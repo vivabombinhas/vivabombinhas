@@ -9,7 +9,7 @@ const problems = [
 
 const ProblemSection = () => {
   return (
-    <section className="py-24 md:py-32 relative">
+    <section className="py-12 md:py-32 relative">
       <div className="container">
         {/* Big stat */}
         <div className="text-center mb-16">
