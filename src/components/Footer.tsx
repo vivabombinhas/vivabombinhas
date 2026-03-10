@@ -10,7 +10,7 @@ const Footer = () => {
           <span className="text-foreground">IA</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} MarIA — Assistente inteligente para Bombinhas, SC.
+          © {new Date().getFullYear()} MarIA — Inteligência artificial para Bombinhas, SC.
         </p>
         <div className="flex gap-6 text-sm text-muted-foreground">
           <a href="#como-funciona" className="hover:text-foreground transition-colors">Como Funciona</a>
