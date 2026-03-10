@@ -9,7 +9,7 @@ const items = [
 
 const FutureSection = () => {
   return (
-    <section className="py-24 md:py-32">
+    <section className="py-12 md:py-32">
       <div className="container">
         <div className="rounded-3xl bg-gradient-to-br from-foreground to-foreground/90 p-10 md:p-16 text-center max-w-4xl mx-auto relative overflow-hidden">
           {/* Glows */}
