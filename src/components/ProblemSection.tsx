@@ -9,7 +9,7 @@ const problems = [
 
 const ProblemSection = () => {
   return (
-    <section className="py-24 md:py-32 relative">
+    <section className="py-12 md:py-32 relative">
       <div className="container">
         {/* Big stat */}
         <div className="text-center mb-16">
@@ -41,10 +41,10 @@ const ProblemSection = () => {
         </div>
 
         {/* Big number callout */}
-        <div className="mt-14 text-center">
-          <div className="inline-flex items-baseline gap-2">
-            <span className="text-5xl md:text-6xl font-bold text-gradient">4-6h</span>
-            <span className="text-muted-foreground text-lg">gastas em média antes de encontrar algo</span>
+        <div className="mt-10 md:mt-14 text-center">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+            <span className="text-4xl md:text-6xl font-bold text-gradient">4-6h</span>
+            <span className="text-muted-foreground text-base md:text-lg">gastas em média antes de encontrar algo</span>
           </div>
         </div>
       </div>

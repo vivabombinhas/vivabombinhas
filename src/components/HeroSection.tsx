@@ -52,15 +52,15 @@ const HeroSection = () => {
         </div>
 
         {/* Social proof strip */}
-        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-8 animate-fade-up" style={{ animationDelay: "0.4s", opacity: 0 }}>
-          <div className="flex items-center gap-1.5 text-primary-foreground/40 text-sm">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-x-6 mt-8 animate-fade-up" style={{ animationDelay: "0.4s", opacity: 0 }}>
+          <div className="flex items-center gap-1.5 text-primary-foreground/60 text-sm font-medium">
             <Sparkles className="h-3.5 w-3.5 text-accent" />
             <span>Grátis para testar</span>
           </div>
-          <div className="w-1 h-1 rounded-full bg-primary-foreground/20" />
-          <span className="text-primary-foreground/40 text-sm">Sem cadastro</span>
-          <div className="w-1 h-1 rounded-full bg-primary-foreground/20" />
-          <span className="text-primary-foreground/40 text-sm">Resposta em &lt;10s</span>
+          <div className="hidden sm:block w-1 h-1 rounded-full bg-primary-foreground/20" />
+          <span className="text-primary-foreground/60 text-sm font-medium">Sem cadastro</span>
+          <div className="hidden sm:block w-1 h-1 rounded-full bg-primary-foreground/20" />
+          <span className="text-primary-foreground/60 text-sm font-medium">Resposta em &lt;10s</span>
         </div>
       </div>
     </section>
