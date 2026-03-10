@@ -1,9 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Bot } from "lucide-react";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handler);
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
 
   const links = [
     { label: "Como Funciona", href: "#como-funciona" },
@@ -12,27 +19,27 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "glass shadow-sm" : "bg-transparent"}`}>
       <div className="container flex h-16 items-center justify-between">
         <a href="#" className="flex items-center gap-2 font-bold text-xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          <Bot className="h-7 w-7 text-primary" />
+          <Bot className={`h-7 w-7 ${scrolled ? "text-primary" : "text-primary"}`} />
           <span className="text-gradient">Mar</span>
-          <span className="text-foreground">IA</span>
+          <span className={scrolled ? "text-foreground" : "text-primary-foreground"}>IA</span>
         </a>
 
         <nav className="hidden md:flex items-center gap-6">
           {links.map((l) => (
-            <a key={l.href} href={l.href} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            <a key={l.href} href={l.href} className={`text-sm font-medium transition-colors ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-primary-foreground/60 hover:text-primary-foreground"}`}>
               {l.label}
             </a>
           ))}
-          <Button asChild size="sm">
+          <Button asChild size="sm" className="rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground">
             <a href="#experimentar">Experimentar Grátis</a>
           </Button>
         </nav>
 
         <button className="md:hidden" onClick={() => setOpen(!open)}>
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {open ? <X className={`h-6 w-6 ${scrolled ? "text-foreground" : "text-primary-foreground"}`} /> : <Menu className={`h-6 w-6 ${scrolled ? "text-foreground" : "text-primary-foreground"}`} />}
         </button>
       </div>
 
@@ -43,7 +50,7 @@ const Navbar = () => {
               {l.label}
             </a>
           ))}
-          <Button asChild size="sm" className="w-full">
+          <Button asChild size="sm" className="w-full rounded-full">
             <a href="#experimentar" onClick={() => setOpen(false)}>Experimentar Grátis</a>
           </Button>
         </nav>
