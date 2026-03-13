@@ -74,19 +74,42 @@ export function PropertyCard({ property }: PropertyCardProps) {
 
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      {/* Header with badge */}
-      <div className="bg-gradient-to-r from-primary/10 to-accent/10 px-3 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <Home className="w-3.5 h-3.5 text-primary" />
-          <span className="text-xs font-semibold text-primary">
-            {formatTipo(property.tipo)}
-          </span>
-          <span className="text-xs text-muted-foreground">•</span>
-          <span className="text-xs font-medium text-accent">
-            {formatFinalidade(property.finalidade)}
-          </span>
+      {/* Thumbnail */}
+      {property.fotos && property.fotos.length > 0 && (
+        <div className="relative w-full h-36 bg-muted overflow-hidden">
+          <img
+            src={property.fotos[0]}
+            alt={property.titulo}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+          {/* Badges over image */}
+          <div className="absolute top-2 left-2 flex items-center gap-1.5">
+            <span className="px-2 py-0.5 rounded-full bg-primary/90 text-primary-foreground text-[10px] font-semibold backdrop-blur-sm">
+              {formatTipo(property.tipo)}
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-accent/90 text-accent-foreground text-[10px] font-semibold backdrop-blur-sm">
+              {formatFinalidade(property.finalidade)}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Header with badge (fallback when no photo) */}
+      {(!property.fotos || property.fotos.length === 0) && (
+        <div className="bg-gradient-to-r from-primary/10 to-accent/10 px-3 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Home className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs font-semibold text-primary">
+              {formatTipo(property.tipo)}
+            </span>
+            <span className="text-xs text-muted-foreground">•</span>
+            <span className="text-xs font-medium text-accent">
+              {formatFinalidade(property.finalidade)}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Body */}
       <div className="p-3 space-y-2.5">
