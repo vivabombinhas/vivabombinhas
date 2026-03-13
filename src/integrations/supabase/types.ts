@@ -151,7 +151,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      finalidade_imovel: "venda" | "aluguel_anual" | "temporada"
+      finalidade_imovel: "compra" | "aluguel_anual" | "temporada"
       origem_anuncio:
         | "manual"
         | "olx"
@@ -163,18 +163,17 @@ export type Database = {
         | "imobiliaria"
         | "whatsapp"
         | "outro"
-      status_imovel: "ativo" | "pausado" | "removido" | "vendido" | "alugado"
+      status_imovel: "ativo" | "pausado" | "removido"
       tipo_imovel:
-        | "casa"
         | "apartamento"
+        | "casa"
         | "cobertura"
-        | "kitnet"
-        | "studio"
         | "terreno"
-        | "comercial"
         | "sobrado"
-        | "duplex"
-        | "triplex"
+        | "studio"
+        | "pousada"
+        | "sala_comercial"
+        | "outro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -302,7 +301,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      finalidade_imovel: ["venda", "aluguel_anual", "temporada"],
+      finalidade_imovel: ["compra", "aluguel_anual", "temporada"],
       origem_anuncio: [
         "manual",
         "olx",
@@ -315,18 +314,17 @@ export const Constants = {
         "whatsapp",
         "outro",
       ],
-      status_imovel: ["ativo", "pausado", "removido", "vendido", "alugado"],
+      status_imovel: ["ativo", "pausado", "removido"],
       tipo_imovel: [
-        "casa",
         "apartamento",
+        "casa",
         "cobertura",
-        "kitnet",
-        "studio",
         "terreno",
-        "comercial",
         "sobrado",
-        "duplex",
-        "triplex",
+        "studio",
+        "pousada",
+        "sala_comercial",
+        "outro",
       ],
     },
   },
