@@ -450,12 +450,13 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         reply: assistantMessage,
-        properties: allProperties.slice(0, 3),
-        all_properties: allProperties,
+        properties: showResults ? allProperties.slice(0, 3) : [],
+        all_properties: showResults ? allProperties : [],
         filters_used: filters,
-        results_count: resultsToUse.length,
+        results_count: showResults ? resultsToUse.length : 0,
         broader_search: usedBroaderSearch,
         lead_saved: leadSaved,
+        show_results: showResults,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
