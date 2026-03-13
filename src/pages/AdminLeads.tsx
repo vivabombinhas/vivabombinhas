@@ -112,6 +112,18 @@ export default function AdminLeads() {
                 <SelectItem value="descartado">Descartado</SelectItem>
               </SelectContent>
             </Select>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full text-muted-foreground hover:text-destructive"
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = "/admin/leads";
+              }}
+              title="Sair"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </header>
