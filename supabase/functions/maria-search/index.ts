@@ -152,6 +152,20 @@ serve(async (req) => {
       filters = {};
     }
 
+    // Validate and fix enum values
+    const validFinalidades = ["compra", "aluguel_anual", "temporada"];
+    const validTipos = ["apartamento", "casa", "cobertura", "terreno", "sobrado", "studio", "pousada", "sala_comercial", "outro"];
+
+    if (filters.finalidade && !validFinalidades.includes(filters.finalidade)) {
+      // Fuzzy match: find closest valid value
+      const match = validFinalidades.find(v => filters.finalidade!.includes(v.slice(0, 4)) || v.includes(filters.finalidade!.slice(0, 4)));
+      filters.finalidade = match || undefined;
+    }
+    if (filters.tipo && !validTipos.includes(filters.tipo)) {
+      const match = validTipos.find(v => filters.tipo!.includes(v.slice(0, 4)) || v.includes(filters.tipo!.slice(0, 4)));
+      filters.tipo = match || undefined;
+    }
+
     console.log("Extracted filters:", JSON.stringify(filters));
 
     // Step 2: Query the database
