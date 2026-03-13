@@ -305,12 +305,26 @@ serve(async (req) => {
 
     const resultsToUse = properties && properties.length > 0 ? properties : broaderProperties;
 
-    // Step 4: Generate conversational response
+    // Step 4: Generate conversational response with type coverage info
+    let typeNote = "";
+    if (filters.tipo_included && filters.tipo_included.length > 1 && resultsToUse.length > 0) {
+      const foundTypes = new Set(resultsToUse.map((p: Record<string, unknown>) => p.tipo));
+      const missingTypes = filters.tipo_included.filter(t => !foundTypes.has(t));
+      if (missingTypes.length > 0) {
+        typeNote = `\n\nNOTA IMPORTANTE: O usuário pediu os tipos [${filters.tipo_included.join(", ")}], mas NÃO foram encontrados imóveis do tipo [${missingTypes.join(", ")}]. Informe isso claramente ao usuário.`;
+      }
+    }
+
+    let exclusionNote = "";
+    if (filters.tipo_excluded && filters.tipo_excluded.length > 0) {
+      exclusionNote = `\n\nALERTA: O usuário EXCLUIU os tipos [${filters.tipo_excluded.join(", ")}]. NUNCA sugira esses tipos.`;
+    }
+
     const propertyContext = resultsToUse.length > 0
-      ? `\n\nResultados encontrados (${resultsToUse.length} imóveis):\n${JSON.stringify(resultsToUse, null, 2)}${usedBroaderSearch ? "\n\nNOTA: A busca exata não retornou resultados. Estes são resultados de uma busca mais ampla. Informe ao usuário e sugira ajustes nos filtros." : ""}`
+      ? `\n\nResultados encontrados (${resultsToUse.length} imóveis):\n${JSON.stringify(resultsToUse, null, 2)}${usedBroaderSearch ? "\n\nNOTA: A busca exata não retornou resultados. Estes são resultados de uma busca mais ampla (respeitando exclusões). Informe ao usuário e sugira ajustes nos filtros." : ""}${typeNote}${exclusionNote}`
       : filters.is_greeting
         ? "\n\nO usuário está apenas cumprimentando. Responda de forma amigável, se apresente como MarIA e pergunte como pode ajudar na busca de imóveis em Bombinhas."
-        : "\n\nNenhum imóvel encontrado com os critérios informados. Sugira ao usuário ampliar a busca mudando o bairro, faixa de preço ou tipo de imóvel.";
+        : `\n\nNenhum imóvel encontrado com os critérios informados. Sugira ao usuário ampliar a busca mudando o bairro, faixa de preço ou tipo de imóvel.${exclusionNote}`;
 
     const conversationMessages = [
       { role: "system", content: SYSTEM_PROMPT + propertyContext },
