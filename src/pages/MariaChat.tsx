@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Bot, Trash2, ArrowLeft } from "lucide-react";
+import { Bot, Trash2, ArrowLeft, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useMariaChat } from "@/hooks/useMariaChat";
 import { ChatMessage } from "@/components/maria/ChatMessage";
@@ -8,7 +8,7 @@ import { SuggestionChips } from "@/components/maria/SuggestionChips";
 import { Button } from "@/components/ui/button";
 
 const MariaChat = () => {
-  const { messages, isLoading, sendMessage, clearChat } = useMariaChat();
+  const { messages, isLoading, sendMessage, clearChat, hasMore, showMore } = useMariaChat();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -83,6 +83,20 @@ const MariaChat = () => {
                 <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce [animation-delay:300ms]" />
               </div>
             </div>
+          </div>
+        )}
+
+        {hasMore && !isLoading && (
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={showMore}
+              className="rounded-full gap-1.5 text-xs font-semibold border-primary/30 text-primary hover:bg-primary/5"
+            >
+              <ChevronDown className="w-3.5 h-3.5" />
+              Ver mais resultados
+            </Button>
           </div>
         )}
       </div>
