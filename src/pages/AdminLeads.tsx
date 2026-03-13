@@ -101,6 +101,7 @@ export default function AdminLeads() {
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-muted-foreground" />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
+
               <SelectTrigger className="w-36 h-9 text-sm">
                 <SelectValue />
               </SelectTrigger>
