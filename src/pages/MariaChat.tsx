@@ -12,7 +12,10 @@ const MariaChat = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    // Use requestAnimationFrame to ensure DOM has rendered (including property cards)
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    });
   }, [messages, isLoading]);
 
   return (
