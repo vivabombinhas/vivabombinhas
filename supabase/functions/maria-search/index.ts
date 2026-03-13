@@ -51,9 +51,16 @@ Regras gerais:
 
 Bairros de Bombinhas: Bombas, Centro, Mariscal, Zimbros, Canto Grande, Morrinhos, Quatro Ilhas, Praia da Conceição.`;
 
-const FILTER_EXTRACTION_PROMPT = `Analise a mensagem do usuário e extraia filtros de busca para imóveis em Bombinhas/SC.
+const FILTER_EXTRACTION_PROMPT = `Analise a CONVERSA COMPLETA do usuário e extraia os filtros de busca acumulados para imóveis em Bombinhas/SC.
 
-Retorne SOMENTE um JSON válido com os filtros encontrados. Se um filtro não foi mencionado, não inclua no JSON.
+REGRA CRÍTICA DE CONTEXTO:
+- Considere TODAS as mensagens anteriores do usuário para manter o contexto.
+- Se o usuário fez uma busca anterior e agora pede ajustes (ex: "mais barato", "outro bairro", "com piscina"), MANTENHA os filtros anteriores e apenas ajuste o que foi pedido.
+- Exemplo: se buscou "aluguel anual em Bombas" e depois disse "tem algo mais barato?", mantenha finalidade=aluguel_anual, bairro=Bombas e reduza o preco_max.
+- Se o usuário pedir "mais barato" sem um preço específico, e houve resultados anteriores, defina preco_max como um valor razoavelmente menor.
+- Se o usuário iniciar uma busca completamente nova (ex: "quero comprar um terreno"), descarte os filtros anteriores.
+
+Retorne SOMENTE um JSON válido com os filtros encontrados. Se um filtro não foi mencionado nem inferido do contexto, não inclua no JSON.
 
 Campos possíveis:
 - finalidade: "compra", "aluguel_anual" ou "temporada"
@@ -75,11 +82,10 @@ Campos possíveis:
 - wifi: true/false
 - is_greeting: true se for apenas uma saudação sem busca
 
-Exemplos:
-"aluguel anual em Mariscal até 3500" → {"finalidade":"aluguel_anual","bairro":"Mariscal","preco_max":3500}
-"casa para temporada para 8 pessoas em Bombas" → {"finalidade":"temporada","tipo":"casa","bairro":"Bombas","capacidade_pessoas":8}
-"apartamento para compra em Bombinhas até 800 mil" → {"finalidade":"compra","tipo":"apartamento","preco_max":800000}
-"oi" → {"is_greeting":true}
+Exemplos de conversa com contexto:
+- Msg1: "aluguel anual em Mariscal até 3500" → {"finalidade":"aluguel_anual","bairro":"Mariscal","preco_max":3500}
+- Msg2: "tem algo mais barato?" → {"finalidade":"aluguel_anual","bairro":"Mariscal","preco_max":2500}
+- Msg3: "e em Bombas?" → {"finalidade":"aluguel_anual","bairro":"Bombas","preco_max":2500}
 
 Retorne APENAS o JSON, sem texto adicional.`;
 
