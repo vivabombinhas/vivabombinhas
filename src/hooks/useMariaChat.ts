@@ -90,7 +90,7 @@ export function useMariaChat() {
       if (error) throw error;
 
       const allProps: Property[] = data.all_properties || [];
-      console.log("[MarIA Debug] sendMessage response:", { allPropsCount: allProps.length, propertiesCount: data.properties?.length, resultsCount: data.results_count });
+      console.log("[MarIA] Response received:", { allPropsCount: allProps.length, shownCount: Math.min(3, allProps.length) });
       allPropertiesRef.current = allProps;
       shownCountRef.current = Math.min(3, allProps.length);
 
