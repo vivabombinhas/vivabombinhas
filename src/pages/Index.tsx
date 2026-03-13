@@ -25,6 +25,7 @@ const Index = () => {
       <FAQSection />
       <CTASection />
       <Footer />
+      <FloatingChatButton />
     </div>
   );
 };
