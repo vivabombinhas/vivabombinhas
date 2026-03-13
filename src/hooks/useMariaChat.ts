@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Property } from "@/components/maria/PropertyCard";
 
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  properties?: Property[];
 }
 
 export function useMariaChat() {
@@ -40,6 +42,7 @@ export function useMariaChat() {
         role: "assistant",
         content: data.reply,
         timestamp: new Date(),
+        properties: data.properties?.length > 0 ? data.properties : undefined,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
