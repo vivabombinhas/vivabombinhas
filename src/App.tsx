@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import MariaChat from "./pages/MariaChat.tsx";
 import AdminLeads from "./pages/AdminLeads.tsx";
+import ProtectedAdminRoute from "./components/ProtectedAdminRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
