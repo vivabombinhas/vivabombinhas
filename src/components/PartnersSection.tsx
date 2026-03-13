@@ -289,9 +289,10 @@ const PartnersSection = () => {
               <Textarea id="descricao" name="descricao" placeholder="Detalhes do imóvel, diferenciais, mobília..." rows={3} />
             </div>
 
-            <Button type="submit" size="lg" className="w-full gap-2 rounded-xl bg-gradient-to-r from-accent to-primary hover:opacity-90 text-primary-foreground">
-              Enviar anúncio
-              <ArrowRight className="h-4 w-4" />
+            <Button type="submit" size="lg" disabled={loading} className="w-full gap-2 rounded-xl bg-gradient-to-r from-accent to-primary hover:opacity-90 text-primary-foreground">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              {loading ? "Enviando..." : "Enviar anúncio"}
+              {!loading && <ArrowRight className="h-4 w-4" />}
             </Button>
           </form>
         </DialogContent>
