@@ -154,6 +154,7 @@ export type Database = {
           mensagem_original: string | null
           nome: string
           origem: string
+          status: Database["public"]["Enums"]["status_lead"]
           telefone: string
           tipo_imovel: string | null
         }
@@ -167,6 +168,7 @@ export type Database = {
           mensagem_original?: string | null
           nome: string
           origem?: string
+          status?: Database["public"]["Enums"]["status_lead"]
           telefone: string
           tipo_imovel?: string | null
         }
@@ -180,6 +182,7 @@ export type Database = {
           mensagem_original?: string | null
           nome?: string
           origem?: string
+          status?: Database["public"]["Enums"]["status_lead"]
           telefone?: string
           tipo_imovel?: string | null
         }
@@ -206,6 +209,7 @@ export type Database = {
         | "whatsapp"
         | "outro"
       status_imovel: "ativo" | "pausado" | "removido"
+      status_lead: "novo" | "contatado" | "convertido" | "descartado"
       tipo_imovel:
         | "apartamento"
         | "casa"
@@ -357,6 +361,7 @@ export const Constants = {
         "outro",
       ],
       status_imovel: ["ativo", "pausado", "removido"],
+      status_lead: ["novo", "contatado", "convertido", "descartado"],
       tipo_imovel: [
         "apartamento",
         "casa",
