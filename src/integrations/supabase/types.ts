@@ -14,7 +14,135 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      imoveis: {
+        Row: {
+          aceita_pet: boolean | null
+          anunciante_email: string | null
+          anunciante_nome: string | null
+          anunciante_telefone: string | null
+          ar_condicionado: boolean | null
+          area_m2: number | null
+          bairro: string | null
+          banheiros: number | null
+          capacidade_pessoas: number | null
+          churrasqueira: boolean | null
+          cidade: string
+          codigo: string | null
+          condominio: number | null
+          created_at: string
+          descricao: string | null
+          destaque: boolean | null
+          endereco: string | null
+          estacionamento: boolean | null
+          finalidade: Database["public"]["Enums"]["finalidade_imovel"]
+          fotos: string[] | null
+          frente_mar: boolean | null
+          id: string
+          imobiliaria: string | null
+          iptu_anual: number | null
+          link_anuncio: string | null
+          mobiliado: boolean | null
+          observacoes: string | null
+          origem: Database["public"]["Enums"]["origem_anuncio"] | null
+          piscina: boolean | null
+          preco: number | null
+          preco_temporada_diaria: number | null
+          quartos: number | null
+          status: Database["public"]["Enums"]["status_imovel"]
+          suites: number | null
+          tipo: Database["public"]["Enums"]["tipo_imovel"]
+          titulo: string
+          updated_at: string
+          vagas_garagem: number | null
+          vista_mar: boolean | null
+          wifi: boolean | null
+        }
+        Insert: {
+          aceita_pet?: boolean | null
+          anunciante_email?: string | null
+          anunciante_nome?: string | null
+          anunciante_telefone?: string | null
+          ar_condicionado?: boolean | null
+          area_m2?: number | null
+          bairro?: string | null
+          banheiros?: number | null
+          capacidade_pessoas?: number | null
+          churrasqueira?: boolean | null
+          cidade?: string
+          codigo?: string | null
+          condominio?: number | null
+          created_at?: string
+          descricao?: string | null
+          destaque?: boolean | null
+          endereco?: string | null
+          estacionamento?: boolean | null
+          finalidade: Database["public"]["Enums"]["finalidade_imovel"]
+          fotos?: string[] | null
+          frente_mar?: boolean | null
+          id?: string
+          imobiliaria?: string | null
+          iptu_anual?: number | null
+          link_anuncio?: string | null
+          mobiliado?: boolean | null
+          observacoes?: string | null
+          origem?: Database["public"]["Enums"]["origem_anuncio"] | null
+          piscina?: boolean | null
+          preco?: number | null
+          preco_temporada_diaria?: number | null
+          quartos?: number | null
+          status?: Database["public"]["Enums"]["status_imovel"]
+          suites?: number | null
+          tipo: Database["public"]["Enums"]["tipo_imovel"]
+          titulo: string
+          updated_at?: string
+          vagas_garagem?: number | null
+          vista_mar?: boolean | null
+          wifi?: boolean | null
+        }
+        Update: {
+          aceita_pet?: boolean | null
+          anunciante_email?: string | null
+          anunciante_nome?: string | null
+          anunciante_telefone?: string | null
+          ar_condicionado?: boolean | null
+          area_m2?: number | null
+          bairro?: string | null
+          banheiros?: number | null
+          capacidade_pessoas?: number | null
+          churrasqueira?: boolean | null
+          cidade?: string
+          codigo?: string | null
+          condominio?: number | null
+          created_at?: string
+          descricao?: string | null
+          destaque?: boolean | null
+          endereco?: string | null
+          estacionamento?: boolean | null
+          finalidade?: Database["public"]["Enums"]["finalidade_imovel"]
+          fotos?: string[] | null
+          frente_mar?: boolean | null
+          id?: string
+          imobiliaria?: string | null
+          iptu_anual?: number | null
+          link_anuncio?: string | null
+          mobiliado?: boolean | null
+          observacoes?: string | null
+          origem?: Database["public"]["Enums"]["origem_anuncio"] | null
+          piscina?: boolean | null
+          preco?: number | null
+          preco_temporada_diaria?: number | null
+          quartos?: number | null
+          status?: Database["public"]["Enums"]["status_imovel"]
+          suites?: number | null
+          tipo?: Database["public"]["Enums"]["tipo_imovel"]
+          titulo?: string
+          updated_at?: string
+          vagas_garagem?: number | null
+          vista_mar?: boolean | null
+          wifi?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +151,30 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      finalidade_imovel: "venda" | "aluguel_anual" | "temporada"
+      origem_anuncio:
+        | "manual"
+        | "olx"
+        | "zap_imoveis"
+        | "imovel_web"
+        | "viva_real"
+        | "airbnb"
+        | "booking"
+        | "imobiliaria"
+        | "whatsapp"
+        | "outro"
+      status_imovel: "ativo" | "pausado" | "removido" | "vendido" | "alugado"
+      tipo_imovel:
+        | "casa"
+        | "apartamento"
+        | "cobertura"
+        | "kitnet"
+        | "studio"
+        | "terreno"
+        | "comercial"
+        | "sobrado"
+        | "duplex"
+        | "triplex"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +301,33 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      finalidade_imovel: ["venda", "aluguel_anual", "temporada"],
+      origem_anuncio: [
+        "manual",
+        "olx",
+        "zap_imoveis",
+        "imovel_web",
+        "viva_real",
+        "airbnb",
+        "booking",
+        "imobiliaria",
+        "whatsapp",
+        "outro",
+      ],
+      status_imovel: ["ativo", "pausado", "removido", "vendido", "alugado"],
+      tipo_imovel: [
+        "casa",
+        "apartamento",
+        "cobertura",
+        "kitnet",
+        "studio",
+        "terreno",
+        "comercial",
+        "sobrado",
+        "duplex",
+        "triplex",
+      ],
+    },
   },
 } as const
