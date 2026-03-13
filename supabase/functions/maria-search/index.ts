@@ -36,11 +36,25 @@ Seu trabalho é:
 2. Apresentar os resultados de forma conversacional e amigável
 3. Após mostrar resultados, oferecer naturalmente para salvar a busca
 
+REGRA CRÍTICA - QUANDO MOSTRAR IMÓVEIS:
+- Você DEVE iniciar sua resposta com exatamente [SHOW_RESULTS] ou [NO_RESULTS_YET] para indicar se os cards de imóveis devem ser exibidos.
+- Use [SHOW_RESULTS] SOMENTE quando:
+  * O usuário fez uma busca clara e específica com intenção definida (ex: "quero alugar em Bombas", "casas à venda em Mariscal")
+  * O usuário pediu explicitamente para ver opções/resultados
+  * Você tem filtros suficientes para uma busca significativa (pelo menos finalidade OU bairro OU tipo)
+- Use [NO_RESULTS_YET] quando:
+  * O usuário fez uma pergunta exploratória ou contextual (ex: "tem escola perto?", "qual bairro é melhor?")
+  * Você ainda está fazendo perguntas de esclarecimento ao usuário
+  * A mensagem é uma saudação ou conversa geral
+  * Filtros importantes ainda estão faltando e você precisa perguntar mais
+  * O usuário não demonstrou intenção clara de ver imóveis agora
+- NUNCA misture perguntas de esclarecimento com cards de imóveis. Se você está perguntando algo, use [NO_RESULTS_YET].
+
 REGRA CRÍTICA DE FORMATAÇÃO:
 - Os detalhes dos imóveis (título, preço, quartos, link, telefone) serão exibidos automaticamente em CARDS VISUAIS na interface.
 - Você NÃO deve listar os detalhes dos imóveis no texto. Nada de emojis 🏠📍💰🛏️🔗📞 seguidos de dados.
 - Escreva APENAS uma introdução curta e natural sobre os resultados encontrados.
-- Exemplo BOM: "Encontrei 2 opções de aluguel anual em Bombas dentro do seu orçamento! Dá uma olhada nos cards abaixo 👇"
+- Exemplo BOM: "[SHOW_RESULTS] Encontrei 2 opções de aluguel anual em Bombas dentro do seu orçamento! Dá uma olhada nos cards abaixo 👇"
 - Exemplo RUIM: "🏠 **Apartamento em Bombas** 📍 Bombas 💰 R$ 2.600..." (NUNCA faça isso)
 - Se houver mais resultados além dos exibidos, mencione: "Tenho mais X opções, quer ver?"
 - Se foram buscados múltiplos tipos (ex: casa e kitnet) mas só encontrou um deles, EXPLIQUE: "Não encontrei kitnets disponíveis no momento, mas encontrei algumas casas que podem te interessar."
@@ -350,6 +364,20 @@ serve(async (req) => {
     const aiData = await aiResponse.json();
     let assistantMessage = aiData.choices?.[0]?.message?.content || "Desculpe, tive um problema ao processar sua busca. Pode tentar novamente?";
 
+    // Check for show_results flag
+    let showResults = true;
+    if (assistantMessage.startsWith("[NO_RESULTS_YET]")) {
+      showResults = false;
+      assistantMessage = assistantMessage.replace(/^\[NO_RESULTS_YET\]\s*/, "");
+    } else if (assistantMessage.startsWith("[SHOW_RESULTS]")) {
+      showResults = true;
+      assistantMessage = assistantMessage.replace(/^\[SHOW_RESULTS\]\s*/, "");
+    }
+    // If greeting, never show results
+    if (filters.is_greeting) {
+      showResults = false;
+    }
+
     // Check for lead capture tag in the response
     let leadSaved = false;
     const leadMatch = assistantMessage.match(/\[LEAD_CAPTURE\]\s*(\{[^}]+\})/);
@@ -422,12 +450,13 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         reply: assistantMessage,
-        properties: allProperties.slice(0, 3),
-        all_properties: allProperties,
+        properties: showResults ? allProperties.slice(0, 3) : [],
+        all_properties: showResults ? allProperties : [],
         filters_used: filters,
-        results_count: resultsToUse.length,
+        results_count: showResults ? resultsToUse.length : 0,
         broader_search: usedBroaderSearch,
         lead_saved: leadSaved,
+        show_results: showResults,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

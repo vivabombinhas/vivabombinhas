@@ -90,9 +90,15 @@ export function useMariaChat() {
       if (error) throw error;
 
       const allProps: Property[] = data.all_properties || [];
+      const shouldShowResults = data.show_results !== false && allProps.length > 0;
       
-      allPropertiesRef.current = allProps;
-      shownCountRef.current = Math.min(3, allProps.length);
+      if (shouldShowResults) {
+        allPropertiesRef.current = allProps;
+        shownCountRef.current = Math.min(3, allProps.length);
+      } else {
+        // Don't reset pagination state for conversational responses
+        // so "ver mais" still works if there were previous results
+      }
 
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
