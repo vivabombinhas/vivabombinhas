@@ -143,6 +143,48 @@ export type Database = {
         }
         Relationships: []
       }
+      leads_maria: {
+        Row: {
+          bairro_interesse: string | null
+          created_at: string
+          email: string | null
+          faixa_preco: string | null
+          id: string
+          interesse: string | null
+          mensagem_original: string | null
+          nome: string
+          origem: string
+          telefone: string
+          tipo_imovel: string | null
+        }
+        Insert: {
+          bairro_interesse?: string | null
+          created_at?: string
+          email?: string | null
+          faixa_preco?: string | null
+          id?: string
+          interesse?: string | null
+          mensagem_original?: string | null
+          nome: string
+          origem?: string
+          telefone: string
+          tipo_imovel?: string | null
+        }
+        Update: {
+          bairro_interesse?: string | null
+          created_at?: string
+          email?: string | null
+          faixa_preco?: string | null
+          id?: string
+          interesse?: string | null
+          mensagem_original?: string | null
+          nome?: string
+          origem?: string
+          telefone?: string
+          tipo_imovel?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
