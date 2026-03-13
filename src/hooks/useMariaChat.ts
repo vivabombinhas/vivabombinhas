@@ -49,6 +49,7 @@ export function useMariaChat() {
 
   const handleShowMore = useCallback((content: string): boolean => {
     const remaining = allPropertiesRef.current.slice(shownCountRef.current);
+    
     if (!MORE_PATTERNS.test(content.trim()) || remaining.length === 0) return false;
 
     const userMsg: ChatMessage = {
@@ -89,6 +90,7 @@ export function useMariaChat() {
       if (error) throw error;
 
       const allProps: Property[] = data.all_properties || [];
+      
       allPropertiesRef.current = allProps;
       shownCountRef.current = Math.min(3, allProps.length);
 
