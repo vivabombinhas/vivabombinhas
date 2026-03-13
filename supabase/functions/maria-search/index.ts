@@ -265,7 +265,42 @@ serve(async (req) => {
     });
 
     const aiData = await aiResponse.json();
-    const assistantMessage = aiData.choices?.[0]?.message?.content || "Desculpe, tive um problema ao processar sua busca. Pode tentar novamente?";
+    let assistantMessage = aiData.choices?.[0]?.message?.content || "Desculpe, tive um problema ao processar sua busca. Pode tentar novamente?";
+
+    // Check for lead capture tag in the response
+    let leadSaved = false;
+    const leadMatch = assistantMessage.match(/\[LEAD_CAPTURE\]\s*(\{[^}]+\})/);
+    if (leadMatch) {
+      try {
+        const leadData = JSON.parse(leadMatch[1]);
+        // Save lead to database
+        const { error: leadError } = await supabase
+          .from("leads_maria")
+          .insert({
+            nome: leadData.nome,
+            telefone: leadData.telefone,
+            email: leadData.email || null,
+            interesse: filters.finalidade || null,
+            bairro_interesse: filters.bairro || null,
+            tipo_imovel: filters.tipo || null,
+            faixa_preco: filters.preco_max ? `até ${filters.preco_max}` : filters.preco_min ? `a partir de ${filters.preco_min}` : null,
+            mensagem_original: messages[0]?.content || null,
+            origem: "maria_chat",
+          });
+
+        if (leadError) {
+          console.error("Lead save error:", leadError);
+        } else {
+          leadSaved = true;
+          console.log("Lead saved successfully:", leadData.nome);
+        }
+      } catch (e) {
+        console.error("Failed to parse lead data:", e);
+      }
+
+      // Remove the [LEAD_CAPTURE]{...} tag from the message shown to user
+      assistantMessage = assistantMessage.replace(/\[LEAD_CAPTURE\]\s*\{[^}]+\}/, "").trim();
+    }
 
     // Return top 3 properties as structured data for card rendering
     const topProperties = resultsToUse.slice(0, 3).map((p: Record<string, unknown>) => ({
@@ -302,6 +337,7 @@ serve(async (req) => {
         filters_used: filters,
         results_count: resultsToUse.length,
         broader_search: usedBroaderSearch,
+        lead_saved: leadSaved,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
