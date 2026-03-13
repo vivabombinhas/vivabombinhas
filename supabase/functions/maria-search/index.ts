@@ -10,6 +10,8 @@ const corsHeaders = {
 interface SearchFilters {
   finalidade?: string;
   tipo?: string;
+  tipo_included?: string[];
+  tipo_excluded?: string[];
   bairro?: string;
   preco_min?: number;
   preco_max?: number;
@@ -41,8 +43,9 @@ REGRA CRÍTICA DE FORMATAÇÃO:
 - Exemplo BOM: "Encontrei 2 opções de aluguel anual em Bombas dentro do seu orçamento! Dá uma olhada nos cards abaixo 👇"
 - Exemplo RUIM: "🏠 **Apartamento em Bombas** 📍 Bombas 💰 R$ 2.600..." (NUNCA faça isso)
 - Se houver mais resultados além dos exibidos, mencione: "Tenho mais X opções, quer ver?"
-- Se não houver resultados, sugira ampliar a busca por bairro, preço ou tipo.
-- Se a busca for muito ampla, faça uma pergunta curta para refinar.
+- Se foram buscados múltiplos tipos (ex: casa e kitnet) mas só encontrou um deles, EXPLIQUE: "Não encontrei kitnets disponíveis no momento, mas encontrei algumas casas que podem te interessar."
+- Se o usuário excluiu um tipo (ex: "não quero apartamento"), NUNCA sugira apartamentos nos resultados.
+- Se não houver resultados, sugira ampliar a busca por bairro, preço ou tipo. NÃO sugira o tipo que o usuário excluiu.
 
 FLUXO DE CAPTAÇÃO DE LEAD (importante!):
 - SOMENTE após mostrar resultados de uma busca com imóveis encontrados, adicione naturalmente no final da sua resposta uma oferta para salvar a busca.
@@ -79,7 +82,10 @@ Retorne SOMENTE um JSON válido com os filtros encontrados. Se um filtro não fo
 
 Campos possíveis:
 - finalidade: "compra", "aluguel_anual" ou "temporada"
-- tipo: "apartamento", "casa", "cobertura", "terreno", "sobrado", "studio", "pousada", "sala_comercial"
+- tipo: usar SOMENTE quando o usuário menciona um único tipo. Ex: "quero casa" → tipo: "casa"
+- tipo_included: array de tipos aceitos quando o usuário menciona MÚLTIPLOS tipos. Ex: "casa ou kitnet" → tipo_included: ["casa", "studio"]. Mapeie "kitnet" para "studio".
+- tipo_excluded: array de tipos que o usuário NÃO quer. Ex: "não quero apartamento" → tipo_excluded: ["apartamento"]. SEMPRE capture negações como "não quero", "sem", "nada de", "menos apartamento".
+- IMPORTANTE: tipo, tipo_included e tipo_excluded podem coexistir. Se o usuário disse "quero casa" antes e agora diz "não quero apartamento", mantenha ambos.
 - bairro: nome do bairro (Bombas, Centro, Mariscal, Zimbros, Canto Grande, Morrinhos, Quatro Ilhas, Praia da Conceição)
 - preco_min: valor mínimo (número)
 - preco_max: valor máximo (número). "até 800 mil" = 800000, "até 3500" para aluguel = 3500, "até 500 por dia" para temporada = 500
@@ -97,10 +103,17 @@ Campos possíveis:
 - wifi: true/false
 - is_greeting: true se for apenas uma saudação sem busca
 
-Exemplos de conversa com contexto:
+Mapeamento de sinônimos para tipos:
+- "kitnet", "kitinete", "quitinete", "kit" → "studio"
+- "apt", "apto" → "apartamento"
+- "cob" → "cobertura"
+
+Exemplos:
+- "casa ou kitnet em Bombas" → {"tipo_included":["casa","studio"],"bairro":"Bombas"}
+- "quero alugar, não quero apartamento" → {"finalidade":"aluguel_anual","tipo_excluded":["apartamento"]}
+- "casa ou sobrado, sem apartamento" → {"tipo_included":["casa","sobrado"],"tipo_excluded":["apartamento"]}
 - Msg1: "aluguel anual em Mariscal até 3500" → {"finalidade":"aluguel_anual","bairro":"Mariscal","preco_max":3500}
 - Msg2: "tem algo mais barato?" → {"finalidade":"aluguel_anual","bairro":"Mariscal","preco_max":2500}
-- Msg3: "e em Bombas?" → {"finalidade":"aluguel_anual","bairro":"Bombas","preco_max":2500}
 
 Retorne APENAS o JSON, sem texto adicional.`;
 
@@ -158,13 +171,35 @@ serve(async (req) => {
     const validTipos = ["apartamento", "casa", "cobertura", "terreno", "sobrado", "studio", "pousada", "sala_comercial", "outro"];
 
     if (filters.finalidade && !validFinalidades.includes(filters.finalidade)) {
-      // Fuzzy match: find closest valid value
       const match = validFinalidades.find(v => filters.finalidade!.includes(v.slice(0, 4)) || v.includes(filters.finalidade!.slice(0, 4)));
       filters.finalidade = match || undefined;
     }
+
+    // Validate tipo (single)
     if (filters.tipo && !validTipos.includes(filters.tipo)) {
       const match = validTipos.find(v => filters.tipo!.includes(v.slice(0, 4)) || v.includes(filters.tipo!.slice(0, 4)));
       filters.tipo = match || undefined;
+    }
+
+    // Validate tipo_included array
+    if (filters.tipo_included && Array.isArray(filters.tipo_included)) {
+      filters.tipo_included = filters.tipo_included
+        .map(t => validTipos.includes(t) ? t : validTipos.find(v => t.includes(v.slice(0, 4)) || v.includes(t.slice(0, 4))) || null)
+        .filter((t): t is string => t !== null);
+      if (filters.tipo_included.length === 0) delete filters.tipo_included;
+    }
+
+    // Validate tipo_excluded array
+    if (filters.tipo_excluded && Array.isArray(filters.tipo_excluded)) {
+      filters.tipo_excluded = filters.tipo_excluded
+        .map(t => validTipos.includes(t) ? t : validTipos.find(v => t.includes(v.slice(0, 4)) || v.includes(t.slice(0, 4))) || null)
+        .filter((t): t is string => t !== null);
+      if (filters.tipo_excluded.length === 0) delete filters.tipo_excluded;
+    }
+
+    // If tipo_included has values, clear single tipo to avoid conflict
+    if (filters.tipo_included && filters.tipo_included.length > 0) {
+      delete filters.tipo;
     }
 
     console.log("Extracted filters:", JSON.stringify(filters));
@@ -178,9 +213,21 @@ serve(async (req) => {
     if (filters.finalidade) {
       query = query.eq("finalidade", filters.finalidade);
     }
-    if (filters.tipo) {
+
+    // Type filtering: support single, included list, and excluded list
+    if (filters.tipo_included && filters.tipo_included.length > 0) {
+      query = query.in("tipo", filters.tipo_included);
+    } else if (filters.tipo) {
       query = query.eq("tipo", filters.tipo);
     }
+
+    // Always apply exclusions regardless of inclusions
+    if (filters.tipo_excluded && filters.tipo_excluded.length > 0) {
+      for (const excluded of filters.tipo_excluded) {
+        query = query.neq("tipo", excluded);
+      }
+    }
+
     if (filters.bairro) {
       query = query.ilike("bairro", `%${filters.bairro}%`);
     }
@@ -227,18 +274,25 @@ serve(async (req) => {
 
     console.log(`Found ${properties?.length || 0} properties`);
 
-    // Step 3: If strict search found nothing, try broader search
+    // Step 3: If strict search found nothing, try broader search (still respecting exclusions)
     let broaderProperties: typeof properties = [];
     let usedBroaderSearch = false;
 
     if ((!properties || properties.length === 0) && !filters.is_greeting) {
-      const broaderQuery = supabase
+      let broaderQuery = supabase
         .from("imoveis")
         .select("*")
         .eq("status", "ativo");
 
       if (filters.finalidade) {
-        broaderQuery.eq("finalidade", filters.finalidade);
+        broaderQuery = broaderQuery.eq("finalidade", filters.finalidade);
+      }
+
+      // CRITICAL: Always respect exclusions even in broader search
+      if (filters.tipo_excluded && filters.tipo_excluded.length > 0) {
+        for (const excluded of filters.tipo_excluded) {
+          broaderQuery = broaderQuery.neq("tipo", excluded);
+        }
       }
 
       const { data: broader } = await broaderQuery
@@ -251,12 +305,26 @@ serve(async (req) => {
 
     const resultsToUse = properties && properties.length > 0 ? properties : broaderProperties;
 
-    // Step 4: Generate conversational response
+    // Step 4: Generate conversational response with type coverage info
+    let typeNote = "";
+    if (filters.tipo_included && filters.tipo_included.length > 1 && resultsToUse.length > 0) {
+      const foundTypes = new Set(resultsToUse.map((p: Record<string, unknown>) => p.tipo));
+      const missingTypes = filters.tipo_included.filter(t => !foundTypes.has(t));
+      if (missingTypes.length > 0) {
+        typeNote = `\n\nNOTA IMPORTANTE: O usuário pediu os tipos [${filters.tipo_included.join(", ")}], mas NÃO foram encontrados imóveis do tipo [${missingTypes.join(", ")}]. Informe isso claramente ao usuário.`;
+      }
+    }
+
+    let exclusionNote = "";
+    if (filters.tipo_excluded && filters.tipo_excluded.length > 0) {
+      exclusionNote = `\n\nALERTA: O usuário EXCLUIU os tipos [${filters.tipo_excluded.join(", ")}]. NUNCA sugira esses tipos.`;
+    }
+
     const propertyContext = resultsToUse.length > 0
-      ? `\n\nResultados encontrados (${resultsToUse.length} imóveis):\n${JSON.stringify(resultsToUse, null, 2)}${usedBroaderSearch ? "\n\nNOTA: A busca exata não retornou resultados. Estes são resultados de uma busca mais ampla. Informe ao usuário e sugira ajustes nos filtros." : ""}`
+      ? `\n\nResultados encontrados (${resultsToUse.length} imóveis):\n${JSON.stringify(resultsToUse, null, 2)}${usedBroaderSearch ? "\n\nNOTA: A busca exata não retornou resultados. Estes são resultados de uma busca mais ampla (respeitando exclusões). Informe ao usuário e sugira ajustes nos filtros." : ""}${typeNote}${exclusionNote}`
       : filters.is_greeting
         ? "\n\nO usuário está apenas cumprimentando. Responda de forma amigável, se apresente como MarIA e pergunte como pode ajudar na busca de imóveis em Bombinhas."
-        : "\n\nNenhum imóvel encontrado com os critérios informados. Sugira ao usuário ampliar a busca mudando o bairro, faixa de preço ou tipo de imóvel.";
+        : `\n\nNenhum imóvel encontrado com os critérios informados. Sugira ao usuário ampliar a busca mudando o bairro, faixa de preço ou tipo de imóvel.${exclusionNote}`;
 
     const conversationMessages = [
       { role: "system", content: SYSTEM_PROMPT + propertyContext },
