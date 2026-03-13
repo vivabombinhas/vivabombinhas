@@ -105,7 +105,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Step 1: Extract filters using AI
-    const filterResponse = await fetch("https://ai.lovable.dev/chat/completions", {
+    const filterResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
