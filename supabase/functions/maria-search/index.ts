@@ -422,7 +422,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         reply: assistantMessage,
-        properties: topProperties,
+        properties: allProperties.slice(0, 3),
+        all_properties: allProperties,
         filters_used: filters,
         results_count: resultsToUse.length,
         broader_search: usedBroaderSearch,
