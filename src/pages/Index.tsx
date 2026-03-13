@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
+import FloatingChatButton from "@/components/FloatingChatButton";
 import ProblemSection from "@/components/ProblemSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import AudienceSection from "@/components/AudienceSection";
@@ -24,6 +25,7 @@ const Index = () => {
       <FAQSection />
       <CTASection />
       <Footer />
+      <FloatingChatButton />
     </div>
   );
 };
