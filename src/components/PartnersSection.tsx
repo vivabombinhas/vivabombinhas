@@ -42,6 +42,7 @@ const PartnersSection = () => {
   const [open, setOpen] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const toggleType = (value: string) => {
@@ -50,28 +51,55 @@ const PartnersSection = () => {
     );
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (selectedTypes.length === 0) {
+      toast({ title: "Selecione ao menos um tipo de negócio", variant: "destructive" });
+      return;
+    }
+    if (!selectedCategory) {
+      toast({ title: "Selecione o tipo de imóvel", variant: "destructive" });
+      return;
+    }
+
+    setLoading(true);
     const formData = new FormData(e.currentTarget);
-    const data = {
-      nome: formData.get("nome"),
-      telefone: formData.get("telefone"),
-      email: formData.get("email"),
-      tipo: selectedTypes,
-      categoria: selectedCategory,
-      bairro: formData.get("bairro"),
-      quartos: formData.get("quartos"),
-      banheiros: formData.get("banheiros"),
-      vagas: formData.get("vagas"),
-      area: formData.get("area"),
-      valor: formData.get("valor"),
-      link: formData.get("link"),
-      descricao: formData.get("descricao"),
-    };
-    console.log("Anúncio enviado:", data);
+    const valorStr = String(formData.get("valor") || "").replace(/[^\d.,]/g, "").replace(",", ".");
+    const preco = parseFloat(valorStr) || null;
+
+    // Use first selected finalidade for the DB record
+    const finalidade = finalidadeMap[selectedTypes[0]] || "venda";
+
+    const { error } = await supabase.from("imoveis").insert({
+      titulo: `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} em Bombinhas`,
+      descricao: String(formData.get("descricao") || ""),
+      finalidade: finalidade as any,
+      tipo: selectedCategory as any,
+      bairro: String(formData.get("bairro") || ""),
+      quartos: parseInt(String(formData.get("quartos"))) || 0,
+      banheiros: parseInt(String(formData.get("banheiros"))) || 0,
+      vagas_garagem: parseInt(String(formData.get("vagas"))) || 0,
+      area_m2: parseFloat(String(formData.get("area"))) || null,
+      preco,
+      link_anuncio: String(formData.get("link") || "") || null,
+      anunciante_nome: String(formData.get("nome") || ""),
+      anunciante_telefone: String(formData.get("telefone") || ""),
+      anunciante_email: String(formData.get("email") || ""),
+      origem: "manual" as any,
+      status: "ativo" as any,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      console.error("Erro ao salvar imóvel:", error);
+      toast({ title: "Erro ao enviar anúncio", description: error.message, variant: "destructive" });
+      return;
+    }
+
     toast({
       title: "Anúncio enviado com sucesso! 🎉",
-      description: "Nossa equipe vai revisar e entrar em contato em breve.",
+      description: "Seu imóvel foi cadastrado na base da MarIA.",
     });
     setOpen(false);
     setSelectedTypes([]);
