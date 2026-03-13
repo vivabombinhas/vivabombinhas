@@ -15,19 +15,17 @@ const MORE_PATTERNS = /^(tem mais|mostrar mais|mais op[çc][õo]es|outras op[çc
 export function useMariaChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const allPropertiesRef = useRef<Property[]>([]);
   const shownCountRef = useRef(0);
 
-  const handleShowMore = useCallback((content: string): boolean => {
-    const remaining = allPropertiesRef.current.slice(shownCountRef.current);
-    if (!MORE_PATTERNS.test(content.trim()) || remaining.length === 0) return false;
+  const updateHasMore = useCallback(() => {
+    setHasMore(allPropertiesRef.current.length > shownCountRef.current);
+  }, []);
 
-    const userMsg: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content,
-      timestamp: new Date(),
-    };
+  const showMore = useCallback(() => {
+    const remaining = allPropertiesRef.current.slice(shownCountRef.current);
+    if (remaining.length === 0) return;
 
     const nextBatch = remaining.slice(0, 3);
     shownCountRef.current += nextBatch.length;
@@ -45,12 +43,27 @@ export function useMariaChat() {
       properties: nextBatch,
     };
 
-    setMessages((prev) => [...prev, userMsg, assistantMsg]);
+    setMessages((prev) => [...prev, assistantMsg]);
+    updateHasMore();
+  }, [updateHasMore]);
+
+  const handleShowMore = useCallback((content: string): boolean => {
+    const remaining = allPropertiesRef.current.slice(shownCountRef.current);
+    if (!MORE_PATTERNS.test(content.trim()) || remaining.length === 0) return false;
+
+    const userMsg: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content,
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
+    showMore();
     return true;
-  }, []);
+  }, [showMore]);
 
   const sendMessage = useCallback(async (content: string) => {
-    // Handle "show more" locally without API call
     if (handleShowMore(content)) return;
 
     const userMsg: ChatMessage = {
@@ -75,7 +88,6 @@ export function useMariaChat() {
 
       if (error) throw error;
 
-      // Store all properties for pagination
       const allProps: Property[] = data.all_properties || [];
       allPropertiesRef.current = allProps;
       shownCountRef.current = Math.min(3, allProps.length);
@@ -89,6 +101,7 @@ export function useMariaChat() {
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
+      updateHasMore();
     } catch (err) {
       console.error("MarIA error:", err);
       const errorMsg: ChatMessage = {
@@ -101,13 +114,14 @@ export function useMariaChat() {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, handleShowMore]);
+  }, [messages, handleShowMore, updateHasMore]);
 
   const clearChat = useCallback(() => {
     setMessages([]);
     allPropertiesRef.current = [];
     shownCountRef.current = 0;
+    setHasMore(false);
   }, []);
 
-  return { messages, isLoading, sendMessage, clearChat };
+  return { messages, isLoading, sendMessage, clearChat, hasMore, showMore };
 }
