@@ -45,6 +45,7 @@ Regras importantes:
 - Para temporada, mencione o valor da diária
 - Para aluguel anual, mencione o valor mensal
 - Para compra, mencione o valor total
+- Mostre NO MÁXIMO 3 imóveis por resposta. Se houver mais resultados disponíveis, informe o usuário quantos mais existem e ofereça mostrar as próximas opções.
 
 Bairros de Bombinhas: Bombas, Centro, Mariscal, Zimbros, Canto Grande, Morrinhos, Quatro Ilhas, Praia da Conceição.
 
