@@ -170,13 +170,35 @@ serve(async (req) => {
     const validTipos = ["apartamento", "casa", "cobertura", "terreno", "sobrado", "studio", "pousada", "sala_comercial", "outro"];
 
     if (filters.finalidade && !validFinalidades.includes(filters.finalidade)) {
-      // Fuzzy match: find closest valid value
       const match = validFinalidades.find(v => filters.finalidade!.includes(v.slice(0, 4)) || v.includes(filters.finalidade!.slice(0, 4)));
       filters.finalidade = match || undefined;
     }
+
+    // Validate tipo (single)
     if (filters.tipo && !validTipos.includes(filters.tipo)) {
       const match = validTipos.find(v => filters.tipo!.includes(v.slice(0, 4)) || v.includes(filters.tipo!.slice(0, 4)));
       filters.tipo = match || undefined;
+    }
+
+    // Validate tipo_included array
+    if (filters.tipo_included && Array.isArray(filters.tipo_included)) {
+      filters.tipo_included = filters.tipo_included
+        .map(t => validTipos.includes(t) ? t : validTipos.find(v => t.includes(v.slice(0, 4)) || v.includes(t.slice(0, 4))) || null)
+        .filter((t): t is string => t !== null);
+      if (filters.tipo_included.length === 0) delete filters.tipo_included;
+    }
+
+    // Validate tipo_excluded array
+    if (filters.tipo_excluded && Array.isArray(filters.tipo_excluded)) {
+      filters.tipo_excluded = filters.tipo_excluded
+        .map(t => validTipos.includes(t) ? t : validTipos.find(v => t.includes(v.slice(0, 4)) || v.includes(t.slice(0, 4))) || null)
+        .filter((t): t is string => t !== null);
+      if (filters.tipo_excluded.length === 0) delete filters.tipo_excluded;
+    }
+
+    // If tipo_included has values, clear single tipo to avoid conflict
+    if (filters.tipo_included && filters.tipo_included.length > 0) {
+      delete filters.tipo;
     }
 
     console.log("Extracted filters:", JSON.stringify(filters));
@@ -190,9 +212,21 @@ serve(async (req) => {
     if (filters.finalidade) {
       query = query.eq("finalidade", filters.finalidade);
     }
-    if (filters.tipo) {
+
+    // Type filtering: support single, included list, and excluded list
+    if (filters.tipo_included && filters.tipo_included.length > 0) {
+      query = query.in("tipo", filters.tipo_included);
+    } else if (filters.tipo) {
       query = query.eq("tipo", filters.tipo);
     }
+
+    // Always apply exclusions regardless of inclusions
+    if (filters.tipo_excluded && filters.tipo_excluded.length > 0) {
+      for (const excluded of filters.tipo_excluded) {
+        query = query.neq("tipo", excluded);
+      }
+    }
+
     if (filters.bairro) {
       query = query.ilike("bairro", `%${filters.bairro}%`);
     }
@@ -239,18 +273,25 @@ serve(async (req) => {
 
     console.log(`Found ${properties?.length || 0} properties`);
 
-    // Step 3: If strict search found nothing, try broader search
+    // Step 3: If strict search found nothing, try broader search (still respecting exclusions)
     let broaderProperties: typeof properties = [];
     let usedBroaderSearch = false;
 
     if ((!properties || properties.length === 0) && !filters.is_greeting) {
-      const broaderQuery = supabase
+      let broaderQuery = supabase
         .from("imoveis")
         .select("*")
         .eq("status", "ativo");
 
       if (filters.finalidade) {
-        broaderQuery.eq("finalidade", filters.finalidade);
+        broaderQuery = broaderQuery.eq("finalidade", filters.finalidade);
+      }
+
+      // CRITICAL: Always respect exclusions even in broader search
+      if (filters.tipo_excluded && filters.tipo_excluded.length > 0) {
+        for (const excluded of filters.tipo_excluded) {
+          broaderQuery = broaderQuery.neq("tipo", excluded);
+        }
       }
 
       const { data: broader } = await broaderQuery
