@@ -287,18 +287,24 @@ serve(async (req) => {
     if (leadMatch) {
       try {
         const leadData = JSON.parse(leadMatch[1]);
-        // Save lead to database
+        // Extract search context from conversation history for lead enrichment
+        const previousFilters = messages
+          .filter((m: { role: string }) => m.role === "user")
+          .map((m: { content: string }) => m.content)
+          .join(" ");
+
+        // Save lead to database with context from the full conversation
         const { error: leadError } = await supabase
           .from("leads_maria")
           .insert({
             nome: leadData.nome,
             telefone: leadData.telefone,
             email: leadData.email || null,
-            interesse: filters.finalidade || null,
-            bairro_interesse: filters.bairro || null,
-            tipo_imovel: filters.tipo || null,
-            faixa_preco: filters.preco_max ? `até ${filters.preco_max}` : filters.preco_min ? `a partir de ${filters.preco_min}` : null,
-            mensagem_original: messages[0]?.content || null,
+            interesse: filters.finalidade || leadData.interesse || null,
+            bairro_interesse: filters.bairro || leadData.bairro || null,
+            tipo_imovel: filters.tipo || leadData.tipo || null,
+            faixa_preco: filters.preco_max ? `até ${filters.preco_max}` : filters.preco_min ? `a partir de ${filters.preco_min}` : leadData.faixa_preco || null,
+            mensagem_original: previousFilters || messages[0]?.content || null,
             origem: "maria_chat",
           });
 
