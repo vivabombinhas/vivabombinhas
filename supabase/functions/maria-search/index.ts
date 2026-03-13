@@ -249,9 +249,38 @@ serve(async (req) => {
     const aiData = await aiResponse.json();
     const assistantMessage = aiData.choices?.[0]?.message?.content || "Desculpe, tive um problema ao processar sua busca. Pode tentar novamente?";
 
+    // Return top 3 properties as structured data for card rendering
+    const topProperties = resultsToUse.slice(0, 3).map((p: Record<string, unknown>) => ({
+      id: p.id,
+      titulo: p.titulo,
+      bairro: p.bairro,
+      finalidade: p.finalidade,
+      tipo: p.tipo,
+      preco: p.preco,
+      preco_temporada_diaria: p.preco_temporada_diaria,
+      quartos: p.quartos,
+      suites: p.suites,
+      banheiros: p.banheiros,
+      vagas_garagem: p.vagas_garagem,
+      area_m2: p.area_m2,
+      capacidade_pessoas: p.capacidade_pessoas,
+      piscina: p.piscina,
+      vista_mar: p.vista_mar,
+      frente_mar: p.frente_mar,
+      mobiliado: p.mobiliado,
+      churrasqueira: p.churrasqueira,
+      ar_condicionado: p.ar_condicionado,
+      wifi: p.wifi,
+      aceita_pet: p.aceita_pet,
+      fotos: p.fotos,
+      link_anuncio: p.link_anuncio,
+      anunciante_telefone: p.anunciante_telefone,
+    }));
+
     return new Response(
       JSON.stringify({
         reply: assistantMessage,
+        properties: topProperties,
         filters_used: filters,
         results_count: resultsToUse.length,
         broader_search: usedBroaderSearch,

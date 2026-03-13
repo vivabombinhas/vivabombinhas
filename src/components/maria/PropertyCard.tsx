@@ -1,0 +1,190 @@
+import {
+  Home, MapPin, BedDouble, Bath, Car, Waves, Sun, Dog,
+  Wind, Wifi, UtensilsCrossed, ExternalLink, Phone, Users, Maximize
+} from "lucide-react";
+
+export interface Property {
+  id: string;
+  titulo: string;
+  bairro: string | null;
+  finalidade: string;
+  tipo: string;
+  preco: number | null;
+  preco_temporada_diaria: number | null;
+  quartos: number | null;
+  suites: number | null;
+  banheiros: number | null;
+  vagas_garagem: number | null;
+  area_m2: number | null;
+  capacidade_pessoas: number | null;
+  piscina: boolean | null;
+  vista_mar: boolean | null;
+  frente_mar: boolean | null;
+  mobiliado: boolean | null;
+  churrasqueira: boolean | null;
+  ar_condicionado: boolean | null;
+  wifi: boolean | null;
+  aceita_pet: boolean | null;
+  fotos: string[] | null;
+  link_anuncio: string | null;
+  anunciante_telefone: string | null;
+}
+
+function formatPrice(property: Property) {
+  if (property.finalidade === "temporada" && property.preco_temporada_diaria) {
+    return `R$ ${property.preco_temporada_diaria.toLocaleString("pt-BR")}/dia`;
+  }
+  if (property.preco) {
+    if (property.finalidade === "aluguel_anual") {
+      return `R$ ${property.preco.toLocaleString("pt-BR")}/mês`;
+    }
+    return `R$ ${property.preco.toLocaleString("pt-BR")}`;
+  }
+  return "Consulte";
+}
+
+function formatFinalidade(f: string) {
+  switch (f) {
+    case "compra": return "Compra";
+    case "aluguel_anual": return "Aluguel";
+    case "temporada": return "Temporada";
+    default: return f;
+  }
+}
+
+function formatTipo(t: string) {
+  return t.charAt(0).toUpperCase() + t.slice(1).replace("_", " ");
+}
+
+interface PropertyCardProps {
+  property: Property;
+}
+
+export function PropertyCard({ property }: PropertyCardProps) {
+  const amenities: { icon: React.ElementType; label: string }[] = [];
+
+  if (property.piscina) amenities.push({ icon: Waves, label: "Piscina" });
+  if (property.vista_mar) amenities.push({ icon: Sun, label: "Vista mar" });
+  if (property.frente_mar) amenities.push({ icon: Waves, label: "Frente mar" });
+  if (property.mobiliado) amenities.push({ icon: Home, label: "Mobiliado" });
+  if (property.churrasqueira) amenities.push({ icon: UtensilsCrossed, label: "Churrasq." });
+  if (property.ar_condicionado) amenities.push({ icon: Wind, label: "Ar cond." });
+  if (property.wifi) amenities.push({ icon: Wifi, label: "Wi-Fi" });
+  if (property.aceita_pet) amenities.push({ icon: Dog, label: "Pet" });
+
+  return (
+    <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      {/* Header with badge */}
+      <div className="bg-gradient-to-r from-primary/10 to-accent/10 px-3 py-2 flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <Home className="w-3.5 h-3.5 text-primary" />
+          <span className="text-xs font-semibold text-primary">
+            {formatTipo(property.tipo)}
+          </span>
+          <span className="text-xs text-muted-foreground">•</span>
+          <span className="text-xs font-medium text-accent">
+            {formatFinalidade(property.finalidade)}
+          </span>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="p-3 space-y-2.5">
+        {/* Title */}
+        <h3 className="text-sm font-bold text-foreground leading-snug line-clamp-2">
+          {property.titulo}
+        </h3>
+
+        {/* Location */}
+        {property.bairro && (
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <MapPin className="w-3 h-3 flex-shrink-0" />
+            <span className="text-xs">{property.bairro}, Bombinhas</span>
+          </div>
+        )}
+
+        {/* Price */}
+        <div className="bg-primary/5 rounded-lg px-3 py-2">
+          <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            {formatPrice(property)}
+          </span>
+        </div>
+
+        {/* Stats row */}
+        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+          {property.quartos != null && property.quartos > 0 && (
+            <div className="flex items-center gap-1">
+              <BedDouble className="w-3.5 h-3.5" />
+              <span>{property.quartos} {property.quartos === 1 ? "quarto" : "quartos"}</span>
+            </div>
+          )}
+          {property.banheiros != null && property.banheiros > 0 && (
+            <div className="flex items-center gap-1">
+              <Bath className="w-3.5 h-3.5" />
+              <span>{property.banheiros} {property.banheiros === 1 ? "banh." : "banh."}</span>
+            </div>
+          )}
+          {property.vagas_garagem != null && property.vagas_garagem > 0 && (
+            <div className="flex items-center gap-1">
+              <Car className="w-3.5 h-3.5" />
+              <span>{property.vagas_garagem} {property.vagas_garagem === 1 ? "vaga" : "vagas"}</span>
+            </div>
+          )}
+          {property.area_m2 != null && (
+            <div className="flex items-center gap-1">
+              <Maximize className="w-3.5 h-3.5" />
+              <span>{property.area_m2} m²</span>
+            </div>
+          )}
+          {property.capacidade_pessoas != null && property.capacidade_pessoas > 0 && (
+            <div className="flex items-center gap-1">
+              <Users className="w-3.5 h-3.5" />
+              <span>{property.capacidade_pessoas} pessoas</span>
+            </div>
+          )}
+        </div>
+
+        {/* Amenities */}
+        {amenities.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {amenities.map(({ icon: Icon, label }) => (
+              <span
+                key={label}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-medium"
+              >
+                <Icon className="w-2.5 h-2.5" />
+                {label}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex gap-2 pt-1">
+          {property.link_anuncio && (
+            <a
+              href={property.link_anuncio}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Ver anúncio
+            </a>
+          )}
+          {property.anunciante_telefone && (
+            <a
+              href={`https://wa.me/55${property.anunciante_telefone.replace(/\D/g, "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-accent text-accent-foreground text-xs font-semibold hover:opacity-90 transition-opacity"
+            >
+              <Phone className="w-3.5 h-3.5" />
+              WhatsApp
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
