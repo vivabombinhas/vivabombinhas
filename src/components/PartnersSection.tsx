@@ -15,6 +15,12 @@ const benefits = [
   { icon: Building2, title: "Gestão simples", desc: "Cadastre e atualize seus anúncios em poucos minutos." },
 ];
 
+const finalidadeMap: Record<string, string> = {
+  aluguel: "aluguel_anual",
+  temporada: "temporada",
+  venda: "venda",
+};
+
 const typeOptions = [
   { value: "aluguel", label: "Aluguel Anual" },
   { value: "temporada", label: "Temporada" },
@@ -25,9 +31,11 @@ const propertyCategories = [
   { value: "apartamento", label: "Apartamento" },
   { value: "casa", label: "Casa" },
   { value: "cobertura", label: "Cobertura" },
+  { value: "kitnet", label: "Kitnet" },
+  { value: "studio", label: "Studio" },
+  { value: "sobrado", label: "Sobrado" },
   { value: "terreno", label: "Terreno" },
   { value: "comercial", label: "Comercial" },
-  { value: "outro", label: "Outro" },
 ];
 
 const PartnersSection = () => {
