@@ -232,7 +232,7 @@ serve(async (req) => {
       })),
     ];
 
-    const aiResponse = await fetch("https://ai.lovable.dev/chat/completions", {
+    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
