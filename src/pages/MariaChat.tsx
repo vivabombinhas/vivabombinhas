@@ -85,6 +85,20 @@ const MariaChat = () => {
             </div>
           </div>
         )}
+
+        {hasMore && !isLoading && (
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={showMore}
+              className="rounded-full gap-1.5 text-xs font-semibold border-primary/30 text-primary hover:bg-primary/5"
+            >
+              <ChevronDown className="w-3.5 h-3.5" />
+              Ver mais resultados
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Input */}
