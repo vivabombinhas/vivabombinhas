@@ -52,8 +52,9 @@ FLUXO DE CAPTAÇÃO DE LEAD (importante!):
 - Se o usuário aceitar (ex: "quero", "sim", "pode salvar", "manda", "beleza"), peça os dados de forma amigável e conversacional:
   "Ótimo! 🎉 Me passa seu nome e número de WhatsApp que eu salvo aqui. Se quiser, pode informar um e-mail também (mas é opcional)."
 - Quando o usuário fornecer nome e telefone, responda com: [LEAD_CAPTURE] seguido de um JSON com os dados. Exemplo:
-  [LEAD_CAPTURE]{"nome":"João Silva","telefone":"47999998888","email":"joao@email.com"}
+  [LEAD_CAPTURE]{"nome":"João Silva","telefone":"47999998888","email":"joao@email.com","interesse":"aluguel_anual","bairro":"Bombas","tipo":"apartamento","faixa_preco":"até 3500"}
   Depois do JSON, escreva uma confirmação amigável como: "Pronto, salvei sua busca! Vou te avisar assim que surgir algo novo no seu perfil. 📲"
+  IMPORTANTE: Inclua no JSON os campos interesse (finalidade), bairro, tipo e faixa_preco baseados no contexto da conversa anterior.
 - Se o usuário fornecer dados parciais (só nome sem telefone), peça o que falta de forma gentil.
 - NUNCA force a captação. Se o usuário não quiser, respeite e continue ajudando normalmente.
 
@@ -150,6 +151,20 @@ serve(async (req) => {
       filters = JSON.parse(filterText);
     } catch {
       filters = {};
+    }
+
+    // Validate and fix enum values
+    const validFinalidades = ["compra", "aluguel_anual", "temporada"];
+    const validTipos = ["apartamento", "casa", "cobertura", "terreno", "sobrado", "studio", "pousada", "sala_comercial", "outro"];
+
+    if (filters.finalidade && !validFinalidades.includes(filters.finalidade)) {
+      // Fuzzy match: find closest valid value
+      const match = validFinalidades.find(v => filters.finalidade!.includes(v.slice(0, 4)) || v.includes(filters.finalidade!.slice(0, 4)));
+      filters.finalidade = match || undefined;
+    }
+    if (filters.tipo && !validTipos.includes(filters.tipo)) {
+      const match = validTipos.find(v => filters.tipo!.includes(v.slice(0, 4)) || v.includes(filters.tipo!.slice(0, 4)));
+      filters.tipo = match || undefined;
     }
 
     console.log("Extracted filters:", JSON.stringify(filters));
@@ -273,18 +288,24 @@ serve(async (req) => {
     if (leadMatch) {
       try {
         const leadData = JSON.parse(leadMatch[1]);
-        // Save lead to database
+        // Extract search context from conversation history for lead enrichment
+        const previousFilters = messages
+          .filter((m: { role: string }) => m.role === "user")
+          .map((m: { content: string }) => m.content)
+          .join(" ");
+
+        // Save lead to database with context from the full conversation
         const { error: leadError } = await supabase
           .from("leads_maria")
           .insert({
             nome: leadData.nome,
             telefone: leadData.telefone,
             email: leadData.email || null,
-            interesse: filters.finalidade || null,
-            bairro_interesse: filters.bairro || null,
-            tipo_imovel: filters.tipo || null,
-            faixa_preco: filters.preco_max ? `até ${filters.preco_max}` : filters.preco_min ? `a partir de ${filters.preco_min}` : null,
-            mensagem_original: messages[0]?.content || null,
+            interesse: filters.finalidade || leadData.interesse || null,
+            bairro_interesse: filters.bairro || leadData.bairro || null,
+            tipo_imovel: filters.tipo || leadData.tipo || null,
+            faixa_preco: filters.preco_max ? `até ${filters.preco_max}` : filters.preco_min ? `a partir de ${filters.preco_min}` : leadData.faixa_preco || null,
+            mensagem_original: previousFilters || messages[0]?.content || null,
             origem: "maria_chat",
           });
 
