@@ -103,7 +103,13 @@ serve(async (req) => {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Step 1: Extract filters using AI
+    // Step 1: Extract filters using AI with full conversation context
+    // Build conversation context for filter extraction (last 3 user interactions)
+    const recentMessages = messages.slice(-6); // Last ~3 pairs of user/assistant
+    const conversationContext = recentMessages
+      .map((m: { role: string; content: string }) => `${m.role === "user" ? "Usuário" : "Assistente"}: ${m.content}`)
+      .join("\n");
+
     const filterResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -114,7 +120,7 @@ serve(async (req) => {
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: FILTER_EXTRACTION_PROMPT },
-          { role: "user", content: userMessage },
+          { role: "user", content: `Histórico da conversa:\n${conversationContext}\n\nÚltima mensagem do usuário: ${userMessage}` },
         ],
         temperature: 0.1,
       }),
