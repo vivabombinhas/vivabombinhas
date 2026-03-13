@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Building2, Users, Eye, TrendingUp, ArrowRight, Phone, Link2, BedDouble, Bath, Car, Ruler } from "lucide-react";
+import { Building2, Users, Eye, TrendingUp, ArrowRight, Phone, Link2, BedDouble, Bath, Car, Ruler, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
