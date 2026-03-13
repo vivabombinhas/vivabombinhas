@@ -364,6 +364,20 @@ serve(async (req) => {
     const aiData = await aiResponse.json();
     let assistantMessage = aiData.choices?.[0]?.message?.content || "Desculpe, tive um problema ao processar sua busca. Pode tentar novamente?";
 
+    // Check for show_results flag
+    let showResults = true;
+    if (assistantMessage.startsWith("[NO_RESULTS_YET]")) {
+      showResults = false;
+      assistantMessage = assistantMessage.replace(/^\[NO_RESULTS_YET\]\s*/, "");
+    } else if (assistantMessage.startsWith("[SHOW_RESULTS]")) {
+      showResults = true;
+      assistantMessage = assistantMessage.replace(/^\[SHOW_RESULTS\]\s*/, "");
+    }
+    // If greeting, never show results
+    if (filters.is_greeting) {
+      showResults = false;
+    }
+
     // Check for lead capture tag in the response
     let leadSaved = false;
     const leadMatch = assistantMessage.match(/\[LEAD_CAPTURE\]\s*(\{[^}]+\})/);
