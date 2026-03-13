@@ -49,7 +49,7 @@ export function useMariaChat() {
 
   const handleShowMore = useCallback((content: string): boolean => {
     const remaining = allPropertiesRef.current.slice(shownCountRef.current);
-    console.log("[MarIA] handleShowMore:", { allCount: allPropertiesRef.current.length, shownCount: shownCountRef.current, remainingCount: remaining.length });
+    
     if (!MORE_PATTERNS.test(content.trim()) || remaining.length === 0) return false;
 
     const userMsg: ChatMessage = {
