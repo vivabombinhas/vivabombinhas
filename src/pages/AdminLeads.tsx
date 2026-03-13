@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Users, Phone, Mail, Filter } from "lucide-react";
+import { ArrowLeft, Users, Phone, Mail, Filter, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -100,6 +100,7 @@ export default function AdminLeads() {
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-muted-foreground" />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
+
               <SelectTrigger className="w-36 h-9 text-sm">
                 <SelectValue />
               </SelectTrigger>
@@ -111,6 +112,18 @@ export default function AdminLeads() {
                 <SelectItem value="descartado">Descartado</SelectItem>
               </SelectContent>
             </Select>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full text-muted-foreground hover:text-destructive"
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = "/admin/leads";
+              }}
+              title="Sair"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </header>
