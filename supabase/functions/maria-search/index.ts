@@ -81,7 +81,10 @@ Retorne SOMENTE um JSON válido com os filtros encontrados. Se um filtro não fo
 
 Campos possíveis:
 - finalidade: "compra", "aluguel_anual" ou "temporada"
-- tipo: "apartamento", "casa", "cobertura", "terreno", "sobrado", "studio", "pousada", "sala_comercial"
+- tipo: usar SOMENTE quando o usuário menciona um único tipo. Ex: "quero casa" → tipo: "casa"
+- tipo_included: array de tipos aceitos quando o usuário menciona MÚLTIPLOS tipos. Ex: "casa ou kitnet" → tipo_included: ["casa", "studio"]. Mapeie "kitnet" para "studio".
+- tipo_excluded: array de tipos que o usuário NÃO quer. Ex: "não quero apartamento" → tipo_excluded: ["apartamento"]. SEMPRE capture negações como "não quero", "sem", "nada de", "menos apartamento".
+- IMPORTANTE: tipo, tipo_included e tipo_excluded podem coexistir. Se o usuário disse "quero casa" antes e agora diz "não quero apartamento", mantenha ambos.
 - bairro: nome do bairro (Bombas, Centro, Mariscal, Zimbros, Canto Grande, Morrinhos, Quatro Ilhas, Praia da Conceição)
 - preco_min: valor mínimo (número)
 - preco_max: valor máximo (número). "até 800 mil" = 800000, "até 3500" para aluguel = 3500, "até 500 por dia" para temporada = 500
@@ -99,10 +102,17 @@ Campos possíveis:
 - wifi: true/false
 - is_greeting: true se for apenas uma saudação sem busca
 
-Exemplos de conversa com contexto:
+Mapeamento de sinônimos para tipos:
+- "kitnet", "kitinete", "quitinete", "kit" → "studio"
+- "apt", "apto" → "apartamento"
+- "cob" → "cobertura"
+
+Exemplos:
+- "casa ou kitnet em Bombas" → {"tipo_included":["casa","studio"],"bairro":"Bombas"}
+- "quero alugar, não quero apartamento" → {"finalidade":"aluguel_anual","tipo_excluded":["apartamento"]}
+- "casa ou sobrado, sem apartamento" → {"tipo_included":["casa","sobrado"],"tipo_excluded":["apartamento"]}
 - Msg1: "aluguel anual em Mariscal até 3500" → {"finalidade":"aluguel_anual","bairro":"Mariscal","preco_max":3500}
 - Msg2: "tem algo mais barato?" → {"finalidade":"aluguel_anual","bairro":"Mariscal","preco_max":2500}
-- Msg3: "e em Bombas?" → {"finalidade":"aluguel_anual","bairro":"Bombas","preco_max":2500}
 
 Retorne APENAS o JSON, sem texto adicional.`;
 
