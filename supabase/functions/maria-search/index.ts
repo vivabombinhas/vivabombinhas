@@ -10,6 +10,8 @@ const corsHeaders = {
 interface SearchFilters {
   finalidade?: string;
   tipo?: string;
+  tipo_included?: string[];
+  tipo_excluded?: string[];
   bairro?: string;
   preco_min?: number;
   preco_max?: number;
