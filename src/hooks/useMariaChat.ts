@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Property } from "@/components/maria/PropertyCard";
 
@@ -10,11 +10,49 @@ export interface ChatMessage {
   properties?: Property[];
 }
 
+const MORE_PATTERNS = /^(tem mais|mostrar mais|mais op[çc][õo]es|outras op[çc][õo]es|quero ver mais|mais resultados|ver mais|mais im[óo]veis|próximos|next)\??$/i;
+
 export function useMariaChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const allPropertiesRef = useRef<Property[]>([]);
+  const shownCountRef = useRef(0);
+
+  const handleShowMore = useCallback((content: string): boolean => {
+    const remaining = allPropertiesRef.current.slice(shownCountRef.current);
+    if (!MORE_PATTERNS.test(content.trim()) || remaining.length === 0) return false;
+
+    const userMsg: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content,
+      timestamp: new Date(),
+    };
+
+    const nextBatch = remaining.slice(0, 3);
+    shownCountRef.current += nextBatch.length;
+    const stillRemaining = allPropertiesRef.current.length - shownCountRef.current;
+
+    const replyText = stillRemaining > 0
+      ? `Aqui estão mais ${nextBatch.length} opções! Ainda tenho ${stillRemaining} ${stillRemaining === 1 ? "resultado" : "resultados"}, é só pedir 😊`
+      : `Aqui estão as últimas ${nextBatch.length} opções que encontrei! Se quiser, posso fazer uma nova busca com outros critérios 😊`;
+
+    const assistantMsg: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: "assistant",
+      content: replyText,
+      timestamp: new Date(),
+      properties: nextBatch,
+    };
+
+    setMessages((prev) => [...prev, userMsg, assistantMsg]);
+    return true;
+  }, []);
 
   const sendMessage = useCallback(async (content: string) => {
+    // Handle "show more" locally without API call
+    if (handleShowMore(content)) return;
+
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
@@ -37,6 +75,11 @@ export function useMariaChat() {
 
       if (error) throw error;
 
+      // Store all properties for pagination
+      const allProps: Property[] = data.all_properties || [];
+      allPropertiesRef.current = allProps;
+      shownCountRef.current = Math.min(3, allProps.length);
+
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
@@ -58,10 +101,12 @@ export function useMariaChat() {
     } finally {
       setIsLoading(false);
     }
-  }, [messages]);
+  }, [messages, handleShowMore]);
 
   const clearChat = useCallback(() => {
     setMessages([]);
+    allPropertiesRef.current = [];
+    shownCountRef.current = 0;
   }, []);
 
   return { messages, isLoading, sendMessage, clearChat };

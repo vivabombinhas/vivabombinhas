@@ -391,8 +391,8 @@ serve(async (req) => {
       assistantMessage = assistantMessage.replace(/\[LEAD_CAPTURE\]\s*\{[^}]+\}/, "").trim();
     }
 
-    // Return top 3 properties as structured data for card rendering
-    const topProperties = resultsToUse.slice(0, 3).map((p: Record<string, unknown>) => ({
+    // Return ALL matching properties for client-side pagination
+    const allProperties = resultsToUse.map((p: Record<string, unknown>) => ({
       id: p.id,
       titulo: p.titulo,
       bairro: p.bairro,
@@ -422,7 +422,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         reply: assistantMessage,
-        properties: topProperties,
+        properties: allProperties.slice(0, 3),
+        all_properties: allProperties,
         filters_used: filters,
         results_count: resultsToUse.length,
         broader_search: usedBroaderSearch,
