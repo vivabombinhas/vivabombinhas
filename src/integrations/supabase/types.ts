@@ -143,6 +143,140 @@ export type Database = {
         }
         Relationships: []
       }
+      imoveis_submissions: {
+        Row: {
+          aceita_pet: boolean | null
+          anunciante_email: string | null
+          anunciante_nome: string | null
+          anunciante_telefone: string | null
+          ar_condicionado: boolean | null
+          area_m2: number | null
+          bairro: string | null
+          banheiros: number | null
+          capacidade_pessoas: number | null
+          churrasqueira: boolean | null
+          cidade: string
+          condominio: number | null
+          created_at: string
+          descricao: string | null
+          endereco: string | null
+          estacionamento: boolean | null
+          finalidade: Database["public"]["Enums"]["finalidade_imovel"]
+          fotos: string[] | null
+          frente_mar: boolean | null
+          id: string
+          imobiliaria: string | null
+          imovel_id: string | null
+          iptu_anual: number | null
+          link_anuncio: string | null
+          mobiliado: boolean | null
+          observacoes: string | null
+          piscina: boolean | null
+          preco: number | null
+          preco_temporada_diaria: number | null
+          quartos: number | null
+          reviewed_at: string | null
+          status_submission: Database["public"]["Enums"]["status_submission"]
+          suites: number | null
+          tipo: Database["public"]["Enums"]["tipo_imovel"]
+          titulo: string
+          updated_at: string
+          vagas_garagem: number | null
+          vista_mar: boolean | null
+          wifi: boolean | null
+        }
+        Insert: {
+          aceita_pet?: boolean | null
+          anunciante_email?: string | null
+          anunciante_nome?: string | null
+          anunciante_telefone?: string | null
+          ar_condicionado?: boolean | null
+          area_m2?: number | null
+          bairro?: string | null
+          banheiros?: number | null
+          capacidade_pessoas?: number | null
+          churrasqueira?: boolean | null
+          cidade?: string
+          condominio?: number | null
+          created_at?: string
+          descricao?: string | null
+          endereco?: string | null
+          estacionamento?: boolean | null
+          finalidade: Database["public"]["Enums"]["finalidade_imovel"]
+          fotos?: string[] | null
+          frente_mar?: boolean | null
+          id?: string
+          imobiliaria?: string | null
+          imovel_id?: string | null
+          iptu_anual?: number | null
+          link_anuncio?: string | null
+          mobiliado?: boolean | null
+          observacoes?: string | null
+          piscina?: boolean | null
+          preco?: number | null
+          preco_temporada_diaria?: number | null
+          quartos?: number | null
+          reviewed_at?: string | null
+          status_submission?: Database["public"]["Enums"]["status_submission"]
+          suites?: number | null
+          tipo: Database["public"]["Enums"]["tipo_imovel"]
+          titulo: string
+          updated_at?: string
+          vagas_garagem?: number | null
+          vista_mar?: boolean | null
+          wifi?: boolean | null
+        }
+        Update: {
+          aceita_pet?: boolean | null
+          anunciante_email?: string | null
+          anunciante_nome?: string | null
+          anunciante_telefone?: string | null
+          ar_condicionado?: boolean | null
+          area_m2?: number | null
+          bairro?: string | null
+          banheiros?: number | null
+          capacidade_pessoas?: number | null
+          churrasqueira?: boolean | null
+          cidade?: string
+          condominio?: number | null
+          created_at?: string
+          descricao?: string | null
+          endereco?: string | null
+          estacionamento?: boolean | null
+          finalidade?: Database["public"]["Enums"]["finalidade_imovel"]
+          fotos?: string[] | null
+          frente_mar?: boolean | null
+          id?: string
+          imobiliaria?: string | null
+          imovel_id?: string | null
+          iptu_anual?: number | null
+          link_anuncio?: string | null
+          mobiliado?: boolean | null
+          observacoes?: string | null
+          piscina?: boolean | null
+          preco?: number | null
+          preco_temporada_diaria?: number | null
+          quartos?: number | null
+          reviewed_at?: string | null
+          status_submission?: Database["public"]["Enums"]["status_submission"]
+          suites?: number | null
+          tipo?: Database["public"]["Enums"]["tipo_imovel"]
+          titulo?: string
+          updated_at?: string
+          vagas_garagem?: number | null
+          vista_mar?: boolean | null
+          wifi?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imoveis_submissions_imovel_id_fkey"
+            columns: ["imovel_id"]
+            isOneToOne: false
+            referencedRelation: "imoveis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads_maria: {
         Row: {
           bairro_interesse: string | null
@@ -235,6 +369,7 @@ export type Database = {
         | "outro"
       status_imovel: "ativo" | "pausado" | "removido"
       status_lead: "novo" | "contatado" | "convertido" | "descartado"
+      status_submission: "pendente" | "aprovado" | "rejeitado"
       tipo_imovel:
         | "apartamento"
         | "casa"
@@ -388,6 +523,7 @@ export const Constants = {
       ],
       status_imovel: ["ativo", "pausado", "removido"],
       status_lead: ["novo", "contatado", "convertido", "descartado"],
+      status_submission: ["pendente", "aprovado", "rejeitado"],
       tipo_imovel: [
         "apartamento",
         "casa",
