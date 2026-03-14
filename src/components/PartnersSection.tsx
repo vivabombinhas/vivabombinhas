@@ -71,7 +71,7 @@ const PartnersSection = () => {
     // Use first selected finalidade for the DB record
     const finalidade = finalidadeMap[selectedTypes[0]] || "venda";
 
-    const { error } = await supabase.from("imoveis").insert({
+    const { error } = await supabase.from("imoveis_submissions" as any).insert({
       titulo: `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} em Bombinhas`,
       descricao: String(formData.get("descricao") || ""),
       finalidade: finalidade as any,
@@ -86,9 +86,7 @@ const PartnersSection = () => {
       anunciante_nome: String(formData.get("nome") || ""),
       anunciante_telefone: String(formData.get("telefone") || ""),
       anunciante_email: String(formData.get("email") || ""),
-      origem: "manual" as any,
-      status: "ativo" as any,
-    });
+    } as any);
 
     setLoading(false);
 
