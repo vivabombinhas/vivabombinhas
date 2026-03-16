@@ -23,6 +23,12 @@ export function useMariaChat() {
     setHasMore(allPropertiesRef.current.length > shownCountRef.current);
   }, []);
 
+  const clearPropertyState = useCallback(() => {
+    allPropertiesRef.current = [];
+    shownCountRef.current = 0;
+    setHasMore(false);
+  }, []);
+
   const showMore = useCallback(() => {
     const remaining = allPropertiesRef.current.slice(shownCountRef.current);
     if (remaining.length === 0) return;
@@ -89,23 +95,27 @@ export function useMariaChat() {
 
       if (error) throw error;
 
-      const allProps: Property[] = data.all_properties || [];
-      const shouldShowResults = data.show_results !== false && allProps.length > 0;
-      
-      if (shouldShowResults) {
+      const showResults = data.show_results === true;
+      const clearResults = data.clear_results === true;
+
+      if (showResults) {
+        // New search results — update pagination state
+        const allProps: Property[] = data.all_properties || [];
         allPropertiesRef.current = allProps;
         shownCountRef.current = Math.min(3, allProps.length);
-      } else {
-        // Don't reset pagination state for conversational responses
-        // so "ver mais" still works if there were previous results
+      } else if (clearResults) {
+        // Conversation moved away from search — clear stale property state
+        clearPropertyState();
       }
+      // If neither flag: keep pagination for "ver mais" continuity
 
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
         content: data.reply,
         timestamp: new Date(),
-        properties: data.properties?.length > 0 ? data.properties : undefined,
+        // Only attach properties when this specific response is a search result
+        properties: showResults && data.properties?.length > 0 ? data.properties : undefined,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
@@ -122,14 +132,12 @@ export function useMariaChat() {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, handleShowMore, updateHasMore]);
+  }, [messages, handleShowMore, updateHasMore, clearPropertyState]);
 
   const clearChat = useCallback(() => {
     setMessages([]);
-    allPropertiesRef.current = [];
-    shownCountRef.current = 0;
-    setHasMore(false);
-  }, []);
+    clearPropertyState();
+  }, [clearPropertyState]);
 
   return { messages, isLoading, sendMessage, clearChat, hasMore, showMore };
 }

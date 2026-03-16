@@ -42,13 +42,28 @@ REGRA CRÍTICA - QUANDO MOSTRAR IMÓVEIS:
   * O usuário fez uma busca clara e específica com intenção definida (ex: "quero alugar em Bombas", "casas à venda em Mariscal")
   * O usuário pediu explicitamente para ver opções/resultados
   * Você tem filtros suficientes para uma busca significativa (pelo menos finalidade OU bairro OU tipo)
+  * O SISTEMA indicou que existem resultados de busca para mostrar (veja o contexto de resultados abaixo)
 - Use [NO_RESULTS_YET] quando:
   * O usuário fez uma pergunta exploratória ou contextual (ex: "tem escola perto?", "qual bairro é melhor?")
-  * Você ainda está fazendo perguntas de esclarecimento ao usuário
+  * Você ainda está fazendo perguntas de esclarecimento ao usuário (ex: "Você quer aluguel anual ou temporada?")
   * A mensagem é uma saudação ou conversa geral
   * Filtros importantes ainda estão faltando e você precisa perguntar mais
   * O usuário não demonstrou intenção clara de ver imóveis agora
+  * O usuário está fornecendo dados de contato (nome, telefone, email)
+  * O usuário está falando sobre anunciar/cadastrar um imóvel
+  * O usuário está reclamando dos cards ou pediu para parar de mostrar
+  * O usuário mudou de assunto (não está mais pedindo busca)
+  * A conversa é sobre qualquer tema que NÃO seja mostrar resultados de busca
 - NUNCA misture perguntas de esclarecimento com cards de imóveis. Se você está perguntando algo, use [NO_RESULTS_YET].
+
+REGRA SOBRE ANUNCIAR/CADASTRAR IMÓVEL:
+- Se o usuário quiser anunciar, cadastrar, registrar ou divulgar um imóvel, NÃO sugira imobiliárias externas.
+- Oriente o usuário a usar o formulário de cadastro no site: "Você pode cadastrar seu imóvel diretamente pelo nosso site! Basta acessar a seção de parceiros na página principal e preencher o formulário. Sua submissão será analisada e publicada em breve 😊"
+- Use [NO_RESULTS_YET] neste caso.
+
+REGRA SOBRE PARAR CARDS:
+- Se o usuário pedir para parar de mostrar cards, disser "pare de mandar os cards", reclamar dos cards, ou qualquer variação, RESPEITE e use [NO_RESULTS_YET].
+- Confirme que você entendeu e que só mostrará cards quando ele pedir novamente.
 
 REGRA CRÍTICA DE FORMATAÇÃO:
 - Os detalhes dos imóveis (título, preço, quartos, link, telefone) serão exibidos automaticamente em CARDS VISUAIS na interface.
@@ -85,49 +100,53 @@ Bairros de Bombinhas: Bombas, Centro, Mariscal, Zimbros, Canto Grande, Morrinhos
 
 const FILTER_EXTRACTION_PROMPT = `Analise a CONVERSA COMPLETA do usuário e extraia os filtros de busca acumulados para imóveis em Bombinhas/SC.
 
-REGRA CRÍTICA DE CONTEXTO:
+REGRA CRÍTICA - CLASSIFICAÇÃO DE INTENÇÃO:
+Primeiro, determine a INTENÇÃO da última mensagem do usuário. Classifique como:
+- "search": O usuário quer buscar/ver imóveis (nova busca ou refinamento)
+- "conversation": Qualquer outra coisa (saudação, perguntas gerais, dados de contato, reclamação, anunciar imóvel, conversa casual, esclarecimentos, etc.)
+
+Se a intenção for "conversation", retorne APENAS: {"intent":"conversation"}
+NÃO extraia filtros para mensagens conversacionais.
+
+Exemplos de "conversation":
+- "oi", "olá", "bom dia" → {"intent":"conversation"}
+- "quero anunciar meu imóvel" → {"intent":"conversation"}
+- "meu nome é João, telefone 47999..." → {"intent":"conversation"}
+- "qual bairro é melhor?" → {"intent":"conversation"}
+- "pare de mandar os cards" → {"intent":"conversation"}
+- "obrigado" → {"intent":"conversation"}
+- "você quer aluguel anual ou temporada?" (resposta: "anual") → Depende: se é resposta a uma pergunta de esclarecimento de busca, é "search". Se é conversa geral, "conversation".
+- "sim" (após MarIA perguntar se quer salvar) → {"intent":"conversation"}
+
+Exemplos de "search":
+- "quero alugar em Bombas" → search com filtros
+- "casas à venda até 500 mil" → search com filtros
+- "tem algo mais barato?" (após busca anterior) → search (refinamento)
+- "e com piscina?" (após busca anterior) → search (refinamento)
+
+REGRA CRÍTICA DE CONTEXTO (somente para intent=search):
 - Considere TODAS as mensagens anteriores do usuário para manter o contexto.
 - Se o usuário fez uma busca anterior e agora pede ajustes (ex: "mais barato", "outro bairro", "com piscina"), MANTENHA os filtros anteriores e apenas ajuste o que foi pedido.
-- Exemplo: se buscou "aluguel anual em Bombas" e depois disse "tem algo mais barato?", mantenha finalidade=aluguel_anual, bairro=Bombas e reduza o preco_max.
-- Se o usuário pedir "mais barato" sem um preço específico, e houve resultados anteriores, defina preco_max como um valor razoavelmente menor.
 - Se o usuário iniciar uma busca completamente nova (ex: "quero comprar um terreno"), descarte os filtros anteriores.
 
-Retorne SOMENTE um JSON válido com os filtros encontrados. Se um filtro não foi mencionado nem inferido do contexto, não inclua no JSON.
+Retorne SOMENTE um JSON válido. Se intent=conversation, retorne {"intent":"conversation"}.
+Se intent=search, inclua "intent":"search" junto com os filtros.
 
-Campos possíveis:
+Campos possíveis (somente para search):
+- intent: "search"
 - finalidade: "compra", "aluguel_anual" ou "temporada"
-- tipo: usar SOMENTE quando o usuário menciona um único tipo. Ex: "quero casa" → tipo: "casa"
-- tipo_included: array de tipos aceitos quando o usuário menciona MÚLTIPLOS tipos. Ex: "casa ou kitnet" → tipo_included: ["casa", "studio"]. Mapeie "kitnet" para "studio".
-- tipo_excluded: array de tipos que o usuário NÃO quer. Ex: "não quero apartamento" → tipo_excluded: ["apartamento"]. SEMPRE capture negações como "não quero", "sem", "nada de", "menos apartamento".
-- IMPORTANTE: tipo, tipo_included e tipo_excluded podem coexistir. Se o usuário disse "quero casa" antes e agora diz "não quero apartamento", mantenha ambos.
-- bairro: nome do bairro (Bombas, Centro, Mariscal, Zimbros, Canto Grande, Morrinhos, Quatro Ilhas, Praia da Conceição)
-- preco_min: valor mínimo (número)
-- preco_max: valor máximo (número). "até 800 mil" = 800000, "até 3500" para aluguel = 3500, "até 500 por dia" para temporada = 500
-- quartos: número de quartos
-- banheiros: número de banheiros
-- vagas_garagem: número de vagas
-- capacidade_pessoas: número de pessoas (para temporada)
-- piscina: true/false
-- vista_mar: true/false
-- frente_mar: true/false
-- mobiliado: true/false
-- aceita_pet: true/false
-- churrasqueira: true/false
-- ar_condicionado: true/false
-- wifi: true/false
-- is_greeting: true se for apenas uma saudação sem busca
+- tipo: usar SOMENTE quando o usuário menciona um único tipo
+- tipo_included: array de tipos aceitos quando múltiplos
+- tipo_excluded: array de tipos que o usuário NÃO quer
+- bairro: nome do bairro
+- preco_min, preco_max: valores numéricos
+- quartos, banheiros, vagas_garagem, capacidade_pessoas: números
+- piscina, vista_mar, frente_mar, mobiliado, aceita_pet, churrasqueira, ar_condicionado, wifi: true/false
 
 Mapeamento de sinônimos para tipos:
 - "kitnet", "kitinete", "quitinete", "kit" → "studio"
 - "apt", "apto" → "apartamento"
 - "cob" → "cobertura"
-
-Exemplos:
-- "casa ou kitnet em Bombas" → {"tipo_included":["casa","studio"],"bairro":"Bombas"}
-- "quero alugar, não quero apartamento" → {"finalidade":"aluguel_anual","tipo_excluded":["apartamento"]}
-- "casa ou sobrado, sem apartamento" → {"tipo_included":["casa","sobrado"],"tipo_excluded":["apartamento"]}
-- Msg1: "aluguel anual em Mariscal até 3500" → {"finalidade":"aluguel_anual","bairro":"Mariscal","preco_max":3500}
-- Msg2: "tem algo mais barato?" → {"finalidade":"aluguel_anual","bairro":"Mariscal","preco_max":2500}
 
 Retorne APENAS o JSON, sem texto adicional.`;
 
@@ -145,9 +164,8 @@ serve(async (req) => {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Step 1: Extract filters using AI with full conversation context
-    // Build conversation context for filter extraction (last 3 user interactions)
-    const recentMessages = messages.slice(-6); // Last ~3 pairs of user/assistant
+    // Step 1: Extract intent + filters using AI with conversation context
+    const recentMessages = messages.slice(-6);
     const conversationContext = recentMessages
       .map((m: { role: string; content: string }) => `${m.role === "user" ? "Usuário" : "Assistente"}: ${m.content}`)
       .join("\n");
@@ -170,15 +188,97 @@ serve(async (req) => {
 
     const filterData = await filterResponse.json();
     let filterText = filterData.choices?.[0]?.message?.content || "{}";
-    // Clean markdown code blocks if present
     filterText = filterText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
-    let filters: SearchFilters & { is_greeting?: boolean } = {};
+    let filters: SearchFilters & { intent?: string; is_greeting?: boolean } = {};
     try {
       filters = JSON.parse(filterText);
     } catch {
       filters = {};
     }
+
+    console.log("Extracted intent+filters:", JSON.stringify(filters));
+
+    // If intent is conversation, skip DB query entirely
+    const isConversation = filters.intent === "conversation";
+
+    if (isConversation) {
+      // Generate conversational response without any property context
+      const conversationMessages = [
+        { role: "system", content: SYSTEM_PROMPT + "\n\nEsta mensagem NÃO é uma busca de imóveis. É uma mensagem conversacional. Use [NO_RESULTS_YET] obrigatoriamente. NÃO mencione imóveis encontrados, NÃO mostre resultados. Responda de forma natural e amigável." },
+        ...messages.map((m: { role: string; content: string }) => ({
+          role: m.role,
+          content: m.content,
+        })),
+      ];
+
+      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${lovableApiKey}`,
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: conversationMessages,
+          temperature: 0.7,
+        }),
+      });
+
+      const aiData = await aiResponse.json();
+      let assistantMessage = aiData.choices?.[0]?.message?.content || "Desculpe, tive um problema. Pode tentar novamente?";
+
+      // Strip any markers
+      assistantMessage = assistantMessage.replace(/^\[(SHOW_RESULTS|NO_RESULTS_YET)\]\s*/g, "");
+
+      // Handle lead capture even in conversation mode
+      let leadSaved = false;
+      const leadMatch = assistantMessage.match(/\[LEAD_CAPTURE\]\s*(\{[^}]+\})/);
+      if (leadMatch) {
+        try {
+          const leadData = JSON.parse(leadMatch[1]);
+          const previousFilters = messages
+            .filter((m: { role: string }) => m.role === "user")
+            .map((m: { content: string }) => m.content)
+            .join(" ");
+
+          const { error: leadError } = await supabase
+            .from("leads_maria")
+            .insert({
+              nome: leadData.nome,
+              telefone: leadData.telefone,
+              email: leadData.email || null,
+              interesse: leadData.interesse || null,
+              bairro_interesse: leadData.bairro || null,
+              tipo_imovel: leadData.tipo || null,
+              faixa_preco: leadData.faixa_preco || null,
+              mensagem_original: previousFilters || messages[0]?.content || null,
+              origem: "maria_chat",
+            });
+
+          if (leadError) console.error("Lead save error:", leadError);
+          else { leadSaved = true; console.log("Lead saved:", leadData.nome); }
+        } catch (e) { console.error("Failed to parse lead:", e); }
+        assistantMessage = assistantMessage.replace(/\[LEAD_CAPTURE\]\s*\{[^}]+\}/, "").trim();
+      }
+
+      return new Response(
+        JSON.stringify({
+          reply: assistantMessage,
+          properties: [],
+          all_properties: [],
+          filters_used: {},
+          results_count: 0,
+          broader_search: false,
+          lead_saved: leadSaved,
+          show_results: false,
+          clear_results: true,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // --- SEARCH INTENT: proceed with DB query ---
 
     // Validate and fix enum values
     const validFinalidades = ["compra", "aluguel_anual", "temporada"];
@@ -189,13 +289,11 @@ serve(async (req) => {
       filters.finalidade = match || undefined;
     }
 
-    // Validate tipo (single)
     if (filters.tipo && !validTipos.includes(filters.tipo)) {
       const match = validTipos.find(v => filters.tipo!.includes(v.slice(0, 4)) || v.includes(filters.tipo!.slice(0, 4)));
       filters.tipo = match || undefined;
     }
 
-    // Validate tipo_included array
     if (filters.tipo_included && Array.isArray(filters.tipo_included)) {
       filters.tipo_included = filters.tipo_included
         .map(t => validTipos.includes(t) ? t : validTipos.find(v => t.includes(v.slice(0, 4)) || v.includes(t.slice(0, 4))) || null)
@@ -203,7 +301,6 @@ serve(async (req) => {
       if (filters.tipo_included.length === 0) delete filters.tipo_included;
     }
 
-    // Validate tipo_excluded array
     if (filters.tipo_excluded && Array.isArray(filters.tipo_excluded)) {
       filters.tipo_excluded = filters.tipo_excluded
         .map(t => validTipos.includes(t) ? t : validTipos.find(v => t.includes(v.slice(0, 4)) || v.includes(t.slice(0, 4))) || null)
@@ -211,12 +308,9 @@ serve(async (req) => {
       if (filters.tipo_excluded.length === 0) delete filters.tipo_excluded;
     }
 
-    // If tipo_included has values, clear single tipo to avoid conflict
     if (filters.tipo_included && filters.tipo_included.length > 0) {
       delete filters.tipo;
     }
-
-    console.log("Extracted filters:", JSON.stringify(filters));
 
     // Step 2: Query the database
     let query = supabase
@@ -224,41 +318,26 @@ serve(async (req) => {
       .select("*")
       .eq("status", "ativo");
 
-    if (filters.finalidade) {
-      query = query.eq("finalidade", filters.finalidade);
-    }
+    if (filters.finalidade) query = query.eq("finalidade", filters.finalidade);
 
-    // Type filtering: support single, included list, and excluded list
     if (filters.tipo_included && filters.tipo_included.length > 0) {
       query = query.in("tipo", filters.tipo_included);
     } else if (filters.tipo) {
       query = query.eq("tipo", filters.tipo);
     }
 
-    // Always apply exclusions regardless of inclusions
     if (filters.tipo_excluded && filters.tipo_excluded.length > 0) {
       for (const excluded of filters.tipo_excluded) {
         query = query.neq("tipo", excluded);
       }
     }
 
-    if (filters.bairro) {
-      query = query.ilike("bairro", `%${filters.bairro}%`);
-    }
-    if (filters.quartos) {
-      query = query.gte("quartos", filters.quartos);
-    }
-    if (filters.banheiros) {
-      query = query.gte("banheiros", filters.banheiros);
-    }
-    if (filters.vagas_garagem) {
-      query = query.gte("vagas_garagem", filters.vagas_garagem);
-    }
-    if (filters.capacidade_pessoas) {
-      query = query.gte("capacidade_pessoas", filters.capacidade_pessoas);
-    }
+    if (filters.bairro) query = query.ilike("bairro", `%${filters.bairro}%`);
+    if (filters.quartos) query = query.gte("quartos", filters.quartos);
+    if (filters.banheiros) query = query.gte("banheiros", filters.banheiros);
+    if (filters.vagas_garagem) query = query.gte("vagas_garagem", filters.vagas_garagem);
+    if (filters.capacidade_pessoas) query = query.gte("capacidade_pessoas", filters.capacidade_pessoas);
 
-    // Price filtering depends on finalidade
     if (filters.preco_max || filters.preco_min) {
       if (filters.finalidade === "temporada") {
         if (filters.preco_max) query = query.lte("preco_temporada_diaria", filters.preco_max);
@@ -269,57 +348,38 @@ serve(async (req) => {
       }
     }
 
-    // Boolean filters
     const booleanFields = ["piscina", "vista_mar", "frente_mar", "mobiliado", "aceita_pet", "churrasqueira", "ar_condicionado", "wifi"] as const;
     for (const field of booleanFields) {
-      if (filters[field] === true) {
-        query = query.eq(field, true);
-      }
+      if (filters[field] === true) query = query.eq(field, true);
     }
 
     query = query.order("destaque", { ascending: false }).limit(10);
 
     const { data: properties, error: dbError } = await query;
-
-    if (dbError) {
-      console.error("Database error:", dbError);
-      throw new Error("Erro ao buscar imóveis");
-    }
+    if (dbError) { console.error("Database error:", dbError); throw new Error("Erro ao buscar imóveis"); }
 
     console.log(`Found ${properties?.length || 0} properties`);
 
-    // Step 3: If strict search found nothing, try broader search (still respecting exclusions)
+    // Step 3: Broader search fallback
     let broaderProperties: typeof properties = [];
     let usedBroaderSearch = false;
 
-    if ((!properties || properties.length === 0) && !filters.is_greeting) {
-      let broaderQuery = supabase
-        .from("imoveis")
-        .select("*")
-        .eq("status", "ativo");
-
-      if (filters.finalidade) {
-        broaderQuery = broaderQuery.eq("finalidade", filters.finalidade);
-      }
-
-      // CRITICAL: Always respect exclusions even in broader search
+    if (!properties || properties.length === 0) {
+      let broaderQuery = supabase.from("imoveis").select("*").eq("status", "ativo");
+      if (filters.finalidade) broaderQuery = broaderQuery.eq("finalidade", filters.finalidade);
       if (filters.tipo_excluded && filters.tipo_excluded.length > 0) {
         for (const excluded of filters.tipo_excluded) {
           broaderQuery = broaderQuery.neq("tipo", excluded);
         }
       }
-
-      const { data: broader } = await broaderQuery
-        .order("destaque", { ascending: false })
-        .limit(10);
-
+      const { data: broader } = await broaderQuery.order("destaque", { ascending: false }).limit(10);
       broaderProperties = broader || [];
       usedBroaderSearch = broaderProperties.length > 0;
     }
 
     const resultsToUse = properties && properties.length > 0 ? properties : broaderProperties;
 
-    // Step 4: Generate conversational response with type coverage info
+    // Step 4: Generate conversational response
     let typeNote = "";
     if (filters.tipo_included && filters.tipo_included.length > 1 && resultsToUse.length > 0) {
       const foundTypes = new Set(resultsToUse.map((p: Record<string, unknown>) => p.tipo));
@@ -336,9 +396,7 @@ serve(async (req) => {
 
     const propertyContext = resultsToUse.length > 0
       ? `\n\nResultados encontrados (${resultsToUse.length} imóveis):\n${JSON.stringify(resultsToUse, null, 2)}${usedBroaderSearch ? "\n\nNOTA: A busca exata não retornou resultados. Estes são resultados de uma busca mais ampla (respeitando exclusões). Informe ao usuário e sugira ajustes nos filtros." : ""}${typeNote}${exclusionNote}`
-      : filters.is_greeting
-        ? "\n\nO usuário está apenas cumprimentando. Responda de forma amigável, se apresente como MarIA e pergunte como pode ajudar na busca de imóveis em Bombinhas."
-        : `\n\nNenhum imóvel encontrado com os critérios informados. Sugira ao usuário ampliar a busca mudando o bairro, faixa de preço ou tipo de imóvel.${exclusionNote}`;
+      : `\n\nNenhum imóvel encontrado com os critérios informados. Sugira ao usuário ampliar a busca mudando o bairro, faixa de preço ou tipo de imóvel.${exclusionNote}`;
 
     const conversationMessages = [
       { role: "system", content: SYSTEM_PROMPT + propertyContext },
@@ -373,24 +431,18 @@ serve(async (req) => {
       showResults = true;
       assistantMessage = assistantMessage.replace(/^\[SHOW_RESULTS\]\s*/, "");
     }
-    // If greeting, never show results
-    if (filters.is_greeting) {
-      showResults = false;
-    }
 
-    // Check for lead capture tag in the response
+    // Handle lead capture
     let leadSaved = false;
     const leadMatch = assistantMessage.match(/\[LEAD_CAPTURE\]\s*(\{[^}]+\})/);
     if (leadMatch) {
       try {
         const leadData = JSON.parse(leadMatch[1]);
-        // Extract search context from conversation history for lead enrichment
         const previousFilters = messages
           .filter((m: { role: string }) => m.role === "user")
           .map((m: { content: string }) => m.content)
           .join(" ");
 
-        // Save lead to database with context from the full conversation
         const { error: leadError } = await supabase
           .from("leads_maria")
           .insert({
@@ -405,21 +457,13 @@ serve(async (req) => {
             origem: "maria_chat",
           });
 
-        if (leadError) {
-          console.error("Lead save error:", leadError);
-        } else {
-          leadSaved = true;
-          console.log("Lead saved successfully:", leadData.nome);
-        }
-      } catch (e) {
-        console.error("Failed to parse lead data:", e);
-      }
-
-      // Remove the [LEAD_CAPTURE]{...} tag from the message shown to user
+        if (leadError) console.error("Lead save error:", leadError);
+        else { leadSaved = true; console.log("Lead saved:", leadData.nome); }
+      } catch (e) { console.error("Failed to parse lead:", e); }
       assistantMessage = assistantMessage.replace(/\[LEAD_CAPTURE\]\s*\{[^}]+\}/, "").trim();
     }
 
-    // Return ALL matching properties for client-side pagination
+    // Build property list for response
     const allProperties = resultsToUse.map((p: Record<string, unknown>) => ({
       id: p.id,
       titulo: p.titulo,
@@ -457,10 +501,9 @@ serve(async (req) => {
         broader_search: usedBroaderSearch,
         lead_saved: leadSaved,
         show_results: showResults,
+        clear_results: !showResults,
       }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("Error in maria-search:", error);
@@ -469,10 +512,7 @@ serve(async (req) => {
         reply: "Desculpe, ocorreu um erro. Pode tentar novamente em instantes? 😊",
         error: error.message,
       }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
