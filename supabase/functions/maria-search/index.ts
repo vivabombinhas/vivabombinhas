@@ -395,8 +395,8 @@ serve(async (req) => {
     }
 
     const propertyContext = resultsToUse.length > 0
-      ? `\n\nResultados encontrados (${resultsToUse.length} imóveis):\n${JSON.stringify(resultsToUse, null, 2)}${usedBroaderSearch ? "\n\nNOTA: A busca exata não retornou resultados. Estes são resultados de uma busca mais ampla (respeitando exclusões). Informe ao usuário e sugira ajustes nos filtros." : ""}${typeNote}${exclusionNote}`
-      : `\n\nNenhum imóvel encontrado com os critérios informados. Sugira ao usuário ampliar a busca mudando o bairro, faixa de preço ou tipo de imóvel.${exclusionNote}`;
+      ? `\n\nResultados encontrados (${resultsToUse.length} imóveis):\n${JSON.stringify(resultsToUse, null, 2)}${usedBroaderSearch ? "\n\nNOTA: A busca exata não retornou resultados. Estes são resultados de uma busca mais ampla (respeitando exclusões). Informe ao usuário e sugira ajustes nos filtros. Ao final, ofereça PROATIVAMENTE salvar a busca: 'Posso te avisar no WhatsApp assim que aparecer algo do jeitinho que você quer 💛 — quer que eu te avise?'" : ""}${typeNote}${exclusionNote}`
+      : `\n\nNenhum imóvel encontrado com os critérios informados (nem ampliando a busca). MODO CAPTADORA ATIVADO:\n1. Use [NO_RESULTS_YET] (não há cards pra mostrar).\n2. Seja honesta e acolhedora: diga que ainda não tem nada que case 100% com o que ele quer no nosso catálogo.\n3. OFEREÇA IMEDIATAMENTE salvar a busca: 'Mas posso te avisar pelo WhatsApp assim que chegar um imóvel desse perfil 💛 Aparecem novidades quase toda semana em Bombinhas. Topa? Me passa seu nome e WhatsApp.'\n4. NÃO sugira tipos que o usuário excluiu. NÃO invente imóveis.${exclusionNote}`;
 
     const conversationMessages = [
       { role: "system", content: SYSTEM_PROMPT + propertyContext },
