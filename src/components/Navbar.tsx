@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Bot } from "lucide-react";
 
@@ -33,6 +34,9 @@ const Navbar = () => {
               {l.label}
             </a>
           ))}
+          <Link to="/anuncie" className={`text-sm font-medium transition-colors ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-primary-foreground/60 hover:text-primary-foreground"}`}>
+            Anuncie
+          </Link>
           <Button asChild size="sm" className="rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground">
             <a href="#experimentar">Experimentar Grátis</a>
           </Button>
@@ -50,6 +54,9 @@ const Navbar = () => {
               {l.label}
             </a>
           ))}
+          <Link to="/anuncie" onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground py-2">
+            Anuncie
+          </Link>
           <Button asChild size="sm" className="w-full rounded-full">
             <a href="#experimentar" onClick={() => setOpen(false)}>Experimentar Grátis</a>
           </Button>
