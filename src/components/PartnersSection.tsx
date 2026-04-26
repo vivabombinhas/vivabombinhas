@@ -1,110 +1,15 @@
-import { useState } from "react";
-import { Building2, Users, Eye, TrendingUp, ArrowRight, Phone, Link2, BedDouble, Bath, Car, Ruler, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
+import { Building2, Users, Eye, TrendingUp, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
 
 const benefits = [
-  { icon: Eye, title: "Mais visibilidade", desc: "Seus imóveis aparecem para quem está buscando ativamente na região." },
+  { icon: Eye, title: "Mais visibilidade", desc: "Seus imóveis aparecem para quem busca ativamente em Bombinhas." },
   { icon: Users, title: "Leads qualificados", desc: "Conecte-se com pessoas que já descreveram exatamente o que procuram." },
-  { icon: TrendingUp, title: "Alcance inteligente", desc: "A IA da MarIA recomenda seus imóveis quando batem com a busca do usuário." },
-  { icon: Building2, title: "Gestão simples", desc: "Cadastre e atualize seus anúncios em poucos minutos." },
-];
-
-const finalidadeMap: Record<string, string> = {
-  aluguel: "aluguel_anual",
-  temporada: "temporada",
-  compra: "compra",
-};
-
-const typeOptions = [
-  { value: "aluguel", label: "Aluguel Anual" },
-  { value: "temporada", label: "Temporada" },
-  { value: "compra", label: "Compra" },
-];
-
-const propertyCategories = [
-  { value: "apartamento", label: "Apartamento" },
-  { value: "casa", label: "Casa" },
-  { value: "cobertura", label: "Cobertura" },
-  { value: "studio", label: "Studio" },
-  { value: "sobrado", label: "Sobrado" },
-  { value: "terreno", label: "Terreno" },
-  { value: "pousada", label: "Pousada" },
-  { value: "sala_comercial", label: "Sala Comercial" },
-  { value: "outro", label: "Outro" },
+  { icon: TrendingUp, title: "IA recomenda você", desc: "A MarIA sugere seus imóveis quando batem com a busca do usuário." },
+  { icon: Building2, title: "Cadastro em 30s", desc: "Cole o link de um anúncio existente e a IA preenche tudo." },
 ];
 
 const PartnersSection = () => {
-  const [open, setOpen] = useState(false);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
-
-  const toggleType = (value: string) => {
-    setSelectedTypes((prev) =>
-      prev.includes(value) ? prev.filter((t) => t !== value) : [...prev, value]
-    );
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (selectedTypes.length === 0) {
-      toast({ title: "Selecione ao menos um tipo de negócio", variant: "destructive" });
-      return;
-    }
-    if (!selectedCategory) {
-      toast({ title: "Selecione o tipo de imóvel", variant: "destructive" });
-      return;
-    }
-
-    setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    const valorStr = String(formData.get("valor") || "").replace(/[^\d.,]/g, "").replace(",", ".");
-    const preco = parseFloat(valorStr) || null;
-
-    // Use first selected finalidade for the DB record
-    const finalidade = finalidadeMap[selectedTypes[0]] || "venda";
-
-    const { error } = await supabase.from("imoveis_submissions" as any).insert({
-      titulo: `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} em Bombinhas`,
-      descricao: String(formData.get("descricao") || ""),
-      finalidade: finalidade as any,
-      tipo: selectedCategory as any,
-      bairro: String(formData.get("bairro") || ""),
-      quartos: parseInt(String(formData.get("quartos"))) || 0,
-      banheiros: parseInt(String(formData.get("banheiros"))) || 0,
-      vagas_garagem: parseInt(String(formData.get("vagas"))) || 0,
-      area_m2: parseFloat(String(formData.get("area"))) || null,
-      preco,
-      link_anuncio: String(formData.get("link") || "") || null,
-      anunciante_nome: String(formData.get("nome") || ""),
-      anunciante_telefone: String(formData.get("telefone") || ""),
-      anunciante_email: String(formData.get("email") || ""),
-    } as any);
-
-    setLoading(false);
-
-    if (error) {
-      console.error("Erro ao salvar imóvel:", error);
-      toast({ title: "Erro ao enviar anúncio", description: error.message, variant: "destructive" });
-      return;
-    }
-
-    toast({
-      title: "Anúncio enviado com sucesso! 🎉",
-      description: "Seu imóvel foi cadastrado na base da MarIA.",
-    });
-    setOpen(false);
-    setSelectedTypes([]);
-    setSelectedCategory("");
-  };
-
   return (
     <section id="anunciar" className="py-12 md:py-32 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.03] to-transparent" />
@@ -116,11 +21,10 @@ const PartnersSection = () => {
               Para anunciantes
             </div>
             <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Anuncie na <span className="text-gradient">MarIA</span>
+              Anuncie sua casa de praia <span className="text-gradient">grátis</span>
             </h2>
             <p className="text-muted-foreground text-lg">
-              Proprietários, corretores e imobiliárias: coloque seus imóveis na frente de quem está
-              procurando ativamente em Bombinhas.
+              Proprietários, corretores e imobiliárias: cole o link do anúncio que você já tem e a IA cuida do resto.
             </p>
           </div>
 
@@ -138,164 +42,28 @@ const PartnersSection = () => {
 
           {/* CTA card */}
           <div className="rounded-2xl border border-accent/20 bg-gradient-to-br from-accent/5 to-primary/5 p-8 md:p-10 text-center">
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary uppercase tracking-wider mb-3">
+              <Sparkles className="h-3.5 w-3.5" /> Cadastro com IA
+            </div>
             <h3 className="text-xl md:text-2xl font-bold mb-2">
-              Faça parte do ecossistema MarIA
+              Cole o link, a IA preenche tudo
             </h3>
             <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-              Cadastre seus imóveis e seja encontrado por quem busca alugar, comprar ou investir em Bombinhas.
+              Funciona com Airbnb, OLX, ZAP, VivaReal, Instagram e a maioria dos sites. É 100% grátis.
             </p>
             <Button
+              asChild
               size="lg"
               className="gap-2 rounded-xl bg-gradient-to-r from-accent to-primary hover:opacity-90 text-primary-foreground"
-              onClick={() => setOpen(true)}
             >
-              Quero anunciar meus imóveis
-              <ArrowRight className="h-4 w-4" />
+              <Link to="/anuncie">
+                Anunciar meu imóvel
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </Button>
           </div>
         </div>
       </div>
-
-      {/* Dialog do formulário */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">Cadastrar imóvel</DialogTitle>
-            <DialogDescription>
-              Preencha as informações do seu imóvel. Nossa equipe revisará e publicará em breve.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleSubmit} className="space-y-5 mt-2">
-            {/* Dados do anunciante */}
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-foreground">Seus dados</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="nome">Nome / Empresa</Label>
-                  <Input id="nome" name="nome" placeholder="João Silva" required />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="telefone">WhatsApp</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="telefone" name="telefone" placeholder="(47) 99999-0000" className="pl-9" required />
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="email">E-mail</Label>
-                <Input id="email" name="email" type="email" placeholder="seu@email.com" required />
-              </div>
-            </div>
-
-            {/* Tipo de negócio */}
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-foreground">Tipo de negócio</p>
-              <div className="flex flex-wrap gap-2">
-                {typeOptions.map((t) => (
-                  <button
-                    key={t.value}
-                    type="button"
-                    onClick={() => toggleType(t.value)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                      selectedTypes.includes(t.value)
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-card text-muted-foreground border-border hover:border-primary/40"
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Categoria */}
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-foreground">Tipo de imóvel</p>
-              <div className="flex flex-wrap gap-2">
-                {propertyCategories.map((c) => (
-                  <button
-                    key={c.value}
-                    type="button"
-                    onClick={() => setSelectedCategory(c.value)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                      selectedCategory === c.value
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-card text-muted-foreground border-border hover:border-primary/40"
-                    }`}
-                  >
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Localização */}
-            <div className="space-y-1.5">
-              <Label htmlFor="bairro">Bairro / Localização</Label>
-              <Input id="bairro" name="bairro" placeholder="Ex: Mariscal, Bombas, Centro..." required />
-            </div>
-
-            {/* Especificações */}
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-foreground">Especificações</p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="quartos" className="flex items-center gap-1.5 text-xs">
-                    <BedDouble className="h-3.5 w-3.5" /> Quartos
-                  </Label>
-                  <Input id="quartos" name="quartos" type="number" min="0" placeholder="3" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="banheiros" className="flex items-center gap-1.5 text-xs">
-                    <Bath className="h-3.5 w-3.5" /> Banheiros
-                  </Label>
-                  <Input id="banheiros" name="banheiros" type="number" min="0" placeholder="2" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="vagas" className="flex items-center gap-1.5 text-xs">
-                    <Car className="h-3.5 w-3.5" /> Vagas
-                  </Label>
-                  <Input id="vagas" name="vagas" type="number" min="0" placeholder="1" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="area" className="flex items-center gap-1.5 text-xs">
-                    <Ruler className="h-3.5 w-3.5" /> Área (m²)
-                  </Label>
-                  <Input id="area" name="area" type="number" min="0" placeholder="80" />
-                </div>
-              </div>
-            </div>
-
-            {/* Valor */}
-            <div className="space-y-1.5">
-              <Label htmlFor="valor">Valor (R$)</Label>
-              <Input id="valor" name="valor" placeholder="Ex: 2.500/mês ou 450.000" required />
-            </div>
-
-            {/* Link */}
-            <div className="space-y-1.5">
-              <Label htmlFor="link" className="flex items-center gap-1.5">
-                <Link2 className="h-3.5 w-3.5" /> Link do anúncio (opcional)
-              </Label>
-              <Input id="link" name="link" type="url" placeholder="https://olx.com.br/seu-anuncio" />
-            </div>
-
-            {/* Descrição */}
-            <div className="space-y-1.5">
-              <Label htmlFor="descricao">Descrição adicional</Label>
-              <Textarea id="descricao" name="descricao" placeholder="Detalhes do imóvel, diferenciais, mobília..." rows={3} />
-            </div>
-
-            <Button type="submit" size="lg" disabled={loading} className="w-full gap-2 rounded-xl bg-gradient-to-r from-accent to-primary hover:opacity-90 text-primary-foreground">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {loading ? "Enviando..." : "Enviar anúncio"}
-              {!loading && <ArrowRight className="h-4 w-4" />}
-            </Button>
-          </form>
-        </DialogContent>
-      </Dialog>
     </section>
   );
 };
