@@ -54,6 +54,9 @@ const Navbar = () => {
               {l.label}
             </a>
           ))}
+          <Link to="/anuncie" onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground py-2">
+            Anuncie
+          </Link>
           <Button asChild size="sm" className="w-full rounded-full">
             <a href="#experimentar" onClick={() => setOpen(false)}>Experimentar Grátis</a>
           </Button>
