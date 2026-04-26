@@ -34,6 +34,9 @@ const Navbar = () => {
               {l.label}
             </a>
           ))}
+          <Link to="/anuncie" className={`text-sm font-medium transition-colors ${scrolled ? "text-muted-foreground hover:text-foreground" : "text-primary-foreground/60 hover:text-primary-foreground"}`}>
+            Anuncie
+          </Link>
           <Button asChild size="sm" className="rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground">
             <a href="#experimentar">Experimentar Grátis</a>
           </Button>
