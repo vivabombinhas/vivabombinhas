@@ -510,7 +510,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         reply: "Desculpe, ocorreu um erro. Pode tentar novamente em instantes? 😊",
-        error: error.message,
+        error: error instanceof Error ? error.message : "Unknown error",
       }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
