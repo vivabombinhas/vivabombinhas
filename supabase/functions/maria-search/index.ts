@@ -133,10 +133,16 @@ REGRA CRÍTICA DE CONTEXTO (somente para intent=search):
 Retorne SOMENTE um JSON válido. Se intent=conversation, retorne {"intent":"conversation"}.
 Se intent=search, inclua "intent":"search" junto com os filtros.
 
+REGRA CRÍTICA - NÃO INVENTAR FILTROS:
+- Extraia APENAS filtros que o usuário mencionou EXPLICITAMENTE.
+- Se o usuário disser "qualquer imóvel", "qualquer coisa", "tudo", "o que tiver", "qualquer um", "mostra tudo" — NÃO defina finalidade nem tipo. Deixe ambos vazios para trazer todos os resultados disponíveis.
+- NUNCA assuma "temporada" como padrão. Só use finalidade se o usuário falar claramente em comprar, alugar (anual) ou temporada/férias/diária.
+- Se a mensagem atual usa "qualquer/tudo" e a anterior tinha finalidade definida, REMOVA a finalidade (o usuário está ampliando a busca).
+
 Campos possíveis (somente para search):
 - intent: "search"
-- finalidade: "compra", "aluguel_anual" ou "temporada"
-- tipo: usar SOMENTE quando o usuário menciona um único tipo
+- finalidade: "compra", "aluguel_anual" ou "temporada" — APENAS se mencionado explicitamente
+- tipo: usar SOMENTE quando o usuário menciona um único tipo explicitamente
 - tipo_included: array de tipos aceitos quando múltiplos
 - tipo_excluded: array de tipos que o usuário NÃO quer
 - bairro: nome do bairro
