@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Users, Phone, Mail, Filter, LogOut } from "lucide-react";
+import { ArrowLeft, Users, Phone, Mail, Filter, LogOut, FileSpreadsheet, ClipboardList } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -98,6 +98,18 @@ export default function AdminLeads() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Link to="/admin/importar">
+              <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                <FileSpreadsheet className="w-4 h-4" />
+                <span className="hidden sm:inline">Importar</span>
+              </Button>
+            </Link>
+            <Link to="/admin/submissions">
+              <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                <ClipboardList className="w-4 h-4" />
+                <span className="hidden sm:inline">Submissões</span>
+              </Button>
+            </Link>
             <Filter className="w-4 h-4 text-muted-foreground" />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
 

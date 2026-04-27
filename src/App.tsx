@@ -8,6 +8,7 @@ import MariaChat from "./pages/MariaChat.tsx";
 import Anunciar from "./pages/Anunciar.tsx";
 import AdminLeads from "./pages/AdminLeads.tsx";
 import AdminSubmissions from "./pages/AdminSubmissions.tsx";
+import AdminImportar from "./pages/AdminImportar.tsx";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/anuncie" element={<Anunciar />} />
           <Route path="/admin/leads" element={<ProtectedAdminRoute><AdminLeads /></ProtectedAdminRoute>} />
           <Route path="/admin/submissions" element={<ProtectedAdminRoute><AdminSubmissions /></ProtectedAdminRoute>} />
+          <Route path="/admin/importar" element={<ProtectedAdminRoute><AdminImportar /></ProtectedAdminRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
