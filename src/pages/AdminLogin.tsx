@@ -11,13 +11,21 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      if (isSignUp) {
+      if (forgotMode) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        toast.success("Enviamos um email com o link de redefinição.");
+        setForgotMode(false);
+      } else if (isSignUp) {
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -50,7 +58,9 @@ export default function AdminLogin() {
             Admin MarIA
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Acesse o painel de leads
+            {forgotMode
+              ? "Informe seu email para receber o link"
+              : "Acesse o painel de leads"}
           </p>
         </div>
 
@@ -71,33 +81,64 @@ export default function AdminLogin() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-          </div>
+          {!forgotMode && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Senha</Label>
+                {!isSignUp && (
+                  <button
+                    type="button"
+                    onClick={() => setForgotMode(true)}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Esqueci minha senha
+                  </button>
+                )}
+              </div>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+            </div>
+          )}
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Carregando..." : isSignUp ? "Criar conta" : "Entrar"}
+            {loading
+              ? "Carregando..."
+              : forgotMode
+              ? "Enviar link de redefinição"
+              : isSignUp
+              ? "Criar conta"
+              : "Entrar"}
           </Button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground mt-4">
-          {isSignUp ? "Já tem conta?" : "Primeiro acesso?"}{" "}
-          <button
-            type="button"
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-primary hover:underline font-medium"
-          >
-            {isSignUp ? "Fazer login" : "Criar conta"}
-          </button>
+          {forgotMode ? (
+            <button
+              type="button"
+              onClick={() => setForgotMode(false)}
+              className="text-primary hover:underline font-medium"
+            >
+              Voltar para o login
+            </button>
+          ) : (
+            <>
+              {isSignUp ? "Já tem conta?" : "Primeiro acesso?"}{" "}
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-primary hover:underline font-medium"
+              >
+                {isSignUp ? "Fazer login" : "Criar conta"}
+              </button>
+            </>
+          )}
         </p>
       </div>
     </div>
