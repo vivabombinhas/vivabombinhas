@@ -152,6 +152,8 @@ export function useMariaChat() {
   const clearChat = useCallback(() => {
     setMessages([]);
     clearPropertyState();
+    try { sessionStorage.removeItem("maria_session_id"); } catch { /* ignore */ }
+    sessionIdRef.current = getOrCreateSessionId();
   }, [clearPropertyState]);
 
   return { messages, isLoading, sendMessage, clearChat, hasMore, showMore };
