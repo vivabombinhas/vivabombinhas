@@ -68,7 +68,7 @@ const MariaChat = () => {
         )}
 
         {messages.map((msg) => (
-          <ChatMessage key={msg.id} message={msg} />
+          <ChatMessage key={msg.id} message={msg} onSubmitLead={submitLead} />
         ))}
 
         {isLoading && (
