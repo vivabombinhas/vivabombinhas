@@ -70,6 +70,8 @@ export default function AdminLeads() {
         .eq("status", "pending");
       if (error) throw error;
       return count || 0;
+    },
+  });
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: LeadStatus }) => {
