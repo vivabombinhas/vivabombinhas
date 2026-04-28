@@ -239,7 +239,7 @@ export default function AdminLeads() {
                         minute: "2-digit",
                       })}
                     </p>
-                  </div>
+                  </button>
 
                   {/* Status selector */}
                   <Select
