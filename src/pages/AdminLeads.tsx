@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Users, Phone, Mail, Filter, LogOut, FileSpreadsheet, ClipboardList, Sparkles } from "lucide-react";
+import { ArrowLeft, Users, Phone, Mail, Filter, LogOut, FileSpreadsheet, ClipboardList, Sparkles, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -61,6 +61,18 @@ export default function AdminLeads() {
     },
   });
 
+  const { data: pendingMatches } = useQuery({
+    queryKey: ["lead_matches_pending_count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("lead_matches")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "pending");
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: LeadStatus }) => {
       const { error } = await supabase
@@ -101,6 +113,17 @@ export default function AdminLeads() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Link to="/admin/matches">
+              <Button variant="outline" size="sm" className="h-9 gap-1.5 relative">
+                <Zap className="w-4 h-4 text-primary" />
+                <span className="hidden sm:inline">Matches</span>
+                {!!pendingMatches && (
+                  <Badge className="absolute -top-2 -right-2 h-5 min-w-5 px-1 text-[10px] rounded-full">
+                    {pendingMatches}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
             <Link to="/admin/importar-link">
               <Button variant="outline" size="sm" className="h-9 gap-1.5">
                 <Sparkles className="w-4 h-4" />
