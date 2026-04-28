@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import LeadDetailSheet from "@/components/admin/LeadDetailSheet";
 
 type LeadStatus = "novo" | "contatado" | "convertido" | "descartado";
 
