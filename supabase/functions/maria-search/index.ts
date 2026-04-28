@@ -544,51 +544,47 @@ serve(async (req) => {
       assistantMessage = assistantMessage.replace(/^\[SHOW_RESULTS\]\s*/, "");
     }
 
-    // Handle lead capture
+    // Handle lead capture (promote anonymous lead -> identified)
     let leadSaved = false;
     const leadMatch = assistantMessage.match(/\[LEAD_CAPTURE\]\s*(\{[^}]+\})/);
     if (leadMatch) {
       try {
         const leadData = JSON.parse(leadMatch[1]);
-        const previousFilters = messages
-          .filter((m: { role: string }) => m.role === "user")
-          .map((m: { content: string }) => m.content)
-          .join(" ");
-
-        const { data: leadRow, error: leadError } = await supabase
-          .from("leads_maria")
-          .insert({
+        const normalizedPhone = normalizePhoneBR(leadData.telefone);
+        if (!normalizedPhone) {
+          assistantMessage = "Quase lá! 😊 Faltou o DDD da sua cidade no número. Pode me mandar o WhatsApp completo? Ex: 47 99999-8888";
+        } else {
+          const previousFilters = messages
+            .filter((m: { role: string }) => m.role === "user")
+            .map((m: { content: string }) => m.content)
+            .join(" ");
+          const leadId = await upsertLeadBySession(supabase, sessionId, {
             nome: leadData.nome,
-            telefone: leadData.telefone,
+            telefone: normalizedPhone,
             email: leadData.email || null,
             interesse: filters.finalidade || leadData.interesse || null,
             bairro_interesse: filters.bairro || leadData.bairro || null,
             tipo_imovel: filters.tipo || leadData.tipo || null,
             faixa_preco: filters.preco_max ? `até ${filters.preco_max}` : filters.preco_min ? `a partir de ${filters.preco_min}` : leadData.faixa_preco || null,
             mensagem_original: previousFilters || messages[0]?.content || null,
-            origem: "maria_chat",
-          })
-          .select("id")
-          .single();
-
-        if (leadError) console.error("Lead save error:", leadError);
-        else {
-          leadSaved = true;
-          console.log("Lead saved:", leadData.nome);
-          if (leadRow?.id) {
-            const convRows = messages.map((m: { role: string; content: string }) => ({
-              lead_id: leadRow.id,
-              role: m.role === "assistant" ? "assistant" : "user",
-              content: m.content,
-            }));
-            if (convRows.length) {
-              const { error: convErr } = await supabase.from("lead_conversations").insert(convRows);
-              if (convErr) console.error("Conv save error:", convErr);
-            }
+            status: "novo",
+          });
+          if (leadId) {
+            leadSaved = true;
+            console.log("Lead promoted:", leadData.nome);
           }
         }
       } catch (e) { console.error("Failed to parse lead:", e); }
       assistantMessage = assistantMessage.replace(/\[LEAD_CAPTURE\]\s*\{[^}]+\}/, "").trim();
+    }
+
+    // Salva turn de conversa vinculada ao lead (anônimo ou identificado)
+    if (sessionId) {
+      const { data: existingLead } = await supabase
+        .from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
+      if (existingLead?.id) {
+        await saveLastConversationTurn(supabase, existingLead.id, userMessage, assistantMessage);
+      }
     }
 
     // Fetch agency config for "gestão própria" override
