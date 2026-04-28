@@ -77,24 +77,22 @@ REGRA CRÍTICA DE FORMATAÇÃO:
 - Se não houver resultados, sugira ampliar a busca por bairro, preço ou tipo. NÃO sugira o tipo que o usuário excluiu.
 
 FLUXO DE CAPTAÇÃO DE LEAD (importante!):
-- Há DOIS momentos pra oferecer salvar a busca:
-  (a) Após mostrar resultados de uma busca com imóveis encontrados — adicione naturalmente no final: "Se quiser, posso salvar sua busca e te avisar pelo WhatsApp quando aparecerem imóveis novos nesse perfil 💛"
-  (b) Quando NÃO houver nenhum imóvel que case com a busca — aí seja proativa e direta: "Ainda não tenho exatamente isso no catálogo, mas Bombinhas recebe novidades toda semana. Posso te avisar no WhatsApp assim que chegar? Me passa seu nome e número 😊"
-- NÃO ofereça em saudações, perguntas exploratórias, ou follow-ups sobre os mesmos resultados já mostrados.
-- Ofereça NO MÁXIMO uma vez por conversa (não repita se já ofereceu antes).
-- Se o usuário aceitar (ex: "quero", "sim", "pode salvar", "manda", "beleza", "topo"), peça os dados de forma amigável:
-  "Show! 🎉 Me passa seu nome e número de WhatsApp **com DDD** (ex: 47 99999-8888) que eu salvo aqui. E-mail é opcional."
+- A captação agora é PRIORIDADE COMERCIAL. Quando houver busca com imóveis, o sistema pode segurar os cards e pedir contato antes de liberar detalhes.
+- Use CTA forte, curta e com urgência real: "Encontrei opções que batem com sua busca — imóveis de temporada em Bombinhas somem rápido. Me passa seu nome e WhatsApp com DDD que eu libero os detalhes e te aviso primeiro quando entrar novidade 🔥"
+- Peça SOMENTE nome e WhatsApp. NÃO peça e-mail e NÃO mencione e-mail opcional.
+- Se o usuário aceitar (ex: "quero", "sim", "pode salvar", "manda", "beleza", "topo"), peça:
+  "Perfeito! Me manda seu **nome e WhatsApp com DDD** numa mensagem só (ex: Juliana 41 99825-1888) que eu já libero as opções pra você. 🔥"
 - ⚠️ VALIDAÇÃO DE TELEFONE — REGRA CRÍTICA:
-  * O telefone DEVE ter DDD (10 ou 11 dígitos no total). Exemplos válidos: "47999998888", "(47) 99999-8888", "47 9 9999-8888".
-  * Se o usuário mandar um número CURTO (8 ou 9 dígitos, sem DDD), NÃO confirme nem salve. Responda algo tipo:
-    "Quase lá! 😊 Faltou o DDD da sua cidade. Pode me mandar o número completo? Ex: 47 99999-8888"
+  * O telefone DEVE ter DDD (10 ou 11 dígitos no total). Exemplos válidos: "41998251888", "47 99999-8888", "(47) 99999-8888", "47 9 9999-8888".
+  * "41998251888" É VÁLIDO: DDD 41 + número 99825-1888.
+  * Se o usuário mandar 8 ou 9 dígitos no total, aí sim falta DDD. Peça novamente.
   * Só emita [LEAD_CAPTURE] quando tiver nome + telefone com DDD válido.
 - Quando o usuário fornecer nome e telefone válidos, responda com: [LEAD_CAPTURE] seguido de um JSON com os dados. Exemplo:
-  [LEAD_CAPTURE]{"nome":"João Silva","telefone":"47999998888","email":"joao@email.com","interesse":"aluguel_anual","bairro":"Bombas","tipo":"apartamento","faixa_preco":"até 3500"}
-  Depois do JSON, escreva uma confirmação amigável como: "Pronto, salvei sua busca! Vou te avisar assim que surgir algo no seu perfil. 📲"
-  IMPORTANTE: Inclua no JSON os campos interesse (finalidade), bairro, tipo e faixa_preco baseados no contexto da conversa anterior.
-- Se o usuário fornecer dados parciais (só nome sem telefone, ou telefone sem DDD), peça o que falta de forma gentil.
-- NUNCA force a captação. Se o usuário não quiser, respeite e continue ajudando normalmente.
+  [LEAD_CAPTURE]{"nome":"João Silva","telefone":"47999998888","interesse":"aluguel_anual","bairro":"Bombas","tipo":"apartamento","faixa_preco":"até 3500"}
+  Depois do JSON, confirme de forma objetiva.
+- Se o usuário fornecer só telefone válido, NÃO diga que falta DDD. Diga que o WhatsApp foi recebido e peça apenas o nome.
+- Se o usuário fornecer só nome, peça apenas o WhatsApp com DDD.
+- NUNCA force a captação se o usuário recusar. Se recusou, continue ajudando normalmente.
 
 Regras gerais:
 - Sempre seja simpática e prestativa
@@ -169,6 +167,35 @@ function normalizePhoneBR(raw: string | null | undefined): string | null {
   if (digits.startsWith("55") && digits.length > 11) digits = digits.slice(2);
   if (digits.length < 10 || digits.length > 11) return null;
   return "55" + digits;
+}
+
+function extractPhoneCandidate(text: string): { normalized: string | null; hasInvalidShortPhone: boolean } {
+  const candidates = text.match(/(?:\+?55\s*)?(?:\(?\d{2}\)?\s*)?\d{4,5}[-\s]?\d{4}/g) || [];
+  const allDigits = text.replace(/\D/g, "");
+  if (allDigits.length >= 8 && allDigits.length <= 13) candidates.push(allDigits);
+
+  for (const candidate of candidates) {
+    const normalized = normalizePhoneBR(candidate);
+    if (normalized) return { normalized, hasInvalidShortPhone: false };
+  }
+
+  return { normalized: null, hasInvalidShortPhone: allDigits.length === 8 || allDigits.length === 9 };
+}
+
+function extractNameCandidate(text: string): string | null {
+  const withoutPhones = text
+    .replace(/(?:\+?55\s*)?(?:\(?\d{2}\)?\s*)?\d{4,5}[-\s]?\d{4}/g, " ")
+    .replace(/\d+/g, " ");
+
+  const cleaned = withoutPhones
+    .replace(/\b(meu nome é|me chamo|eu sou|sou|aqui é|nome|whats(?:app)?|telefone|celular|número|numero|meu|minha|é|e|,|:|-|\.)\b/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!cleaned || cleaned.length < 2 || cleaned.length > 80) return null;
+  if (!/[A-Za-zÀ-ÿ]/.test(cleaned)) return null;
+  if (/^(sim|quero|ok|beleza|pode|manda|avisar|salvar|topo)$/i.test(cleaned)) return null;
+  return cleaned;
 }
 
 // Faz upsert do lead anônimo / identificado pelo session_id.
