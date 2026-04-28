@@ -15,13 +15,14 @@ import {
 import { toast } from "sonner";
 import LeadDetailSheet from "@/components/admin/LeadDetailSheet";
 
-type LeadStatus = "novo" | "contatado" | "convertido" | "descartado";
+type LeadStatus = "novo" | "contatado" | "convertido" | "descartado" | "anonimo";
 
 const STATUS_CONFIG: Record<LeadStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   novo: { label: "Novo", variant: "default" },
   contatado: { label: "Contatado", variant: "secondary" },
   convertido: { label: "Convertido", variant: "outline" },
   descartado: { label: "Destructive", variant: "destructive" },
+  anonimo: { label: "Anônimo", variant: "outline" },
 };
 
 const STATUS_COLORS: Record<LeadStatus, string> = {
@@ -29,6 +30,7 @@ const STATUS_COLORS: Record<LeadStatus, string> = {
   contatado: "bg-amber-500/10 text-amber-700 border-amber-200",
   convertido: "bg-emerald-500/10 text-emerald-700 border-emerald-200",
   descartado: "bg-red-500/10 text-red-700 border-red-200",
+  anonimo: "bg-muted text-muted-foreground border-border",
 };
 
 const INTERESSE_MAP: Record<string, string> = {
