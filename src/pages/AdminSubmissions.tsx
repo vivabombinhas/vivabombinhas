@@ -43,6 +43,7 @@ export default function AdminSubmissions() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [gestaoPropriaMap, setGestaoPropriaMap] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -72,6 +73,7 @@ export default function AdminSubmissions() {
     }
 
     setActionLoading(sub.id);
+    const gestao_propria = !!gestaoPropriaMap[sub.id];
 
     // Insert into imoveis
     const { data: inserted, error: insertError } = await supabase.from("imoveis").insert({
@@ -91,7 +93,8 @@ export default function AdminSubmissions() {
       anunciante_email: sub.anunciante_email,
       origem: "manual" as any,
       status: "ativo" as any,
-    }).select("id").single();
+      gestao_propria,
+    } as any).select("id").single();
 
     if (insertError) {
       toast({ title: "Erro ao aprovar", description: insertError.message, variant: "destructive" });
