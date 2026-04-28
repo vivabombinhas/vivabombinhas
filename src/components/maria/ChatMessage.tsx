@@ -57,6 +57,14 @@ export function ChatMessage({ message, onSubmitLead }: ChatMessageProps) {
             ))}
           </div>
         )}
+
+        {/* Inline lead capture form (gate) */}
+        {showLeadForm && (
+          <LeadCaptureForm
+            remainingCount={message.remainingForGate ?? 0}
+            onSubmit={onSubmitLead!}
+          />
+        )}
       </div>
       {!isAssistant && (
         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
