@@ -675,9 +675,9 @@ serve(async (req) => {
     if (leadMatch) {
       try {
         const leadData = JSON.parse(leadMatch[1]);
-        const normalizedPhone = normalizePhoneBR(leadData.telefone);
+        const normalizedPhone = normalizePhone(leadData.telefone) || extractPhoneFromText(userMessage).normalized;
         if (!normalizedPhone) {
-          assistantMessage = "Quase lá! 😊 Faltou o DDD da sua cidade no número. Pode me mandar o WhatsApp completo? Ex: 47 99999-8888";
+          assistantMessage = "Quase lá! 😊 Pra eu te avisar pelo WhatsApp preciso do número com DDD. Ex: 47 99999-8888 (ou +54 11 1234-5678 pra Argentina).";
         } else {
           const previousFilters = messages
             .filter((m: { role: string }) => m.role === "user")
@@ -686,7 +686,6 @@ serve(async (req) => {
           const leadId = await upsertLeadBySession(supabase, sessionId, {
             nome: leadData.nome,
             telefone: normalizedPhone,
-            email: leadData.email || null,
             interesse: filters.finalidade || leadData.interesse || null,
             bairro_interesse: filters.bairro || leadData.bairro || null,
             tipo_imovel: filters.tipo || leadData.tipo || null,
