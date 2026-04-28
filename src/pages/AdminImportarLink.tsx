@@ -222,7 +222,7 @@ export default function AdminImportarLink() {
       anunciante_telefone: data.anunciante_telefone?.trim() || null,
       anunciante_email: data.anunciante_email?.trim() || null,
       imobiliaria: data.imobiliaria?.trim() || null,
-      origem: "scraping" as never,
+      origem: inferOrigem(data.link_anuncio) as never,
       status: "ativo" as never,
     });
     setSubmitting(false);
