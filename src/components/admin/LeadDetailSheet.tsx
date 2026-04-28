@@ -252,7 +252,7 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
                 >
                   <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
                     {m.role === "user" ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
-                    {m.role === "user" ? lead.nome : "MarIA"} · {formatDateTime(m.created_at)}
+                    {m.role === "user" ? (lead.nome ?? "Visitante") : "MarIA"} · {formatDateTime(m.created_at)}
                   </div>
                   <p className="whitespace-pre-wrap">{m.content}</p>
                 </div>
