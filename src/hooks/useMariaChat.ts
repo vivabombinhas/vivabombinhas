@@ -112,12 +112,15 @@ export function useMariaChat() {
 
       const showResults = data.show_results === true;
       const clearResults = data.clear_results === true;
+      const gateActive = data.gate_active === true;
 
       if (showResults) {
         // New search results — update pagination state
         const allProps: Property[] = data.all_properties || [];
         allPropertiesRef.current = allProps;
-        shownCountRef.current = Math.min(3, allProps.length);
+        // Se o gate está ativo, mostra só 1 card (teaser); senão, mostra até 3
+        const initial = gateActive ? 1 : 3;
+        shownCountRef.current = Math.min(initial, allProps.length);
       } else if (clearResults) {
         // Conversation moved away from search — clear stale property state
         clearPropertyState();
