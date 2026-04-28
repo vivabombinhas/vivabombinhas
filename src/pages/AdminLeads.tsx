@@ -218,22 +218,28 @@ export default function AdminLeads() {
                     className="flex-1 min-w-0 space-y-1.5 text-left cursor-pointer hover:opacity-80 transition"
                   >
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-foreground">{lead.nome}</span>
+                      <span className="font-semibold text-foreground">
+                        {lead.nome ?? <span className="italic text-muted-foreground">Sem nome (anônimo)</span>}
+                      </span>
                       <Badge
                         variant="outline"
                         className={`text-[10px] px-2 py-0.5 ${STATUS_COLORS[(lead.status as LeadStatus) ?? "novo"]}`}
                       >
-                        {(lead.status as LeadStatus) === "novo" ? "Novo" : (lead.status as LeadStatus) === "contatado" ? "Contatado" : (lead.status as LeadStatus) === "convertido" ? "Convertido" : "Descartado"}
+                        {STATUS_CONFIG[(lead.status as LeadStatus) ?? "novo"]?.label ?? "Novo"}
                       </Badge>
                     </div>
 
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Phone className="w-3.5 h-3.5" />
-                        <a href={`https://wa.me/55${lead.telefone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-accent hover:underline">
-                          {lead.telefone}
-                        </a>
-                      </span>
+                      {lead.telefone ? (
+                        <span className="flex items-center gap-1">
+                          <Phone className="w-3.5 h-3.5" />
+                          <a href={`https://wa.me/${lead.telefone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-accent hover:underline">
+                            {lead.telefone}
+                          </a>
+                        </span>
+                      ) : (
+                        <span className="italic">Sem telefone</span>
+                      )}
                       {lead.email && (
                         <span className="flex items-center gap-1">
                           <Mail className="w-3.5 h-3.5" />
