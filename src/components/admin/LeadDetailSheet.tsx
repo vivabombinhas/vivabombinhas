@@ -18,8 +18,8 @@ import { toast } from "sonner";
 
 interface Lead {
   id: string;
-  nome: string;
-  telefone: string;
+  nome: string | null;
+  telefone: string | null;
   email?: string | null;
   interesse?: string | null;
   bairro_interesse?: string | null;
