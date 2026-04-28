@@ -353,6 +353,66 @@ serve(async (req) => {
     const isConversation = filters.intent === "conversation";
 
     if (isConversation) {
+      // Verifica se já existe lead identificado nessa sessão (pra contexto da MarIA)
+      const { data: existingForCtx } = sessionId
+        ? await supabase.from("leads_maria").select("id, nome, telefone").eq("session_id", sessionId).maybeSingle()
+        : { data: null };
+      const alreadyCaptured = !!(existingForCtx?.nome && existingForCtx?.telefone);
+
+      // ⚡ PRÉ-PARSER DETERMINÍSTICO: tenta capturar nome+telefone da última msg
+      // ANTES de chamar o LLM. Isso elimina o bug do "falta DDD" em números válidos.
+      if (!alreadyCaptured && sessionId) {
+        const phoneInfo = extractPhoneFromText(userMessage);
+        // Tenta combinar com mensagens recentes do usuário (caso tenha mandado nome em msg anterior)
+        const recentUserMsgs = messages
+          .filter((m: { role: string }) => m.role === "user")
+          .slice(-3)
+          .map((m: { content: string }) => m.content)
+          .join(" ");
+        const nameCandidate = extractNameFromText(userMessage) || extractNameFromText(recentUserMsgs);
+
+        if (phoneInfo.normalized && nameCandidate) {
+          // Captura completa! Salva direto e responde.
+          const leadId = await upsertLeadBySession(supabase, sessionId, {
+            nome: nameCandidate,
+            telefone: phoneInfo.normalized,
+            mensagem_original: recentUserMsgs.slice(0, 500),
+            status: "novo",
+          });
+          if (leadId) {
+            const reply = `Salvo, ${nameCandidate.split(" ")[0]}! 🎉 Vou te avisar em primeira mão pelo WhatsApp assim que aparecer um imóvel desse perfil. Quer que eu já liste outras opções pra você dar uma olhada agora?`;
+            await saveLastConversationTurn(supabase, leadId, userMessage, reply);
+            return new Response(
+              JSON.stringify({
+                reply, properties: [], all_properties: [], filters_used: {},
+                results_count: 0, broader_search: false, lead_saved: true,
+                show_results: false, clear_results: false,
+              }),
+              { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        }
+
+        if (phoneInfo.normalized && !nameCandidate) {
+          // Só telefone — salva e pede o nome
+          await upsertLeadBySession(supabase, sessionId, {
+            telefone: phoneInfo.normalized,
+            mensagem_original: recentUserMsgs.slice(0, 500),
+          });
+          const reply = "Anotei o WhatsApp! 📲 Só me diz seu **nome** que eu finalizo seu cadastro e já te aviso assim que rolar novidade.";
+          const { data: lead } = await supabase.from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
+          if (lead?.id) await saveLastConversationTurn(supabase, lead.id, userMessage, reply);
+          return new Response(
+            JSON.stringify({
+              reply, properties: [], all_properties: [], filters_used: {},
+              results_count: 0, broader_search: false, lead_saved: false,
+              show_results: false, clear_results: false,
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+
       // Generate conversational response without any property context
       const conversationMessages = [
         { role: "system", content: SYSTEM_PROMPT + "\n\nEsta mensagem NÃO é uma busca de imóveis. É uma mensagem conversacional. Use [NO_RESULTS_YET] obrigatoriamente. NÃO mencione imóveis encontrados, NÃO mostre resultados. Responda de forma natural e amigável." },
