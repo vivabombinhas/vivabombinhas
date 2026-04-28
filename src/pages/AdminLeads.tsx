@@ -113,6 +113,17 @@ export default function AdminLeads() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Link to="/admin/matches">
+              <Button variant="outline" size="sm" className="h-9 gap-1.5 relative">
+                <Zap className="w-4 h-4 text-primary" />
+                <span className="hidden sm:inline">Matches</span>
+                {!!pendingMatches && (
+                  <Badge className="absolute -top-2 -right-2 h-5 min-w-5 px-1 text-[10px] rounded-full">
+                    {pendingMatches}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
             <Link to="/admin/importar-link">
               <Button variant="outline" size="sm" className="h-9 gap-1.5">
                 <Sparkles className="w-4 h-4" />
