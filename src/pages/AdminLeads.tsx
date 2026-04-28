@@ -171,10 +171,12 @@ export default function AdminLeads() {
               >
                 <div className="flex flex-col sm:flex-row sm:items-start gap-3">
                   {/* Lead info - clickable */}
-                  <button
-                    type="button"
+                  <div
+                    role="button"
+                    tabIndex={0}
                     onClick={() => { setSelectedLeadId(lead.id); setSheetOpen(true); }}
-                    className="flex-1 min-w-0 space-y-1.5 text-left hover:opacity-80 transition"
+                    onKeyDown={(e) => { if (e.key === "Enter") { setSelectedLeadId(lead.id); setSheetOpen(true); } }}
+                    className="flex-1 min-w-0 space-y-1.5 text-left cursor-pointer hover:opacity-80 transition"
                   >
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-foreground">{lead.nome}</span>
