@@ -523,7 +523,12 @@ export type Database = {
         | "whatsapp"
         | "outro"
       status_imovel: "ativo" | "pausado" | "removido"
-      status_lead: "novo" | "contatado" | "convertido" | "descartado"
+      status_lead:
+        | "novo"
+        | "contatado"
+        | "convertido"
+        | "descartado"
+        | "anonimo"
       status_submission: "pendente" | "aprovado" | "rejeitado"
       tipo_imovel:
         | "apartamento"
@@ -678,7 +683,7 @@ export const Constants = {
         "outro",
       ],
       status_imovel: ["ativo", "pausado", "removido"],
-      status_lead: ["novo", "contatado", "convertido", "descartado"],
+      status_lead: ["novo", "contatado", "convertido", "descartado", "anonimo"],
       status_submission: ["pendente", "aprovado", "rejeitado"],
       tipo_imovel: [
         "apartamento",

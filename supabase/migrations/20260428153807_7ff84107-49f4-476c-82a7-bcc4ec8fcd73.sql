@@ -1,0 +1,1 @@
+ALTER TYPE public.status_lead ADD VALUE IF NOT EXISTS 'anonimo';
