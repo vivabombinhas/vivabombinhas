@@ -162,14 +162,87 @@ Mapeamento de sinônimos para tipos:
 
 Retorne APENAS o JSON, sem texto adicional.`;
 
+// Normaliza telefone BR. Retorna string '55DDDNUMERO' se válido (10-11 dígitos), null caso contrário.
+function normalizePhoneBR(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  let digits = String(raw).replace(/\D/g, "");
+  if (digits.startsWith("55") && digits.length > 11) digits = digits.slice(2);
+  if (digits.length < 10 || digits.length > 11) return null;
+  return "55" + digits;
+}
+
+// Faz upsert do lead anônimo / identificado pelo session_id.
+// Se identifiedData fornecido com nome+telefone válidos, "promove" o lead.
+async function upsertLeadBySession(
+  supabase: ReturnType<typeof createClient>,
+  sessionId: string,
+  patch: Record<string, unknown>,
+): Promise<string | null> {
+  if (!sessionId) return null;
+  try {
+    // Tenta UPDATE primeiro (lead já existe)
+    const { data: existing } = await supabase
+      .from("leads_maria")
+      .select("id")
+      .eq("session_id", sessionId)
+      .maybeSingle();
+
+    if (existing?.id) {
+      const { error } = await supabase
+        .from("leads_maria")
+        .update({ ...patch, last_contact_at: new Date().toISOString() })
+        .eq("id", existing.id);
+      if (error) console.error("Lead update error:", error);
+      return existing.id;
+    }
+
+    // Insere novo lead anônimo/identificado
+    const { data: inserted, error } = await supabase
+      .from("leads_maria")
+      .insert({
+        session_id: sessionId,
+        origem: "maria_chat",
+        status: patch.nome && patch.telefone ? "novo" : "anonimo",
+        last_contact_at: new Date().toISOString(),
+        ...patch,
+      })
+      .select("id")
+      .single();
+    if (error) { console.error("Lead insert error:", error); return null; }
+    return inserted?.id ?? null;
+  } catch (e) {
+    console.error("upsertLeadBySession failed:", e);
+    return null;
+  }
+}
+
+async function saveLastConversationTurn(
+  supabase: ReturnType<typeof createClient>,
+  leadId: string,
+  userMsg: string,
+  assistantMsg: string,
+) {
+  try {
+    const rows = [
+      { lead_id: leadId, role: "user", content: userMsg },
+      { lead_id: leadId, role: "assistant", content: assistantMsg },
+    ].filter(r => r.content);
+    if (rows.length) {
+      const { error } = await supabase.from("lead_conversations").insert(rows);
+      if (error) console.error("Conv insert error:", error);
+    }
+  } catch (e) { console.error("saveLastConversationTurn failed:", e); }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, session_id } = await req.json();
     const userMessage = messages[messages.length - 1]?.content || "";
+    const sessionId: string = session_id || "";
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
