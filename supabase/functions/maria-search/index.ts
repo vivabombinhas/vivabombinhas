@@ -447,10 +447,11 @@ serve(async (req) => {
       if (leadMatch) {
         try {
           const leadData = JSON.parse(leadMatch[1]);
-          const normalizedPhone = normalizePhoneBR(leadData.telefone);
+          // Tenta o telefone do JSON; se inválido, faz fallback pra mensagem do usuário
+          const normalizedPhone = normalizePhone(leadData.telefone) || extractPhoneFromText(userMessage).normalized;
           if (!normalizedPhone) {
-            // Telefone inválido (sem DDD) — não salva, devolve mensagem pedindo de novo
-            assistantMessage = "Quase lá! 😊 Faltou o DDD da sua cidade no número. Pode me mandar o WhatsApp completo? Ex: 47 99999-8888";
+            // Telefone realmente inválido — não salva, devolve mensagem pedindo de novo
+            assistantMessage = "Quase lá! 😊 Pra eu te avisar pelo WhatsApp preciso do número com DDD. Ex: 47 99999-8888 (ou +54 11 1234-5678 pra Argentina).";
           } else {
             const previousFilters = messages
               .filter((m: { role: string }) => m.role === "user")
@@ -459,7 +460,6 @@ serve(async (req) => {
             const leadId = await upsertLeadBySession(supabase, sessionId, {
               nome: leadData.nome,
               telefone: normalizedPhone,
-              email: leadData.email || null,
               interesse: leadData.interesse || null,
               bairro_interesse: leadData.bairro || null,
               tipo_imovel: leadData.tipo || null,
