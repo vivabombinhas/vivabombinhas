@@ -41,12 +41,13 @@ const INTERESSE_MAP: Record<string, string> = {
 
 export default function AdminLeads() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [showAnonimos, setShowAnonimos] = useState<boolean>(false);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: leads, isLoading } = useQuery({
-    queryKey: ["leads_maria", statusFilter],
+    queryKey: ["leads_maria", statusFilter, showAnonimos],
     queryFn: async () => {
       let query = supabase
         .from("leads_maria")
@@ -55,6 +56,9 @@ export default function AdminLeads() {
 
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter as LeadStatus);
+      } else if (!showAnonimos) {
+        // Por padrão, esconde leads anônimos (sem nome/telefone)
+        query = query.neq("status", "anonimo");
       }
 
       const { data, error } = await query;
