@@ -316,6 +316,67 @@ export type Database = {
           },
         ]
       }
+      lead_conversations: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          lead_id: string
+          role: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          lead_id: string
+          role: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          lead_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_conversations_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads_maria"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_notes: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          lead_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          lead_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          lead_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_notes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads_maria"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads_maria: {
         Row: {
           bairro_interesse: string | null
@@ -324,7 +385,9 @@ export type Database = {
           faixa_preco: string | null
           id: string
           interesse: string | null
+          last_contact_at: string | null
           mensagem_original: string | null
+          next_followup_at: string | null
           nome: string
           origem: string
           status: Database["public"]["Enums"]["status_lead"]
@@ -338,7 +401,9 @@ export type Database = {
           faixa_preco?: string | null
           id?: string
           interesse?: string | null
+          last_contact_at?: string | null
           mensagem_original?: string | null
+          next_followup_at?: string | null
           nome: string
           origem?: string
           status?: Database["public"]["Enums"]["status_lead"]
@@ -352,7 +417,9 @@ export type Database = {
           faixa_preco?: string | null
           id?: string
           interesse?: string | null
+          last_contact_at?: string | null
           mensagem_original?: string | null
+          next_followup_at?: string | null
           nome?: string
           origem?: string
           status?: Database["public"]["Enums"]["status_lead"]

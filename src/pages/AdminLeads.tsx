@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import LeadDetailSheet from "@/components/admin/LeadDetailSheet";
 
 type LeadStatus = "novo" | "contatado" | "convertido" | "descartado";
 
@@ -38,6 +39,8 @@ const INTERESSE_MAP: Record<string, string> = {
 
 export default function AdminLeads() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: leads, isLoading } = useQuery({
@@ -167,8 +170,14 @@ export default function AdminLeads() {
                 className="bg-card border border-border rounded-xl p-4 shadow-sm"
               >
                 <div className="flex flex-col sm:flex-row sm:items-start gap-3">
-                  {/* Lead info */}
-                  <div className="flex-1 min-w-0 space-y-1.5">
+                  {/* Lead info - clickable */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => { setSelectedLeadId(lead.id); setSheetOpen(true); }}
+                    onKeyDown={(e) => { if (e.key === "Enter") { setSelectedLeadId(lead.id); setSheetOpen(true); } }}
+                    className="flex-1 min-w-0 space-y-1.5 text-left cursor-pointer hover:opacity-80 transition"
+                  >
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-foreground">{lead.nome}</span>
                       <Badge
@@ -182,7 +191,7 @@ export default function AdminLeads() {
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Phone className="w-3.5 h-3.5" />
-                        <a href={`https://wa.me/55${lead.telefone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                        <a href={`https://wa.me/55${lead.telefone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-accent hover:underline">
                           {lead.telefone}
                         </a>
                       </span>
@@ -257,6 +266,12 @@ export default function AdminLeads() {
           </div>
         )}
       </main>
+
+      <LeadDetailSheet
+        lead={(leads?.find((l) => l.id === selectedLeadId) as never) ?? null}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+      />
     </div>
   );
 }
