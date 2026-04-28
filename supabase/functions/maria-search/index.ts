@@ -477,6 +477,20 @@ serve(async (req) => {
 
     const resultsToUse = properties && properties.length > 0 ? properties : broaderProperties;
 
+    // PRÉ-CADASTRO ANÔNIMO: cria/atualiza lead vinculado à sessão com o contexto da busca
+    if (sessionId) {
+      const faixaPreco = filters.preco_max
+        ? `até ${filters.preco_max}`
+        : filters.preco_min ? `a partir de ${filters.preco_min}` : null;
+      await upsertLeadBySession(supabase, sessionId, {
+        interesse: filters.finalidade ?? null,
+        bairro_interesse: filters.bairro ?? null,
+        tipo_imovel: filters.tipo ?? (filters.tipo_included?.[0] ?? null),
+        faixa_preco: faixaPreco,
+        mensagem_original: userMessage,
+      });
+    }
+
     // Step 4: Generate conversational response
     let typeNote = "";
     if (filters.tipo_included && filters.tipo_included.length > 1 && resultsToUse.length > 0) {
