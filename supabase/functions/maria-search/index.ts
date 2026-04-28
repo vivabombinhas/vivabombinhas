@@ -305,14 +305,55 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, session_id } = await req.json();
-    const userMessage = messages[messages.length - 1]?.content || "";
+    const body = await req.json();
+    const { messages, session_id, action, nome, telefone, lead_captured: clientLeadCaptured } = body || {};
     const sessionId: string = session_id || "";
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // ============= ACTION: submit_lead (formulário inline do gate) =============
+    if (action === "submit_lead") {
+      if (!sessionId || !nome || !telefone) {
+        return new Response(
+          JSON.stringify({ success: false, error: "missing_fields" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const cleanName = String(nome).trim().slice(0, 80);
+      if (cleanName.length < 2) {
+        return new Response(
+          JSON.stringify({ success: false, error: "invalid_name" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const normalizedPhone = normalizePhone(telefone);
+      if (!normalizedPhone) {
+        return new Response(
+          JSON.stringify({ success: false, error: "invalid_phone" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const leadId = await upsertLeadBySession(supabase, sessionId, {
+        nome: cleanName,
+        telefone: normalizedPhone,
+        status: "novo",
+      });
+      if (!leadId) {
+        return new Response(
+          JSON.stringify({ success: false, error: "save_failed" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      return new Response(
+        JSON.stringify({ success: true, lead_id: leadId }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const userMessage = messages?.[messages.length - 1]?.content || "";
 
     // Step 1: Extract intent + filters using AI with conversation context
     const recentMessages = messages.slice(-6);
