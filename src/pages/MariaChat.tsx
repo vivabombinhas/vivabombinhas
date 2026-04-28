@@ -8,7 +8,7 @@ import { SuggestionChips } from "@/components/maria/SuggestionChips";
 import { Button } from "@/components/ui/button";
 
 const MariaChat = () => {
-  const { messages, isLoading, sendMessage, clearChat, hasMore, showMore } = useMariaChat();
+  const { messages, isLoading, sendMessage, clearChat, hasMore, showMore, submitLead } = useMariaChat();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
