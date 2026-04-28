@@ -659,8 +659,8 @@ serve(async (req) => {
 
     // 🚪 GATE DE CAPTAÇÃO: se já há resultados E o lead ainda não foi identificado,
     // mostra apenas o 1º imóvel como teaser e segura o resto até pegar nome+WhatsApp.
-    let leadAlreadyCaptured = false;
-    if (sessionId) {
+    let leadAlreadyCaptured = !!clientLeadCaptured;
+    if (!leadAlreadyCaptured && sessionId) {
       const { data: leadRow } = await supabase
         .from("leads_maria")
         .select("nome, telefone")
