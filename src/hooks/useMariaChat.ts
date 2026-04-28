@@ -105,7 +105,7 @@ export function useMariaChat() {
       }));
 
       const { data, error } = await supabase.functions.invoke("maria-search", {
-        body: { messages: conversationHistory },
+        body: { messages: conversationHistory, session_id: sessionIdRef.current },
       });
 
       if (error) throw error;
