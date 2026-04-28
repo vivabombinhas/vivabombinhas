@@ -466,7 +466,7 @@ serve(async (req) => {
           .map((m: { content: string }) => m.content)
           .join(" ");
 
-        const { error: leadError } = await supabase
+        const { data: leadRow, error: leadError } = await supabase
           .from("leads_maria")
           .insert({
             nome: leadData.nome,
@@ -478,10 +478,26 @@ serve(async (req) => {
             faixa_preco: filters.preco_max ? `até ${filters.preco_max}` : filters.preco_min ? `a partir de ${filters.preco_min}` : leadData.faixa_preco || null,
             mensagem_original: previousFilters || messages[0]?.content || null,
             origem: "maria_chat",
-          });
+          })
+          .select("id")
+          .single();
 
         if (leadError) console.error("Lead save error:", leadError);
-        else { leadSaved = true; console.log("Lead saved:", leadData.nome); }
+        else {
+          leadSaved = true;
+          console.log("Lead saved:", leadData.nome);
+          if (leadRow?.id) {
+            const convRows = messages.map((m: { role: string; content: string }) => ({
+              lead_id: leadRow.id,
+              role: m.role === "assistant" ? "assistant" : "user",
+              content: m.content,
+            }));
+            if (convRows.length) {
+              const { error: convErr } = await supabase.from("lead_conversations").insert(convRows);
+              if (convErr) console.error("Conv save error:", convErr);
+            }
+          }
+        }
       } catch (e) { console.error("Failed to parse lead:", e); }
       assistantMessage = assistantMessage.replace(/\[LEAD_CAPTURE\]\s*\{[^}]+\}/, "").trim();
     }
