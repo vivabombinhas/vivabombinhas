@@ -398,7 +398,7 @@ serve(async (req) => {
       const { data: existingForCtx } = sessionId
         ? await supabase.from("leads_maria").select("id, nome, telefone").eq("session_id", sessionId).maybeSingle()
         : { data: null };
-      const alreadyCaptured = !!(existingForCtx?.nome && existingForCtx?.telefone);
+      const alreadyCaptured = !!clientLeadCaptured || !!(existingForCtx?.nome && existingForCtx?.telefone);
 
       // ⚡ PRÉ-PARSER DETERMINÍSTICO: tenta capturar nome+telefone da última msg
       // ANTES de chamar o LLM. Isso elimina o bug do "falta DDD" em números válidos.
