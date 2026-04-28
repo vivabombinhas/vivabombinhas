@@ -170,8 +170,12 @@ export default function AdminLeads() {
                 className="bg-card border border-border rounded-xl p-4 shadow-sm"
               >
                 <div className="flex flex-col sm:flex-row sm:items-start gap-3">
-                  {/* Lead info */}
-                  <div className="flex-1 min-w-0 space-y-1.5">
+                  {/* Lead info - clickable */}
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedLeadId(lead.id); setSheetOpen(true); }}
+                    className="flex-1 min-w-0 space-y-1.5 text-left hover:opacity-80 transition"
+                  >
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-foreground">{lead.nome}</span>
                       <Badge
