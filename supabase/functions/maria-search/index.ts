@@ -305,14 +305,55 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, session_id } = await req.json();
-    const userMessage = messages[messages.length - 1]?.content || "";
+    const body = await req.json();
+    const { messages, session_id, action, nome, telefone, lead_captured: clientLeadCaptured } = body || {};
     const sessionId: string = session_id || "";
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // ============= ACTION: submit_lead (formulário inline do gate) =============
+    if (action === "submit_lead") {
+      if (!sessionId || !nome || !telefone) {
+        return new Response(
+          JSON.stringify({ success: false, error: "missing_fields" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const cleanName = String(nome).trim().slice(0, 80);
+      if (cleanName.length < 2) {
+        return new Response(
+          JSON.stringify({ success: false, error: "invalid_name" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const normalizedPhone = normalizePhone(telefone);
+      if (!normalizedPhone) {
+        return new Response(
+          JSON.stringify({ success: false, error: "invalid_phone" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      const leadId = await upsertLeadBySession(supabase, sessionId, {
+        nome: cleanName,
+        telefone: normalizedPhone,
+        status: "novo",
+      });
+      if (!leadId) {
+        return new Response(
+          JSON.stringify({ success: false, error: "save_failed" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      return new Response(
+        JSON.stringify({ success: true, lead_id: leadId }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const userMessage = messages?.[messages.length - 1]?.content || "";
 
     // Step 1: Extract intent + filters using AI with conversation context
     const recentMessages = messages.slice(-6);
@@ -357,7 +398,7 @@ serve(async (req) => {
       const { data: existingForCtx } = sessionId
         ? await supabase.from("leads_maria").select("id, nome, telefone").eq("session_id", sessionId).maybeSingle()
         : { data: null };
-      const alreadyCaptured = !!(existingForCtx?.nome && existingForCtx?.telefone);
+      const alreadyCaptured = !!clientLeadCaptured || !!(existingForCtx?.nome && existingForCtx?.telefone);
 
       // ⚡ PRÉ-PARSER DETERMINÍSTICO: tenta capturar nome+telefone da última msg
       // ANTES de chamar o LLM. Isso elimina o bug do "falta DDD" em números válidos.
@@ -618,8 +659,8 @@ serve(async (req) => {
 
     // 🚪 GATE DE CAPTAÇÃO: se já há resultados E o lead ainda não foi identificado,
     // mostra apenas o 1º imóvel como teaser e segura o resto até pegar nome+WhatsApp.
-    let leadAlreadyCaptured = false;
-    if (sessionId) {
+    let leadAlreadyCaptured = !!clientLeadCaptured;
+    if (!leadAlreadyCaptured && sessionId) {
       const { data: leadRow } = await supabase
         .from("leads_maria")
         .select("nome, telefone")
