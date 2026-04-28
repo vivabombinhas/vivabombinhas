@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Sparkles, Link2, FileText, Loader2, ArrowRight, BedDouble, Bath, Car, Ruler, CheckCircle2 } from "lucide-react";
+import {
+  ArrowLeft, Sparkles, Link2, FileText, Loader2, ArrowRight,
+  BedDouble, Bath, Car, Ruler, CheckCircle2, X, ArrowUp, ArrowDown, Plus, Star,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +29,8 @@ interface ExtractedData {
   capacidade_pessoas?: number;
   preco?: number;
   preco_temporada_diaria?: number;
+  condominio?: number;
+  iptu_anual?: number;
   mobiliado?: boolean;
   piscina?: boolean;
   vista_mar?: boolean;
@@ -37,6 +42,11 @@ interface ExtractedData {
   estacionamento?: boolean;
   link_anuncio?: string;
   fotos?: string[];
+  anunciante_nome?: string;
+  anunciante_telefone?: string;
+  anunciante_email?: string;
+  imobiliaria?: string;
+  codigo?: string;
 }
 
 const tipoLabels: Record<string, string> = {
@@ -59,9 +69,8 @@ export default function AdminImportarLink() {
   const [linkInput, setLinkInput] = useState("");
   const [textInput, setTextInput] = useState("");
   const [data, setData] = useState<ExtractedData>({});
-  const [anuncianteNome, setAnuncianteNome] = useState("");
-  const [anuncianteTelefone, setAnuncianteTelefone] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [newPhotoUrl, setNewPhotoUrl] = useState("");
 
   const handleExtract = async () => {
     if (mode === "link") {
@@ -83,7 +92,6 @@ export default function AdminImportarLink() {
       if (error) throw error;
       if (!result?.success || !result?.data) throw new Error(result?.error || "Falha ao extrair");
 
-      // Dedup por link
       if (result.data.link_anuncio) {
         const { data: existing } = await supabase
           .from("imoveis")
@@ -103,7 +111,11 @@ export default function AdminImportarLink() {
 
       setData(result.data);
       setStep("review");
-      toast({ title: "Extraído com IA ✨", description: "Revise antes de salvar." });
+      const fotosCount = result.data.fotos?.length || 0;
+      toast({
+        title: "Extraído com IA ✨",
+        description: `${fotosCount} fotos detectadas. Revise e ajuste antes de salvar.`,
+      });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Erro";
       toast({ title: "Falhou", description: msg, variant: "destructive" });
@@ -113,6 +125,49 @@ export default function AdminImportarLink() {
 
   const updateField = <K extends keyof ExtractedData>(key: K, value: ExtractedData[K]) => {
     setData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  // ===== Photo management =====
+  const removePhoto = (idx: number) => {
+    setData((prev) => ({ ...prev, fotos: (prev.fotos || []).filter((_, i) => i !== idx) }));
+  };
+  const movePhoto = (idx: number, dir: -1 | 1) => {
+    setData((prev) => {
+      const fotos = [...(prev.fotos || [])];
+      const target = idx + dir;
+      if (target < 0 || target >= fotos.length) return prev;
+      [fotos[idx], fotos[target]] = [fotos[target], fotos[idx]];
+      return { ...prev, fotos };
+    });
+  };
+  const setAsCover = (idx: number) => {
+    setData((prev) => {
+      const fotos = [...(prev.fotos || [])];
+      if (idx === 0) return prev;
+      const [pic] = fotos.splice(idx, 1);
+      fotos.unshift(pic);
+      return { ...prev, fotos };
+    });
+  };
+  const addPhotoUrl = () => {
+    const raw = newPhotoUrl.trim();
+    if (!raw) return;
+    // Allow comma/newline separated batch paste
+    const urls = raw.split(/[\s,]+/).map((u) => u.trim()).filter((u) => {
+      try { new URL(u); return true; } catch { return false; }
+    });
+    if (urls.length === 0) {
+      toast({ title: "URL(s) inválida(s)", variant: "destructive" });
+      return;
+    }
+    setData((prev) => {
+      const existing = new Set(prev.fotos || []);
+      const merged = [...(prev.fotos || [])];
+      for (const u of urls) if (!existing.has(u)) merged.push(u);
+      return { ...prev, fotos: merged };
+    });
+    setNewPhotoUrl("");
+    toast({ title: `${urls.length} foto(s) adicionada(s)` });
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -134,6 +189,7 @@ export default function AdminImportarLink() {
 
     setSubmitting(true);
     const { error } = await supabase.from("imoveis").insert({
+      codigo: data.codigo?.trim() || null,
       titulo: data.titulo!.trim(),
       descricao: data.descricao || null,
       finalidade: data.finalidade as never,
@@ -158,10 +214,14 @@ export default function AdminImportarLink() {
       estacionamento: data.estacionamento ?? false,
       preco: data.preco || null,
       preco_temporada_diaria: data.preco_temporada_diaria || null,
+      condominio: data.condominio || null,
+      iptu_anual: data.iptu_anual || null,
       link_anuncio: data.link_anuncio || null,
       fotos: data.fotos && data.fotos.length > 0 ? data.fotos : null,
-      anunciante_nome: anuncianteNome.trim() || null,
-      anunciante_telefone: anuncianteTelefone.trim() || null,
+      anunciante_nome: data.anunciante_nome?.trim() || null,
+      anunciante_telefone: data.anunciante_telefone?.trim() || null,
+      anunciante_email: data.anunciante_email?.trim() || null,
+      imobiliaria: data.imobiliaria?.trim() || null,
       origem: "scraping" as never,
       status: "ativo" as never,
     });
@@ -180,8 +240,7 @@ export default function AdminImportarLink() {
     setLinkInput("");
     setTextInput("");
     setData({});
-    setAnuncianteNome("");
-    setAnuncianteTelefone("");
+    setNewPhotoUrl("");
   };
 
   return (
@@ -193,7 +252,7 @@ export default function AdminImportarLink() {
           </Button>
           <div className="flex-1">
             <h1 className="text-xl font-bold text-foreground">Importar por Link (IA)</h1>
-            <p className="text-sm text-muted-foreground">Cole um link ou descreva — a IA extrai e salva no inventário</p>
+            <p className="text-sm text-muted-foreground">Cole um link ou descreva — a IA extrai e você revisa antes de salvar</p>
           </div>
           <Link to="/admin/importar" className="text-sm text-muted-foreground hover:text-foreground">
             Importar CSV →
@@ -228,12 +287,12 @@ export default function AdminImportarLink() {
                 <Label htmlFor="link">URL do anúncio</Label>
                 <Input
                   id="link"
-                  placeholder="https://airbnb.com/... ou OLX, ZAP, VivaReal, Instagram..."
+                  placeholder="https://airbnb.com/... ou OLX, ZAP, VivaReal, Booking, Instagram..."
                   value={linkInput}
                   onChange={(e) => setLinkInput(e.target.value)}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Funciona com Airbnb, OLX, ZAP, VivaReal e a maioria dos sites.
+                  Funciona com a maioria dos sites. Páginas que carregam só por JS podem não vir 100% — nesse caso use "Colar descrição".
                 </p>
               </div>
             ) : (
@@ -241,8 +300,8 @@ export default function AdminImportarLink() {
                 <Label htmlFor="text">Descrição do imóvel</Label>
                 <Textarea
                   id="text"
-                  rows={6}
-                  placeholder="Casa de 3 quartos em Mariscal, frente-mar, piscina, capacidade 8 pessoas. Diária R$ 800..."
+                  rows={8}
+                  placeholder="Cole aqui o texto completo do anúncio (do Airbnb, OLX, WhatsApp, etc). Quanto mais detalhes, melhor a extração."
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
                 />
@@ -265,7 +324,7 @@ export default function AdminImportarLink() {
           <div className="rounded-2xl border border-border bg-card p-12 text-center space-y-4">
             <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
             <h2 className="text-lg font-bold">A IA está lendo o anúncio...</h2>
-            <p className="text-sm text-muted-foreground">Isso pode levar alguns segundos.</p>
+            <p className="text-sm text-muted-foreground">Isso pode levar até 30 segundos para sites mais pesados.</p>
           </div>
         )}
 
@@ -275,10 +334,98 @@ export default function AdminImportarLink() {
               <Sparkles className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="text-sm">
                 <p className="font-semibold">Revise antes de salvar no inventário</p>
-                <p className="text-muted-foreground">Vai entrar como <strong>ativo</strong> direto na vitrine.</p>
+                <p className="text-muted-foreground">Vai entrar como <strong>ativo</strong> direto na vitrine. Edite tudo o que precisar.</p>
               </div>
             </div>
 
+            {/* ===== FOTOS ===== */}
+            <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-semibold">
+                  Fotos {data.fotos && data.fotos.length > 0 && `(${data.fotos.length})`}
+                </Label>
+                {data.fotos && data.fotos.length > 0 && (
+                  <span className="text-xs text-muted-foreground">A primeira é a capa ⭐</span>
+                )}
+              </div>
+
+              {data.fotos && data.fotos.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {data.fotos.map((f, i) => (
+                    <div key={`${f}-${i}`} className="relative group rounded-lg overflow-hidden border border-border bg-muted">
+                      <img
+                        src={f}
+                        alt={`Foto ${i + 1}`}
+                        className="aspect-square w-full object-cover"
+                        loading="lazy"
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = "0.3"; }}
+                      />
+                      {i === 0 && (
+                        <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-[10px] font-semibold px-1.5 py-0.5 rounded flex items-center gap-1">
+                          <Star className="h-2.5 w-2.5 fill-current" /> Capa
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-end justify-center gap-1 p-2 opacity-0 group-hover:opacity-100">
+                        <button
+                          type="button"
+                          title="Mover esquerda"
+                          onClick={() => movePhoto(i, -1)}
+                          disabled={i === 0}
+                          className="h-7 w-7 rounded bg-card/90 hover:bg-card text-foreground disabled:opacity-30 flex items-center justify-center"
+                        >
+                          <ArrowUp className="h-3.5 w-3.5 -rotate-90" />
+                        </button>
+                        <button
+                          type="button"
+                          title="Mover direita"
+                          onClick={() => movePhoto(i, 1)}
+                          disabled={i === (data.fotos?.length || 0) - 1}
+                          className="h-7 w-7 rounded bg-card/90 hover:bg-card text-foreground disabled:opacity-30 flex items-center justify-center"
+                        >
+                          <ArrowDown className="h-3.5 w-3.5 -rotate-90" />
+                        </button>
+                        {i !== 0 && (
+                          <button
+                            type="button"
+                            title="Definir como capa"
+                            onClick={() => setAsCover(i)}
+                            className="h-7 w-7 rounded bg-card/90 hover:bg-card text-foreground flex items-center justify-center"
+                          >
+                            <Star className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          title="Excluir"
+                          onClick={() => removePhoto(i)}
+                          className="h-7 w-7 rounded bg-destructive/90 hover:bg-destructive text-destructive-foreground flex items-center justify-center"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">Nenhuma foto detectada. Adicione abaixo coando URLs.</p>
+              )}
+
+              <div className="flex gap-2 pt-2 border-t border-border">
+                <Input
+                  placeholder="Cole URL(s) de fotos (separe por vírgula ou espaço)"
+                  value={newPhotoUrl}
+                  onChange={(e) => setNewPhotoUrl(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") { e.preventDefault(); addPhotoUrl(); }
+                  }}
+                />
+                <Button type="button" variant="outline" onClick={addPhotoUrl} className="gap-1 flex-shrink-0">
+                  <Plus className="h-4 w-4" /> Adicionar
+                </Button>
+              </div>
+            </div>
+
+            {/* ===== DADOS PRINCIPAIS ===== */}
             <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="titulo">Título *</Label>
@@ -319,20 +466,30 @@ export default function AdminImportarLink() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="bairro">Bairro</Label>
-                <Input id="bairro" value={data.bairro || ""} onChange={(e) => updateField("bairro", e.target.value)} placeholder="Bombas, Mariscal, Centro..." />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="bairro">Bairro</Label>
+                  <Input id="bairro" value={data.bairro || ""} onChange={(e) => updateField("bairro", e.target.value)} placeholder="Bombas, Mariscal, Centro..." />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endereco">Endereço</Label>
+                  <Input id="endereco" value={data.endereco || ""} onChange={(e) => updateField("endereco", e.target.value)} placeholder="Rua / nº" />
+                </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="descricao">Descrição</Label>
-                <Textarea id="descricao" rows={3} value={data.descricao || ""} onChange={(e) => updateField("descricao", e.target.value)} />
+                <Textarea id="descricao" rows={4} value={data.descricao || ""} onChange={(e) => updateField("descricao", e.target.value)} />
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 <div className="space-y-1.5">
                   <Label className="flex items-center gap-1 text-xs"><BedDouble className="h-3 w-3" />Quartos</Label>
                   <Input type="number" min={0} value={data.quartos ?? ""} onChange={(e) => updateField("quartos", e.target.value ? parseInt(e.target.value) : undefined)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Suítes</Label>
+                  <Input type="number" min={0} value={data.suites ?? ""} onChange={(e) => updateField("suites", e.target.value ? parseInt(e.target.value) : undefined)} />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="flex items-center gap-1 text-xs"><Bath className="h-3 w-3" />Banheiros</Label>
@@ -343,22 +500,39 @@ export default function AdminImportarLink() {
                   <Input type="number" min={0} value={data.vagas_garagem ?? ""} onChange={(e) => updateField("vagas_garagem", e.target.value ? parseInt(e.target.value) : undefined)} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="flex items-center gap-1 text-xs"><Ruler className="h-3 w-3" />Área (m²)</Label>
+                  <Label className="flex items-center gap-1 text-xs"><Ruler className="h-3 w-3" />Área m²</Label>
                   <Input type="number" min={0} value={data.area_m2 ?? ""} onChange={(e) => updateField("area_m2", e.target.value ? parseFloat(e.target.value) : undefined)} />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              {data.finalidade === "temporada" && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Capacidade (pessoas)</Label>
+                  <Input type="number" min={0} value={data.capacidade_pessoas ?? ""} onChange={(e) => updateField("capacidade_pessoas", e.target.value ? parseInt(e.target.value) : undefined)} />
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {data.finalidade === "temporada" ? (
-                  <div className="space-y-1.5 col-span-2">
+                  <div className="space-y-1.5 sm:col-span-3">
                     <Label>Diária na temporada (R$) *</Label>
                     <Input type="number" min={0} value={data.preco_temporada_diaria ?? ""} onChange={(e) => updateField("preco_temporada_diaria", e.target.value ? parseFloat(e.target.value) : undefined)} />
                   </div>
                 ) : (
-                  <div className="space-y-1.5 col-span-2">
-                    <Label>Preço (R$) *</Label>
-                    <Input type="number" min={0} value={data.preco ?? ""} onChange={(e) => updateField("preco", e.target.value ? parseFloat(e.target.value) : undefined)} />
-                  </div>
+                  <>
+                    <div className="space-y-1.5">
+                      <Label>Preço (R$) *</Label>
+                      <Input type="number" min={0} value={data.preco ?? ""} onChange={(e) => updateField("preco", e.target.value ? parseFloat(e.target.value) : undefined)} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Condomínio (R$/mês)</Label>
+                      <Input type="number" min={0} value={data.condominio ?? ""} onChange={(e) => updateField("condominio", e.target.value ? parseFloat(e.target.value) : undefined)} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>IPTU anual (R$)</Label>
+                      <Input type="number" min={0} value={data.iptu_anual ?? ""} onChange={(e) => updateField("iptu_anual", e.target.value ? parseFloat(e.target.value) : undefined)} />
+                    </div>
+                  </>
                 )}
               </div>
 
@@ -382,29 +556,35 @@ export default function AdminImportarLink() {
                   ))}
                 </div>
               </div>
-
-              {data.fotos && data.fotos.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold">{data.fotos.length} fotos detectadas</Label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {data.fotos.slice(0, 8).map((f, i) => (
-                      <img key={i} src={f} alt={`Foto ${i + 1}`} className="aspect-square object-cover rounded-md" loading="lazy" />
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
+            {/* ===== CONTATO ===== */}
             <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
-              <h3 className="font-semibold text-sm">Contato do anunciante (opcional)</h3>
+              <h3 className="font-semibold text-sm">Contato do anunciante</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="nome">Nome</Label>
-                  <Input id="nome" value={anuncianteNome} onChange={(e) => setAnuncianteNome(e.target.value)} />
+                  <Input id="nome" value={data.anunciante_nome || ""} onChange={(e) => updateField("anunciante_nome", e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="tel">WhatsApp</Label>
-                  <Input id="tel" value={anuncianteTelefone} onChange={(e) => setAnuncianteTelefone(e.target.value)} placeholder="47999999999" />
+                  <Input id="tel" value={data.anunciante_telefone || ""} onChange={(e) => updateField("anunciante_telefone", e.target.value)} placeholder="47999999999" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="email">E-mail</Label>
+                  <Input id="email" type="email" value={data.anunciante_email || ""} onChange={(e) => updateField("anunciante_email", e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="imob">Imobiliária</Label>
+                  <Input id="imob" value={data.imobiliaria || ""} onChange={(e) => updateField("imobiliaria", e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="codigo">Código/Ref.</Label>
+                  <Input id="codigo" value={data.codigo || ""} onChange={(e) => updateField("codigo", e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="link_anuncio">Link do anúncio</Label>
+                  <Input id="link_anuncio" value={data.link_anuncio || ""} onChange={(e) => updateField("link_anuncio", e.target.value)} />
                 </div>
               </div>
             </div>
