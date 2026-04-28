@@ -15,13 +15,14 @@ import {
 import { toast } from "sonner";
 import LeadDetailSheet from "@/components/admin/LeadDetailSheet";
 
-type LeadStatus = "novo" | "contatado" | "convertido" | "descartado";
+type LeadStatus = "novo" | "contatado" | "convertido" | "descartado" | "anonimo";
 
 const STATUS_CONFIG: Record<LeadStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   novo: { label: "Novo", variant: "default" },
   contatado: { label: "Contatado", variant: "secondary" },
   convertido: { label: "Convertido", variant: "outline" },
   descartado: { label: "Destructive", variant: "destructive" },
+  anonimo: { label: "Anônimo", variant: "outline" },
 };
 
 const STATUS_COLORS: Record<LeadStatus, string> = {
@@ -29,6 +30,7 @@ const STATUS_COLORS: Record<LeadStatus, string> = {
   contatado: "bg-amber-500/10 text-amber-700 border-amber-200",
   convertido: "bg-emerald-500/10 text-emerald-700 border-emerald-200",
   descartado: "bg-red-500/10 text-red-700 border-red-200",
+  anonimo: "bg-muted text-muted-foreground border-border",
 };
 
 const INTERESSE_MAP: Record<string, string> = {
@@ -39,12 +41,13 @@ const INTERESSE_MAP: Record<string, string> = {
 
 export default function AdminLeads() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [showAnonimos, setShowAnonimos] = useState<boolean>(false);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: leads, isLoading } = useQuery({
-    queryKey: ["leads_maria", statusFilter],
+    queryKey: ["leads_maria", statusFilter, showAnonimos],
     queryFn: async () => {
       let query = supabase
         .from("leads_maria")
@@ -53,6 +56,9 @@ export default function AdminLeads() {
 
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter as LeadStatus);
+      } else if (!showAnonimos) {
+        // Por padrão, esconde leads anônimos (sem nome/telefone)
+        query = query.neq("status", "anonimo");
       }
 
       const { data, error } = await query;
@@ -154,8 +160,18 @@ export default function AdminLeads() {
                 <SelectItem value="contatado">Contatado</SelectItem>
                 <SelectItem value="convertido">Convertido</SelectItem>
                 <SelectItem value="descartado">Descartado</SelectItem>
+                <SelectItem value="anonimo">Anônimo</SelectItem>
               </SelectContent>
             </Select>
+            <Button
+              variant={showAnonimos ? "default" : "ghost"}
+              size="sm"
+              className="h-9 text-xs"
+              onClick={() => setShowAnonimos((v) => !v)}
+              title="Mostrar leads anônimos (sem nome/telefone)"
+            >
+              {showAnonimos ? "Ocultar anônimos" : "Ver anônimos"}
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -202,22 +218,28 @@ export default function AdminLeads() {
                     className="flex-1 min-w-0 space-y-1.5 text-left cursor-pointer hover:opacity-80 transition"
                   >
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-foreground">{lead.nome}</span>
+                      <span className="font-semibold text-foreground">
+                        {lead.nome ?? <span className="italic text-muted-foreground">Sem nome (anônimo)</span>}
+                      </span>
                       <Badge
                         variant="outline"
                         className={`text-[10px] px-2 py-0.5 ${STATUS_COLORS[(lead.status as LeadStatus) ?? "novo"]}`}
                       >
-                        {(lead.status as LeadStatus) === "novo" ? "Novo" : (lead.status as LeadStatus) === "contatado" ? "Contatado" : (lead.status as LeadStatus) === "convertido" ? "Convertido" : "Descartado"}
+                        {STATUS_CONFIG[(lead.status as LeadStatus) ?? "novo"]?.label ?? "Novo"}
                       </Badge>
                     </div>
 
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Phone className="w-3.5 h-3.5" />
-                        <a href={`https://wa.me/55${lead.telefone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-accent hover:underline">
-                          {lead.telefone}
-                        </a>
-                      </span>
+                      {lead.telefone ? (
+                        <span className="flex items-center gap-1">
+                          <Phone className="w-3.5 h-3.5" />
+                          <a href={`https://wa.me/${lead.telefone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="text-accent hover:underline">
+                            {lead.telefone}
+                          </a>
+                        </span>
+                      ) : (
+                        <span className="italic">Sem telefone</span>
+                      )}
                       {lead.email && (
                         <span className="flex items-center gap-1">
                           <Mail className="w-3.5 h-3.5" />

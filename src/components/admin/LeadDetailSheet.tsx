@@ -18,8 +18,8 @@ import { toast } from "sonner";
 
 interface Lead {
   id: string;
-  nome: string;
-  telefone: string;
+  nome: string | null;
+  telefone: string | null;
   email?: string | null;
   interesse?: string | null;
   bairro_interesse?: string | null;
@@ -118,13 +118,13 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
 
   if (!lead) return null;
 
-  const waLink = `https://wa.me/55${lead.telefone.replace(/\D/g, "")}`;
+  const waLink = lead.telefone ? `https://wa.me/${lead.telefone.replace(/\D/g, "")}` : null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>{lead.nome}</SheetTitle>
+          <SheetTitle>{lead.nome ?? "Lead anônimo"}</SheetTitle>
           <SheetDescription>
             Lead desde {formatDateTime(lead.created_at)}
           </SheetDescription>
@@ -132,9 +132,15 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
 
         {/* Contato */}
         <section className="mt-4 space-y-2 text-sm">
-          <a href={waLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-accent hover:underline">
-            <Phone className="w-4 h-4" /> {lead.telefone}
-          </a>
+          {waLink ? (
+            <a href={waLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-accent hover:underline">
+              <Phone className="w-4 h-4" /> {lead.telefone}
+            </a>
+          ) : (
+            <div className="flex items-center gap-2 text-muted-foreground italic">
+              <Phone className="w-4 h-4" /> Sem telefone (lead anônimo)
+            </div>
+          )}
           {lead.email && (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Mail className="w-4 h-4" /> {lead.email}
@@ -246,7 +252,7 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
                 >
                   <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
                     {m.role === "user" ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
-                    {m.role === "user" ? lead.nome : "MarIA"} · {formatDateTime(m.created_at)}
+                    {m.role === "user" ? (lead.nome ?? "Visitante") : "MarIA"} · {formatDateTime(m.created_at)}
                   </div>
                   <p className="whitespace-pre-wrap">{m.content}</p>
                 </div>

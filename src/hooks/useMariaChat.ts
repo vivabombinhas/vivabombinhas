@@ -12,12 +12,27 @@ export interface ChatMessage {
 
 const MORE_PATTERNS = /^(tem mais|mostrar mais|mais op[çc][õo]es|outras op[çc][õo]es|quero ver mais|mais resultados|ver mais|mais im[óo]veis|próximos|next)\??$/i;
 
+function getOrCreateSessionId(): string {
+  try {
+    const KEY = "maria_session_id";
+    let id = sessionStorage.getItem(KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      sessionStorage.setItem(KEY, id);
+    }
+    return id;
+  } catch {
+    return crypto.randomUUID();
+  }
+}
+
 export function useMariaChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const allPropertiesRef = useRef<Property[]>([]);
   const shownCountRef = useRef(0);
+  const sessionIdRef = useRef<string>(getOrCreateSessionId());
 
   const updateHasMore = useCallback(() => {
     setHasMore(allPropertiesRef.current.length > shownCountRef.current);
@@ -90,7 +105,7 @@ export function useMariaChat() {
       }));
 
       const { data, error } = await supabase.functions.invoke("maria-search", {
-        body: { messages: conversationHistory },
+        body: { messages: conversationHistory, session_id: sessionIdRef.current },
       });
 
       if (error) throw error;
@@ -137,6 +152,8 @@ export function useMariaChat() {
   const clearChat = useCallback(() => {
     setMessages([]);
     clearPropertyState();
+    try { sessionStorage.removeItem("maria_session_id"); } catch { /* ignore */ }
+    sessionIdRef.current = getOrCreateSessionId();
   }, [clearPropertyState]);
 
   return { messages, isLoading, sendMessage, clearChat, hasMore, showMore };

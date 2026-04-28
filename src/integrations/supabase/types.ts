@@ -424,10 +424,11 @@ export type Database = {
           last_contact_at: string | null
           mensagem_original: string | null
           next_followup_at: string | null
-          nome: string
+          nome: string | null
           origem: string
+          session_id: string | null
           status: Database["public"]["Enums"]["status_lead"]
-          telefone: string
+          telefone: string | null
           tipo_imovel: string | null
         }
         Insert: {
@@ -440,10 +441,11 @@ export type Database = {
           last_contact_at?: string | null
           mensagem_original?: string | null
           next_followup_at?: string | null
-          nome: string
+          nome?: string | null
           origem?: string
+          session_id?: string | null
           status?: Database["public"]["Enums"]["status_lead"]
-          telefone: string
+          telefone?: string | null
           tipo_imovel?: string | null
         }
         Update: {
@@ -456,10 +458,11 @@ export type Database = {
           last_contact_at?: string | null
           mensagem_original?: string | null
           next_followup_at?: string | null
-          nome?: string
+          nome?: string | null
           origem?: string
+          session_id?: string | null
           status?: Database["public"]["Enums"]["status_lead"]
-          telefone?: string
+          telefone?: string | null
           tipo_imovel?: string | null
         }
         Relationships: []
@@ -520,7 +523,12 @@ export type Database = {
         | "whatsapp"
         | "outro"
       status_imovel: "ativo" | "pausado" | "removido"
-      status_lead: "novo" | "contatado" | "convertido" | "descartado"
+      status_lead:
+        | "novo"
+        | "contatado"
+        | "convertido"
+        | "descartado"
+        | "anonimo"
       status_submission: "pendente" | "aprovado" | "rejeitado"
       tipo_imovel:
         | "apartamento"
@@ -675,7 +683,7 @@ export const Constants = {
         "outro",
       ],
       status_imovel: ["ativo", "pausado", "removido"],
-      status_lead: ["novo", "contatado", "convertido", "descartado"],
+      status_lead: ["novo", "contatado", "convertido", "descartado", "anonimo"],
       status_submission: ["pendente", "aprovado", "rejeitado"],
       tipo_imovel: [
         "apartamento",

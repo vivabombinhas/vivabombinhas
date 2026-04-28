@@ -83,12 +83,17 @@ FLUXO DE CAPTAÇÃO DE LEAD (importante!):
 - NÃO ofereça em saudações, perguntas exploratórias, ou follow-ups sobre os mesmos resultados já mostrados.
 - Ofereça NO MÁXIMO uma vez por conversa (não repita se já ofereceu antes).
 - Se o usuário aceitar (ex: "quero", "sim", "pode salvar", "manda", "beleza", "topo"), peça os dados de forma amigável:
-  "Show! 🎉 Me passa seu nome e número de WhatsApp que eu salvo aqui. E-mail é opcional."
-- Quando o usuário fornecer nome e telefone, responda com: [LEAD_CAPTURE] seguido de um JSON com os dados. Exemplo:
+  "Show! 🎉 Me passa seu nome e número de WhatsApp **com DDD** (ex: 47 99999-8888) que eu salvo aqui. E-mail é opcional."
+- ⚠️ VALIDAÇÃO DE TELEFONE — REGRA CRÍTICA:
+  * O telefone DEVE ter DDD (10 ou 11 dígitos no total). Exemplos válidos: "47999998888", "(47) 99999-8888", "47 9 9999-8888".
+  * Se o usuário mandar um número CURTO (8 ou 9 dígitos, sem DDD), NÃO confirme nem salve. Responda algo tipo:
+    "Quase lá! 😊 Faltou o DDD da sua cidade. Pode me mandar o número completo? Ex: 47 99999-8888"
+  * Só emita [LEAD_CAPTURE] quando tiver nome + telefone com DDD válido.
+- Quando o usuário fornecer nome e telefone válidos, responda com: [LEAD_CAPTURE] seguido de um JSON com os dados. Exemplo:
   [LEAD_CAPTURE]{"nome":"João Silva","telefone":"47999998888","email":"joao@email.com","interesse":"aluguel_anual","bairro":"Bombas","tipo":"apartamento","faixa_preco":"até 3500"}
   Depois do JSON, escreva uma confirmação amigável como: "Pronto, salvei sua busca! Vou te avisar assim que surgir algo no seu perfil. 📲"
   IMPORTANTE: Inclua no JSON os campos interesse (finalidade), bairro, tipo e faixa_preco baseados no contexto da conversa anterior.
-- Se o usuário fornecer dados parciais (só nome sem telefone), peça o que falta de forma gentil.
+- Se o usuário fornecer dados parciais (só nome sem telefone, ou telefone sem DDD), peça o que falta de forma gentil.
 - NUNCA force a captação. Se o usuário não quiser, respeite e continue ajudando normalmente.
 
 Regras gerais:
@@ -157,14 +162,87 @@ Mapeamento de sinônimos para tipos:
 
 Retorne APENAS o JSON, sem texto adicional.`;
 
+// Normaliza telefone BR. Retorna string '55DDDNUMERO' se válido (10-11 dígitos), null caso contrário.
+function normalizePhoneBR(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  let digits = String(raw).replace(/\D/g, "");
+  if (digits.startsWith("55") && digits.length > 11) digits = digits.slice(2);
+  if (digits.length < 10 || digits.length > 11) return null;
+  return "55" + digits;
+}
+
+// Faz upsert do lead anônimo / identificado pelo session_id.
+// Se identifiedData fornecido com nome+telefone válidos, "promove" o lead.
+async function upsertLeadBySession(
+  supabase: ReturnType<typeof createClient>,
+  sessionId: string,
+  patch: Record<string, unknown>,
+): Promise<string | null> {
+  if (!sessionId) return null;
+  try {
+    // Tenta UPDATE primeiro (lead já existe)
+    const { data: existing } = await supabase
+      .from("leads_maria")
+      .select("id")
+      .eq("session_id", sessionId)
+      .maybeSingle();
+
+    if (existing?.id) {
+      const { error } = await supabase
+        .from("leads_maria")
+        .update({ ...patch, last_contact_at: new Date().toISOString() })
+        .eq("id", existing.id);
+      if (error) console.error("Lead update error:", error);
+      return existing.id;
+    }
+
+    // Insere novo lead anônimo/identificado
+    const { data: inserted, error } = await supabase
+      .from("leads_maria")
+      .insert({
+        session_id: sessionId,
+        origem: "maria_chat",
+        status: patch.nome && patch.telefone ? "novo" : "anonimo",
+        last_contact_at: new Date().toISOString(),
+        ...patch,
+      })
+      .select("id")
+      .single();
+    if (error) { console.error("Lead insert error:", error); return null; }
+    return inserted?.id ?? null;
+  } catch (e) {
+    console.error("upsertLeadBySession failed:", e);
+    return null;
+  }
+}
+
+async function saveLastConversationTurn(
+  supabase: ReturnType<typeof createClient>,
+  leadId: string,
+  userMsg: string,
+  assistantMsg: string,
+) {
+  try {
+    const rows = [
+      { lead_id: leadId, role: "user", content: userMsg },
+      { lead_id: leadId, role: "assistant", content: assistantMsg },
+    ].filter(r => r.content);
+    if (rows.length) {
+      const { error } = await supabase.from("lead_conversations").insert(rows);
+      if (error) console.error("Conv insert error:", error);
+    }
+  } catch (e) { console.error("saveLastConversationTurn failed:", e); }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, session_id } = await req.json();
     const userMessage = messages[messages.length - 1]?.content || "";
+    const sessionId: string = session_id || "";
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -244,45 +322,42 @@ serve(async (req) => {
       if (leadMatch) {
         try {
           const leadData = JSON.parse(leadMatch[1]);
-          const previousFilters = messages
-            .filter((m: { role: string }) => m.role === "user")
-            .map((m: { content: string }) => m.content)
-            .join(" ");
-
-          const { data: leadRow, error: leadError } = await supabase
-            .from("leads_maria")
-            .insert({
+          const normalizedPhone = normalizePhoneBR(leadData.telefone);
+          if (!normalizedPhone) {
+            // Telefone inválido (sem DDD) — não salva, devolve mensagem pedindo de novo
+            assistantMessage = "Quase lá! 😊 Faltou o DDD da sua cidade no número. Pode me mandar o WhatsApp completo? Ex: 47 99999-8888";
+          } else {
+            const previousFilters = messages
+              .filter((m: { role: string }) => m.role === "user")
+              .map((m: { content: string }) => m.content)
+              .join(" ");
+            const leadId = await upsertLeadBySession(supabase, sessionId, {
               nome: leadData.nome,
-              telefone: leadData.telefone,
+              telefone: normalizedPhone,
               email: leadData.email || null,
               interesse: leadData.interesse || null,
               bairro_interesse: leadData.bairro || null,
               tipo_imovel: leadData.tipo || null,
               faixa_preco: leadData.faixa_preco || null,
               mensagem_original: previousFilters || messages[0]?.content || null,
-              origem: "maria_chat",
-            })
-            .select("id")
-            .single();
-
-          if (leadError) console.error("Lead save error:", leadError);
-          else {
-            leadSaved = true;
-            console.log("Lead saved:", leadData.nome);
-            if (leadRow?.id) {
-              const convRows = messages.map((m: { role: string; content: string }) => ({
-                lead_id: leadRow.id,
-                role: m.role === "assistant" ? "assistant" : "user",
-                content: m.content,
-              }));
-              if (convRows.length) {
-                const { error: convErr } = await supabase.from("lead_conversations").insert(convRows);
-                if (convErr) console.error("Conv save error:", convErr);
-              }
+              status: "novo",
+            });
+            if (leadId) {
+              leadSaved = true;
+              console.log("Lead promoted:", leadData.nome);
             }
           }
         } catch (e) { console.error("Failed to parse lead:", e); }
         assistantMessage = assistantMessage.replace(/\[LEAD_CAPTURE\]\s*\{[^}]+\}/, "").trim();
+      }
+
+      // Salvar turn de conversa (mesmo anônimo) se já existir lead pra essa sessão
+      if (sessionId) {
+        const { data: existingLead } = await supabase
+          .from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
+        if (existingLead?.id) {
+          await saveLastConversationTurn(supabase, existingLead.id, userMessage, assistantMessage);
+        }
       }
 
       return new Response(
@@ -402,6 +477,20 @@ serve(async (req) => {
 
     const resultsToUse = properties && properties.length > 0 ? properties : broaderProperties;
 
+    // PRÉ-CADASTRO ANÔNIMO: cria/atualiza lead vinculado à sessão com o contexto da busca
+    if (sessionId) {
+      const faixaPreco = filters.preco_max
+        ? `até ${filters.preco_max}`
+        : filters.preco_min ? `a partir de ${filters.preco_min}` : null;
+      await upsertLeadBySession(supabase, sessionId, {
+        interesse: filters.finalidade ?? null,
+        bairro_interesse: filters.bairro ?? null,
+        tipo_imovel: filters.tipo ?? (filters.tipo_included?.[0] ?? null),
+        faixa_preco: faixaPreco,
+        mensagem_original: userMessage,
+      });
+    }
+
     // Step 4: Generate conversational response
     let typeNote = "";
     if (filters.tipo_included && filters.tipo_included.length > 1 && resultsToUse.length > 0) {
@@ -455,51 +544,47 @@ serve(async (req) => {
       assistantMessage = assistantMessage.replace(/^\[SHOW_RESULTS\]\s*/, "");
     }
 
-    // Handle lead capture
+    // Handle lead capture (promote anonymous lead -> identified)
     let leadSaved = false;
     const leadMatch = assistantMessage.match(/\[LEAD_CAPTURE\]\s*(\{[^}]+\})/);
     if (leadMatch) {
       try {
         const leadData = JSON.parse(leadMatch[1]);
-        const previousFilters = messages
-          .filter((m: { role: string }) => m.role === "user")
-          .map((m: { content: string }) => m.content)
-          .join(" ");
-
-        const { data: leadRow, error: leadError } = await supabase
-          .from("leads_maria")
-          .insert({
+        const normalizedPhone = normalizePhoneBR(leadData.telefone);
+        if (!normalizedPhone) {
+          assistantMessage = "Quase lá! 😊 Faltou o DDD da sua cidade no número. Pode me mandar o WhatsApp completo? Ex: 47 99999-8888";
+        } else {
+          const previousFilters = messages
+            .filter((m: { role: string }) => m.role === "user")
+            .map((m: { content: string }) => m.content)
+            .join(" ");
+          const leadId = await upsertLeadBySession(supabase, sessionId, {
             nome: leadData.nome,
-            telefone: leadData.telefone,
+            telefone: normalizedPhone,
             email: leadData.email || null,
             interesse: filters.finalidade || leadData.interesse || null,
             bairro_interesse: filters.bairro || leadData.bairro || null,
             tipo_imovel: filters.tipo || leadData.tipo || null,
             faixa_preco: filters.preco_max ? `até ${filters.preco_max}` : filters.preco_min ? `a partir de ${filters.preco_min}` : leadData.faixa_preco || null,
             mensagem_original: previousFilters || messages[0]?.content || null,
-            origem: "maria_chat",
-          })
-          .select("id")
-          .single();
-
-        if (leadError) console.error("Lead save error:", leadError);
-        else {
-          leadSaved = true;
-          console.log("Lead saved:", leadData.nome);
-          if (leadRow?.id) {
-            const convRows = messages.map((m: { role: string; content: string }) => ({
-              lead_id: leadRow.id,
-              role: m.role === "assistant" ? "assistant" : "user",
-              content: m.content,
-            }));
-            if (convRows.length) {
-              const { error: convErr } = await supabase.from("lead_conversations").insert(convRows);
-              if (convErr) console.error("Conv save error:", convErr);
-            }
+            status: "novo",
+          });
+          if (leadId) {
+            leadSaved = true;
+            console.log("Lead promoted:", leadData.nome);
           }
         }
       } catch (e) { console.error("Failed to parse lead:", e); }
       assistantMessage = assistantMessage.replace(/\[LEAD_CAPTURE\]\s*\{[^}]+\}/, "").trim();
+    }
+
+    // Salva turn de conversa vinculada ao lead (anônimo ou identificado)
+    if (sessionId) {
+      const { data: existingLead } = await supabase
+        .from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
+      if (existingLead?.id) {
+        await saveLastConversationTurn(supabase, existingLead.id, userMessage, assistantMessage);
+      }
     }
 
     // Fetch agency config for "gestão própria" override
