@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      config_imobiliaria: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          creci: string | null
+          email: string | null
+          id: string
+          nome: string
+          updated_at: string
+          whatsapp: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          creci?: string | null
+          email?: string | null
+          id?: string
+          nome: string
+          updated_at?: string
+          whatsapp: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          creci?: string | null
+          email?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
       imoveis: {
         Row: {
           aceita_pet: boolean | null
@@ -37,6 +70,7 @@ export type Database = {
           finalidade: Database["public"]["Enums"]["finalidade_imovel"]
           fotos: string[] | null
           frente_mar: boolean | null
+          gestao_propria: boolean
           id: string
           imobiliaria: string | null
           iptu_anual: number | null
@@ -79,6 +113,7 @@ export type Database = {
           finalidade: Database["public"]["Enums"]["finalidade_imovel"]
           fotos?: string[] | null
           frente_mar?: boolean | null
+          gestao_propria?: boolean
           id?: string
           imobiliaria?: string | null
           iptu_anual?: number | null
@@ -121,6 +156,7 @@ export type Database = {
           finalidade?: Database["public"]["Enums"]["finalidade_imovel"]
           fotos?: string[] | null
           frente_mar?: boolean | null
+          gestao_propria?: boolean
           id?: string
           imobiliaria?: string | null
           iptu_anual?: number | null
@@ -164,6 +200,7 @@ export type Database = {
           finalidade: Database["public"]["Enums"]["finalidade_imovel"]
           fotos: string[] | null
           frente_mar: boolean | null
+          gestao_propria: boolean
           id: string
           imobiliaria: string | null
           imovel_id: string | null
@@ -205,6 +242,7 @@ export type Database = {
           finalidade: Database["public"]["Enums"]["finalidade_imovel"]
           fotos?: string[] | null
           frente_mar?: boolean | null
+          gestao_propria?: boolean
           id?: string
           imobiliaria?: string | null
           imovel_id?: string | null
@@ -246,6 +284,7 @@ export type Database = {
           finalidade?: Database["public"]["Enums"]["finalidade_imovel"]
           fotos?: string[] | null
           frente_mar?: boolean | null
+          gestao_propria?: boolean
           id?: string
           imobiliaria?: string | null
           imovel_id?: string | null

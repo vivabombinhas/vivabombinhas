@@ -28,6 +28,8 @@ export interface Property {
   fotos: string[] | null;
   link_anuncio: string | null;
   anunciante_telefone: string | null;
+  gestao_propria?: boolean | null;
+  imobiliaria_nome?: string | null;
 }
 
 function formatPrice(property: Property) {
@@ -182,9 +184,19 @@ export function PropertyCard({ property }: PropertyCardProps) {
           </div>
         )}
 
+        {/* Gestão própria badge */}
+        {property.gestao_propria && (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary/10 border border-primary/20">
+            <Home className="w-3 h-3 text-primary" />
+            <span className="text-[10px] font-semibold text-primary">
+              Administrado por {property.imobiliaria_nome ?? "nossa imobiliária"}
+            </span>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex gap-2 pt-1">
-          {property.link_anuncio && (
+          {property.link_anuncio && !property.gestao_propria && (
             <a
               href={property.link_anuncio}
               target="_blank"
@@ -197,10 +209,14 @@ export function PropertyCard({ property }: PropertyCardProps) {
           )}
           {property.anunciante_telefone && (
             <a
-              href={`https://wa.me/55${property.anunciante_telefone.replace(/\D/g, "")}`}
+              href={`https://wa.me/55${property.anunciante_telefone.replace(/\D/g, "")}?text=${encodeURIComponent(
+                property.gestao_propria
+                  ? `Olá! Tenho interesse no imóvel "${property.titulo}" anunciado na MarIA. Pode me passar mais informações?`
+                  : `Olá! Vi o imóvel "${property.titulo}" na MarIA Bombinhas e gostaria de mais informações.`
+              )}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-accent text-accent-foreground text-xs font-semibold hover:opacity-90 transition-opacity"
+              className={`${property.gestao_propria ? "flex-1" : ""} flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-accent text-accent-foreground text-xs font-semibold hover:opacity-90 transition-opacity`}
             >
               <Phone className="w-3.5 h-3.5" />
               WhatsApp

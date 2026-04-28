@@ -470,33 +470,49 @@ serve(async (req) => {
       assistantMessage = assistantMessage.replace(/\[LEAD_CAPTURE\]\s*\{[^}]+\}/, "").trim();
     }
 
+    // Fetch agency config for "gestão própria" override
+    const { data: agencyConfig } = await supabase
+      .from("config_imobiliaria")
+      .select("nome, whatsapp")
+      .eq("ativo", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
     // Build property list for response
-    const allProperties = resultsToUse.map((p: Record<string, unknown>) => ({
-      id: p.id,
-      titulo: p.titulo,
-      bairro: p.bairro,
-      finalidade: p.finalidade,
-      tipo: p.tipo,
-      preco: p.preco,
-      preco_temporada_diaria: p.preco_temporada_diaria,
-      quartos: p.quartos,
-      suites: p.suites,
-      banheiros: p.banheiros,
-      vagas_garagem: p.vagas_garagem,
-      area_m2: p.area_m2,
-      capacidade_pessoas: p.capacidade_pessoas,
-      piscina: p.piscina,
-      vista_mar: p.vista_mar,
-      frente_mar: p.frente_mar,
-      mobiliado: p.mobiliado,
-      churrasqueira: p.churrasqueira,
-      ar_condicionado: p.ar_condicionado,
-      wifi: p.wifi,
-      aceita_pet: p.aceita_pet,
-      fotos: p.fotos,
-      link_anuncio: p.link_anuncio,
-      anunciante_telefone: p.anunciante_telefone,
-    }));
+    const allProperties = resultsToUse.map((p: Record<string, unknown>) => {
+      const isGestaoPropria = p.gestao_propria === true;
+      return {
+        id: p.id,
+        titulo: p.titulo,
+        bairro: p.bairro,
+        finalidade: p.finalidade,
+        tipo: p.tipo,
+        preco: p.preco,
+        preco_temporada_diaria: p.preco_temporada_diaria,
+        quartos: p.quartos,
+        suites: p.suites,
+        banheiros: p.banheiros,
+        vagas_garagem: p.vagas_garagem,
+        area_m2: p.area_m2,
+        capacidade_pessoas: p.capacidade_pessoas,
+        piscina: p.piscina,
+        vista_mar: p.vista_mar,
+        frente_mar: p.frente_mar,
+        mobiliado: p.mobiliado,
+        churrasqueira: p.churrasqueira,
+        ar_condicionado: p.ar_condicionado,
+        wifi: p.wifi,
+        aceita_pet: p.aceita_pet,
+        fotos: p.fotos,
+        link_anuncio: isGestaoPropria ? null : p.link_anuncio,
+        anunciante_telefone: isGestaoPropria && agencyConfig?.whatsapp
+          ? agencyConfig.whatsapp
+          : p.anunciante_telefone,
+        gestao_propria: isGestaoPropria,
+        imobiliaria_nome: isGestaoPropria ? agencyConfig?.nome ?? null : null,
+      };
+    });
 
     return new Response(
       JSON.stringify({

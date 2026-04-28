@@ -43,6 +43,7 @@ export default function AdminSubmissions() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [gestaoPropriaMap, setGestaoPropriaMap] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -72,6 +73,7 @@ export default function AdminSubmissions() {
     }
 
     setActionLoading(sub.id);
+    const gestao_propria = !!gestaoPropriaMap[sub.id];
 
     // Insert into imoveis
     const { data: inserted, error: insertError } = await supabase.from("imoveis").insert({
@@ -91,7 +93,8 @@ export default function AdminSubmissions() {
       anunciante_email: sub.anunciante_email,
       origem: "manual" as any,
       status: "ativo" as any,
-    }).select("id").single();
+      gestao_propria,
+    } as any).select("id").single();
 
     if (insertError) {
       toast({ title: "Erro ao aprovar", description: insertError.message, variant: "destructive" });
@@ -169,6 +172,8 @@ export default function AdminSubmissions() {
                       onApprove={handleApprove}
                       onReject={handleReject}
                       actionLoading={actionLoading}
+                      gestaoPropria={!!gestaoPropriaMap[sub.id]}
+                      onToggleGestao={(v) => setGestaoPropriaMap((m) => ({ ...m, [sub.id]: v }))}
                     />
                   ))}
                 </div>
@@ -186,6 +191,8 @@ export default function AdminSubmissions() {
                       onApprove={handleApprove}
                       onReject={handleReject}
                       actionLoading={actionLoading}
+                      gestaoPropria={false}
+                      onToggleGestao={() => {}}
                     />
                   ))}
                 </div>
@@ -203,11 +210,15 @@ function SubmissionCard({
   onApprove,
   onReject,
   actionLoading,
+  gestaoPropria,
+  onToggleGestao,
 }: {
   sub: Submission;
   onApprove: (s: Submission) => void;
   onReject: (s: Submission) => void;
   actionLoading: string | null;
+  gestaoPropria: boolean;
+  onToggleGestao: (v: boolean) => void;
 }) {
   const isPending = sub.status_submission === "pendente";
   const isLoading = actionLoading === sub.id;
@@ -269,26 +280,42 @@ function SubmissionCard({
       </div>
 
       {isPending && (
-        <div className="flex gap-2 pt-1">
-          <Button
-            size="sm"
-            className="gap-1.5"
-            onClick={() => onApprove(sub)}
-            disabled={isLoading}
-          >
-            {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
-            Aprovar
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="gap-1.5 text-destructive hover:text-destructive"
-            onClick={() => onReject(sub)}
-            disabled={isLoading}
-          >
-            <XCircle className="h-3.5 w-3.5" />
-            Rejeitar
-          </Button>
+        <div className="space-y-2 pt-1">
+          <label className="flex items-center gap-2 text-sm cursor-pointer select-none p-2 rounded-md bg-primary/5 border border-primary/20">
+            <input
+              type="checkbox"
+              checked={gestaoPropria}
+              onChange={(e) => onToggleGestao(e.target.checked)}
+              className="h-4 w-4 accent-primary"
+            />
+            <span className="font-medium text-foreground">
+              🏢 Gestão própria (Viva Bombinhas)
+            </span>
+            <span className="text-xs text-muted-foreground">
+              — usar nosso contato no card
+            </span>
+          </label>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              className="gap-1.5"
+              onClick={() => onApprove(sub)}
+              disabled={isLoading}
+            >
+              {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+              Aprovar
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-destructive hover:text-destructive"
+              onClick={() => onReject(sub)}
+              disabled={isLoading}
+            >
+              <XCircle className="h-3.5 w-3.5" />
+              Rejeitar
+            </Button>
+          </div>
         </div>
       )}
     </div>
