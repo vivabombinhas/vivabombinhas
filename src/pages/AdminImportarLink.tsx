@@ -14,6 +14,18 @@ import { useToast } from "@/hooks/use-toast";
 type Mode = "link" | "text";
 type Step = "input" | "extracting" | "review" | "done";
 
+function inferOrigem(link?: string | null): string {
+  if (!link) return "manual";
+  const l = link.toLowerCase();
+  if (l.includes("airbnb")) return "airbnb";
+  if (l.includes("booking")) return "booking";
+  if (l.includes("olx")) return "olx";
+  if (l.includes("zapimoveis") || l.includes("zap.com")) return "zap_imoveis";
+  if (l.includes("vivareal") || l.includes("viva-real")) return "viva_real";
+  if (l.includes("imovelweb")) return "imovel_web";
+  return "outro";
+}
+
 interface ExtractedData {
   titulo?: string;
   descricao?: string;
