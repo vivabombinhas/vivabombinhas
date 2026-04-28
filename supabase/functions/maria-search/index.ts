@@ -774,15 +774,22 @@ serve(async (req) => {
       };
     });
 
+    // Se o gate ainda está ativo (lead não capturado nessa request), mostra só 1 imóvel teaser.
+    // Se o lead foi capturado nessa mesma request, libera tudo.
+    const gateStillActive = gateActive && !leadSaved;
+    const initialBatch = gateStillActive ? 1 : 3;
+
     return new Response(
       JSON.stringify({
         reply: assistantMessage,
-        properties: showResults ? allProperties.slice(0, 3) : [],
+        properties: showResults ? allProperties.slice(0, initialBatch) : [],
         all_properties: showResults ? allProperties : [],
         filters_used: filters,
         results_count: showResults ? resultsToUse.length : 0,
         broader_search: usedBroaderSearch,
         lead_saved: leadSaved,
+        lead_captured: leadAlreadyCaptured || leadSaved,
+        gate_active: gateStillActive,
         show_results: showResults,
         clear_results: !showResults,
       }),
