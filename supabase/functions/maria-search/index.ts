@@ -616,6 +616,19 @@ serve(async (req) => {
       });
     }
 
+    // 🚪 GATE DE CAPTAÇÃO: se já há resultados E o lead ainda não foi identificado,
+    // mostra apenas o 1º imóvel como teaser e segura o resto até pegar nome+WhatsApp.
+    let leadAlreadyCaptured = false;
+    if (sessionId) {
+      const { data: leadRow } = await supabase
+        .from("leads_maria")
+        .select("nome, telefone")
+        .eq("session_id", sessionId)
+        .maybeSingle();
+      leadAlreadyCaptured = !!(leadRow?.nome && leadRow?.telefone);
+    }
+    const gateActive = !leadAlreadyCaptured && resultsToUse.length >= 2;
+
     // Step 4: Generate conversational response
     let typeNote = "";
     if (filters.tipo_included && filters.tipo_included.length > 1 && resultsToUse.length > 0) {
@@ -631,9 +644,15 @@ serve(async (req) => {
       exclusionNote = `\n\nALERTA: O usuário EXCLUIU os tipos [${filters.tipo_excluded.join(", ")}]. NUNCA sugira esses tipos.`;
     }
 
+    const gateNote = gateActive
+      ? `\n\n🚪 GATE_ATIVO: Encontramos ${resultsToUse.length} imóveis ótimos. Você vai mostrar APENAS 1 (o primeiro = teaser) e segurar os outros ${resultsToUse.length - 1} atrás de uma CTA forte de captação. Use [SHOW_RESULTS] (vou mostrar 1 card). Mensagem deve: (1) celebrar que achou ${resultsToUse.length} opções pro perfil, (2) mostrar o teaser, (3) usar gatilho de escassez/exclusividade pedindo nome + WhatsApp pra liberar o resto. NUNCA peça e-mail. Tom humano e empolgado, sem soar robô.`
+      : leadAlreadyCaptured && resultsToUse.length > 0
+      ? `\n\n✅ LEAD_CAPTURADO: Esse usuário já é cadastrado. Só apresente os resultados naturalmente. NÃO peça contato de novo.`
+      : "";
+
     const propertyContext = resultsToUse.length > 0
-      ? `\n\nResultados encontrados (${resultsToUse.length} imóveis):\n${JSON.stringify(resultsToUse, null, 2)}${usedBroaderSearch ? "\n\nNOTA: A busca exata não retornou resultados. Estes são resultados de uma busca mais ampla (respeitando exclusões). Informe ao usuário e sugira ajustes nos filtros. Ao final, ofereça PROATIVAMENTE salvar a busca: 'Posso te avisar no WhatsApp assim que aparecer algo do jeitinho que você quer 💛 — quer que eu te avise?'" : ""}${typeNote}${exclusionNote}`
-      : `\n\nNenhum imóvel encontrado com os critérios informados (nem ampliando a busca). MODO CAPTADORA ATIVADO:\n1. Use [NO_RESULTS_YET] (não há cards pra mostrar).\n2. Seja honesta e acolhedora: diga que ainda não tem nada que case 100% com o que ele quer no nosso catálogo.\n3. OFEREÇA IMEDIATAMENTE salvar a busca: 'Mas posso te avisar pelo WhatsApp assim que chegar um imóvel desse perfil 💛 Aparecem novidades quase toda semana em Bombinhas. Topa? Me passa seu nome e WhatsApp.'\n4. NÃO sugira tipos que o usuário excluiu. NÃO invente imóveis.${exclusionNote}`;
+      ? `\n\nResultados encontrados (${resultsToUse.length} imóveis):\n${JSON.stringify(resultsToUse, null, 2)}${usedBroaderSearch ? "\n\nNOTA: A busca exata não retornou resultados. Estes são resultados de uma busca mais ampla (respeitando exclusões). Informe ao usuário e sugira ajustes nos filtros." : ""}${gateNote}${typeNote}${exclusionNote}`
+      : `\n\n🚨 SEM_RESULTADOS: Nenhum imóvel encontrado (nem ampliando). Use [NO_RESULTS_YET]. Seja honesta, acolhedora e ATAQUE COM CTA FORTE de captação seguindo o exemplo do prompt. NÃO invente imóveis.${exclusionNote}`;
 
     const conversationMessages = [
       { role: "system", content: SYSTEM_PROMPT + propertyContext },
