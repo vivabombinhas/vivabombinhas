@@ -105,7 +105,7 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
   });
 
   const updateLead = useMutation({
-    mutationFn: async (patch: Partial<Lead>) => {
+    mutationFn: async (patch: { next_followup_at?: string | null; last_contact_at?: string | null }) => {
       const { error } = await supabase.from("leads_maria").update(patch).eq("id", lead!.id);
       if (error) throw error;
     },
