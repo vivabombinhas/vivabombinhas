@@ -266,6 +266,12 @@ export default function AdminLeads() {
           </div>
         )}
       </main>
+
+      <LeadDetailSheet
+        lead={(leads?.find((l) => l.id === selectedLeadId) as never) ?? null}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+      />
     </div>
   );
 }
