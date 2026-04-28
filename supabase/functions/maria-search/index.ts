@@ -160,42 +160,78 @@ Mapeamento de sinônimos para tipos:
 
 Retorne APENAS o JSON, sem texto adicional.`;
 
-// Normaliza telefone BR. Retorna string '55DDDNUMERO' se válido (10-11 dígitos), null caso contrário.
-function normalizePhoneBR(raw: string | null | undefined): string | null {
+// Normaliza telefone BR (10-11 dígitos) ou AR (10-13 dígitos).
+// Retorna string com prefixo país (55... ou 54...) ou null se inválido.
+function normalizePhone(raw: string | null | undefined): string | null {
   if (!raw) return null;
-  let digits = String(raw).replace(/\D/g, "");
-  if (digits.startsWith("55") && digits.length > 11) digits = digits.slice(2);
+  const original = String(raw).trim();
+  let digits = original.replace(/\D/g, "");
+  if (!digits) return null;
+
+  // Detecta país explícito via "+"
+  const hasPlus54 = /^\+?\s*54/.test(original);
+  const hasPlus55 = /^\+?\s*55/.test(original);
+
+  if (hasPlus54 || (digits.startsWith("54") && digits.length >= 12)) {
+    if (digits.startsWith("54")) digits = digits.slice(2);
+    // AR aceita 10 (fixo/celular sem 9) ou 11 dígitos (celular com 9)
+    if (digits.length < 10 || digits.length > 11) return null;
+    return "54" + digits;
+  }
+
+  if (hasPlus55 || (digits.startsWith("55") && digits.length > 11)) {
+    if (digits.startsWith("55")) digits = digits.slice(2);
+  }
+
+  // BR padrão: 10 (fixo) ou 11 (celular com 9)
   if (digits.length < 10 || digits.length > 11) return null;
   return "55" + digits;
 }
 
-function extractPhoneCandidate(text: string): { normalized: string | null; hasInvalidShortPhone: boolean } {
-  const candidates = text.match(/(?:\+?55\s*)?(?:\(?\d{2}\)?\s*)?\d{4,5}[-\s]?\d{4}/g) || [];
-  const allDigits = text.replace(/\D/g, "");
-  if (allDigits.length >= 8 && allDigits.length <= 13) candidates.push(allDigits);
+// Extrai telefone da última mensagem do usuário. Aceita BR e AR.
+function extractPhoneFromText(text: string): { normalized: string | null; hasShortPhone: boolean } {
+  if (!text) return { normalized: null, hasShortPhone: false };
 
-  for (const candidate of candidates) {
-    const normalized = normalizePhoneBR(candidate);
-    if (normalized) return { normalized, hasInvalidShortPhone: false };
+  // Tenta padrões com possível prefixo internacional
+  const patterns = [
+    /\+?\s*5[45]\s*\d[\d\s().-]{8,15}/g,           // +54/+55 explícito
+    /\(?\s*\d{2,3}\s*\)?\s*9?\s*\d{4}[-\s.]?\d{4}/g, // BR/AR sem prefixo
+    /\d{10,13}/g,                                   // dígitos puros
+  ];
+
+  for (const re of patterns) {
+    const matches = text.match(re) || [];
+    for (const m of matches) {
+      const normalized = normalizePhone(m);
+      if (normalized) return { normalized, hasShortPhone: false };
+    }
   }
 
-  return { normalized: null, hasInvalidShortPhone: allDigits.length === 8 || allDigits.length === 9 };
+  // Fallback: pega o maior bloco de dígitos da mensagem
+  const allDigits = text.replace(/\D/g, "");
+  const normalized = normalizePhone(allDigits);
+  if (normalized) return { normalized, hasShortPhone: false };
+
+  // Se tinha algum número curto (8-9 dígitos), é provável telefone sem DDD
+  return { normalized: null, hasShortPhone: allDigits.length >= 8 && allDigits.length <= 9 };
 }
 
-function extractNameCandidate(text: string): string | null {
-  const withoutPhones = text
-    .replace(/(?:\+?55\s*)?(?:\(?\d{2}\)?\s*)?\d{4,5}[-\s]?\d{4}/g, " ")
-    .replace(/\d+/g, " ");
-
-  const cleaned = withoutPhones
-    .replace(/\b(meu nome é|me chamo|eu sou|sou|aqui é|nome|whats(?:app)?|telefone|celular|número|numero|meu|minha|é|e|,|:|-|\.)\b/gi, " ")
+// Extrai nome plausível removendo dígitos e palavras-stop comuns.
+function extractNameFromText(text: string): string | null {
+  if (!text) return null;
+  const cleaned = text
+    .replace(/\+?\d[\d\s().-]{6,}/g, " ")
+    .replace(/\d+/g, " ")
+    .replace(/\b(meu nome é|me chamo|eu sou|aqui é|nome|whats(?:app)?|telefone|celular|n[uú]mero|sou o|sou a|me\s+llamo|mi\s+nombre)\b/gi, " ")
+    .replace(/[,:;\-_/\\|()]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
   if (!cleaned || cleaned.length < 2 || cleaned.length > 80) return null;
   if (!/[A-Za-zÀ-ÿ]/.test(cleaned)) return null;
-  if (/^(sim|quero|ok|beleza|pode|manda|avisar|salvar|topo)$/i.test(cleaned)) return null;
-  return cleaned;
+  if (/^(sim|quero|ok|beleza|pode|manda|avisar|salvar|topo|claro|tá|ta|si|s[ií])$/i.test(cleaned)) return null;
+  // Pega no máximo 4 palavras (nome + sobrenome)
+  return cleaned.split(/\s+/).slice(0, 4).join(" ");
 }
 
 // Faz upsert do lead anônimo / identificado pelo session_id.
