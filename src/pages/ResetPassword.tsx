@@ -15,16 +15,49 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Supabase recovery link sets a session via hash; listen for PASSWORD_RECOVERY
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
         setReady(true);
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setReady(true);
-    });
+    (async () => {
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      const hash = window.location.hash;
+
+      try {
+        if (code) {
+          // PKCE flow: exchange ?code=... for a session
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+          setReady(true);
+          // Clean the URL
+          window.history.replaceState({}, "", window.location.pathname);
+          return;
+        }
+
+        if (hash.includes("access_token")) {
+          // Implicit flow: tokens in hash
+          const params = new URLSearchParams(hash.replace(/^#/, ""));
+          const access_token = params.get("access_token");
+          const refresh_token = params.get("refresh_token");
+          if (access_token && refresh_token) {
+            const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+            if (error) throw error;
+            setReady(true);
+            window.history.replaceState({}, "", window.location.pathname);
+            return;
+          }
+        }
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) setReady(true);
+        else toast.error("Link de recuperação inválido ou expirado. Solicite um novo.");
+      } catch (err: any) {
+        toast.error(err.message || "Não foi possível validar o link de recuperação.");
+      }
+    })();
 
     return () => subscription.unsubscribe();
   }, []);
