@@ -348,6 +348,42 @@ export type Database = {
           },
         ]
       }
+      lead_matches: {
+        Row: {
+          created_at: string
+          id: string
+          imovel_id: string
+          lead_id: string
+          match_reasons: string[] | null
+          notes: string | null
+          score: number
+          status: Database["public"]["Enums"]["match_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          imovel_id: string
+          lead_id: string
+          match_reasons?: string[] | null
+          notes?: string | null
+          score?: number
+          status?: Database["public"]["Enums"]["match_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          imovel_id?: string
+          lead_id?: string
+          match_reasons?: string[] | null
+          notes?: string | null
+          score?: number
+          status?: Database["public"]["Enums"]["match_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lead_notes: {
         Row: {
           content: string
@@ -451,6 +487,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      find_matching_leads: {
+        Args: { _imovel_id: string }
+        Returns: {
+          lead_id: string
+          reasons: string[]
+          score: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -458,10 +502,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      parse_faixa_preco: { Args: { faixa: string }; Returns: number[] }
     }
     Enums: {
       app_role: "admin" | "user"
       finalidade_imovel: "compra" | "aluguel_anual" | "temporada"
+      match_status: "pending" | "sent" | "converted" | "dismissed"
       origem_anuncio:
         | "manual"
         | "olx"
@@ -615,6 +661,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user"],
       finalidade_imovel: ["compra", "aluguel_anual", "temporada"],
+      match_status: ["pending", "sent", "converted", "dismissed"],
       origem_anuncio: [
         "manual",
         "olx",
