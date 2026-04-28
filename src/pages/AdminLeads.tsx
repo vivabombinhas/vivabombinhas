@@ -160,8 +160,18 @@ export default function AdminLeads() {
                 <SelectItem value="contatado">Contatado</SelectItem>
                 <SelectItem value="convertido">Convertido</SelectItem>
                 <SelectItem value="descartado">Descartado</SelectItem>
+                <SelectItem value="anonimo">Anônimo</SelectItem>
               </SelectContent>
             </Select>
+            <Button
+              variant={showAnonimos ? "default" : "ghost"}
+              size="sm"
+              className="h-9 text-xs"
+              onClick={() => setShowAnonimos((v) => !v)}
+              title="Mostrar leads anônimos (sem nome/telefone)"
+            >
+              {showAnonimos ? "Ocultar anônimos" : "Ver anônimos"}
+            </Button>
             <Button
               variant="ghost"
               size="icon"
