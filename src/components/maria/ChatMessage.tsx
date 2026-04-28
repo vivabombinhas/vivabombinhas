@@ -2,14 +2,17 @@ import ReactMarkdown from "react-markdown";
 import { Bot, User } from "lucide-react";
 import type { ChatMessage as ChatMessageType } from "@/hooks/useMariaChat";
 import { PropertyCard } from "./PropertyCard";
+import { LeadCaptureForm } from "./LeadCaptureForm";
 
 interface ChatMessageProps {
   message: ChatMessageType;
+  onSubmitLead?: (nome: string, telefone: string) => Promise<boolean>;
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({ message, onSubmitLead }: ChatMessageProps) {
   const isAssistant = message.role === "assistant";
   const hasProperties = isAssistant && message.properties && message.properties.length > 0;
+  const showLeadForm = isAssistant && message.showLeadForm && onSubmitLead;
 
   return (
     <div className={`flex gap-3 ${isAssistant ? "justify-start" : "justify-end"}`}>
