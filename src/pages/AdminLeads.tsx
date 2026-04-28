@@ -39,6 +39,8 @@ const INTERESSE_MAP: Record<string, string> = {
 
 export default function AdminLeads() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: leads, isLoading } = useQuery({
