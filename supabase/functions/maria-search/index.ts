@@ -76,23 +76,25 @@ REGRA CRÍTICA DE FORMATAÇÃO:
 - Se o usuário excluiu um tipo (ex: "não quero apartamento"), NUNCA sugira apartamentos nos resultados.
 - Se não houver resultados, sugira ampliar a busca por bairro, preço ou tipo. NÃO sugira o tipo que o usuário excluiu.
 
-FLUXO DE CAPTAÇÃO DE LEAD (importante!):
-- A captação agora é PRIORIDADE COMERCIAL. Quando houver busca com imóveis, o sistema pode segurar os cards e pedir contato antes de liberar detalhes.
-- Use CTA forte, curta e com urgência real: "Encontrei opções que batem com sua busca — imóveis de temporada em Bombinhas somem rápido. Me passa seu nome e WhatsApp com DDD que eu libero os detalhes e te aviso primeiro quando entrar novidade 🔥"
-- Peça SOMENTE nome e WhatsApp. NÃO peça e-mail e NÃO mencione e-mail opcional.
-- Se o usuário aceitar (ex: "quero", "sim", "pode salvar", "manda", "beleza", "topo"), peça:
-  "Perfeito! Me manda seu **nome e WhatsApp com DDD** numa mensagem só (ex: Juliana 41 99825-1888) que eu já libero as opções pra você. 🔥"
-- ⚠️ VALIDAÇÃO DE TELEFONE — REGRA CRÍTICA:
-  * O telefone DEVE ter DDD (10 ou 11 dígitos no total). Exemplos válidos: "41998251888", "47 99999-8888", "(47) 99999-8888", "47 9 9999-8888".
-  * "41998251888" É VÁLIDO: DDD 41 + número 99825-1888.
-  * Se o usuário mandar 8 ou 9 dígitos no total, aí sim falta DDD. Peça novamente.
-  * Só emita [LEAD_CAPTURE] quando tiver nome + telefone com DDD válido.
-- Quando o usuário fornecer nome e telefone válidos, responda com: [LEAD_CAPTURE] seguido de um JSON com os dados. Exemplo:
-  [LEAD_CAPTURE]{"nome":"João Silva","telefone":"47999998888","interesse":"aluguel_anual","bairro":"Bombas","tipo":"apartamento","faixa_preco":"até 3500"}
-  Depois do JSON, confirme de forma objetiva.
-- Se o usuário fornecer só telefone válido, NÃO diga que falta DDD. Diga que o WhatsApp foi recebido e peça apenas o nome.
-- Se o usuário fornecer só nome, peça apenas o WhatsApp com DDD.
-- NUNCA force a captação se o usuário recusar. Se recusou, continue ajudando normalmente.
+FLUXO DE CAPTAÇÃO DE LEAD (PRIORIDADE COMERCIAL MÁXIMA):
+- Captar nome + WhatsApp é OBJETIVO #1. NUNCA peça e-mail. NUNCA mencione e-mail.
+- Quando o SISTEMA indicar "GATE_ATIVO" no contexto, você ESTÁ segurando os melhores resultados. Mostre só o teaser e use uma CTA forte com escassez real e benefício claro. Exemplo:
+  "Achei [N] casas ótimas pro seu perfil em [bairro] 🔥 Aqui vai uma como prévia 👇 As outras são as mais procuradas e somem rápido na temporada — me passa seu **nome e WhatsApp** que eu libero todas agora e ainda te aviso em primeira mão quando entrar imóvel novo desse perfil. Leva 5 segundos 💛"
+- Quando o SISTEMA indicar "SEM_RESULTADOS", seja proativa e direta:
+  "Ainda não tenho exatamente isso no catálogo, MAS Bombinhas recebe novidades quase toda semana e tenho corretores caçando 24/7. Me passa seu **nome e WhatsApp** que eu te aviso em primeira mão quando aparecer 🔥 (sem spam, prometo)"
+- Quando o SISTEMA indicar "LEAD_CAPTURADO", apenas mostre/comente os imóveis normalmente. NÃO peça contato de novo.
+- ⚠️ TELEFONE — REGRA CRÍTICA (não erre):
+  * Aceite BR (10-11 dígitos com DDD) e AR (com +54 ou começando com 54).
+  * Exemplos VÁLIDOS BR: "41998251888", "47 99999-8888", "(11) 98765-4321".
+  * Exemplos VÁLIDOS AR: "+54 9 11 1234-5678", "541112345678".
+  * "41998251888" tem 11 dígitos = DDD 41 + 99825-1888 → VÁLIDO. Nunca diga que falta DDD nesse caso.
+  * Só rejeite se vier 8-9 dígitos puros (sem DDD).
+- Se o usuário fornecer nome E telefone válidos, responda com [LEAD_CAPTURE] + JSON e uma confirmação curta. Ex:
+  [LEAD_CAPTURE]{"nome":"João Silva","telefone":"47999998888","interesse":"temporada","bairro":"Zimbros","tipo":"casa","faixa_preco":"até 600"}
+  "Salvo, João! 🎉 Tô te enviando as outras opções agora e te aviso assim que rolar novidade no seu perfil."
+- Se o usuário deu só telefone válido → confirme recebido e peça só o nome.
+- Se deu só nome → peça só o WhatsApp.
+- Se recusar a captação → respeite e continue ajudando normalmente.
 
 Regras gerais:
 - Sempre seja simpática e prestativa
@@ -160,42 +162,78 @@ Mapeamento de sinônimos para tipos:
 
 Retorne APENAS o JSON, sem texto adicional.`;
 
-// Normaliza telefone BR. Retorna string '55DDDNUMERO' se válido (10-11 dígitos), null caso contrário.
-function normalizePhoneBR(raw: string | null | undefined): string | null {
+// Normaliza telefone BR (10-11 dígitos) ou AR (10-13 dígitos).
+// Retorna string com prefixo país (55... ou 54...) ou null se inválido.
+function normalizePhone(raw: string | null | undefined): string | null {
   if (!raw) return null;
-  let digits = String(raw).replace(/\D/g, "");
-  if (digits.startsWith("55") && digits.length > 11) digits = digits.slice(2);
+  const original = String(raw).trim();
+  let digits = original.replace(/\D/g, "");
+  if (!digits) return null;
+
+  // Detecta país explícito via "+"
+  const hasPlus54 = /^\+?\s*54/.test(original);
+  const hasPlus55 = /^\+?\s*55/.test(original);
+
+  if (hasPlus54 || (digits.startsWith("54") && digits.length >= 12)) {
+    if (digits.startsWith("54")) digits = digits.slice(2);
+    // AR aceita 10 (fixo/celular sem 9) ou 11 dígitos (celular com 9)
+    if (digits.length < 10 || digits.length > 11) return null;
+    return "54" + digits;
+  }
+
+  if (hasPlus55 || (digits.startsWith("55") && digits.length > 11)) {
+    if (digits.startsWith("55")) digits = digits.slice(2);
+  }
+
+  // BR padrão: 10 (fixo) ou 11 (celular com 9)
   if (digits.length < 10 || digits.length > 11) return null;
   return "55" + digits;
 }
 
-function extractPhoneCandidate(text: string): { normalized: string | null; hasInvalidShortPhone: boolean } {
-  const candidates = text.match(/(?:\+?55\s*)?(?:\(?\d{2}\)?\s*)?\d{4,5}[-\s]?\d{4}/g) || [];
-  const allDigits = text.replace(/\D/g, "");
-  if (allDigits.length >= 8 && allDigits.length <= 13) candidates.push(allDigits);
+// Extrai telefone da última mensagem do usuário. Aceita BR e AR.
+function extractPhoneFromText(text: string): { normalized: string | null; hasShortPhone: boolean } {
+  if (!text) return { normalized: null, hasShortPhone: false };
 
-  for (const candidate of candidates) {
-    const normalized = normalizePhoneBR(candidate);
-    if (normalized) return { normalized, hasInvalidShortPhone: false };
+  // Tenta padrões com possível prefixo internacional
+  const patterns = [
+    /\+?\s*5[45]\s*\d[\d\s().-]{8,15}/g,           // +54/+55 explícito
+    /\(?\s*\d{2,3}\s*\)?\s*9?\s*\d{4}[-\s.]?\d{4}/g, // BR/AR sem prefixo
+    /\d{10,13}/g,                                   // dígitos puros
+  ];
+
+  for (const re of patterns) {
+    const matches = text.match(re) || [];
+    for (const m of matches) {
+      const normalized = normalizePhone(m);
+      if (normalized) return { normalized, hasShortPhone: false };
+    }
   }
 
-  return { normalized: null, hasInvalidShortPhone: allDigits.length === 8 || allDigits.length === 9 };
+  // Fallback: pega o maior bloco de dígitos da mensagem
+  const allDigits = text.replace(/\D/g, "");
+  const normalized = normalizePhone(allDigits);
+  if (normalized) return { normalized, hasShortPhone: false };
+
+  // Se tinha algum número curto (8-9 dígitos), é provável telefone sem DDD
+  return { normalized: null, hasShortPhone: allDigits.length >= 8 && allDigits.length <= 9 };
 }
 
-function extractNameCandidate(text: string): string | null {
-  const withoutPhones = text
-    .replace(/(?:\+?55\s*)?(?:\(?\d{2}\)?\s*)?\d{4,5}[-\s]?\d{4}/g, " ")
-    .replace(/\d+/g, " ");
-
-  const cleaned = withoutPhones
-    .replace(/\b(meu nome é|me chamo|eu sou|sou|aqui é|nome|whats(?:app)?|telefone|celular|número|numero|meu|minha|é|e|,|:|-|\.)\b/gi, " ")
+// Extrai nome plausível removendo dígitos e palavras-stop comuns.
+function extractNameFromText(text: string): string | null {
+  if (!text) return null;
+  const cleaned = text
+    .replace(/\+?\d[\d\s().-]{6,}/g, " ")
+    .replace(/\d+/g, " ")
+    .replace(/\b(meu nome é|me chamo|eu sou|aqui é|nome|whats(?:app)?|telefone|celular|n[uú]mero|sou o|sou a|me\s+llamo|mi\s+nombre)\b/gi, " ")
+    .replace(/[,:;\-_/\\|()]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
   if (!cleaned || cleaned.length < 2 || cleaned.length > 80) return null;
   if (!/[A-Za-zÀ-ÿ]/.test(cleaned)) return null;
-  if (/^(sim|quero|ok|beleza|pode|manda|avisar|salvar|topo)$/i.test(cleaned)) return null;
-  return cleaned;
+  if (/^(sim|quero|ok|beleza|pode|manda|avisar|salvar|topo|claro|tá|ta|si|s[ií])$/i.test(cleaned)) return null;
+  // Pega no máximo 4 palavras (nome + sobrenome)
+  return cleaned.split(/\s+/).slice(0, 4).join(" ");
 }
 
 // Faz upsert do lead anônimo / identificado pelo session_id.
@@ -315,6 +353,66 @@ serve(async (req) => {
     const isConversation = filters.intent === "conversation";
 
     if (isConversation) {
+      // Verifica se já existe lead identificado nessa sessão (pra contexto da MarIA)
+      const { data: existingForCtx } = sessionId
+        ? await supabase.from("leads_maria").select("id, nome, telefone").eq("session_id", sessionId).maybeSingle()
+        : { data: null };
+      const alreadyCaptured = !!(existingForCtx?.nome && existingForCtx?.telefone);
+
+      // ⚡ PRÉ-PARSER DETERMINÍSTICO: tenta capturar nome+telefone da última msg
+      // ANTES de chamar o LLM. Isso elimina o bug do "falta DDD" em números válidos.
+      if (!alreadyCaptured && sessionId) {
+        const phoneInfo = extractPhoneFromText(userMessage);
+        // Tenta combinar com mensagens recentes do usuário (caso tenha mandado nome em msg anterior)
+        const recentUserMsgs = messages
+          .filter((m: { role: string }) => m.role === "user")
+          .slice(-3)
+          .map((m: { content: string }) => m.content)
+          .join(" ");
+        const nameCandidate = extractNameFromText(userMessage) || extractNameFromText(recentUserMsgs);
+
+        if (phoneInfo.normalized && nameCandidate) {
+          // Captura completa! Salva direto e responde.
+          const leadId = await upsertLeadBySession(supabase, sessionId, {
+            nome: nameCandidate,
+            telefone: phoneInfo.normalized,
+            mensagem_original: recentUserMsgs.slice(0, 500),
+            status: "novo",
+          });
+          if (leadId) {
+            const reply = `Salvo, ${nameCandidate.split(" ")[0]}! 🎉 Vou te avisar em primeira mão pelo WhatsApp assim que aparecer um imóvel desse perfil. Quer que eu já liste outras opções pra você dar uma olhada agora?`;
+            await saveLastConversationTurn(supabase, leadId, userMessage, reply);
+            return new Response(
+              JSON.stringify({
+                reply, properties: [], all_properties: [], filters_used: {},
+                results_count: 0, broader_search: false, lead_saved: true,
+                show_results: false, clear_results: false,
+              }),
+              { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        }
+
+        if (phoneInfo.normalized && !nameCandidate) {
+          // Só telefone — salva e pede o nome
+          await upsertLeadBySession(supabase, sessionId, {
+            telefone: phoneInfo.normalized,
+            mensagem_original: recentUserMsgs.slice(0, 500),
+          });
+          const reply = "Anotei o WhatsApp! 📲 Só me diz seu **nome** que eu finalizo seu cadastro e já te aviso assim que rolar novidade.";
+          const { data: lead } = await supabase.from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
+          if (lead?.id) await saveLastConversationTurn(supabase, lead.id, userMessage, reply);
+          return new Response(
+            JSON.stringify({
+              reply, properties: [], all_properties: [], filters_used: {},
+              results_count: 0, broader_search: false, lead_saved: false,
+              show_results: false, clear_results: false,
+            }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+
       // Generate conversational response without any property context
       const conversationMessages = [
         { role: "system", content: SYSTEM_PROMPT + "\n\nEsta mensagem NÃO é uma busca de imóveis. É uma mensagem conversacional. Use [NO_RESULTS_YET] obrigatoriamente. NÃO mencione imóveis encontrados, NÃO mostre resultados. Responda de forma natural e amigável." },
@@ -349,10 +447,11 @@ serve(async (req) => {
       if (leadMatch) {
         try {
           const leadData = JSON.parse(leadMatch[1]);
-          const normalizedPhone = normalizePhoneBR(leadData.telefone);
+          // Tenta o telefone do JSON; se inválido, faz fallback pra mensagem do usuário
+          const normalizedPhone = normalizePhone(leadData.telefone) || extractPhoneFromText(userMessage).normalized;
           if (!normalizedPhone) {
-            // Telefone inválido (sem DDD) — não salva, devolve mensagem pedindo de novo
-            assistantMessage = "Quase lá! 😊 Faltou o DDD da sua cidade no número. Pode me mandar o WhatsApp completo? Ex: 47 99999-8888";
+            // Telefone realmente inválido — não salva, devolve mensagem pedindo de novo
+            assistantMessage = "Quase lá! 😊 Pra eu te avisar pelo WhatsApp preciso do número com DDD. Ex: 47 99999-8888 (ou +54 11 1234-5678 pra Argentina).";
           } else {
             const previousFilters = messages
               .filter((m: { role: string }) => m.role === "user")
@@ -361,7 +460,6 @@ serve(async (req) => {
             const leadId = await upsertLeadBySession(supabase, sessionId, {
               nome: leadData.nome,
               telefone: normalizedPhone,
-              email: leadData.email || null,
               interesse: leadData.interesse || null,
               bairro_interesse: leadData.bairro || null,
               tipo_imovel: leadData.tipo || null,
@@ -518,6 +616,19 @@ serve(async (req) => {
       });
     }
 
+    // 🚪 GATE DE CAPTAÇÃO: se já há resultados E o lead ainda não foi identificado,
+    // mostra apenas o 1º imóvel como teaser e segura o resto até pegar nome+WhatsApp.
+    let leadAlreadyCaptured = false;
+    if (sessionId) {
+      const { data: leadRow } = await supabase
+        .from("leads_maria")
+        .select("nome, telefone")
+        .eq("session_id", sessionId)
+        .maybeSingle();
+      leadAlreadyCaptured = !!(leadRow?.nome && leadRow?.telefone);
+    }
+    const gateActive = !leadAlreadyCaptured && resultsToUse.length >= 2;
+
     // Step 4: Generate conversational response
     let typeNote = "";
     if (filters.tipo_included && filters.tipo_included.length > 1 && resultsToUse.length > 0) {
@@ -533,9 +644,15 @@ serve(async (req) => {
       exclusionNote = `\n\nALERTA: O usuário EXCLUIU os tipos [${filters.tipo_excluded.join(", ")}]. NUNCA sugira esses tipos.`;
     }
 
+    const gateNote = gateActive
+      ? `\n\n🚪 GATE_ATIVO: Encontramos ${resultsToUse.length} imóveis ótimos. Você vai mostrar APENAS 1 (o primeiro = teaser) e segurar os outros ${resultsToUse.length - 1} atrás de uma CTA forte de captação. Use [SHOW_RESULTS] (vou mostrar 1 card). Mensagem deve: (1) celebrar que achou ${resultsToUse.length} opções pro perfil, (2) mostrar o teaser, (3) usar gatilho de escassez/exclusividade pedindo nome + WhatsApp pra liberar o resto. NUNCA peça e-mail. Tom humano e empolgado, sem soar robô.`
+      : leadAlreadyCaptured && resultsToUse.length > 0
+      ? `\n\n✅ LEAD_CAPTURADO: Esse usuário já é cadastrado. Só apresente os resultados naturalmente. NÃO peça contato de novo.`
+      : "";
+
     const propertyContext = resultsToUse.length > 0
-      ? `\n\nResultados encontrados (${resultsToUse.length} imóveis):\n${JSON.stringify(resultsToUse, null, 2)}${usedBroaderSearch ? "\n\nNOTA: A busca exata não retornou resultados. Estes são resultados de uma busca mais ampla (respeitando exclusões). Informe ao usuário e sugira ajustes nos filtros. Ao final, ofereça PROATIVAMENTE salvar a busca: 'Posso te avisar no WhatsApp assim que aparecer algo do jeitinho que você quer 💛 — quer que eu te avise?'" : ""}${typeNote}${exclusionNote}`
-      : `\n\nNenhum imóvel encontrado com os critérios informados (nem ampliando a busca). MODO CAPTADORA ATIVADO:\n1. Use [NO_RESULTS_YET] (não há cards pra mostrar).\n2. Seja honesta e acolhedora: diga que ainda não tem nada que case 100% com o que ele quer no nosso catálogo.\n3. OFEREÇA IMEDIATAMENTE salvar a busca: 'Mas posso te avisar pelo WhatsApp assim que chegar um imóvel desse perfil 💛 Aparecem novidades quase toda semana em Bombinhas. Topa? Me passa seu nome e WhatsApp.'\n4. NÃO sugira tipos que o usuário excluiu. NÃO invente imóveis.${exclusionNote}`;
+      ? `\n\nResultados encontrados (${resultsToUse.length} imóveis):\n${JSON.stringify(resultsToUse, null, 2)}${usedBroaderSearch ? "\n\nNOTA: A busca exata não retornou resultados. Estes são resultados de uma busca mais ampla (respeitando exclusões). Informe ao usuário e sugira ajustes nos filtros." : ""}${gateNote}${typeNote}${exclusionNote}`
+      : `\n\n🚨 SEM_RESULTADOS: Nenhum imóvel encontrado (nem ampliando). Use [NO_RESULTS_YET]. Seja honesta, acolhedora e ATAQUE COM CTA FORTE de captação seguindo o exemplo do prompt. NÃO invente imóveis.${exclusionNote}`;
 
     const conversationMessages = [
       { role: "system", content: SYSTEM_PROMPT + propertyContext },
@@ -577,9 +694,9 @@ serve(async (req) => {
     if (leadMatch) {
       try {
         const leadData = JSON.parse(leadMatch[1]);
-        const normalizedPhone = normalizePhoneBR(leadData.telefone);
+        const normalizedPhone = normalizePhone(leadData.telefone) || extractPhoneFromText(userMessage).normalized;
         if (!normalizedPhone) {
-          assistantMessage = "Quase lá! 😊 Faltou o DDD da sua cidade no número. Pode me mandar o WhatsApp completo? Ex: 47 99999-8888";
+          assistantMessage = "Quase lá! 😊 Pra eu te avisar pelo WhatsApp preciso do número com DDD. Ex: 47 99999-8888 (ou +54 11 1234-5678 pra Argentina).";
         } else {
           const previousFilters = messages
             .filter((m: { role: string }) => m.role === "user")
@@ -588,7 +705,6 @@ serve(async (req) => {
           const leadId = await upsertLeadBySession(supabase, sessionId, {
             nome: leadData.nome,
             telefone: normalizedPhone,
-            email: leadData.email || null,
             interesse: filters.finalidade || leadData.interesse || null,
             bairro_interesse: filters.bairro || leadData.bairro || null,
             tipo_imovel: filters.tipo || leadData.tipo || null,
@@ -658,15 +774,22 @@ serve(async (req) => {
       };
     });
 
+    // Se o gate ainda está ativo (lead não capturado nessa request), mostra só 1 imóvel teaser.
+    // Se o lead foi capturado nessa mesma request, libera tudo.
+    const gateStillActive = gateActive && !leadSaved;
+    const initialBatch = gateStillActive ? 1 : 3;
+
     return new Response(
       JSON.stringify({
         reply: assistantMessage,
-        properties: showResults ? allProperties.slice(0, 3) : [],
+        properties: showResults ? allProperties.slice(0, initialBatch) : [],
         all_properties: showResults ? allProperties : [],
         filters_used: filters,
         results_count: showResults ? resultsToUse.length : 0,
         broader_search: usedBroaderSearch,
         lead_saved: leadSaved,
+        lead_captured: leadAlreadyCaptured || leadSaved,
+        gate_active: gateStillActive,
         show_results: showResults,
         clear_results: !showResults,
       }),
