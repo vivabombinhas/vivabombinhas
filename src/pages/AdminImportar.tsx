@@ -392,11 +392,8 @@ export default function AdminImportar() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b border-border bg-card/60">
         <div className="container flex items-center gap-4 py-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
           <div className="flex-1">
             <h1 className="text-xl font-bold text-foreground">Importar Imóveis em Lote</h1>
             <p className="text-sm text-muted-foreground">CSV ou planilha (.xlsx) com validação e deduplicação automáticas</p>
