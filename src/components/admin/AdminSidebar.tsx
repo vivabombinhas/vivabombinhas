@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard,
   Users,
@@ -7,6 +8,7 @@ import {
   Link2,
   FileSpreadsheet,
   LogOut,
+  CalendarClock,
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,6 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const mainItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true },
+  { title: "Follow-ups", url: "/admin/followups", icon: CalendarClock, badgeKey: "followups" as const },
   { title: "Leads", url: "/admin/leads", icon: Users },
   { title: "Matches", url: "/admin/matches", icon: Sparkles },
 ];
@@ -42,6 +45,27 @@ export function AdminSidebar() {
 
   const isActive = (url: string, exact?: boolean) =>
     exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
+
+  // Badge: leads com follow-up vencido ou para hoje
+  const { data: followupBadge } = useQuery({
+    queryKey: ["sidebar_followup_badge"],
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const endOfToday = new Date();
+      endOfToday.setHours(23, 59, 59, 999);
+      const { count } = await supabase
+        .from("leads_maria")
+        .select("id", { count: "exact", head: true })
+        .not("next_followup_at", "is", null)
+        .lte("next_followup_at", endOfToday.toISOString())
+        .neq("status", "convertido")
+        .neq("status", "descartado")
+        .neq("status", "anonimo");
+      return count ?? 0;
+    },
+  });
+
+  const badges: Record<string, number | undefined> = { followups: followupBadge };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -69,16 +93,24 @@ export function AdminSidebar() {
           <SidebarGroupLabel>Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url, item.exact)} tooltip={item.title}>
-                    <NavLink to={item.url} end={item.exact}>
-                      <item.icon className="w-4 h-4" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {mainItems.map((item) => {
+                const badge = item.badgeKey ? badges[item.badgeKey] : undefined;
+                return (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton asChild isActive={isActive(item.url, item.exact)} tooltip={item.title}>
+                      <NavLink to={item.url} end={item.exact} className="flex items-center w-full">
+                        <item.icon className="w-4 h-4" />
+                        <span className="flex-1">{item.title}</span>
+                        {!collapsed && badge && badge > 0 && (
+                          <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold">
+                            {badge}
+                          </span>
+                        )}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

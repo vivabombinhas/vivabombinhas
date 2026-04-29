@@ -8,6 +8,7 @@ import {
   TrendingUp,
   MessageSquare,
   ArrowRight,
+  CalendarClock,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -30,6 +31,8 @@ export default function AdminDashboard() {
     queryFn: async () => {
       const today = startOfToday();
       const weekAgo = startOfWeek();
+      const endOfToday = new Date(); endOfToday.setHours(23, 59, 59, 999);
+      const nowIso = new Date().toISOString();
 
       const [
         leadsHoje,
@@ -39,6 +42,8 @@ export default function AdminDashboard() {
         matchesAltoScore,
         imoveisAtivos,
         submissoesPendentes,
+        followupsAtrasados,
+        followupsHoje,
         ultimosLeads,
         topMatches,
       ] = await Promise.all([
@@ -49,6 +54,8 @@ export default function AdminDashboard() {
         supabase.from("lead_matches").select("*", { count: "exact", head: true }).eq("status", "pending").gte("score", 70),
         supabase.from("imoveis").select("*", { count: "exact", head: true }).eq("status", "ativo"),
         supabase.from("imoveis_submissions").select("*", { count: "exact", head: true }).eq("status_submission", "pendente"),
+        supabase.from("leads_maria").select("*", { count: "exact", head: true }).not("next_followup_at", "is", null).lt("next_followup_at", nowIso).neq("status", "convertido").neq("status", "descartado").neq("status", "anonimo"),
+        supabase.from("leads_maria").select("*", { count: "exact", head: true }).not("next_followup_at", "is", null).gte("next_followup_at", nowIso).lte("next_followup_at", endOfToday.toISOString()).neq("status", "convertido").neq("status", "descartado").neq("status", "anonimo"),
         supabase.from("leads_maria").select("id, nome, telefone, bairro_interesse, tipo_imovel, status, created_at").neq("status", "anonimo").order("created_at", { ascending: false }).limit(5),
         supabase.from("lead_matches").select("id, score, match_reasons, lead_id, imovel_id, created_at, leads_maria(nome, telefone), imoveis(titulo, bairro)").eq("status", "pending").order("score", { ascending: false }).limit(5),
       ]);
@@ -61,6 +68,8 @@ export default function AdminDashboard() {
         matchesAltoScore: matchesAltoScore.count || 0,
         imoveisAtivos: imoveisAtivos.count || 0,
         submissoesPendentes: submissoesPendentes.count || 0,
+        followupsAtrasados: followupsAtrasados.count || 0,
+        followupsHoje: followupsHoje.count || 0,
         ultimosLeads: ultimosLeads.data || [],
         topMatches: topMatches.data || [],
       };
@@ -69,19 +78,21 @@ export default function AdminDashboard() {
 
   const cards = [
     {
-      title: "Leads hoje",
-      value: stats?.leadsHoje ?? "—",
-      sub: `${stats?.leadsSemana ?? 0} nos últimos 7 dias`,
-      icon: Users,
-      color: "text-blue-600 bg-blue-500/10",
-      to: "/admin/leads",
+      title: "Follow-ups",
+      value: (stats?.followupsAtrasados ?? 0) + (stats?.followupsHoje ?? 0),
+      sub: `${stats?.followupsAtrasados ?? 0} atrasados · ${stats?.followupsHoje ?? 0} hoje`,
+      icon: CalendarClock,
+      color: (stats?.followupsAtrasados ?? 0) > 0
+        ? "text-red-600 bg-red-500/10"
+        : "text-amber-600 bg-amber-500/10",
+      to: "/admin/followups",
     },
     {
       title: "Leads novos",
       value: stats?.leadsNovos ?? "—",
-      sub: "Aguardando contato",
+      sub: "Aguardando primeiro contato",
       icon: MessageSquare,
-      color: "text-amber-600 bg-amber-500/10",
+      color: "text-blue-600 bg-blue-500/10",
       to: "/admin/leads",
     },
     {
@@ -93,11 +104,19 @@ export default function AdminDashboard() {
       to: "/admin/matches",
     },
     {
+      title: "Leads (7 dias)",
+      value: stats?.leadsSemana ?? "—",
+      sub: `${stats?.leadsHoje ?? 0} hoje`,
+      icon: Users,
+      color: "text-purple-600 bg-purple-500/10",
+      to: "/admin/leads",
+    },
+    {
       title: "Imóveis ativos",
       value: stats?.imoveisAtivos ?? "—",
       sub: `${stats?.submissoesPendentes ?? 0} submissões pendentes`,
       icon: Home,
-      color: "text-purple-600 bg-purple-500/10",
+      color: "text-cyan-600 bg-cyan-500/10",
       to: "/admin/submissions",
     },
   ];
@@ -116,7 +135,7 @@ export default function AdminDashboard() {
 
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {cards.map((c) => (
             <Link
               key={c.title}
