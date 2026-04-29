@@ -161,6 +161,33 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
             {lead.tipo_imovel && <Badge variant="secondary" className="text-[10px]">{lead.tipo_imovel}</Badge>}
             {lead.faixa_preco && <Badge variant="secondary" className="text-[10px]">{lead.faixa_preco}</Badge>}
           </div>
+
+          {lead.telefone && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700 mt-2">
+                  <MessageCircle className="w-4 h-4" /> Enviar mensagem pronta
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[320px]">
+                <DropdownMenuLabel>Templates de WhatsApp</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {WHATSAPP_TEMPLATES.map((t) => (
+                  <DropdownMenuItem
+                    key={t.id}
+                    onClick={() => {
+                      const link = buildWhatsappLink(lead.telefone!, t.build(lead));
+                      window.open(link, "_blank", "noopener,noreferrer");
+                    }}
+                    className="flex flex-col items-start gap-0.5 py-2"
+                  >
+                    <span className="text-sm font-medium">{t.label}</span>
+                    <span className="text-[10px] text-muted-foreground">{t.description}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </section>
 
         <Separator className="my-4" />
@@ -170,6 +197,32 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
           <h3 className="text-sm font-semibold flex items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" /> Próximo follow-up
           </h3>
+
+          {/* Atalhos rápidos */}
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { label: "Amanhã", days: 1 },
+              { label: "+3 dias", days: 3 },
+              { label: "+1 semana", days: 7 },
+              { label: "+2 semanas", days: 14 },
+            ].map((opt) => (
+              <Button
+                key={opt.days}
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => {
+                  const d = new Date();
+                  d.setDate(d.getDate() + opt.days);
+                  d.setHours(10, 0, 0, 0);
+                  updateLead.mutate({ next_followup_at: d.toISOString() });
+                }}
+              >
+                {opt.label}
+              </Button>
+            ))}
+          </div>
+
           <div className="flex gap-2">
             <Input
               type="datetime-local"
@@ -188,7 +241,7 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Último contato: {formatDateTime(lead.last_contact_at)}
+            Agendado: {formatDateTime(lead.next_followup_at)} · Último contato: {formatDateTime(lead.last_contact_at)}
           </p>
           <Button
             variant="outline"
