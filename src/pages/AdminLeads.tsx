@@ -67,17 +67,7 @@ export default function AdminLeads() {
     },
   });
 
-  const { data: pendingMatches } = useQuery({
-    queryKey: ["lead_matches_pending_count"],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("lead_matches")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "pending");
-      if (error) throw error;
-      return count || 0;
-    },
-  });
+
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: LeadStatus }) => {
