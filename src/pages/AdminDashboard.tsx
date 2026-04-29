@@ -9,8 +9,12 @@ import {
   MessageSquare,
   ArrowRight,
   CalendarClock,
+  DollarSign,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+
+const fmtBRL = (v: number) =>
+  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
 function startOfToday() {
   const d = new Date();
@@ -46,6 +50,7 @@ export default function AdminDashboard() {
         followupsHoje,
         ultimosLeads,
         topMatches,
+        revenue,
       ] = await Promise.all([
         supabase.from("leads_maria").select("*", { count: "exact", head: true }).gte("created_at", today).neq("status", "anonimo"),
         supabase.from("leads_maria").select("*", { count: "exact", head: true }).gte("created_at", weekAgo).neq("status", "anonimo"),
@@ -58,7 +63,14 @@ export default function AdminDashboard() {
         supabase.from("leads_maria").select("*", { count: "exact", head: true }).not("next_followup_at", "is", null).gte("next_followup_at", nowIso).lte("next_followup_at", endOfToday.toISOString()).neq("status", "convertido").neq("status", "descartado").neq("status", "anonimo"),
         supabase.from("leads_maria").select("id, nome, telefone, bairro_interesse, tipo_imovel, status, created_at").neq("status", "anonimo").order("created_at", { ascending: false }).limit(5),
         supabase.from("lead_matches").select("id, score, match_reasons, lead_id, imovel_id, created_at, leads_maria(nome, telefone), imoveis(titulo, bairro)").eq("status", "pending").order("score", { ascending: false }).limit(5),
+        supabase.from("lead_revenue").select("status, valor_previsto, valor_pago"),
       ]);
+
+      const revList = (revenue.data || []) as Array<{ status: string; valor_previsto: number | null; valor_pago: number | null }>;
+      const previstoAtivo = revList
+        .filter((r) => r.status !== "cancelado" && r.status !== "pago")
+        .reduce((a, r) => a + (Number(r.valor_previsto) || 0), 0);
+      const pago = revList.reduce((a, r) => a + (Number(r.valor_pago) || 0), 0);
 
       return {
         leadsHoje: leadsHoje.count || 0,
@@ -72,6 +84,8 @@ export default function AdminDashboard() {
         followupsHoje: followupsHoje.count || 0,
         ultimosLeads: ultimosLeads.data || [],
         topMatches: topMatches.data || [],
+        previstoAtivo,
+        pago,
       };
     },
   });
