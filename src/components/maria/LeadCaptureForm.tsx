@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 
 interface LeadCaptureFormProps {
   remainingCount: number;
+  isAlertMode?: boolean; // true quando é "sem resultados → alerta"
   onSubmit: (nome: string, telefone: string) => Promise<boolean>;
 }
 
