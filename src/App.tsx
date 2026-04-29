@@ -28,6 +28,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/maria" element={<MariaChat />} />
           <Route path="/anuncie" element={<Anunciar />} />
+          <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
           <Route path="/admin/leads" element={<ProtectedAdminRoute><AdminLeads /></ProtectedAdminRoute>} />
           <Route path="/admin/submissions" element={<ProtectedAdminRoute><AdminSubmissions /></ProtectedAdminRoute>} />
           <Route path="/admin/importar" element={<ProtectedAdminRoute><AdminImportar /></ProtectedAdminRoute>} />
