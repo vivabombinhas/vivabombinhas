@@ -1,0 +1,263 @@
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
+import {
+  Users,
+  Home,
+  Sparkles,
+  ClipboardList,
+  TrendingUp,
+  MessageSquare,
+  ArrowRight,
+  LogOut,
+  Zap,
+  FileSpreadsheet,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString();
+}
+
+function startOfWeek() {
+  const d = new Date();
+  d.setDate(d.getDate() - 7);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString();
+}
+
+export default function AdminDashboard() {
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["admin_dashboard_stats"],
+    queryFn: async () => {
+      const today = startOfToday();
+      const weekAgo = startOfWeek();
+
+      const [
+        leadsHoje,
+        leadsSemana,
+        leadsNovos,
+        matchesPendentes,
+        matchesAltoScore,
+        imoveisAtivos,
+        submissoesPendentes,
+        ultimosLeads,
+        topMatches,
+      ] = await Promise.all([
+        supabase.from("leads_maria").select("*", { count: "exact", head: true }).gte("created_at", today).neq("status", "anonimo"),
+        supabase.from("leads_maria").select("*", { count: "exact", head: true }).gte("created_at", weekAgo).neq("status", "anonimo"),
+        supabase.from("leads_maria").select("*", { count: "exact", head: true }).eq("status", "novo"),
+        supabase.from("lead_matches").select("*", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("lead_matches").select("*", { count: "exact", head: true }).eq("status", "pending").gte("score", 70),
+        supabase.from("imoveis").select("*", { count: "exact", head: true }).eq("status", "ativo"),
+        supabase.from("imoveis_submissions").select("*", { count: "exact", head: true }).eq("status_submission", "pendente"),
+        supabase.from("leads_maria").select("id, nome, telefone, bairro_interesse, tipo_imovel, status, created_at").neq("status", "anonimo").order("created_at", { ascending: false }).limit(5),
+        supabase.from("lead_matches").select("id, score, match_reasons, lead_id, imovel_id, created_at, leads_maria(nome, telefone), imoveis(titulo, bairro)").eq("status", "pending").order("score", { ascending: false }).limit(5),
+      ]);
+
+      return {
+        leadsHoje: leadsHoje.count || 0,
+        leadsSemana: leadsSemana.count || 0,
+        leadsNovos: leadsNovos.count || 0,
+        matchesPendentes: matchesPendentes.count || 0,
+        matchesAltoScore: matchesAltoScore.count || 0,
+        imoveisAtivos: imoveisAtivos.count || 0,
+        submissoesPendentes: submissoesPendentes.count || 0,
+        ultimosLeads: ultimosLeads.data || [],
+        topMatches: topMatches.data || [],
+      };
+    },
+  });
+
+  const cards = [
+    {
+      title: "Leads hoje",
+      value: stats?.leadsHoje ?? "—",
+      sub: `${stats?.leadsSemana ?? 0} nos últimos 7 dias`,
+      icon: Users,
+      color: "text-blue-600 bg-blue-500/10",
+      to: "/admin/leads",
+    },
+    {
+      title: "Leads novos",
+      value: stats?.leadsNovos ?? "—",
+      sub: "Aguardando contato",
+      icon: MessageSquare,
+      color: "text-amber-600 bg-amber-500/10",
+      to: "/admin/leads",
+    },
+    {
+      title: "Matches pendentes",
+      value: stats?.matchesPendentes ?? "—",
+      sub: `${stats?.matchesAltoScore ?? 0} com score ≥ 70`,
+      icon: Sparkles,
+      color: "text-emerald-600 bg-emerald-500/10",
+      to: "/admin/matches",
+    },
+    {
+      title: "Imóveis ativos",
+      value: stats?.imoveisAtivos ?? "—",
+      sub: `${stats?.submissoesPendentes ?? 0} submissões pendentes`,
+      icon: Home,
+      color: "text-purple-600 bg-purple-500/10",
+      to: "/admin/submissions",
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border bg-card sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-primary" />
+            <h1 className="font-semibold">Dashboard Admin</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link to="/admin/matches">
+              <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                <Zap className="w-4 h-4" />
+                <span className="hidden sm:inline">Matches</span>
+              </Button>
+            </Link>
+            <Link to="/admin/leads">
+              <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                <Users className="w-4 h-4" />
+                <span className="hidden sm:inline">Leads</span>
+              </Button>
+            </Link>
+            <Link to="/admin/submissions">
+              <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                <ClipboardList className="w-4 h-4" />
+                <span className="hidden sm:inline">Submissões</span>
+              </Button>
+            </Link>
+            <Link to="/admin/importar">
+              <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                <FileSpreadsheet className="w-4 h-4" />
+                <span className="hidden sm:inline">CSV</span>
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full text-muted-foreground hover:text-destructive"
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = "/admin/leads";
+              }}
+              title="Sair"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {cards.map((c) => (
+            <Link
+              key={c.title}
+              to={c.to}
+              className="bg-card border border-border rounded-xl p-4 shadow-sm hover:shadow-md transition group"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${c.color}`}>
+                  <c.icon className="w-5 h-5" />
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition" />
+              </div>
+              <div className="text-2xl font-bold">
+                {isLoading ? <span className="inline-block w-10 h-7 bg-muted rounded animate-pulse" /> : c.value}
+              </div>
+              <div className="text-sm text-muted-foreground mt-0.5">{c.title}</div>
+              <div className="text-xs text-muted-foreground mt-2">{c.sub}</div>
+            </Link>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Últimos leads */}
+          <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary" />
+                Últimos leads
+              </h2>
+              <Link to="/admin/leads" className="text-xs text-primary hover:underline">
+                Ver todos
+              </Link>
+            </div>
+            {isLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-12 bg-muted rounded animate-pulse" />
+                ))}
+              </div>
+            ) : !stats?.ultimosLeads?.length ? (
+              <p className="text-sm text-muted-foreground text-center py-6">Nenhum lead ainda</p>
+            ) : (
+              <ul className="space-y-2">
+                {stats.ultimosLeads.map((l: any) => (
+                  <li key={l.id} className="flex items-center justify-between gap-2 py-2 border-b border-border last:border-0">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium truncate">{l.nome || "Sem nome"}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {[l.bairro_interesse, l.tipo_imovel].filter(Boolean).join(" · ") || "—"}
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-xs">{l.status}</Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Top matches */}
+          <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-emerald-600" />
+                Melhores matches pendentes
+              </h2>
+              <Link to="/admin/matches" className="text-xs text-primary hover:underline">
+                Ver todos
+              </Link>
+            </div>
+            {isLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-12 bg-muted rounded animate-pulse" />
+                ))}
+              </div>
+            ) : !stats?.topMatches?.length ? (
+              <p className="text-sm text-muted-foreground text-center py-6">Nenhum match pendente</p>
+            ) : (
+              <ul className="space-y-2">
+                {stats.topMatches.map((m: any) => (
+                  <li key={m.id} className="flex items-center justify-between gap-2 py-2 border-b border-border last:border-0">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium truncate">
+                        {m.leads_maria?.nome || "Lead"} → {m.imoveis?.titulo || "Imóvel"}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {m.imoveis?.bairro || ""}
+                      </div>
+                    </div>
+                    <Badge className="bg-emerald-500/10 text-emerald-700 border border-emerald-200 hover:bg-emerald-500/10">
+                      {m.score} pts
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
