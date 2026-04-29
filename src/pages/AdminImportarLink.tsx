@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  ArrowLeft, Sparkles, Link2, FileText, Loader2, ArrowRight,
+  Sparkles, Link2, FileText, Loader2, ArrowRight,
   BedDouble, Bath, Car, Ruler, CheckCircle2, X, ArrowUp, ArrowDown, Plus, Star,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
