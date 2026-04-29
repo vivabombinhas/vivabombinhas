@@ -428,6 +428,63 @@ export type Database = {
           },
         ]
       }
+      lead_revenue: {
+        Row: {
+          comissao_percentual: number | null
+          created_at: string
+          data_fechamento: string | null
+          data_pagamento: string | null
+          id: string
+          imovel_id: string | null
+          lead_id: string
+          observacoes: string | null
+          parceiro_nome: string | null
+          parceiro_telefone: string | null
+          status: string
+          tipo_negocio: string
+          updated_at: string
+          valor_negocio: number | null
+          valor_pago: number | null
+          valor_previsto: number | null
+        }
+        Insert: {
+          comissao_percentual?: number | null
+          created_at?: string
+          data_fechamento?: string | null
+          data_pagamento?: string | null
+          id?: string
+          imovel_id?: string | null
+          lead_id: string
+          observacoes?: string | null
+          parceiro_nome?: string | null
+          parceiro_telefone?: string | null
+          status?: string
+          tipo_negocio: string
+          updated_at?: string
+          valor_negocio?: number | null
+          valor_pago?: number | null
+          valor_previsto?: number | null
+        }
+        Update: {
+          comissao_percentual?: number | null
+          created_at?: string
+          data_fechamento?: string | null
+          data_pagamento?: string | null
+          id?: string
+          imovel_id?: string | null
+          lead_id?: string
+          observacoes?: string | null
+          parceiro_nome?: string | null
+          parceiro_telefone?: string | null
+          status?: string
+          tipo_negocio?: string
+          updated_at?: string
+          valor_negocio?: number | null
+          valor_pago?: number | null
+          valor_previsto?: number | null
+        }
+        Relationships: []
+      }
       leads_maria: {
         Row: {
           bairro_interesse: string | null
