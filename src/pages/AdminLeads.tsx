@@ -102,14 +102,9 @@ export default function AdminLeads() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Link to="/admin">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-          <div className="flex-1">
+      <header className="border-b border-border bg-card/60">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3 flex-wrap">
+          <div className="flex-1 min-w-0">
             <h1 className="text-lg font-bold font-display flex items-center gap-2">
               <Users className="w-5 h-5 text-primary" />
               Leads MarIA
@@ -118,39 +113,9 @@ export default function AdminLeads() {
               {counts.all} leads • {counts.novo} novos
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Link to="/admin/matches">
-              <Button variant="outline" size="sm" className="h-9 gap-1.5 relative">
-                <Zap className="w-4 h-4 text-primary" />
-                <span className="hidden sm:inline">Matches</span>
-                {!!pendingMatches && (
-                  <Badge className="absolute -top-2 -right-2 h-5 min-w-5 px-1 text-[10px] rounded-full">
-                    {pendingMatches}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
-            <Link to="/admin/importar-link">
-              <Button variant="outline" size="sm" className="h-9 gap-1.5">
-                <Sparkles className="w-4 h-4" />
-                <span className="hidden sm:inline">Importar por link</span>
-              </Button>
-            </Link>
-            <Link to="/admin/importar">
-              <Button variant="outline" size="sm" className="h-9 gap-1.5">
-                <FileSpreadsheet className="w-4 h-4" />
-                <span className="hidden sm:inline">CSV</span>
-              </Button>
-            </Link>
-            <Link to="/admin/submissions">
-              <Button variant="outline" size="sm" className="h-9 gap-1.5">
-                <ClipboardList className="w-4 h-4" />
-                <span className="hidden sm:inline">Submissões</span>
-              </Button>
-            </Link>
+          <div className="flex items-center gap-2 flex-wrap">
             <Filter className="w-4 h-4 text-muted-foreground" />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-
               <SelectTrigger className="w-36 h-9 text-sm">
                 <SelectValue />
               </SelectTrigger>
@@ -171,18 +136,6 @@ export default function AdminLeads() {
               title="Mostrar leads anônimos (sem nome/telefone)"
             >
               {showAnonimos ? "Ocultar anônimos" : "Ver anônimos"}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full text-muted-foreground hover:text-destructive"
-              onClick={async () => {
-                await supabase.auth.signOut();
-                window.location.href = "/admin/leads";
-              }}
-              title="Sair"
-            >
-              <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
