@@ -862,6 +862,11 @@ serve(async (req) => {
     const gateStillActive = gateActive && !leadSaved;
     const initialBatch = gateStillActive ? 1 : 3;
 
+    // Quando é SEM_RESULTADOS_GATE (zero imóveis + filtros válidos + lead não capturado),
+    // sinalizamos no_results_gate=true para o front mostrar o formulário de captação como
+    // "alerta de novidade" (sem cards de imóvel).
+    const noResultsGate = noResults && hasMeaningfulFilters && !leadAlreadyCaptured && !leadSaved;
+
     return new Response(
       JSON.stringify({
         reply: assistantMessage,
@@ -872,9 +877,10 @@ serve(async (req) => {
         broader_search: usedBroaderSearch,
         lead_saved: leadSaved,
         lead_captured: leadAlreadyCaptured || leadSaved,
-        gate_active: gateStillActive,
+        gate_active: gateStillActive || noResultsGate,
+        no_results_gate: noResultsGate,
         show_results: showResults,
-        clear_results: !showResults,
+        clear_results: !showResults && !noResultsGate,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
