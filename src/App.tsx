@@ -11,6 +11,7 @@ import AdminSubmissions from "./pages/AdminSubmissions.tsx";
 import AdminImportar from "./pages/AdminImportar.tsx";
 import AdminImportarLink from "./pages/AdminImportarLink.tsx";
 import AdminMatches from "./pages/AdminMatches.tsx";
+import AdminDashboard from "./pages/AdminDashboard.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute.tsx";
 import NotFound from "./pages/NotFound.tsx";
