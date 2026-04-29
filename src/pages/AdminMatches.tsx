@@ -183,16 +183,59 @@ export default function AdminMatches() {
                         </div>
                       </div>
 
-                      {/* Razões */}
-                      {m.match_reasons?.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {m.match_reasons.map((r: string, i: number) => (
-                            <Badge key={i} variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200">
-                              ✓ {r}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
+                      {/* Detalhamento do Score */}
+                      {(() => {
+                        const reasons: string[] = m.match_reasons || [];
+                        const bairroReason = reasons.find((r) => r.startsWith("Bairro"));
+                        const tipoReason = reasons.find((r) => r.startsWith("Tipo"));
+                        const precoReason = reasons.find((r) => r.toLowerCase().startsWith("preço") || r.toLowerCase().startsWith("preco"));
+                        const criterios = [
+                          { label: "Bairro", pts: 40, hit: !!bairroReason, detail: bairroReason?.replace(/^Bairro:\s*/i, "") },
+                          { label: "Tipo", pts: 30, hit: !!tipoReason, detail: tipoReason?.replace(/^Tipo:\s*/i, "") },
+                          { label: "Preço", pts: 30, hit: !!precoReason, detail: precoReason },
+                        ];
+                        return (
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                              <span className="font-medium">Compatibilidade</span>
+                              <span>{m.score}/100 pts</span>
+                            </div>
+                            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all"
+                                style={{ width: `${Math.min(100, m.score)}%` }}
+                              />
+                            </div>
+                            <div className="grid grid-cols-3 gap-1.5">
+                              {criterios.map((c) => (
+                                <div
+                                  key={c.label}
+                                  className={`rounded-md border px-2 py-1.5 text-[11px] ${
+                                    c.hit
+                                      ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                                      : "bg-muted/40 border-border text-muted-foreground"
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between gap-1">
+                                    <span className="font-medium flex items-center gap-1">
+                                      {c.hit ? <Check className="w-3 h-3" /> : <X className="w-3 h-3 opacity-50" />}
+                                      {c.label}
+                                    </span>
+                                    <span className="text-[10px] opacity-80">
+                                      {c.hit ? `+${c.pts}` : `0/${c.pts}`}
+                                    </span>
+                                  </div>
+                                  {c.hit && c.detail && (
+                                    <div className="mt-0.5 truncate opacity-80" title={c.detail}>
+                                      {c.detail}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
 
                       {/* Ações */}
                       <div className="flex flex-wrap gap-2 pt-1">
