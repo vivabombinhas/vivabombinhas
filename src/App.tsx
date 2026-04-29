@@ -12,6 +12,7 @@ import AdminImportar from "./pages/AdminImportar.tsx";
 import AdminImportarLink from "./pages/AdminImportarLink.tsx";
 import AdminMatches from "./pages/AdminMatches.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
+import AdminFollowups from "./pages/AdminFollowups.tsx";
 import AdminLayout from "./components/admin/AdminLayout.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="leads" element={<AdminLeads />} />
+            <Route path="followups" element={<AdminFollowups />} />
             <Route path="submissions" element={<AdminSubmissions />} />
             <Route path="importar" element={<AdminImportar />} />
             <Route path="importar-link" element={<AdminImportarLink />} />

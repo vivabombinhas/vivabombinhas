@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard,
   Users,
@@ -7,6 +8,7 @@ import {
   Link2,
   FileSpreadsheet,
   LogOut,
+  CalendarClock,
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,6 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const mainItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true },
+  { title: "Follow-ups", url: "/admin/followups", icon: CalendarClock, badgeKey: "followups" as const },
   { title: "Leads", url: "/admin/leads", icon: Users },
   { title: "Matches", url: "/admin/matches", icon: Sparkles },
 ];
