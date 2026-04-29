@@ -199,7 +199,7 @@ const TEMPLATE_HEADERS = [
 ];
 
 export default function AdminImportar() {
-  const navigate = useNavigate();
+  
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [rows, setRows] = useState<ParsedRow[]>([]);
