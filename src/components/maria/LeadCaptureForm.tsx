@@ -23,7 +23,7 @@ function isValidPhone(raw: string): boolean {
   return digits.length >= 10 && digits.length <= 11;
 }
 
-export function LeadCaptureForm({ remainingCount, onSubmit }: LeadCaptureFormProps) {
+export function LeadCaptureForm({ remainingCount, isAlertMode: isAlertModeProp, onSubmit }: LeadCaptureFormProps) {
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [loading, setLoading] = useState(false);
