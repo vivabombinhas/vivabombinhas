@@ -382,7 +382,22 @@ export type Database = {
           status?: Database["public"]["Enums"]["match_status"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lead_matches_imovel_id_fkey"
+            columns: ["imovel_id"]
+            isOneToOne: false
+            referencedRelation: "imoveis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_matches_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads_maria"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lead_notes: {
         Row: {
