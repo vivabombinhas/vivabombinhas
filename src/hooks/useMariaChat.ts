@@ -10,6 +10,7 @@ export interface ChatMessage {
   properties?: Property[];
   showLeadForm?: boolean; // exibe o formulário inline abaixo dessa mensagem
   remainingForGate?: number; // quantos imóveis estão "trancados"
+  isAlertMode?: boolean; // true = modo alerta de novidade (sem resultados)
 }
 
 const MORE_PATTERNS = /^(tem mais|mostrar mais|mais op[çc][õo]es|outras op[çc][õo]es|quero ver mais|mais resultados|ver mais|mais im[óo]veis|próximos|next)\??$/i;
