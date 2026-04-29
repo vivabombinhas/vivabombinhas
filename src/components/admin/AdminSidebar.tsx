@@ -10,6 +10,7 @@ import {
   LogOut,
   CalendarClock,
   Bell,
+  DollarSign,
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,6 +33,7 @@ const mainItems = [
   { title: "Follow-ups", url: "/admin/followups", icon: CalendarClock, badgeKey: "followups" as const },
   { title: "Leads", url: "/admin/leads", icon: Users },
   { title: "Matches", url: "/admin/matches", icon: Sparkles },
+  { title: "Receita", url: "/admin/receita", icon: DollarSign },
 ];
 
 const importItems = [
