@@ -668,18 +668,43 @@ serve(async (req) => {
       });
     }
 
-    // 🚪 GATE DE CAPTAÇÃO: se já há resultados E o lead ainda não foi identificado,
-    // mostra apenas o 1º imóvel como teaser e segura o resto até pegar nome+WhatsApp.
+    // 🚪 GATE DE CAPTAÇÃO: ativa em DUAS situações:
+    //  (A) Há resultados >= 2 e o lead ainda não foi identificado → segura o resto.
+    //  (B) ZERO resultados (nem ampliando) → força captação para criar alerta de novidade.
     let leadAlreadyCaptured = !!clientLeadCaptured;
-    if (!leadAlreadyCaptured && sessionId) {
+    let currentLeadId: string | null = null;
+    if (sessionId) {
       const { data: leadRow } = await supabase
         .from("leads_maria")
-        .select("nome, telefone")
+        .select("id, nome, telefone")
         .eq("session_id", sessionId)
         .maybeSingle();
-      leadAlreadyCaptured = !!(leadRow?.nome && leadRow?.telefone);
+      if (leadRow?.id) currentLeadId = leadRow.id as string;
+      if (!leadAlreadyCaptured) {
+        leadAlreadyCaptured = !!(leadRow?.nome && leadRow?.telefone);
+      }
     }
-    const gateActive = !leadAlreadyCaptured && resultsToUse.length >= 2;
+
+    const noResults = resultsToUse.length === 0;
+    const hasMeaningfulFilters = !!(filters.finalidade || filters.bairro || filters.tipo || filters.tipo_included?.length);
+    const gateActive = !leadAlreadyCaptured && (resultsToUse.length >= 2 || (noResults && hasMeaningfulFilters));
+
+    // 🔔 ALERTA INTELIGENTE: se zero resultados e busca tem filtros úteis,
+    // grava um lead_alert para notificar o lead quando entrar imóvel compatível.
+    if (noResults && hasMeaningfulFilters && currentLeadId) {
+      try {
+        await supabase.from("lead_alerts").insert({
+          lead_id: currentLeadId,
+          finalidade: filters.finalidade ?? null,
+          tipo: filters.tipo ?? (filters.tipo_included?.[0] ?? null),
+          bairro: filters.bairro ?? null,
+          preco_max: filters.preco_max ?? null,
+          quartos_min: filters.quartos ?? null,
+          query_original: userMessage.slice(0, 500),
+          status: "ativo",
+        });
+      } catch (e) { console.error("lead_alerts insert failed:", e); }
+    }
 
     // Step 4: Generate conversational response
     let typeNote = "";
@@ -696,15 +721,21 @@ serve(async (req) => {
       exclusionNote = `\n\nALERTA: O usuário EXCLUIU os tipos [${filters.tipo_excluded.join(", ")}]. NUNCA sugira esses tipos.`;
     }
 
-    const gateNote = gateActive
+    const gateNote = gateActive && !noResults
       ? `\n\n🚪 GATE_ATIVO: Encontramos ${resultsToUse.length} imóveis ótimos. Você vai mostrar APENAS 1 (o primeiro = teaser) e segurar os outros ${resultsToUse.length - 1} atrás de uma CTA forte de captação. Use [SHOW_RESULTS] (vou mostrar 1 card). Mensagem deve: (1) celebrar que achou ${resultsToUse.length} opções pro perfil, (2) mostrar o teaser, (3) usar gatilho de escassez/exclusividade pedindo nome + WhatsApp pra liberar o resto. NUNCA peça e-mail. Tom humano e empolgado, sem soar robô.`
       : leadAlreadyCaptured && resultsToUse.length > 0
-      ? `\n\n✅ LEAD_CAPTURADO: Esse usuário já é cadastrado. Só apresente os resultados naturalmente. NÃO peça contato de novo.`
+      ? `\n\n✅ LEAD_CAPTURADO: Esse usuário já é cadastrado. Só apresente os resultados naturalmente. NÃO peça contato de novo. Faça UMA pergunta de qualificação ou ofereça ação concreta (ex: "Quer que eu peça pro corretor confirmar?").`
+      : "";
+
+    const semResultadosNote = noResults && hasMeaningfulFilters
+      ? (leadAlreadyCaptured
+          ? `\n\n🚨 SEM_RESULTADOS_LEAD_OK: Nenhum imóvel encontrado pra esse filtro. O lead JÁ é cadastrado — confirme com empatia que vai avisar assim que entrar (alerta já criado), e sugira ampliar o filtro (ex: bairro vizinho, preço +20%). Use [NO_RESULTS_YET]. NÃO peça contato.`
+          : `\n\n🚨 SEM_RESULTADOS_GATE: Zero imóveis pro filtro do usuário. Esse é o momento mais crítico — se ele sair sem deixar contato, perdemos pra sempre. Use [NO_RESULTS_YET]. Siga EXATAMENTE a estrutura de 3 passos do prompt (empatia + urgência futura + pedido de nome+WhatsApp). NÃO sugira "fazer outra busca" antes de pedir o contato. NÃO invente imóveis. Mencione o tipo/bairro específico que ele procurou.`)
       : "";
 
     const propertyContext = resultsToUse.length > 0
       ? `\n\nResultados encontrados (${resultsToUse.length} imóveis):\n${JSON.stringify(resultsToUse, null, 2)}${usedBroaderSearch ? "\n\nNOTA: A busca exata não retornou resultados. Estes são resultados de uma busca mais ampla (respeitando exclusões). Informe ao usuário e sugira ajustes nos filtros." : ""}${gateNote}${typeNote}${exclusionNote}`
-      : `\n\n🚨 SEM_RESULTADOS: Nenhum imóvel encontrado (nem ampliando). Use [NO_RESULTS_YET]. Seja honesta, acolhedora e ATAQUE COM CTA FORTE de captação seguindo o exemplo do prompt. NÃO invente imóveis.${exclusionNote}`;
+      : `${semResultadosNote}${exclusionNote}`;
 
     const conversationMessages = [
       { role: "system", content: SYSTEM_PROMPT + propertyContext },
