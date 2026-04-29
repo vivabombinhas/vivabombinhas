@@ -687,7 +687,9 @@ serve(async (req) => {
 
     const noResults = resultsToUse.length === 0;
     const hasMeaningfulFilters = !!(filters.finalidade || filters.bairro || filters.tipo || filters.tipo_included?.length);
-    const gateActive = !leadAlreadyCaptured && (resultsToUse.length >= 2 || (noResults && hasMeaningfulFilters));
+    // Gate ativa SEMPRE que houver intenção de busca real e o lead ainda não foi identificado.
+    // Mesmo com 1 resultado: mostra teaser do card mas exige contato pra liberar link/whatsapp do anunciante e novos matches.
+    const gateActive = !leadAlreadyCaptured && (resultsToUse.length >= 1 || (noResults && hasMeaningfulFilters));
 
     // 🔔 ALERTA INTELIGENTE: se zero resultados e busca tem filtros úteis,
     // grava um lead_alert para notificar o lead quando entrar imóvel compatível.
@@ -722,9 +724,21 @@ serve(async (req) => {
     }
 
     const gateNote = gateActive && !noResults
-      ? `\n\n🚪 GATE_ATIVO: Encontramos ${resultsToUse.length} imóveis ótimos. Você vai mostrar APENAS 1 (o primeiro = teaser) e segurar os outros ${resultsToUse.length - 1} atrás de uma CTA forte de captação. Use [SHOW_RESULTS] (vou mostrar 1 card). Mensagem deve: (1) celebrar que achou ${resultsToUse.length} opções pro perfil, (2) mostrar o teaser, (3) usar gatilho de escassez/exclusividade pedindo nome + WhatsApp pra liberar o resto. NUNCA peça e-mail. Tom humano e empolgado, sem soar robô.`
+      ? `\n\n🚪 GATE_ATIVO (${resultsToUse.length} ${resultsToUse.length === 1 ? "imóvel encontrado" : "imóveis encontrados"}):
+
+INSTRUÇÕES OBRIGATÓRIAS — siga TODAS, nessa ordem, em UMA única mensagem curta (máx 4 frases):
+
+1. **Reconheça com calor humano** o que ele pediu (ex: "Adorei sua busca por terreno em Morrinhos! 🌅"). Nada de "Encontrei X opções" seco.
+2. **Faça UMA pergunta de qualificação** ANTES do teaser, escolhida pela finalidade:
+   - VENDA → "Antes de te mostrar, me conta rapidinho: é pra morar ou investir? Isso muda muito o que vou separar pra você."
+   - TEMPORADA → "Pra quando você tá pensando? E pra quantas pessoas?"
+   - ALUGUEL_ANUAL → "Vai ser pra você, casal ou família? Tem prazo pra entrar?"
+3. **Mostre o teaser** ("Já vou adiantando uma como prévia 👇") — você verá apenas 1 card sendo renderizado.
+4. **Peça nome + WhatsApp com gatilho real** ("Os melhores em Bombinhas somem em horas na temporada. Me passa seu **nome e WhatsApp** que libero ${resultsToUse.length === 1 ? "o contato direto do anunciante" : `as outras ${resultsToUse.length - 1} opções e o contato direto`} agora + te aviso em primeira mão quando entrar imóvel novo nesse perfil. Leva 5s 💛").
+
+NUNCA peça e-mail. NUNCA mostre o telefone do anunciante no texto. NUNCA diga "se quiser saber mais é só pedir" sem antes pedir o contato. Use [SHOW_RESULTS] no início.`
       : leadAlreadyCaptured && resultsToUse.length > 0
-      ? `\n\n✅ LEAD_CAPTURADO: Esse usuário já é cadastrado. Só apresente os resultados naturalmente. NÃO peça contato de novo. Faça UMA pergunta de qualificação ou ofereça ação concreta (ex: "Quer que eu peça pro corretor confirmar?").`
+      ? `\n\n✅ LEAD_CAPTURADO: Esse usuário já é cadastrado. Apresente os resultados naturalmente E faça UMA pergunta de qualificação SPIN ou ofereça ação concreta (ex: "Quer que eu peça pro corretor confirmar disponibilidade pra essa data?"). NÃO peça contato de novo. Use [SHOW_RESULTS].`
       : "";
 
     const semResultadosNote = noResults && hasMeaningfulFilters

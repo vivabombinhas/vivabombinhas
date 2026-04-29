@@ -10,6 +10,7 @@ export interface ChatMessage {
   properties?: Property[];
   showLeadForm?: boolean; // exibe o formulário inline abaixo dessa mensagem
   remainingForGate?: number; // quantos imóveis estão "trancados"
+  isAlertMode?: boolean; // true = modo alerta de novidade (sem resultados)
 }
 
 const MORE_PATTERNS = /^(tem mais|mostrar mais|mais op[çc][õo]es|outras op[çc][õo]es|quero ver mais|mais resultados|ver mais|mais im[óo]veis|próximos|next)\??$/i;
@@ -172,8 +173,8 @@ export function useMariaChat() {
         ? Math.max(0, allPropertiesRef.current.length - shownCountRef.current)
         : 0;
 
-      // Mostra o formulário se: gate clássico com mais imóveis OU gate sem-resultados.
-      const showLeadForm = (gateActive && remainingForGate > 0) || noResultsGate;
+      // Mostra o formulário se: gate clássico (com ou sem mais imóveis) OU gate sem-resultados.
+      const showLeadForm = gateActive || noResultsGate;
 
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
@@ -182,7 +183,8 @@ export function useMariaChat() {
         timestamp: new Date(),
         properties: showResults && data.properties?.length > 0 ? data.properties : undefined,
         showLeadForm,
-        remainingForGate: noResultsGate ? 0 : (remainingForGate || undefined),
+        remainingForGate: noResultsGate ? 0 : remainingForGate,
+        isAlertMode: noResultsGate,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);

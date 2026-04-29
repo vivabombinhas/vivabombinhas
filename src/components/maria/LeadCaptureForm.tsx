@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 
 interface LeadCaptureFormProps {
   remainingCount: number;
+  isAlertMode?: boolean; // true quando é "sem resultados → alerta"
   onSubmit: (nome: string, telefone: string) => Promise<boolean>;
 }
 
@@ -22,7 +23,7 @@ function isValidPhone(raw: string): boolean {
   return digits.length >= 10 && digits.length <= 11;
 }
 
-export function LeadCaptureForm({ remainingCount, onSubmit }: LeadCaptureFormProps) {
+export function LeadCaptureForm({ remainingCount, isAlertMode: isAlertModeProp, onSubmit }: LeadCaptureFormProps) {
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [loading, setLoading] = useState(false);
@@ -53,7 +54,9 @@ export function LeadCaptureForm({ remainingCount, onSubmit }: LeadCaptureFormPro
     }
   };
 
-  const isAlertMode = remainingCount === 0;
+  // alert mode = sem resultados (override por prop, ou fallback histórico de remainingCount===0 sem prop)
+  const isAlertMode = isAlertModeProp ?? remainingCount === 0;
+  const isContactUnlock = !isAlertMode && remainingCount === 0; // 1 imóvel teaser sem extras
 
   return (
     <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 p-4 shadow-md">
@@ -65,6 +68,8 @@ export function LeadCaptureForm({ remainingCount, onSubmit }: LeadCaptureFormPro
           <h3 className="text-sm font-bold text-foreground leading-tight">
             {isAlertMode
               ? "🔔 Te aviso em primeira mão!"
+              : isContactUnlock
+              ? "🔓 Libere o contato direto do anunciante"
               : `🔥 Tenho mais ${remainingCount} ${remainingCount === 1 ? "imóvel" : "imóveis"} no seu perfil!`}
           </h3>
           <p className="text-xs text-muted-foreground mt-1 leading-snug">
@@ -72,6 +77,11 @@ export function LeadCaptureForm({ remainingCount, onSubmit }: LeadCaptureFormPro
               <>
                 Imóvel desse perfil em Bombinhas some <strong className="text-foreground">muito rápido</strong>.
                 Me deixa seu contato que te aviso <strong className="text-foreground">antes de virar anúncio público</strong>.
+              </>
+            ) : isContactUnlock ? (
+              <>
+                Me passa seu nome e WhatsApp pra eu liberar o <strong className="text-foreground">link e o contato direto</strong> desse imóvel
+                — e te aviso assim que entrar algo parecido.
               </>
             ) : (
               <>

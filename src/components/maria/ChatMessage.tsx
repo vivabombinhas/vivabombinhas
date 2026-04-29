@@ -62,6 +62,7 @@ export function ChatMessage({ message, onSubmitLead }: ChatMessageProps) {
         {showLeadForm && (
           <LeadCaptureForm
             remainingCount={message.remainingForGate ?? 0}
+            isAlertMode={message.isAlertMode}
             onSubmit={onSubmitLead!}
           />
         )}
