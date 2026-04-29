@@ -3,8 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, CheckCircle2, XCircle, Loader2, BedDouble, Bath, Car, Ruler, ExternalLink } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { CheckCircle2, XCircle, Loader2, BedDouble, Bath, Car, Ruler, ExternalLink } from "lucide-react";
+
 
 interface Submission {
   id: string;
@@ -45,7 +45,7 @@ export default function AdminSubmissions() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [gestaoPropriaMap, setGestaoPropriaMap] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
-  const navigate = useNavigate();
+  
 
   const fetchSubmissions = async () => {
     setLoading(true);
@@ -138,11 +138,8 @@ export default function AdminSubmissions() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b border-border bg-card/60">
         <div className="container flex items-center gap-4 py-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
           <div>
             <h1 className="text-xl font-bold text-foreground">Submissões de Imóveis</h1>
             <p className="text-sm text-muted-foreground">
