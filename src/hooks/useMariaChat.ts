@@ -172,8 +172,8 @@ export function useMariaChat() {
         ? Math.max(0, allPropertiesRef.current.length - shownCountRef.current)
         : 0;
 
-      // Mostra o formulário se: gate clássico com mais imóveis OU gate sem-resultados.
-      const showLeadForm = (gateActive && remainingForGate > 0) || noResultsGate;
+      // Mostra o formulário se: gate clássico (com ou sem mais imóveis) OU gate sem-resultados.
+      const showLeadForm = gateActive || noResultsGate;
 
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
@@ -182,7 +182,7 @@ export function useMariaChat() {
         timestamp: new Date(),
         properties: showResults && data.properties?.length > 0 ? data.properties : undefined,
         showLeadForm,
-        remainingForGate: noResultsGate ? 0 : (remainingForGate || undefined),
+        remainingForGate: noResultsGate ? 0 : remainingForGate,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
