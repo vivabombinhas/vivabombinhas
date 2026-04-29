@@ -119,12 +119,12 @@ export function LeadCaptureForm({ remainingCount, onSubmit }: LeadCaptureFormPro
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              Liberando...
+              {isAlertMode ? "Ativando alerta..." : "Liberando..."}
             </>
           ) : (
             <>
               <Lock className="w-3.5 h-3.5 mr-2" />
-              Liberar todos os imóveis
+              {isAlertMode ? "Ativar alerta de novidade" : "Liberar todos os imóveis"}
             </>
           )}
         </Button>
