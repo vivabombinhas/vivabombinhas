@@ -13,8 +13,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Phone, Mail, MessageSquare, Calendar, StickyNote, Bot, User, Trash2 } from "lucide-react";
+import { Phone, Mail, MessageSquare, Calendar, StickyNote, Bot, User, Trash2, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { WHATSAPP_TEMPLATES, buildWhatsappLink } from "@/lib/whatsapp-templates";
 
 interface Lead {
   id: string;
