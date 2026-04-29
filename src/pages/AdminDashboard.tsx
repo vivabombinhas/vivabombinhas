@@ -126,6 +126,14 @@ export default function AdminDashboard() {
       to: "/admin/leads",
     },
     {
+      title: "Receita prevista",
+      value: stats ? fmtBRL(stats.previstoAtivo) : "—",
+      sub: `Pago: ${stats ? fmtBRL(stats.pago) : "—"}`,
+      icon: DollarSign,
+      color: "text-emerald-600 bg-emerald-500/10",
+      to: "/admin/receita",
+    },
+    {
       title: "Imóveis ativos",
       value: stats?.imoveisAtivos ?? "—",
       sub: `${stats?.submissoesPendentes ?? 0} submissões pendentes`,
@@ -149,7 +157,7 @@ export default function AdminDashboard() {
 
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {cards.map((c) => (
             <Link
               key={c.title}
