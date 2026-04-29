@@ -394,7 +394,7 @@ export default function AdminImportar() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container flex items-center gap-4 py-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/admin/leads")}>
+          <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
