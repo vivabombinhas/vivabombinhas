@@ -78,22 +78,15 @@ export default function AdminMatches() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card sticky top-0 z-10">
+      <header className="border-b border-border bg-card/60">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <Link to="/admin">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-            </Link>
-            <div className="min-w-0">
-              <h1 className="text-base font-bold flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-primary" /> Matches
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                {counts.all} matches no filtro atual
-              </p>
-            </div>
+          <div className="min-w-0">
+            <h1 className="text-base font-bold flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-primary" /> Matches
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              {counts.all} matches no filtro atual
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-muted-foreground" />
