@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -13,7 +13,22 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Phone, Mail, MessageSquare, Calendar, StickyNote, Bot, User, Trash2, MessageCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Phone,
+  Mail,
+  MessageSquare,
+  Calendar,
+  StickyNote,
+  Bot,
+  User,
+  Trash2,
+  MessageCircle,
+  CheckCircle2,
+  Sparkles,
+  Home,
+  Activity,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -59,6 +74,15 @@ const toLocalInput = (iso?: string | null) => {
   return new Date(d.getTime() - tz).toISOString().slice(0, 16);
 };
 
+type TimelineEvent = {
+  id: string;
+  at: string;
+  kind: "lead_created" | "message_user" | "message_bot" | "note" | "contact" | "match" | "followup_set";
+  title: string;
+  body?: string;
+  meta?: string;
+};
+
 export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
   const qc = useQueryClient();
   const [newNote, setNewNote] = useState("");
@@ -87,6 +111,20 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
         .select("*")
         .eq("lead_id", lead!.id)
         .order("created_at", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: matches } = useQuery({
+    queryKey: ["lead_matches_for_lead", lead?.id],
+    enabled: !!lead?.id && open,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("lead_matches")
+        .select("id, score, status, match_reasons, created_at, updated_at, imovel_id, imoveis(titulo, bairro, preco)")
+        .eq("lead_id", lead!.id)
+        .order("score", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -125,9 +163,96 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
     onError: () => toast.error("Erro ao salvar"),
   });
 
+  // Timeline unificada — merge cronológico de todos os eventos do lead
+  const timeline = useMemo<TimelineEvent[]>(() => {
+    if (!lead) return [];
+    const events: TimelineEvent[] = [];
+
+    events.push({
+      id: `created-${lead.id}`,
+      at: lead.created_at,
+      kind: "lead_created",
+      title: "Lead capturado",
+      body: lead.mensagem_original ?? undefined,
+      meta: lead.bairro_interesse ?? undefined,
+    });
+
+    conversation?.forEach((m: any) => {
+      events.push({
+        id: `msg-${m.id}`,
+        at: m.created_at,
+        kind: m.role === "user" ? "message_user" : "message_bot",
+        title: m.role === "user" ? `${lead.nome ?? "Visitante"} enviou mensagem` : "MarIA respondeu",
+        body: m.content,
+      });
+    });
+
+    notes?.forEach((n: any) => {
+      events.push({
+        id: `note-${n.id}`,
+        at: n.created_at,
+        kind: "note",
+        title: "Anotação interna",
+        body: n.content,
+      });
+    });
+
+    matches?.forEach((m: any) => {
+      events.push({
+        id: `match-${m.id}`,
+        at: m.created_at,
+        kind: "match",
+        title: `Match ${m.score} pts — ${m.imoveis?.titulo ?? "Imóvel"}`,
+        meta: m.status,
+        body: (m.match_reasons || []).join(" · "),
+      });
+    });
+
+    if (lead.last_contact_at) {
+      events.push({
+        id: `contact-${lead.id}`,
+        at: lead.last_contact_at,
+        kind: "contact",
+        title: "Contato realizado",
+        meta: "Marcado manualmente",
+      });
+    }
+
+    if (lead.next_followup_at) {
+      events.push({
+        id: `followup-${lead.id}`,
+        at: lead.next_followup_at,
+        kind: "followup_set",
+        title: "Follow-up agendado",
+        meta: "Próximo contato",
+      });
+    }
+
+    return events.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+  }, [lead, conversation, notes, matches]);
+
   if (!lead) return null;
 
   const waLink = lead.telefone ? `https://wa.me/${lead.telefone.replace(/\D/g, "")}` : null;
+
+  const iconFor = (kind: TimelineEvent["kind"]) => {
+    switch (kind) {
+      case "lead_created":
+        return <Sparkles className="w-3.5 h-3.5 text-primary" />;
+      case "message_user":
+        return <User className="w-3.5 h-3.5 text-blue-600" />;
+      case "message_bot":
+        return <Bot className="w-3.5 h-3.5 text-purple-600" />;
+      case "note":
+        return <StickyNote className="w-3.5 h-3.5 text-amber-600" />;
+      case "contact":
+        return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />;
+      case "match":
+        return <Home className="w-3.5 h-3.5 text-fuchsia-600" />;
+      case "followup_set":
+        return <Calendar className="w-3.5 h-3.5 text-orange-600" />;
+    }
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -178,6 +303,8 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
                     onClick={() => {
                       const link = buildWhatsappLink(lead.telefone!, t.build(lead));
                       window.open(link, "_blank", "noopener,noreferrer");
+                      // Marca contato automaticamente ao abrir o WhatsApp
+                      updateLead.mutate({ last_contact_at: new Date().toISOString() });
                     }}
                     className="flex flex-col items-start gap-0.5 py-2"
                   >
@@ -198,7 +325,6 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
             <Calendar className="w-4 h-4 text-primary" /> Próximo follow-up
           </h3>
 
-          {/* Atalhos rápidos */}
           <div className="flex flex-wrap gap-1.5">
             {[
               { label: "Amanhã", days: 1 },
@@ -255,77 +381,121 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
 
         <Separator className="my-4" />
 
-        {/* Notas */}
-        <section className="space-y-2">
-          <h3 className="text-sm font-semibold flex items-center gap-2">
-            <StickyNote className="w-4 h-4 text-primary" /> Anotações
-          </h3>
-          <Textarea
-            value={newNote}
-            onChange={(e) => setNewNote(e.target.value)}
-            placeholder="Ex: Cliente quer visitar sábado de manhã..."
-            rows={2}
-            className="text-sm"
-          />
-          <Button
-            size="sm"
-            onClick={() => newNote.trim() && addNote.mutate(newNote.trim())}
-            disabled={!newNote.trim() || addNote.isPending}
-          >
-            Adicionar nota
-          </Button>
+        {/* Tabs com histórico unificado, notas, conversa */}
+        <Tabs defaultValue="historico" className="w-full pb-6">
+          <TabsList className="grid grid-cols-3 w-full">
+            <TabsTrigger value="historico" className="text-xs gap-1">
+              <Activity className="w-3.5 h-3.5" /> Histórico
+            </TabsTrigger>
+            <TabsTrigger value="notas" className="text-xs gap-1">
+              <StickyNote className="w-3.5 h-3.5" /> Notas
+              {notes?.length ? <span className="ml-1 text-[10px] opacity-70">({notes.length})</span> : null}
+            </TabsTrigger>
+            <TabsTrigger value="conversa" className="text-xs gap-1">
+              <MessageSquare className="w-3.5 h-3.5" /> Chat
+              {conversation?.length ? <span className="ml-1 text-[10px] opacity-70">({conversation.length})</span> : null}
+            </TabsTrigger>
+          </TabsList>
 
-          <div className="space-y-2 mt-3">
-            {notes?.length ? notes.map((n) => (
-              <div key={n.id} className="bg-muted/50 rounded-lg p-3 text-sm group relative">
-                <p className="whitespace-pre-wrap pr-7">{n.content}</p>
-                <p className="text-[10px] text-muted-foreground mt-1">{formatDateTime(n.created_at)}</p>
-                <button
-                  onClick={() => deleteNote.mutate(n.id)}
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition"
-                  aria-label="Remover nota"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )) : (
-              <p className="text-xs text-muted-foreground italic">Nenhuma anotação ainda.</p>
-            )}
-          </div>
-        </section>
-
-        <Separator className="my-4" />
-
-        {/* Conversa MarIA */}
-        <section className="space-y-2 pb-6">
-          <h3 className="text-sm font-semibold flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-primary" /> Conversa com a MarIA
-          </h3>
-          {conversation?.length ? (
-            <div className="space-y-2">
-              {conversation.map((m) => (
-                <div
-                  key={m.id}
-                  className={`rounded-lg p-2.5 text-sm ${
-                    m.role === "user"
-                      ? "bg-primary/10 ml-6"
-                      : "bg-muted/50 mr-6"
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
-                    {m.role === "user" ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
-                    {m.role === "user" ? (lead.nome ?? "Visitante") : "MarIA"} · {formatDateTime(m.created_at)}
+          {/* TIMELINE UNIFICADA */}
+          <TabsContent value="historico" className="mt-3">
+            {timeline.length === 0 ? (
+              <p className="text-xs text-muted-foreground italic text-center py-6">
+                Sem interações registradas ainda.
+              </p>
+            ) : (
+              <div className="relative pl-5 space-y-3 before:absolute before:left-1.5 before:top-1.5 before:bottom-1.5 before:w-px before:bg-border">
+                {timeline.map((ev) => (
+                  <div key={ev.id} className="relative">
+                    <span className="absolute -left-[18px] top-1 w-3.5 h-3.5 rounded-full bg-background border border-border flex items-center justify-center">
+                      {iconFor(ev.kind)}
+                    </span>
+                    <div className="bg-muted/40 rounded-md px-3 py-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-medium">{ev.title}</p>
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          {formatDateTime(ev.at)}
+                        </span>
+                      </div>
+                      {ev.body && (
+                        <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap line-clamp-4">
+                          {ev.body}
+                        </p>
+                      )}
+                      {ev.meta && (
+                        <Badge variant="outline" className="text-[9px] mt-1.5 h-4">
+                          {ev.meta}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  <p className="whitespace-pre-wrap">{m.content}</p>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* NOTAS */}
+          <TabsContent value="notas" className="mt-3 space-y-2">
+            <Textarea
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
+              placeholder="Ex: Cliente quer visitar sábado de manhã..."
+              rows={2}
+              className="text-sm"
+            />
+            <Button
+              size="sm"
+              onClick={() => newNote.trim() && addNote.mutate(newNote.trim())}
+              disabled={!newNote.trim() || addNote.isPending}
+            >
+              Adicionar nota
+            </Button>
+
+            <div className="space-y-2 mt-3">
+              {notes?.length ? notes.map((n) => (
+                <div key={n.id} className="bg-muted/50 rounded-lg p-3 text-sm group relative">
+                  <p className="whitespace-pre-wrap pr-7">{n.content}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{formatDateTime(n.created_at)}</p>
+                  <button
+                    onClick={() => deleteNote.mutate(n.id)}
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition"
+                    aria-label="Remover nota"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-              ))}
+              )) : (
+                <p className="text-xs text-muted-foreground italic">Nenhuma anotação ainda.</p>
+              )}
             </div>
-          ) : (
-            <p className="text-xs text-muted-foreground italic">
-              {lead.mensagem_original ? `"${lead.mensagem_original}"` : "Sem histórico de conversa salvo."}
-            </p>
-          )}
-        </section>
+          </TabsContent>
+
+          {/* CONVERSA MARIA */}
+          <TabsContent value="conversa" className="mt-3">
+            {conversation?.length ? (
+              <div className="space-y-2">
+                {conversation.map((m: any) => (
+                  <div
+                    key={m.id}
+                    className={`rounded-lg p-2.5 text-sm ${
+                      m.role === "user" ? "bg-primary/10 ml-6" : "bg-muted/50 mr-6"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
+                      {m.role === "user" ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
+                      {m.role === "user" ? (lead.nome ?? "Visitante") : "MarIA"} · {formatDateTime(m.created_at)}
+                    </div>
+                    <p className="whitespace-pre-wrap">{m.content}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground italic">
+                {lead.mensagem_original ? `"${lead.mensagem_original}"` : "Sem histórico de conversa salvo."}
+              </p>
+            )}
+          </TabsContent>
+        </Tabs>
       </SheetContent>
     </Sheet>
   );
