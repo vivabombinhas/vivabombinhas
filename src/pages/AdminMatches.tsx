@@ -200,7 +200,18 @@ export default function AdminMatches() {
                           href={buildWhatsappLink(m)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={() => {
+                          onClick={(e) => {
+                            // Fallback para preview em iframe: força abertura no top window
+                            try {
+                              const url = buildWhatsappLink(m);
+                              const win = window.open(url, "_blank", "noopener,noreferrer");
+                              if (!win) {
+                                window.top!.location.href = url;
+                              }
+                              e.preventDefault();
+                            } catch {
+                              // deixa o comportamento padrão do <a> rolar
+                            }
                             if (m.status === "pending") updateStatus.mutate({ id: m.id, status: "sent" });
                           }}
                         >
