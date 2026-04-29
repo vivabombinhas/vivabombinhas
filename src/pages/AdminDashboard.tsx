@@ -109,49 +109,12 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            <h1 className="font-semibold">Dashboard Admin</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link to="/admin/matches">
-              <Button variant="outline" size="sm" className="h-9 gap-1.5">
-                <Zap className="w-4 h-4" />
-                <span className="hidden sm:inline">Matches</span>
-              </Button>
-            </Link>
-            <Link to="/admin/leads">
-              <Button variant="outline" size="sm" className="h-9 gap-1.5">
-                <Users className="w-4 h-4" />
-                <span className="hidden sm:inline">Leads</span>
-              </Button>
-            </Link>
-            <Link to="/admin/submissions">
-              <Button variant="outline" size="sm" className="h-9 gap-1.5">
-                <ClipboardList className="w-4 h-4" />
-                <span className="hidden sm:inline">Submissões</span>
-              </Button>
-            </Link>
-            <Link to="/admin/importar">
-              <Button variant="outline" size="sm" className="h-9 gap-1.5">
-                <FileSpreadsheet className="w-4 h-4" />
-                <span className="hidden sm:inline">CSV</span>
-              </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full text-muted-foreground hover:text-destructive"
-              onClick={async () => {
-                await supabase.auth.signOut();
-                window.location.href = "/admin/leads";
-              }}
-              title="Sair"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
+      <header className="border-b border-border bg-card/60">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-primary" />
+          <div>
+            <h1 className="text-lg font-bold font-display">Dashboard</h1>
+            <p className="text-xs text-muted-foreground">Visão geral do CRM</p>
           </div>
         </div>
       </header>
