@@ -45,7 +45,7 @@ export default function AdminSubmissions() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [gestaoPropriaMap, setGestaoPropriaMap] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
-  const navigate = useNavigate();
+  
 
   const fetchSubmissions = async () => {
     setLoading(true);
