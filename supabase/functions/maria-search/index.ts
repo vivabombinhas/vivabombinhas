@@ -687,7 +687,9 @@ serve(async (req) => {
 
     const noResults = resultsToUse.length === 0;
     const hasMeaningfulFilters = !!(filters.finalidade || filters.bairro || filters.tipo || filters.tipo_included?.length);
-    const gateActive = !leadAlreadyCaptured && (resultsToUse.length >= 2 || (noResults && hasMeaningfulFilters));
+    // Gate ativa SEMPRE que houver intenção de busca real e o lead ainda não foi identificado.
+    // Mesmo com 1 resultado: mostra teaser do card mas exige contato pra liberar link/whatsapp do anunciante e novos matches.
+    const gateActive = !leadAlreadyCaptured && (resultsToUse.length >= 1 || (noResults && hasMeaningfulFilters));
 
     // 🔔 ALERTA INTELIGENTE: se zero resultados e busca tem filtros úteis,
     // grava um lead_alert para notificar o lead quando entrar imóvel compatível.
