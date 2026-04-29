@@ -9,6 +9,7 @@ import {
   FileSpreadsheet,
   LogOut,
   CalendarClock,
+  Bell,
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,6 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const mainItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true },
+  { title: "Alertas", url: "/admin/alerts", icon: Bell, badgeKey: "alerts" as const },
   { title: "Follow-ups", url: "/admin/followups", icon: CalendarClock, badgeKey: "followups" as const },
   { title: "Leads", url: "/admin/leads", icon: Users },
   { title: "Matches", url: "/admin/matches", icon: Sparkles },
@@ -65,7 +67,23 @@ export function AdminSidebar() {
     },
   });
 
-  const badges: Record<string, number | undefined> = { followups: followupBadge };
+  // Badge: alertas inteligentes pendentes (matches novos)
+  const { data: alertsBadge } = useQuery({
+    queryKey: ["sidebar_alerts_badge"],
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("lead_matches")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending");
+      return count ?? 0;
+    },
+  });
+
+  const badges: Record<string, number | undefined> = {
+    followups: followupBadge,
+    alerts: alertsBadge,
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
