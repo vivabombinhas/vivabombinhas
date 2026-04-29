@@ -149,6 +149,7 @@ export function useMariaChat() {
       const clearResults = data.clear_results === true;
       // Backend só ativa gate se lead realmente não estiver capturado
       const gateActive = data.gate_active === true && !leadCapturedRef.current;
+      const noResultsGate = data.no_results_gate === true && !leadCapturedRef.current;
 
       if (showResults) {
         const allProps: Property[] = data.all_properties || [];
@@ -159,11 +160,20 @@ export function useMariaChat() {
         shownCountRef.current = Math.min(initial, allProps.length);
       } else if (clearResults) {
         clearPropertyState();
+      } else if (noResultsGate) {
+        // Sem resultados, mas precisamos capturar o lead → não limpa nem mostra cards,
+        // mas deixa gate ativo pra exibir o formulário de "alerta de novidade".
+        allPropertiesRef.current = [];
+        shownCountRef.current = 0;
+        gateActiveRef.current = true;
       }
 
       const remainingForGate = gateActive
         ? Math.max(0, allPropertiesRef.current.length - shownCountRef.current)
         : 0;
+
+      // Mostra o formulário se: gate clássico com mais imóveis OU gate sem-resultados.
+      const showLeadForm = (gateActive && remainingForGate > 0) || noResultsGate;
 
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
@@ -171,8 +181,8 @@ export function useMariaChat() {
         content: data.reply,
         timestamp: new Date(),
         properties: showResults && data.properties?.length > 0 ? data.properties : undefined,
-        showLeadForm: gateActive && remainingForGate > 0,
-        remainingForGate: remainingForGate || undefined,
+        showLeadForm,
+        remainingForGate: noResultsGate ? 0 : (remainingForGate || undefined),
       };
 
       setMessages((prev) => [...prev, assistantMsg]);

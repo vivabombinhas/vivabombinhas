@@ -316,6 +316,51 @@ export type Database = {
           },
         ]
       }
+      lead_alerts: {
+        Row: {
+          bairro: string | null
+          created_at: string
+          finalidade: string | null
+          id: string
+          last_matched_at: string | null
+          lead_id: string
+          preco_max: number | null
+          quartos_min: number | null
+          query_original: string | null
+          status: string
+          tipo: string | null
+          updated_at: string
+        }
+        Insert: {
+          bairro?: string | null
+          created_at?: string
+          finalidade?: string | null
+          id?: string
+          last_matched_at?: string | null
+          lead_id: string
+          preco_max?: number | null
+          quartos_min?: number | null
+          query_original?: string | null
+          status?: string
+          tipo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bairro?: string | null
+          created_at?: string
+          finalidade?: string | null
+          id?: string
+          last_matched_at?: string | null
+          lead_id?: string
+          preco_max?: number | null
+          quartos_min?: number | null
+          query_original?: string | null
+          status?: string
+          tipo?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lead_conversations: {
         Row: {
           content: string

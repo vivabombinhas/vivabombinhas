@@ -53,6 +53,8 @@ export function LeadCaptureForm({ remainingCount, onSubmit }: LeadCaptureFormPro
     }
   };
 
+  const isAlertMode = remainingCount === 0;
+
   return (
     <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 p-4 shadow-md">
       <div className="flex items-start gap-2.5 mb-3">
@@ -61,12 +63,23 @@ export function LeadCaptureForm({ remainingCount, onSubmit }: LeadCaptureFormPro
         </div>
         <div className="flex-1">
           <h3 className="text-sm font-bold text-foreground leading-tight">
-            🔥 Tenho mais {remainingCount} {remainingCount === 1 ? "imóvel" : "imóveis"} no seu perfil!
+            {isAlertMode
+              ? "🔔 Te aviso em primeira mão!"
+              : `🔥 Tenho mais ${remainingCount} ${remainingCount === 1 ? "imóvel" : "imóveis"} no seu perfil!`}
           </h3>
           <p className="text-xs text-muted-foreground mt-1 leading-snug">
-            Os melhores somem rápido na temporada. Me passa seu contato que eu libero{" "}
-            <strong className="text-foreground">agora</strong> e ainda te aviso em primeira mão quando entrar
-            algo novo.
+            {isAlertMode ? (
+              <>
+                Imóvel desse perfil em Bombinhas some <strong className="text-foreground">muito rápido</strong>.
+                Me deixa seu contato que te aviso <strong className="text-foreground">antes de virar anúncio público</strong>.
+              </>
+            ) : (
+              <>
+                Os melhores somem rápido na temporada. Me passa seu contato que eu libero{" "}
+                <strong className="text-foreground">agora</strong> e ainda te aviso em primeira mão quando entrar
+                algo novo.
+              </>
+            )}
           </p>
         </div>
       </div>
@@ -106,12 +119,12 @@ export function LeadCaptureForm({ remainingCount, onSubmit }: LeadCaptureFormPro
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              Liberando...
+              {isAlertMode ? "Ativando alerta..." : "Liberando..."}
             </>
           ) : (
             <>
               <Lock className="w-3.5 h-3.5 mr-2" />
-              Liberar todos os imóveis
+              {isAlertMode ? "Ativar alerta de novidade" : "Liberar todos os imóveis"}
             </>
           )}
         </Button>
