@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 
 import {
-  ArrowLeft,
+  
   Upload,
   FileSpreadsheet,
   CheckCircle2,
