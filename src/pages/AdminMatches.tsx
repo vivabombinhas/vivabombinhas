@@ -1,10 +1,23 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Phone, MapPin, Home, DollarSign, Check, X, Filter, MessageCircle } from "lucide-react";
+import {
+  Sparkles,
+  Phone,
+  MapPin,
+  Home,
+  DollarSign,
+  Check,
+  X,
+  Filter,
+  MessageCircle,
+  Search,
+  ExternalLink,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -12,23 +25,54 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { toast } from "sonner";
 
 type MatchStatus = "pending" | "sent" | "converted" | "dismissed";
 
-const STATUS_LABEL: Record<MatchStatus, string> = {
-  pending: "Pendente",
-  sent: "Enviado",
-  converted: "Convertido",
-  dismissed: "Descartado",
+const STATUS_CONFIG: Record<MatchStatus, { label: string; className: string }> = {
+  pending: { label: "Pendente", className: "bg-amber-500/10 text-amber-700 border-amber-200 dark:text-amber-300" },
+  sent: { label: "Enviado", className: "bg-blue-500/10 text-blue-700 border-blue-200 dark:text-blue-300" },
+  converted: { label: "Convertido", className: "bg-emerald-500/10 text-emerald-700 border-emerald-200 dark:text-emerald-300" },
+  dismissed: { label: "Descartado", className: "bg-muted text-muted-foreground border-border" },
 };
 
 const formatCurrency = (v?: number | null) =>
   v == null ? "—" : v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
+function scoreColor(score: number) {
+  if (score >= 70) return "from-emerald-400 to-emerald-600";
+  if (score >= 50) return "from-amber-400 to-amber-600";
+  return "from-rose-400 to-rose-600";
+}
+
+function scoreTextClass(score: number) {
+  if (score >= 70) return "text-emerald-700 dark:text-emerald-400";
+  if (score >= 50) return "text-amber-700 dark:text-amber-400";
+  return "text-rose-700 dark:text-rose-400";
+}
+
 export default function AdminMatches() {
   const qc = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>("pending");
+  const [scoreFilter, setScoreFilter] = useState<string>("all");
+  const [search, setSearch] = useState("");
+  const [selectedMatch, setSelectedMatch] = useState<any | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const { data: matches, isLoading } = useQuery({
     queryKey: ["lead_matches", statusFilter],
@@ -37,7 +81,7 @@ export default function AdminMatches() {
         .from("lead_matches")
         .select(`
           *,
-          lead:leads_maria(id, nome, telefone, bairro_interesse, tipo_imovel, faixa_preco, interesse),
+          lead:leads_maria(id, nome, telefone, bairro_interesse, tipo_imovel, faixa_preco, interesse, mensagem_original),
           imovel:imoveis(id, titulo, bairro, tipo, preco, preco_temporada_diaria, quartos, fotos, link_anuncio)
         `)
         .order("score", { ascending: false })
@@ -48,7 +92,7 @@ export default function AdminMatches() {
       }
       const { data, error } = await q;
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
@@ -71,219 +115,429 @@ export default function AdminMatches() {
     return `https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`;
   };
 
+  const handleWhatsapp = (e: React.MouseEvent, m: any) => {
+    e.stopPropagation();
+    e.preventDefault();
+    try {
+      const url = buildWhatsappLink(m);
+      const win = window.open(url, "_blank", "noopener,noreferrer");
+      if (!win) {
+        window.top!.location.href = url;
+      }
+    } catch {
+      /* ignore */
+    }
+    if (m.status === "pending") updateStatus.mutate({ id: m.id, status: "sent" });
+  };
+
+  const filteredMatches = useMemo(() => {
+    if (!matches) return [];
+    const q = search.trim().toLowerCase();
+    return matches.filter((m: any) => {
+      if (scoreFilter === "high" && m.score < 70) return false;
+      if (scoreFilter === "mid" && (m.score < 50 || m.score >= 70)) return false;
+      if (scoreFilter === "low" && m.score >= 50) return false;
+      if (!q) return true;
+      const hay = [
+        m.lead?.nome,
+        m.lead?.telefone,
+        m.lead?.bairro_interesse,
+        m.imovel?.titulo,
+        m.imovel?.bairro,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(q);
+    });
+  }, [matches, search, scoreFilter]);
+
   const counts = {
-    all: matches?.length || 0,
+    total: matches?.length || 0,
+    filtered: filteredMatches.length,
     pending: matches?.filter((m: any) => m.status === "pending").length || 0,
+    high: matches?.filter((m: any) => m.score >= 70).length || 0,
+  };
+
+  const hasActiveFilters = statusFilter !== "pending" || scoreFilter !== "all" || !!search;
+
+  const clearFilters = () => {
+    setStatusFilter("pending");
+    setScoreFilter("all");
+    setSearch("");
+  };
+
+  const openDetails = (m: any) => {
+    setSelectedMatch(m);
+    setSheetOpen(true);
   };
 
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/60">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-base font-bold flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-primary" /> Matches
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              {counts.all} matches no filtro atual
-            </p>
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg font-bold font-display flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                Matches
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                {counts.total} no filtro · {counts.pending} pendentes · {counts.high} com alta afinidade
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+
+          {/* Filtros */}
+          <div className="mt-4 flex items-center gap-2 flex-wrap">
+            <div className="relative flex-1 min-w-[220px] max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por lead, imóvel, bairro..."
+                className="pl-9 h-9"
+              />
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-32 h-9 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos status</SelectItem>
+                  <SelectItem value="pending">Pendentes</SelectItem>
+                  <SelectItem value="sent">Enviados</SelectItem>
+                  <SelectItem value="converted">Convertidos</SelectItem>
+                  <SelectItem value="dismissed">Descartados</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Select value={scoreFilter} onValueChange={setScoreFilter}>
               <SelectTrigger className="w-36 h-9 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="pending">Pendentes</SelectItem>
-                <SelectItem value="sent">Enviados</SelectItem>
-                <SelectItem value="converted">Convertidos</SelectItem>
-                <SelectItem value="dismissed">Descartados</SelectItem>
+                <SelectItem value="all">Qualquer score</SelectItem>
+                <SelectItem value="high">Alto (≥70)</SelectItem>
+                <SelectItem value="mid">Médio (50-69)</SelectItem>
+                <SelectItem value="low">Baixo (&lt;50)</SelectItem>
               </SelectContent>
             </Select>
+
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="h-9 text-xs gap-1">
+                <X className="w-3.5 h-3.5" />
+                Limpar
+              </Button>
+            )}
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      <main className="max-w-7xl mx-auto px-4 py-6">
         {isLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 rounded-xl bg-muted animate-pulse" />
+          <div className="space-y-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-14 rounded-md bg-muted animate-pulse" />
             ))}
           </div>
-        ) : !matches?.length ? (
-          <div className="text-center py-20 text-muted-foreground">
+        ) : !filteredMatches.length ? (
+          <div className="text-center py-20 text-muted-foreground bg-card border border-border rounded-xl">
             <Sparkles className="w-12 h-12 mx-auto mb-3 opacity-40" />
-            <p className="font-medium">Nenhum match {statusFilter !== "all" ? STATUS_LABEL[statusFilter as MatchStatus]?.toLowerCase() : ""}</p>
-            <p className="text-xs mt-1">Matches são gerados automaticamente quando novos imóveis ou leads entram no sistema.</p>
+            <p className="font-medium">Nenhum match encontrado</p>
+            <p className="text-xs mt-1">Matches são gerados automaticamente quando novos imóveis ou leads entram.</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {matches.map((m: any) => {
-              const preco = m.imovel?.preco ?? m.imovel?.preco_temporada_diaria;
-              const foto = m.imovel?.fotos?.[0];
-              return (
-                <div key={m.id} className="bg-card border border-border rounded-xl p-4 shadow-sm">
-                  <div className="flex flex-col md:flex-row gap-4">
-                    {/* Foto */}
-                    {foto && (
-                      <img
-                        src={foto}
-                        alt={m.imovel?.titulo}
-                        className="w-full md:w-32 h-32 object-cover rounded-lg"
-                        loading="lazy"
-                      />
-                    )}
-
-                    {/* Conteúdo */}
-                    <div className="flex-1 min-w-0 space-y-3">
-                      {/* Header: lead + score */}
-                      <div className="flex items-start justify-between gap-2 flex-wrap">
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-semibold text-sm">{m.lead?.nome}</h3>
-                            <Badge variant="secondary" className="text-[10px]">
-                              {m.score} pts
-                            </Badge>
-                            <Badge
-                              variant={m.status === "pending" ? "default" : "outline"}
-                              className="text-[10px]"
-                            >
-                              {STATUS_LABEL[m.status as MatchStatus]}
-                            </Badge>
+          <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/40 hover:bg-muted/40">
+                    <TableHead className="w-[22%]">Lead</TableHead>
+                    <TableHead className="w-[28%]">Imóvel</TableHead>
+                    <TableHead className="w-[18%]">Score</TableHead>
+                    <TableHead className="w-[12%]">Status</TableHead>
+                    <TableHead className="w-[20%] text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredMatches.map((m: any) => {
+                    const cfg = STATUS_CONFIG[m.status as MatchStatus];
+                    const preco = m.imovel?.preco ?? m.imovel?.preco_temporada_diaria;
+                    const reasons: string[] = m.match_reasons || [];
+                    const hasBairro = reasons.some((r) => r.startsWith("Bairro"));
+                    const hasTipo = reasons.some((r) => r.startsWith("Tipo"));
+                    const hasPreco = reasons.some((r) => r.toLowerCase().startsWith("pre"));
+                    return (
+                      <TableRow
+                        key={m.id}
+                        className="cursor-pointer hover:bg-muted/40"
+                        onClick={() => openDetails(m)}
+                      >
+                        <TableCell className="align-top py-3">
+                          <div className="font-medium text-sm truncate">
+                            {m.lead?.nome || <span className="italic text-muted-foreground">Sem nome</span>}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                            <Phone className="w-3 h-3" /> {m.lead?.telefone}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Imóvel */}
-                      <div className="bg-muted/40 rounded-lg p-3 text-sm">
-                        <p className="font-medium line-clamp-1">{m.imovel?.titulo}</p>
-                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-1">
-                          {m.imovel?.bairro && (
-                            <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{m.imovel.bairro}</span>
-                          )}
-                          {m.imovel?.tipo && (
-                            <span className="flex items-center gap-1"><Home className="w-3 h-3" />{m.imovel.tipo}</span>
-                          )}
-                          {preco != null && (
-                            <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" />{formatCurrency(preco)}</span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Detalhamento do Score */}
-                      {(() => {
-                        const reasons: string[] = m.match_reasons || [];
-                        const bairroReason = reasons.find((r) => r.startsWith("Bairro"));
-                        const tipoReason = reasons.find((r) => r.startsWith("Tipo"));
-                        const precoReason = reasons.find((r) => r.toLowerCase().startsWith("preço") || r.toLowerCase().startsWith("preco"));
-                        const criterios = [
-                          { label: "Bairro", pts: 40, hit: !!bairroReason, detail: bairroReason?.replace(/^Bairro:\s*/i, "") },
-                          { label: "Tipo", pts: 30, hit: !!tipoReason, detail: tipoReason?.replace(/^Tipo:\s*/i, "") },
-                          { label: "Preço", pts: 30, hit: !!precoReason, detail: precoReason },
-                        ];
-                        return (
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                              <span className="font-medium">Compatibilidade</span>
-                              <span>{m.score}/100 pts</span>
-                            </div>
-                            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                              <div
-                                className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all"
-                                style={{ width: `${Math.min(100, m.score)}%` }}
-                              />
-                            </div>
-                            <div className="grid grid-cols-3 gap-1.5">
-                              {criterios.map((c) => (
-                                <div
-                                  key={c.label}
-                                  className={`rounded-md border px-2 py-1.5 text-[11px] ${
-                                    c.hit
-                                      ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                                      : "bg-muted/40 border-border text-muted-foreground"
-                                  }`}
-                                >
-                                  <div className="flex items-center justify-between gap-1">
-                                    <span className="font-medium flex items-center gap-1">
-                                      {c.hit ? <Check className="w-3 h-3" /> : <X className="w-3 h-3 opacity-50" />}
-                                      {c.label}
-                                    </span>
-                                    <span className="text-[10px] opacity-80">
-                                      {c.hit ? `+${c.pts}` : `0/${c.pts}`}
-                                    </span>
-                                  </div>
-                                  {c.hit && c.detail && (
-                                    <div className="mt-0.5 truncate opacity-80" title={c.detail}>
-                                      {c.detail}
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
+                          <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <Phone className="w-3 h-3" />
+                            {m.lead?.telefone || "—"}
                           </div>
-                        );
-                      })()}
+                          {m.lead?.bairro_interesse && (
+                            <div className="text-[11px] text-muted-foreground mt-0.5">
+                              quer {m.lead.tipo_imovel || "imóvel"} em {m.lead.bairro_interesse}
+                            </div>
+                          )}
+                        </TableCell>
 
-                      {/* Ações */}
-                      <div className="flex flex-wrap gap-2 pt-1">
-                        <a
-                          href={buildWhatsappLink(m)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => {
-                            // Fallback para preview em iframe: força abertura no top window
-                            try {
-                              const url = buildWhatsappLink(m);
-                              const win = window.open(url, "_blank", "noopener,noreferrer");
-                              if (!win) {
-                                window.top!.location.href = url;
-                              }
-                              e.preventDefault();
-                            } catch {
-                              // deixa o comportamento padrão do <a> rolar
-                            }
-                            if (m.status === "pending") updateStatus.mutate({ id: m.id, status: "sent" });
-                          }}
-                        >
-                          <Button size="sm" className="h-8 gap-1.5">
-                            <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
-                          </Button>
-                        </a>
-                        {m.status !== "converted" && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 gap-1.5"
-                            onClick={() => updateStatus.mutate({ id: m.id, status: "converted" })}
-                          >
-                            <Check className="w-3.5 h-3.5" /> Converteu
-                          </Button>
-                        )}
-                        {m.status !== "dismissed" && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 gap-1.5 text-muted-foreground"
-                            onClick={() => updateStatus.mutate({ id: m.id, status: "dismissed" })}
-                          >
-                            <X className="w-3.5 h-3.5" /> Descartar
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                        <TableCell className="align-top py-3">
+                          <div className="font-medium text-sm line-clamp-1">{m.imovel?.titulo}</div>
+                          <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
+                            {m.imovel?.bairro && (
+                              <span className="flex items-center gap-0.5"><MapPin className="w-3 h-3" />{m.imovel.bairro}</span>
+                            )}
+                            {m.imovel?.tipo && (
+                              <span className="flex items-center gap-0.5"><Home className="w-3 h-3" />{m.imovel.tipo}</span>
+                            )}
+                            {preco != null && (
+                              <span className="flex items-center gap-0.5"><DollarSign className="w-3 h-3" />{formatCurrency(preco)}</span>
+                            )}
+                          </div>
+                        </TableCell>
+
+                        <TableCell className="align-top py-3">
+                          <div className={`text-sm font-bold ${scoreTextClass(m.score)}`}>
+                            {m.score}<span className="text-xs font-normal text-muted-foreground">/100</span>
+                          </div>
+                          <div className="h-1.5 w-24 rounded-full bg-muted overflow-hidden mt-1">
+                            <div
+                              className={`h-full bg-gradient-to-r ${scoreColor(m.score)}`}
+                              style={{ width: `${Math.min(100, m.score)}%` }}
+                            />
+                          </div>
+                          <div className="flex gap-1 mt-1.5">
+                            <span
+                              className={`text-[9px] px-1 rounded ${hasBairro ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-muted text-muted-foreground"}`}
+                              title={hasBairro ? "Bairro confere" : "Bairro não confere"}
+                            >B</span>
+                            <span
+                              className={`text-[9px] px-1 rounded ${hasTipo ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-muted text-muted-foreground"}`}
+                              title={hasTipo ? "Tipo confere" : "Tipo não confere"}
+                            >T</span>
+                            <span
+                              className={`text-[9px] px-1 rounded ${hasPreco ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-muted text-muted-foreground"}`}
+                              title={hasPreco ? "Preço confere" : "Preço não confere"}
+                            >P</span>
+                          </div>
+                        </TableCell>
+
+                        <TableCell className="align-top py-3">
+                          <Badge variant="outline" className={`text-[10px] ${cfg.className}`}>
+                            {cfg.label}
+                          </Badge>
+                        </TableCell>
+
+                        <TableCell className="align-top py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1">
+                            {m.lead?.telefone && (
+                              <Button
+                                size="sm"
+                                className="h-7 gap-1 text-xs"
+                                onClick={(e) => handleWhatsapp(e, m)}
+                                title="Enviar WhatsApp pré-formatado"
+                              >
+                                <MessageCircle className="w-3 h-3" />
+                                WhatsApp
+                              </Button>
+                            )}
+                            {m.status !== "converted" && (
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                onClick={() => updateStatus.mutate({ id: m.id, status: "converted" })}
+                                title="Marcar como convertido"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                              </Button>
+                            )}
+                            {m.status !== "dismissed" && (
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                                onClick={() => updateStatus.mutate({ id: m.id, status: "dismissed" })}
+                                title="Descartar match"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         )}
       </main>
+
+      {/* Sheet de detalhes */}
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+          {selectedMatch && (
+            <>
+              <SheetHeader>
+                <SheetTitle className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  Detalhes do match
+                </SheetTitle>
+                <SheetDescription>
+                  Score {selectedMatch.score}/100 ·{" "}
+                  {STATUS_CONFIG[selectedMatch.status as MatchStatus]?.label}
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="mt-6 space-y-5">
+                {/* Foto do imóvel */}
+                {selectedMatch.imovel?.fotos?.[0] && (
+                  <img
+                    src={selectedMatch.imovel.fotos[0]}
+                    alt={selectedMatch.imovel.titulo}
+                    className="w-full h-44 object-cover rounded-lg"
+                  />
+                )}
+
+                {/* Lead */}
+                <section>
+                  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Lead</h4>
+                  <div className="bg-muted/40 rounded-lg p-3 space-y-1.5">
+                    <div className="font-medium">{selectedMatch.lead?.nome || "Sem nome"}</div>
+                    <div className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Phone className="w-3.5 h-3.5" />
+                      {selectedMatch.lead?.telefone || "—"}
+                    </div>
+                    {selectedMatch.lead?.bairro_interesse && (
+                      <div className="text-sm">
+                        Procura <strong>{selectedMatch.lead.tipo_imovel || "imóvel"}</strong> em{" "}
+                        <strong>{selectedMatch.lead.bairro_interesse}</strong>
+                        {selectedMatch.lead.faixa_preco && <> · faixa {selectedMatch.lead.faixa_preco}</>}
+                      </div>
+                    )}
+                    {selectedMatch.lead?.mensagem_original && (
+                      <p className="text-xs italic text-muted-foreground mt-1">
+                        "{selectedMatch.lead.mensagem_original}"
+                      </p>
+                    )}
+                  </div>
+                </section>
+
+                {/* Imóvel */}
+                <section>
+                  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Imóvel</h4>
+                  <div className="bg-muted/40 rounded-lg p-3 space-y-1.5">
+                    <div className="font-medium">{selectedMatch.imovel?.titulo}</div>
+                    <div className="text-sm text-muted-foreground flex flex-wrap gap-x-3 gap-y-1">
+                      {selectedMatch.imovel?.bairro && (
+                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{selectedMatch.imovel.bairro}</span>
+                      )}
+                      {selectedMatch.imovel?.tipo && (
+                        <span className="flex items-center gap-1"><Home className="w-3 h-3" />{selectedMatch.imovel.tipo}</span>
+                      )}
+                      <span className="flex items-center gap-1">
+                        <DollarSign className="w-3 h-3" />
+                        {formatCurrency(selectedMatch.imovel?.preco ?? selectedMatch.imovel?.preco_temporada_diaria)}
+                      </span>
+                    </div>
+                    {selectedMatch.imovel?.link_anuncio && (
+                      <a
+                        href={selectedMatch.imovel.link_anuncio}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary hover:underline inline-flex items-center gap-1"
+                      >
+                        Ver anúncio original <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                </section>
+
+                {/* Score breakdown */}
+                <section>
+                  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                    Por que combinou ({selectedMatch.score}/100)
+                  </h4>
+                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden mb-3">
+                    <div
+                      className={`h-full bg-gradient-to-r ${scoreColor(selectedMatch.score)}`}
+                      style={{ width: `${Math.min(100, selectedMatch.score)}%` }}
+                    />
+                  </div>
+                  {(selectedMatch.match_reasons || []).length === 0 ? (
+                    <p className="text-xs text-muted-foreground italic">Sem critérios registrados.</p>
+                  ) : (
+                    <ul className="space-y-1.5">
+                      {selectedMatch.match_reasons.map((r: string, i: number) => (
+                        <li
+                          key={i}
+                          className="flex items-start gap-2 text-sm bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-md px-2.5 py-1.5"
+                        >
+                          <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
+                          <span className="text-emerald-900 dark:text-emerald-200">{r}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+
+                {/* Ações */}
+                <section className="flex flex-wrap gap-2 pt-2 border-t border-border">
+                  {selectedMatch.lead?.telefone && (
+                    <Button
+                      className="gap-1.5 flex-1 min-w-[140px]"
+                      onClick={(e) => handleWhatsapp(e, selectedMatch)}
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      Enviar WhatsApp
+                    </Button>
+                  )}
+                  {selectedMatch.status !== "converted" && (
+                    <Button
+                      variant="outline"
+                      className="gap-1.5"
+                      onClick={() => {
+                        updateStatus.mutate({ id: selectedMatch.id, status: "converted" });
+                        setSheetOpen(false);
+                      }}
+                    >
+                      <Check className="w-4 h-4" />
+                      Converteu
+                    </Button>
+                  )}
+                  {selectedMatch.status !== "dismissed" && (
+                    <Button
+                      variant="ghost"
+                      className="gap-1.5 text-muted-foreground"
+                      onClick={() => {
+                        updateStatus.mutate({ id: selectedMatch.id, status: "dismissed" });
+                        setSheetOpen(false);
+                      }}
+                    >
+                      <X className="w-4 h-4" />
+                      Descartar
+                    </Button>
+                  )}
+                </section>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
