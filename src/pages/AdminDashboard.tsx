@@ -5,15 +5,10 @@ import {
   Users,
   Home,
   Sparkles,
-  ClipboardList,
   TrendingUp,
   MessageSquare,
   ArrowRight,
-  LogOut,
-  Zap,
-  FileSpreadsheet,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 function startOfToday() {
