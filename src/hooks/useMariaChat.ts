@@ -184,6 +184,7 @@ export function useMariaChat() {
         properties: showResults && data.properties?.length > 0 ? data.properties : undefined,
         showLeadForm,
         remainingForGate: noResultsGate ? 0 : remainingForGate,
+        isAlertMode: noResultsGate,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
