@@ -1,6 +1,6 @@
 import {
   Home, MapPin, BedDouble, Bath, Car, Waves, Sun, Dog,
-  Wind, Wifi, UtensilsCrossed, ExternalLink, Phone, Users, Maximize
+  Wind, Wifi, UtensilsCrossed, ExternalLink, Phone, Users, Maximize, Flame
 } from "lucide-react";
 
 export interface Property {
