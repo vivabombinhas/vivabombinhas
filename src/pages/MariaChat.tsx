@@ -61,10 +61,26 @@ const MariaChat = () => {
                 <span>IA</span> 👋
               </h2>
               <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
-                Sua assistente inteligente de imóveis em Bombinhas. Me diga o que você procura!
+                Sua assistente inteligente de imóveis em Bombinhas.
               </p>
             </div>
-            <SuggestionChips onSelect={sendMessage} />
+            {!finalidade ? (
+              <FinalidadeQualifier onSelect={setFinalidade} />
+            ) : (
+              <div className="w-full space-y-3">
+                <p className="text-xs text-center text-muted-foreground">
+                  Buscando para{" "}
+                  <span className="font-semibold text-accent">
+                    {finalidade === "temporada" ? "🏖️ Temporada" : finalidade === "aluguel_anual" ? "🏠 Aluguel anual" : "💰 Comprar"}
+                  </span>
+                  {" · "}
+                  <button onClick={clearFinalidade} className="underline hover:text-foreground">
+                    trocar
+                  </button>
+                </p>
+                <SuggestionChips onSelect={sendMessage} finalidade={finalidade} />
+              </div>
+            )}
           </div>
         )}
 
