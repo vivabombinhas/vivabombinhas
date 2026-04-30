@@ -1,6 +1,14 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Property } from "@/components/maria/PropertyCard";
+import type { Finalidade } from "@/components/maria/FinalidadeQualifier";
+
+const FINALIDADE_KEY = "maria_finalidade";
+const FINALIDADE_LABEL: Record<Finalidade, string> = {
+  temporada: "aluguel de temporada",
+  aluguel_anual: "aluguel anual (pra morar)",
+  venda: "compra (venda)",
+};
 
 export interface ChatMessage {
   id: string;
