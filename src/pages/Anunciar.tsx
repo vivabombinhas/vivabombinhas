@@ -39,6 +39,41 @@ interface ExtractedData {
   fotos?: string[];
 }
 
+const getExtractionErrorMessage = async (error: unknown) => {
+  const fallback = error instanceof Error ? error.message : "Erro ao processar";
+  const context = (error as { context?: Response })?.context;
+
+  if (!context) return fallback;
+
+  try {
+    const body = await context.clone().json() as { error?: string };
+    return body?.error || fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const createManualReviewData = (mode: Mode, link: string, text: string): ExtractedData => {
+  const description = text.trim().replace(/\s+/g, " ");
+
+  if (mode === "text") {
+    return {
+      titulo: description.slice(0, 80) || "Imóvel em Bombinhas",
+      descricao: description,
+      finalidade: "temporada",
+      tipo: "outro",
+    };
+  }
+
+  return {
+    titulo: "Imóvel em Bombinhas",
+    descricao: "A extração automática não conseguiu preencher os detalhes. Revise e complete os campos principais antes de enviar.",
+    finalidade: "temporada",
+    tipo: "outro",
+    link_anuncio: link.trim(),
+  };
+};
+
 const tipoLabels: Record<string, string> = {
   apartamento: "Apartamento", casa: "Casa", cobertura: "Cobertura",
   terreno: "Terreno", sobrado: "Sobrado", studio: "Studio",
