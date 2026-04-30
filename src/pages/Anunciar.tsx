@@ -330,8 +330,8 @@ const Anunciar = () => {
             <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 flex items-start gap-3">
               <Sparkles className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="text-sm">
-                <p className="font-semibold text-foreground">Pronto! A IA preencheu tudo que conseguiu.</p>
-                <p className="text-muted-foreground">Revise, ajuste o que estiver errado e adicione seu contato.</p>
+                <p className="font-semibold text-foreground">Pronto! Revise os dados antes de enviar.</p>
+                <p className="text-muted-foreground">Se a IA não conseguiu preencher tudo, complete os campos principais e adicione seu contato.</p>
               </div>
             </div>
 
