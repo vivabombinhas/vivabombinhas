@@ -177,7 +177,7 @@ const Anunciar = () => {
       aceita_pet: data.aceita_pet ?? false,
       wifi: data.wifi ?? false,
       estacionamento: data.estacionamento ?? false,
-      link_anuncio: data.link_anuncio || null,
+      link_anuncio: (data.link_anuncio && /^https?:\/\/[^\s]{4,}$/i.test(data.link_anuncio.trim())) ? data.link_anuncio.trim() : null,
       fotos: data.fotos && data.fotos.length > 0 ? data.fotos : null,
       anunciante_nome: contactName.trim(),
       anunciante_telefone: contactPhone.trim(),
