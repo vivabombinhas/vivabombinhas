@@ -287,7 +287,13 @@ const Anunciar = () => {
 
     setSubmitting(true);
 
-    const { data: inserted, error } = await supabase.from("imoveis_submissions").insert({
+    // Generate ID client-side so we don't depend on RLS SELECT after insert
+    const newId = (typeof crypto !== "undefined" && "randomUUID" in crypto)
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    const { error } = await supabase.from("imoveis_submissions").insert({
+      id: newId,
       titulo: data.titulo,
       descricao: data.descricao || null,
       finalidade: data.finalidade,
@@ -326,7 +332,7 @@ const Anunciar = () => {
       return;
     }
 
-    if (inserted?.id) setSubmissionId(inserted.id);
+    setSubmissionId(newId);
     setStep("done");
   };
 
