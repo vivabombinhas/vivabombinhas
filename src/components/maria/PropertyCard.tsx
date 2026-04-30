@@ -30,6 +30,8 @@ export interface Property {
   anunciante_telefone: string | null;
   gestao_propria?: boolean | null;
   imobiliaria_nome?: string | null;
+  destaque_pago?: boolean | null;
+  destaque_ate?: string | null;
 }
 
 function formatPrice(property: Property) {
