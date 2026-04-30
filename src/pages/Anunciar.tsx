@@ -439,16 +439,11 @@ const Anunciar = () => {
                 </div>
               </div>
 
-              {data.fotos && data.fotos.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold">{data.fotos.length} fotos detectadas</Label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {data.fotos.slice(0, 8).map((f, i) => (
-                      <img key={i} src={f} alt={`Foto ${i + 1}`} className="aspect-square object-cover rounded-md" loading="lazy" />
-                    ))}
-                  </div>
-                </div>
-              )}
+              <PhotosManager
+                fotos={data.fotos || []}
+                onChange={(fotos) => updateField("fotos", fotos)}
+              />
+
             </div>
 
             {/* Contato */}
