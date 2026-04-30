@@ -76,8 +76,19 @@ export function PropertyCard({ property }: PropertyCardProps) {
   if (property.wifi) amenities.push({ icon: Wifi, label: "Wi-Fi" });
   if (property.aceita_pet) amenities.push({ icon: Dog, label: "Pet" });
 
+  const isDestaqueAtivo =
+    Boolean(property.destaque_pago) &&
+    (!property.destaque_ate || new Date(property.destaque_ate).getTime() > Date.now());
+
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <div
+      className={`relative bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
+        isDestaqueAtivo
+          ? "border-2 border-transparent bg-gradient-to-br from-amber-400 via-yellow-300 to-amber-500 p-[2px]"
+          : "border border-border"
+      }`}
+    >
+      <div className={isDestaqueAtivo ? "bg-card rounded-[10px] overflow-hidden" : ""}>
       {/* Thumbnail */}
       {property.fotos && property.fotos.length > 0 && (
         <div className="relative w-full h-36 bg-muted overflow-hidden">
@@ -88,7 +99,13 @@ export function PropertyCard({ property }: PropertyCardProps) {
             loading="lazy"
           />
           {/* Badges over image */}
-          <div className="absolute top-2 left-2 flex items-center gap-1.5">
+          <div className="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
+            {isDestaqueAtivo && (
+              <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-[10px] font-bold backdrop-blur-sm shadow-md flex items-center gap-1 animate-pulse">
+                <Flame className="w-2.5 h-2.5" />
+                Destaque
+              </span>
+            )}
             <span className="px-2 py-0.5 rounded-full bg-primary/90 text-primary-foreground text-[10px] font-semibold backdrop-blur-sm">
               {formatTipo(property.tipo)}
             </span>
