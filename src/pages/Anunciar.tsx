@@ -332,7 +332,7 @@ const Anunciar = () => {
       return;
     }
 
-    if (inserted?.id) setSubmissionId(inserted.id);
+    setSubmissionId(newId);
     setStep("done");
   };
 
