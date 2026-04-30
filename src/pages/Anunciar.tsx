@@ -113,7 +113,7 @@ const Anunciar = () => {
 
     setSubmitting(true);
 
-    const { error } = await supabase.from("imoveis_submissions").insert({
+    const { data: inserted, error } = await supabase.from("imoveis_submissions").insert({
       titulo: data.titulo,
       descricao: data.descricao || null,
       finalidade: data.finalidade,
@@ -142,7 +142,7 @@ const Anunciar = () => {
       anunciante_nome: contactName.trim(),
       anunciante_telefone: contactPhone.trim(),
       anunciante_email: contactEmail.trim() || null,
-    });
+    }).select("id").maybeSingle();
 
     setSubmitting(false);
 
@@ -152,6 +152,7 @@ const Anunciar = () => {
       return;
     }
 
+    if (inserted?.id) setSubmissionId(inserted.id);
     setStep("done");
   };
 
