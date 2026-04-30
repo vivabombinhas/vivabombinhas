@@ -165,11 +165,22 @@ export function useMariaChat() {
         content: m.content,
       }));
 
+      // Injeta um hint de contexto (finalidade selecionada no qualifier) APENAS na primeira
+      // chamada após a escolha. Vai como mensagem do usuário invisível pra ancorar o LLM.
+      if (finalidade && !finalidadeHintSentRef.current) {
+        conversationHistory.unshift({
+          role: "user",
+          content: `[contexto: o cliente está procurando ${FINALIDADE_LABEL[finalidade]}. Considere essa finalidade nas próximas buscas a menos que ele mude explicitamente.]`,
+        });
+        finalidadeHintSentRef.current = true;
+      }
+
       const { data, error } = await supabase.functions.invoke("maria-search", {
         body: {
           messages: conversationHistory,
           session_id: sessionIdRef.current,
           lead_captured: leadCapturedRef.current, // sinaliza ao backend
+          finalidade_hint: finalidade ?? undefined,
         },
       });
 
