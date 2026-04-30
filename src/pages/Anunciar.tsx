@@ -125,9 +125,14 @@ const Anunciar = () => {
       toast({ title: "Dados extraídos com IA! ✨", description: "Revise e ajuste o que precisar." });
     } catch (e) {
       console.error(e);
-      const msg = e instanceof Error ? e.message : "Erro ao processar";
-      toast({ title: "Não rolou dessa vez", description: msg, variant: "destructive" });
-      setStep("input");
+      const msg = await getExtractionErrorMessage(e);
+      setData(createManualReviewData(mode, linkInput, textInput));
+      setStep("review");
+      toast({
+        title: "IA indisponível agora",
+        description: `${msg} Você pode completar os dados manualmente e enviar para revisão.`,
+        variant: "destructive",
+      });
     }
   };
 
