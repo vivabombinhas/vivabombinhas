@@ -65,6 +65,9 @@ export type Database = {
           created_at: string
           descricao: string | null
           destaque: boolean | null
+          destaque_ate: string | null
+          destaque_pago: boolean
+          destaque_valor: number | null
           endereco: string | null
           estacionamento: boolean | null
           finalidade: Database["public"]["Enums"]["finalidade_imovel"]
@@ -108,6 +111,9 @@ export type Database = {
           created_at?: string
           descricao?: string | null
           destaque?: boolean | null
+          destaque_ate?: string | null
+          destaque_pago?: boolean
+          destaque_valor?: number | null
           endereco?: string | null
           estacionamento?: boolean | null
           finalidade: Database["public"]["Enums"]["finalidade_imovel"]
@@ -151,6 +157,9 @@ export type Database = {
           created_at?: string
           descricao?: string | null
           destaque?: boolean | null
+          destaque_ate?: string | null
+          destaque_pago?: boolean
+          destaque_valor?: number | null
           endereco?: string | null
           estacionamento?: boolean | null
           finalidade?: Database["public"]["Enums"]["finalidade_imovel"]
