@@ -241,7 +241,7 @@ export function useMariaChat() {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, handleShowMore, updateHasMore, clearPropertyState]);
+  }, [messages, handleShowMore, updateHasMore, clearPropertyState, finalidade]);
 
   // Submit do formulário inline de captação
   const submitLead = useCallback(async (nome: string, telefone: string): Promise<boolean> => {
