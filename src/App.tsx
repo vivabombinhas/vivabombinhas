@@ -32,6 +32,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/maria" element={<MariaChat />} />
           <Route path="/anuncie" element={<Anunciar />} />
+          <Route path="/destacar/:submissionId" element={<CheckoutSimulado />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="leads" element={<AdminLeads />} />
