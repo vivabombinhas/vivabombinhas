@@ -120,40 +120,67 @@ serve(async (req) => {
 
       console.log("Scraping URL with Firecrawl:", url);
 
-      const scrapeRes = await fetch("https://api.firecrawl.dev/v2/scrape", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${firecrawlKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url,
-          formats: ["markdown", "html"],
-          onlyMainContent: true,
-          waitFor: 2500,
-          timeout: 45000,
-        }),
-      });
-
-      const scrapeData = await scrapeRes.json();
-
-      if (!scrapeRes.ok) {
-        console.error("Firecrawl error:", scrapeData);
-        const friendly = scrapeRes.status === 402
-          ? "Sem créditos no Firecrawl. Recarregue ou descreva o imóvel manualmente."
-          : `Não consegui acessar este link (${scrapeRes.status}). Tente colar o texto do anúncio.`;
-        return new Response(
-          JSON.stringify({ error: friendly }),
-          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+      async function doScrape(onlyMain: boolean, waitFor: number) {
+        return await fetch("https://api.firecrawl.dev/v2/scrape", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${firecrawlKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url,
+            formats: ["markdown", "html"],
+            onlyMainContent: onlyMain,
+            waitFor,
+            timeout: 45000,
+          }),
+        });
       }
 
-      const scrapedMd: string = scrapeData?.data?.markdown || scrapeData?.markdown || "";
-      const scrapedHtml: string = scrapeData?.data?.html || scrapeData?.html || "";
+      let scrapeRes = await doScrape(true, 2500);
+      let scrapeData = await scrapeRes.json();
+
+      if (!scrapeRes.ok) {
+        console.error("Firecrawl error (attempt 1):", scrapeRes.status, scrapeData);
+        if (scrapeRes.status === 402) {
+          return new Response(
+            JSON.stringify({ error: "Sem créditos no Firecrawl. Recarregue ou descreva o imóvel manualmente." }),
+            { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+
+      let scrapedMd: string = scrapeData?.data?.markdown || scrapeData?.markdown || "";
+      let scrapedHtml: string = scrapeData?.data?.html || scrapeData?.html || "";
+
+      // Retry without onlyMainContent if content too short (some sites strip everything)
+      if (scrapedMd.length < 200) {
+        console.log("Content too short, retrying without onlyMainContent. Length:", scrapedMd.length);
+        scrapeRes = await doScrape(false, 5000);
+        scrapeData = await scrapeRes.json();
+        if (scrapeRes.ok) {
+          scrapedMd = scrapeData?.data?.markdown || scrapeData?.markdown || scrapedMd;
+          scrapedHtml = scrapeData?.data?.html || scrapeData?.html || scrapedHtml;
+        }
+      }
+
+      // Fallback: derive text from HTML if markdown still weak
+      if (scrapedMd.length < 200 && scrapedHtml) {
+        const stripped = scrapedHtml
+          .replace(/<script[\s\S]*?<\/script>/gi, " ")
+          .replace(/<style[\s\S]*?<\/style>/gi, " ")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+        if (stripped.length > scrapedMd.length) {
+          console.log("Using HTML-derived text fallback. Length:", stripped.length);
+          scrapedMd = stripped;
+        }
+      }
 
       if (!scrapedMd || scrapedMd.length < 80) {
         return new Response(
-          JSON.stringify({ error: "Não consegui extrair conteúdo desse link. Tente colar o texto." }),
+          JSON.stringify({ error: "Não consegui extrair conteúdo desse link. Tente colar o texto do anúncio no campo de descrição." }),
           { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
