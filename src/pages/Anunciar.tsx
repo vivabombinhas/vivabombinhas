@@ -164,6 +164,7 @@ const Anunciar = () => {
     setContactName("");
     setContactPhone("");
     setContactEmail("");
+    setSubmissionId(null);
   };
 
   return (
