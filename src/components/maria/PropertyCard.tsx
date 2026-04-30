@@ -243,6 +243,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
           )}
         </div>
       </div>
+      </div>
     </div>
   );
 }
