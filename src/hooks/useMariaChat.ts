@@ -295,8 +295,21 @@ export function useMariaChat() {
     clearPropertyState();
     try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
     sessionIdRef.current = getOrCreateSessionId();
+    finalidadeHintSentRef.current = false;
     // NÃO limpa leadCaptured do localStorage — é permanente por usuário/dispositivo
+    // NÃO limpa finalidade — é a preferência do usuário (use clearFinalidade pra trocar)
   }, [clearPropertyState]);
 
-  return { messages, isLoading, sendMessage, clearChat, hasMore, showMore, submitLead };
+  return {
+    messages,
+    isLoading,
+    sendMessage,
+    clearChat,
+    hasMore,
+    showMore,
+    submitLead,
+    finalidade,
+    setFinalidade,
+    clearFinalidade,
+  };
 }
