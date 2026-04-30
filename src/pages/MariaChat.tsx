@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Bot, Trash2, ArrowLeft, ChevronDown, RotateCcw } from "lucide-react";
+import { Bot, Trash2, ArrowLeft, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useMariaChat } from "@/hooks/useMariaChat";
 import { ChatMessage } from "@/components/maria/ChatMessage";
