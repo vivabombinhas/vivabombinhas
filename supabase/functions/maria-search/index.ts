@@ -637,7 +637,13 @@ serve(async (req) => {
       if (filters[field] === true) query = query.eq(field, true);
     }
 
-    query = query.order("destaque", { ascending: false }).limit(10);
+    // Priorização: destaque pago ativo > destaque manual > recentes
+    query = query
+      .order("destaque_pago", { ascending: false })
+      .order("destaque_ate", { ascending: false, nullsFirst: false })
+      .order("destaque", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(10);
 
     const { data: properties, error: dbError } = await query;
     if (dbError) { console.error("Database error:", dbError); throw new Error("Erro ao buscar imóveis"); }
@@ -656,7 +662,12 @@ serve(async (req) => {
           broaderQuery = broaderQuery.neq("tipo", excluded);
         }
       }
-      const { data: broader } = await broaderQuery.order("destaque", { ascending: false }).limit(10);
+      const { data: broader } = await broaderQuery
+        .order("destaque_pago", { ascending: false })
+        .order("destaque_ate", { ascending: false, nullsFirst: false })
+        .order("destaque", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(10);
       broaderProperties = broader || [];
       usedBroaderSearch = broaderProperties.length > 0;
     }
