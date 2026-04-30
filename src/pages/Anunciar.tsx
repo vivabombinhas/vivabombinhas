@@ -59,7 +59,9 @@ const Anunciar = () => {
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("");
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleExtract = async () => {
     if (mode === "link" && !linkInput.trim()) {
