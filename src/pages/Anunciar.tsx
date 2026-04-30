@@ -450,20 +450,72 @@ const Anunciar = () => {
         )}
 
         {step === "done" && (
-          <div className="rounded-2xl border border-border bg-card p-10 text-center space-y-5">
-            <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <Check className="h-8 w-8 text-primary-foreground" />
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-border bg-card p-8 text-center space-y-4">
+              <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <Check className="h-7 w-7 text-primary-foreground" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold mb-1">Imóvel enviado! 🎉</h2>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  Nossa equipe revisa em até 24h e seu anúncio entra no ar.
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-bold mb-2">Imóvel enviado! 🎉</h2>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Nossa equipe revisa em até 24h e seu anúncio entra no ar. Te avisamos no WhatsApp quando publicar.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+
+            {/* Upsell de destaque pago */}
+            {submissionId && (
+              <div className="rounded-2xl border-2 border-amber-400 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 p-6 space-y-4 relative overflow-hidden">
+                <div className="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold uppercase tracking-wide shadow">
+                  Recomendado
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center flex-shrink-0 shadow-md">
+                    <Flame className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base">Quer aparecer no topo da MarIA?</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Anúncios em destaque recebem <strong>3x mais cliques</strong> e contatos.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  {[
+                    { icon: TrendingUp, label: "Topo da busca" },
+                    { icon: Star, label: "Borda dourada" },
+                    { icon: Flame, label: "30 dias ativo" },
+                  ].map(({ icon: Icon, label }) => (
+                    <div key={label} className="bg-card/60 rounded-lg p-2">
+                      <Icon className="h-4 w-4 text-amber-600 mx-auto mb-1" />
+                      <p className="text-[10px] font-semibold text-foreground">{label}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-baseline justify-center gap-1.5 pt-1">
+                  <span className="text-3xl font-bold">R$ 49</span>
+                  <span className="text-xs text-muted-foreground">/ pagamento único</span>
+                </div>
+
+                <Button
+                  onClick={() => navigate(`/destacar/${submissionId}`)}
+                  size="lg"
+                  className="w-full gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:opacity-90 text-white font-bold shadow-md"
+                >
+                  <Flame className="h-4 w-4" />
+                  Destacar meu anúncio
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button variant="outline" onClick={reset}>Cadastrar outro imóvel</Button>
-              <Button asChild className="gap-2 rounded-xl bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground">
-                <Link to="/">Voltar ao site<ArrowRight className="h-4 w-4" /></Link>
+              <Button asChild variant="ghost" className="gap-2">
+                <Link to="/">Não, obrigado, ir ao site<ArrowRight className="h-4 w-4" /></Link>
               </Button>
             </div>
           </div>
