@@ -190,7 +190,12 @@ export default function CheckoutSimulado() {
 
           <div className="space-y-2.5 pt-2 border-t border-amber-200 dark:border-amber-800">
             {[
-              { icon: TrendingUp, t: "Posição prioritária", d: "Aparece antes dos anúncios comuns" },
+              {
+                icon: Bot,
+                t: "MarIA recomenda seu imóvel primeiro",
+                d: "Nossa IA sempre prioriza imóveis em destaque ao conversar com clientes interessados",
+              },
+              { icon: TrendingUp, t: "Posição prioritária nas buscas", d: "Aparece antes dos anúncios comuns" },
               { icon: Star, t: "Borda dourada e badge 🔥", d: "Mais cliques e atenção visual" },
               { icon: Zap, t: "Ativo por 30 dias", d: "Sem renovação automática" },
               { icon: Shield, t: "Cancele quando quiser", d: "Suporte por WhatsApp" },
@@ -205,6 +210,25 @@ export default function CheckoutSimulado() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Como a MarIA recomenda */}
+        <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5 mb-6">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0">
+              <Bot className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Sparkles className="h-3.5 w-3.5 text-accent" />
+                <p className="text-xs font-bold uppercase tracking-wide text-accent">Vantagem exclusiva</p>
+              </div>
+              <p className="text-sm font-bold mb-1">A MarIA recomenda seu imóvel ativamente</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Sempre que um cliente conversar com a MarIA buscando algo compatível, <strong className="text-foreground">o seu imóvel será o primeiro indicado</strong> — mesmo entre dezenas de opções. Imóveis em destaque têm prioridade absoluta nas conversas e nas listagens.
+              </p>
+            </div>
           </div>
         </div>
 
