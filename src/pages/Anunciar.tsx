@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Sparkles, Link2, FileText, Check, Loader2, ArrowRight, BedDouble, Bath, Car, Ruler, Phone, Flame, TrendingUp, Star } from "lucide-react";
+import { ArrowLeft, Sparkles, Link2, FileText, Check, Loader2, ArrowRight, BedDouble, Bath, Car, Ruler, Phone, Flame, TrendingUp, Star, X, ChevronLeft, ChevronRight, Plus, ImagePlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,6 +82,140 @@ const tipoLabels: Record<string, string> = {
 
 const finalidadeLabels: Record<string, string> = {
   temporada: "Temporada", aluguel_anual: "Aluguel Anual", compra: "Venda",
+};
+
+interface PhotosManagerProps {
+  fotos: string[];
+  onChange: (fotos: string[]) => void;
+}
+
+const PhotosManager = ({ fotos, onChange }: PhotosManagerProps) => {
+  const [newUrl, setNewUrl] = useState("");
+
+  const remove = (i: number) => onChange(fotos.filter((_, idx) => idx !== i));
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= fotos.length) return;
+    const next = [...fotos];
+    [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+  };
+  const setCover = (i: number) => {
+    if (i === 0) return;
+    const next = [...fotos];
+    const [pic] = next.splice(i, 1);
+    next.unshift(pic);
+    onChange(next);
+  };
+  const addUrl = () => {
+    const url = newUrl.trim();
+    if (!/^https?:\/\/[^\s]{4,}$/i.test(url)) return;
+    if (fotos.includes(url)) return;
+    onChange([...fotos, url]);
+    setNewUrl("");
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Label className="text-xs font-semibold">
+          {fotos.length > 0 ? `${fotos.length} foto${fotos.length > 1 ? "s" : ""}` : "Fotos"}
+          {fotos.length > 0 && <span className="text-muted-foreground font-normal ml-1">(a 1ª é a capa)</span>}
+        </Label>
+      </div>
+
+      {fotos.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {fotos.map((f, i) => (
+            <div key={`${f}-${i}`} className="relative group rounded-md overflow-hidden border border-border bg-muted">
+              <img src={f} alt={`Foto ${i + 1}`} className="aspect-square object-cover w-full" loading="lazy" />
+
+              {i === 0 && (
+                <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-primary text-primary-foreground text-[9px] font-bold uppercase">
+                  Capa
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => remove(i)}
+                title="Excluir foto"
+                className="absolute top-1 right-1 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow opacity-90 hover:opacity-100"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+
+              <div className="absolute bottom-1 left-1 right-1 flex items-center justify-between gap-1">
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => move(i, -1)}
+                    disabled={i === 0}
+                    title="Mover para trás"
+                    className="h-6 w-6 rounded bg-background/90 text-foreground flex items-center justify-center disabled:opacity-30 hover:bg-background"
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => move(i, 1)}
+                    disabled={i === fotos.length - 1}
+                    title="Mover para frente"
+                    className="h-6 w-6 rounded bg-background/90 text-foreground flex items-center justify-center disabled:opacity-30 hover:bg-background"
+                  >
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                {i !== 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setCover(i)}
+                    title="Definir como capa"
+                    className="h-6 px-1.5 rounded bg-background/90 text-foreground text-[10px] font-semibold flex items-center gap-1 hover:bg-background"
+                  >
+                    <Star className="h-3 w-3" /> Capa
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {fotos.length === 0 && (
+        <div className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+          <ImagePlus className="h-5 w-5 mx-auto mb-1 opacity-60" />
+          Nenhuma foto ainda. Cole uma URL de imagem abaixo.
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <Input
+          type="url"
+          placeholder="https://... (cole o link de uma imagem)"
+          value={newUrl}
+          onChange={(e) => setNewUrl(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addUrl();
+            }
+          }}
+          className="text-sm"
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={addUrl}
+          disabled={!/^https?:\/\/[^\s]{4,}$/i.test(newUrl.trim())}
+          className="gap-1 shrink-0"
+        >
+          <Plus className="h-4 w-4" /> Adicionar
+        </Button>
+      </div>
+    </div>
+  );
 };
 
 const Anunciar = () => {
@@ -439,16 +573,11 @@ const Anunciar = () => {
                 </div>
               </div>
 
-              {data.fotos && data.fotos.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold">{data.fotos.length} fotos detectadas</Label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {data.fotos.slice(0, 8).map((f, i) => (
-                      <img key={i} src={f} alt={`Foto ${i + 1}`} className="aspect-square object-cover rounded-md" loading="lazy" />
-                    ))}
-                  </div>
-                </div>
-              )}
+              <PhotosManager
+                fotos={data.fotos || []}
+                onChange={(fotos) => updateField("fotos", fotos)}
+              />
+
             </div>
 
             {/* Contato */}
