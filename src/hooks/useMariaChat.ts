@@ -58,11 +58,32 @@ export function useMariaChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
+  const [finalidade, setFinalidadeState] = useState<Finalidade | null>(() => {
+    try {
+      const v = localStorage.getItem(FINALIDADE_KEY);
+      return v === "venda" || v === "aluguel_anual" || v === "temporada" ? v : null;
+    } catch {
+      return null;
+    }
+  });
   const allPropertiesRef = useRef<Property[]>([]);
   const shownCountRef = useRef(0);
   const sessionIdRef = useRef<string>(getOrCreateSessionId());
   const leadCapturedRef = useRef<boolean>(readLeadCaptured());
   const gateActiveRef = useRef<boolean>(false);
+  const finalidadeHintSentRef = useRef<boolean>(false);
+
+  const setFinalidade = useCallback((f: Finalidade) => {
+    try { localStorage.setItem(FINALIDADE_KEY, f); } catch { /* ignore */ }
+    setFinalidadeState(f);
+    finalidadeHintSentRef.current = false;
+  }, []);
+
+  const clearFinalidade = useCallback(() => {
+    try { localStorage.removeItem(FINALIDADE_KEY); } catch { /* ignore */ }
+    setFinalidadeState(null);
+    finalidadeHintSentRef.current = false;
+  }, []);
 
   const updateHasMore = useCallback(() => {
     // Se o gate está ativo (lead ainda não preenchido), não mostra botão "Ver mais"
