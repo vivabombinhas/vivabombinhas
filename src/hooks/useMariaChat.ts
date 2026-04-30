@@ -1,6 +1,14 @@
 import { useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Property } from "@/components/maria/PropertyCard";
+import type { Finalidade } from "@/components/maria/FinalidadeQualifier";
+
+const FINALIDADE_KEY = "maria_finalidade";
+const FINALIDADE_LABEL: Record<Finalidade, string> = {
+  temporada: "aluguel de temporada",
+  aluguel_anual: "aluguel anual (pra morar)",
+  venda: "compra (venda)",
+};
 
 export interface ChatMessage {
   id: string;
@@ -50,11 +58,32 @@ export function useMariaChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
+  const [finalidade, setFinalidadeState] = useState<Finalidade | null>(() => {
+    try {
+      const v = localStorage.getItem(FINALIDADE_KEY);
+      return v === "venda" || v === "aluguel_anual" || v === "temporada" ? v : null;
+    } catch {
+      return null;
+    }
+  });
   const allPropertiesRef = useRef<Property[]>([]);
   const shownCountRef = useRef(0);
   const sessionIdRef = useRef<string>(getOrCreateSessionId());
   const leadCapturedRef = useRef<boolean>(readLeadCaptured());
   const gateActiveRef = useRef<boolean>(false);
+  const finalidadeHintSentRef = useRef<boolean>(false);
+
+  const setFinalidade = useCallback((f: Finalidade) => {
+    try { localStorage.setItem(FINALIDADE_KEY, f); } catch { /* ignore */ }
+    setFinalidadeState(f);
+    finalidadeHintSentRef.current = false;
+  }, []);
+
+  const clearFinalidade = useCallback(() => {
+    try { localStorage.removeItem(FINALIDADE_KEY); } catch { /* ignore */ }
+    setFinalidadeState(null);
+    finalidadeHintSentRef.current = false;
+  }, []);
 
   const updateHasMore = useCallback(() => {
     // Se o gate está ativo (lead ainda não preenchido), não mostra botão "Ver mais"
@@ -136,11 +165,22 @@ export function useMariaChat() {
         content: m.content,
       }));
 
+      // Injeta um hint de contexto (finalidade selecionada no qualifier) APENAS na primeira
+      // chamada após a escolha. Vai como mensagem do usuário invisível pra ancorar o LLM.
+      if (finalidade && !finalidadeHintSentRef.current) {
+        conversationHistory.unshift({
+          role: "user",
+          content: `[contexto: o cliente está procurando ${FINALIDADE_LABEL[finalidade]}. Considere essa finalidade nas próximas buscas a menos que ele mude explicitamente.]`,
+        });
+        finalidadeHintSentRef.current = true;
+      }
+
       const { data, error } = await supabase.functions.invoke("maria-search", {
         body: {
           messages: conversationHistory,
           session_id: sessionIdRef.current,
           lead_captured: leadCapturedRef.current, // sinaliza ao backend
+          finalidade_hint: finalidade ?? undefined,
         },
       });
 
@@ -201,7 +241,7 @@ export function useMariaChat() {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, handleShowMore, updateHasMore, clearPropertyState]);
+  }, [messages, handleShowMore, updateHasMore, clearPropertyState, finalidade]);
 
   // Submit do formulário inline de captação
   const submitLead = useCallback(async (nome: string, telefone: string): Promise<boolean> => {
@@ -255,8 +295,21 @@ export function useMariaChat() {
     clearPropertyState();
     try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
     sessionIdRef.current = getOrCreateSessionId();
+    finalidadeHintSentRef.current = false;
     // NÃO limpa leadCaptured do localStorage — é permanente por usuário/dispositivo
+    // NÃO limpa finalidade — é a preferência do usuário (use clearFinalidade pra trocar)
   }, [clearPropertyState]);
 
-  return { messages, isLoading, sendMessage, clearChat, hasMore, showMore, submitLead };
+  return {
+    messages,
+    isLoading,
+    sendMessage,
+    clearChat,
+    hasMore,
+    showMore,
+    submitLead,
+    finalidade,
+    setFinalidade,
+    clearFinalidade,
+  };
 }

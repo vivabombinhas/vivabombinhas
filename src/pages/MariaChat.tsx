@@ -5,10 +5,11 @@ import { useMariaChat } from "@/hooks/useMariaChat";
 import { ChatMessage } from "@/components/maria/ChatMessage";
 import { ChatInput } from "@/components/maria/ChatInput";
 import { SuggestionChips } from "@/components/maria/SuggestionChips";
+import { FinalidadeQualifier } from "@/components/maria/FinalidadeQualifier";
 import { Button } from "@/components/ui/button";
 
 const MariaChat = () => {
-  const { messages, isLoading, sendMessage, clearChat, hasMore, showMore, submitLead } = useMariaChat();
+  const { messages, isLoading, sendMessage, clearChat, hasMore, showMore, submitLead, finalidade, setFinalidade, clearFinalidade } = useMariaChat();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -60,10 +61,26 @@ const MariaChat = () => {
                 <span>IA</span> 👋
               </h2>
               <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
-                Sua assistente inteligente de imóveis em Bombinhas. Me diga o que você procura!
+                Sua assistente inteligente de imóveis em Bombinhas.
               </p>
             </div>
-            <SuggestionChips onSelect={sendMessage} />
+            {!finalidade ? (
+              <FinalidadeQualifier onSelect={setFinalidade} />
+            ) : (
+              <div className="w-full space-y-3">
+                <p className="text-xs text-center text-muted-foreground">
+                  Buscando para{" "}
+                  <span className="font-semibold text-accent">
+                    {finalidade === "temporada" ? "🏖️ Temporada" : finalidade === "aluguel_anual" ? "🏠 Aluguel anual" : "💰 Comprar"}
+                  </span>
+                  {" · "}
+                  <button onClick={clearFinalidade} className="underline hover:text-foreground">
+                    trocar
+                  </button>
+                </p>
+                <SuggestionChips onSelect={sendMessage} finalidade={finalidade} />
+              </div>
+            )}
           </div>
         )}
 
