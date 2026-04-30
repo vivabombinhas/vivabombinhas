@@ -39,6 +39,41 @@ interface ExtractedData {
   fotos?: string[];
 }
 
+const getExtractionErrorMessage = async (error: unknown) => {
+  const fallback = error instanceof Error ? error.message : "Erro ao processar";
+  const context = (error as { context?: Response })?.context;
+
+  if (!context) return fallback;
+
+  try {
+    const body = await context.clone().json() as { error?: string };
+    return body?.error || fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const createManualReviewData = (mode: Mode, link: string, text: string): ExtractedData => {
+  const description = text.trim().replace(/\s+/g, " ");
+
+  if (mode === "text") {
+    return {
+      titulo: description.slice(0, 80) || "Imóvel em Bombinhas",
+      descricao: description,
+      finalidade: "temporada",
+      tipo: "outro",
+    };
+  }
+
+  return {
+    titulo: "Imóvel em Bombinhas",
+    descricao: "A extração automática não conseguiu preencher os detalhes. Revise e complete os campos principais antes de enviar.",
+    finalidade: "temporada",
+    tipo: "outro",
+    link_anuncio: link.trim(),
+  };
+};
+
 const tipoLabels: Record<string, string> = {
   apartamento: "Apartamento", casa: "Casa", cobertura: "Cobertura",
   terreno: "Terreno", sobrado: "Sobrado", studio: "Studio",
@@ -90,9 +125,14 @@ const Anunciar = () => {
       toast({ title: "Dados extraídos com IA! ✨", description: "Revise e ajuste o que precisar." });
     } catch (e) {
       console.error(e);
-      const msg = e instanceof Error ? e.message : "Erro ao processar";
-      toast({ title: "Não rolou dessa vez", description: msg, variant: "destructive" });
-      setStep("input");
+      const msg = await getExtractionErrorMessage(e);
+      setData(createManualReviewData(mode, linkInput, textInput));
+      setStep("review");
+      toast({
+        title: "IA indisponível agora",
+        description: `${msg} Você pode completar os dados manualmente e enviar para revisão.`,
+        variant: "destructive",
+      });
     }
   };
 
@@ -290,8 +330,8 @@ const Anunciar = () => {
             <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 flex items-start gap-3">
               <Sparkles className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="text-sm">
-                <p className="font-semibold text-foreground">Pronto! A IA preencheu tudo que conseguiu.</p>
-                <p className="text-muted-foreground">Revise, ajuste o que estiver errado e adicione seu contato.</p>
+                <p className="font-semibold text-foreground">Pronto! Revise os dados antes de enviar.</p>
+                <p className="text-muted-foreground">Se a IA não conseguiu preencher tudo, complete os campos principais e adicione seu contato.</p>
               </div>
             </div>
 
