@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import MariaChat from "./pages/MariaChat.tsx";
 import Anunciar from "./pages/Anunciar.tsx";
+import CheckoutSimulado from "./pages/CheckoutSimulado.tsx";
 import AdminLeads from "./pages/AdminLeads.tsx";
 import AdminSubmissions from "./pages/AdminSubmissions.tsx";
 import AdminImportar from "./pages/AdminImportar.tsx";
