@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Sparkles, Link2, FileText, Check, Loader2, ArrowRight, BedDouble, Bath, Car, Ruler, Phone, Flame, TrendingUp, Star, X, ChevronLeft, ChevronRight, Plus, ImagePlus } from "lucide-react";
+import { ArrowLeft, Sparkles, Link2, FileText, Check, Loader2, ArrowRight, BedDouble, Bath, Car, Ruler, Phone, Flame, TrendingUp, Star, X, ChevronLeft, ChevronRight, Plus, ImagePlus, LayoutDashboard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -229,8 +229,16 @@ const Anunciar = () => {
   const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCurrentUser(session?.user ?? null);
+      if (session?.user?.email) setContactEmail(session.user.email);
+    });
+  }, []);
 
   const handleExtract = async () => {
     if (mode === "link" && !linkInput.trim()) {
@@ -322,6 +330,7 @@ const Anunciar = () => {
       anunciante_nome: contactName.trim(),
       anunciante_telefone: contactPhone.trim(),
       anunciante_email: contactEmail.trim() || null,
+      user_id: currentUser?.id || null,
     }).select("id").maybeSingle();
 
     setSubmitting(false);
@@ -356,9 +365,15 @@ const Anunciar = () => {
             <ArrowLeft className="h-4 w-4" />
             Voltar
           </Link>
-          <div className="text-sm font-bold">
-            <span className="text-gradient">Mar</span>
-            <span className="text-foreground">IA</span>
+          <div className="flex items-center gap-4">
+            <Link to="/dashboard" className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1.5">
+              <LayoutDashboard className="h-3.5 w-3.5" />
+              Meu Painel
+            </Link>
+            <div className="text-sm font-bold">
+              <span className="text-gradient">Mar</span>
+              <span className="text-foreground">IA</span>
+            </div>
           </div>
         </div>
       </header>
