@@ -13,16 +13,32 @@ interface Submission {
   descricao: string | null;
   finalidade: string;
   tipo: string;
+  cidade: string | null;
   bairro: string | null;
+  endereco: string | null;
   quartos: number | null;
+  suites: number | null;
   banheiros: number | null;
   vagas_garagem: number | null;
   area_m2: number | null;
+  capacidade_pessoas: number | null;
+  mobiliado: boolean | null;
+  piscina: boolean | null;
+  vista_mar: boolean | null;
+  frente_mar: boolean | null;
+  churrasqueira: boolean | null;
+  ar_condicionado: boolean | null;
+  aceita_pet: boolean | null;
+  wifi: boolean | null;
+  estacionamento: boolean | null;
   preco: number | null;
+  preco_temporada_diaria: number | null;
+  fotos: string[] | null;
   link_anuncio: string | null;
   anunciante_nome: string | null;
   anunciante_telefone: string | null;
   anunciante_email: string | null;
+  imobiliaria: string | null;
   imovel_id: string | null;
   created_at: string;
 }
@@ -82,15 +98,31 @@ export default function AdminSubmissions() {
       finalidade: sub.finalidade as any,
       tipo: sub.tipo as any,
       bairro: sub.bairro,
+      cidade: sub.cidade || "Bombinhas",
+      endereco: sub.endereco,
       quartos: sub.quartos || 0,
+      suites: sub.suites || 0,
       banheiros: sub.banheiros || 0,
       vagas_garagem: sub.vagas_garagem || 0,
       area_m2: sub.area_m2,
+      capacidade_pessoas: sub.capacidade_pessoas || 0,
+      mobiliado: sub.mobiliado,
+      piscina: sub.piscina,
+      vista_mar: sub.vista_mar,
+      frente_mar: sub.frente_mar,
+      churrasqueira: sub.churrasqueira,
+      ar_condicionado: sub.ar_condicionado,
+      aceita_pet: sub.aceita_pet,
+      wifi: sub.wifi,
+      estacionamento: sub.estacionamento,
       preco: sub.preco,
+      preco_temporada_diaria: sub.preco_temporada_diaria,
       link_anuncio: sub.link_anuncio,
+      fotos: (sub as any).fotos,
       anunciante_nome: sub.anunciante_nome,
       anunciante_telefone: sub.anunciante_telefone,
       anunciante_email: sub.anunciante_email,
+      imobiliaria: (sub as any).imobiliaria,
       origem: "manual" as any,
       status: "ativo" as any,
       gestao_propria,
