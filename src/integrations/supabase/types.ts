@@ -90,6 +90,7 @@ export type Database = {
           tipo: Database["public"]["Enums"]["tipo_imovel"]
           titulo: string
           updated_at: string
+          user_id: string | null
           vagas_garagem: number | null
           vista_mar: boolean | null
           wifi: boolean | null
@@ -136,6 +137,7 @@ export type Database = {
           tipo: Database["public"]["Enums"]["tipo_imovel"]
           titulo: string
           updated_at?: string
+          user_id?: string | null
           vagas_garagem?: number | null
           vista_mar?: boolean | null
           wifi?: boolean | null
@@ -182,6 +184,7 @@ export type Database = {
           tipo?: Database["public"]["Enums"]["tipo_imovel"]
           titulo?: string
           updated_at?: string
+          user_id?: string | null
           vagas_garagem?: number | null
           vista_mar?: boolean | null
           wifi?: boolean | null
@@ -227,6 +230,7 @@ export type Database = {
           tipo: Database["public"]["Enums"]["tipo_imovel"]
           titulo: string
           updated_at: string
+          user_id: string | null
           vagas_garagem: number | null
           vista_mar: boolean | null
           wifi: boolean | null
@@ -269,6 +273,7 @@ export type Database = {
           tipo: Database["public"]["Enums"]["tipo_imovel"]
           titulo: string
           updated_at?: string
+          user_id?: string | null
           vagas_garagem?: number | null
           vista_mar?: boolean | null
           wifi?: boolean | null
@@ -311,6 +316,7 @@ export type Database = {
           tipo?: Database["public"]["Enums"]["tipo_imovel"]
           titulo?: string
           updated_at?: string
+          user_id?: string | null
           vagas_garagem?: number | null
           vista_mar?: boolean | null
           wifi?: boolean | null
