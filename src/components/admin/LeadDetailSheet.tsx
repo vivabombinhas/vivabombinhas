@@ -233,7 +233,7 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
 
   if (!lead) return null;
 
-  const waLink = lead.telefone ? `https://wa.me/${lead.telefone.replace(/\D/g, "")}` : null;
+  const waLink = lead.telefone ? buildWhatsappLink(lead.telefone, "") : null;
 
   const iconFor = (kind: TimelineEvent["kind"]) => {
     switch (kind) {
