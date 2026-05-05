@@ -276,7 +276,22 @@ serve(async (req) => {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Fetch dynamic AI configuration
+    const { data: aiConfigData } = await supabase
+      .from("ai_config")
+      .select("*")
+      .limit(1)
+      .maybeSingle();
+
+    const aiConfig = {
+      model: aiConfigData?.model || "google/gemini-2.0-flash-exp",
+      temperature: aiConfigData?.temperature ?? 0.7,
+      systemPrompt: aiConfigData?.system_prompt || SYSTEM_PROMPT,
+      maxTokens: aiConfigData?.max_tokens || 1000
+    };
+
     if (action === "submit_lead") {
+      // ... keep existing code
       if (!sessionId || !nome || !telefone) {
         return new Response(JSON.stringify({ success: false, error: "missing_fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
@@ -299,7 +314,7 @@ serve(async (req) => {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: aiConfig.model,
         messages: [
           { role: "system", content: FILTER_EXTRACTION_PROMPT },
           { role: "user", content: `Histórico:\n${conversationContext}\n\nMsg: ${userMessage}` },
@@ -320,12 +335,13 @@ serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: aiConfig.model,
           messages: [
-            { role: "system", content: SYSTEM_PROMPT + "\n\nEsta mensagem NÃO é uma busca. Use [NO_RESULTS_YET]. Responda de forma natural." },
+            { role: "system", content: aiConfig.systemPrompt + "\n\nEsta mensagem NÃO é uma busca. Use [NO_RESULTS_YET]. Responda de forma natural." },
             ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
           ],
-          temperature: 0.7,
+          temperature: aiConfig.temperature,
+          max_tokens: aiConfig.maxTokens
         }),
       });
       const aiData = await aiResponse.json();
