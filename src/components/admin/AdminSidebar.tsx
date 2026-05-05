@@ -39,7 +39,8 @@ const mainItems = [
 ];
 
 const importItems = [
-  { title: "Submissões", url: "/admin/submissions", icon: ClipboardList },
+  { title: "Meus Imóveis", url: "/admin/imoveis", icon: ClipboardList },
+  { title: "Submissões", url: "/admin/submissions", icon: Bell },
   { title: "Importar link", url: "/admin/importar-link", icon: Link2 },
   { title: "Importar planilha", url: "/admin/importar", icon: FileSpreadsheet },
 ];
