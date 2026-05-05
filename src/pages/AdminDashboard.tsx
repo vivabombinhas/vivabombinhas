@@ -46,6 +46,7 @@ export default function AdminDashboard() {
         matchesAltoScore,
         imoveisAtivos,
         submissoesPendentes,
+        destaquesPendentes,
         followupsAtrasados,
         followupsHoje,
         ultimosLeads,
@@ -59,6 +60,7 @@ export default function AdminDashboard() {
         supabase.from("lead_matches").select("*", { count: "exact", head: true }).eq("status", "pending").gte("score", 70),
         supabase.from("imoveis").select("*", { count: "exact", head: true }).eq("status", "ativo"),
         supabase.from("imoveis_submissions").select("*", { count: "exact", head: true }).eq("status_submission", "pendente"),
+        supabase.from("imoveis_submissions").select("*", { count: "exact", head: true }).eq("status_submission", "pendente").ilike("observacoes", "%[DESTAQUE-PAGO-SIMULADO]%"),
         supabase.from("leads_maria").select("*", { count: "exact", head: true }).not("next_followup_at", "is", null).lt("next_followup_at", nowIso).neq("status", "convertido").neq("status", "descartado").neq("status", "anonimo"),
         supabase.from("leads_maria").select("*", { count: "exact", head: true }).not("next_followup_at", "is", null).gte("next_followup_at", nowIso).lte("next_followup_at", endOfToday.toISOString()).neq("status", "convertido").neq("status", "descartado").neq("status", "anonimo"),
         supabase.from("leads_maria").select("id, nome, telefone, bairro_interesse, tipo_imovel, status, created_at").neq("status", "anonimo").order("created_at", { ascending: false }).limit(5),
@@ -80,6 +82,7 @@ export default function AdminDashboard() {
         matchesAltoScore: matchesAltoScore.count || 0,
         imoveisAtivos: imoveisAtivos.count || 0,
         submissoesPendentes: submissoesPendentes.count || 0,
+        destaquesPendentes: destaquesPendentes.count || 0,
         followupsAtrasados: followupsAtrasados.count || 0,
         followupsHoje: followupsHoje.count || 0,
         ultimosLeads: ultimosLeads.data || [],
@@ -134,11 +137,15 @@ export default function AdminDashboard() {
       to: "/admin/receita",
     },
     {
-      title: "Imóveis ativos",
-      value: stats?.imoveisAtivos ?? "—",
-      sub: `${stats?.submissoesPendentes ?? 0} submissões pendentes`,
+      title: "Submissões",
+      value: stats?.submissoesPendentes ?? "—",
+      sub: (stats?.destaquesPendentes ?? 0) > 0 
+        ? `${stats?.destaquesPendentes} destaque(s) pago(s) 🔥` 
+        : `${stats?.imoveisAtivos ?? 0} imóveis ativos`,
       icon: Home,
-      color: "text-cyan-600 bg-cyan-500/10",
+      color: (stats?.destaquesPendentes ?? 0) > 0 
+        ? "text-amber-600 bg-amber-500/10 animate-pulse" 
+        : "text-cyan-600 bg-cyan-500/10",
       to: "/admin/submissions",
     },
   ];
