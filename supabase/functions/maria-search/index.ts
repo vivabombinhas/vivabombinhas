@@ -106,8 +106,8 @@ const FILTER_EXTRACTION_PROMPT = `Analise a CONVERSA COMPLETA do usuário e extr
 
 REGRA CRÍTICA - CLASSIFICAÇÃO DE INTENÇÃO:
 Primeiro, determine a INTENÇÃO da última mensagem do usuário. Classifique como:
-- "search": O usuário quer buscar/ver imóveis (nova busca ou refinamento)
-- "conversation": Qualquer outra coisa (saudação, perguntas gerais, dados de contato, reclamação, anunciar imóvel, conversa casual, esclarecimentos, etc.)
+- "search": O usuário quer buscar/ver imóveis (nova busca ou refinamento). Se ele estiver respondendo a uma pergunta sobre o perfil do imóvel (ex: "quero morar", "2 quartos", "até 800k"), isso é INTENÇÃO DE BUSCA/REFINAMENTO.
+- "conversation": Qualquer outra coisa (saudação, perguntas gerais, dados de contato, reclamação, anunciar imóvel, conversa casual).
 
 Se a intenção for "conversation", retorne APENAS: {"intent":"conversation"}
 NÃO extraia filtros para mensagens conversacionais.
@@ -363,22 +363,44 @@ serve(async (req) => {
 
     // --- SEARCH INTENT ---
     let query = supabase.from("imoveis").select("*").eq("status", "ativo");
+    
     if (filters.finalidade) query = query.eq("finalidade", filters.finalidade);
+    
     if (filters.tipo_included?.length) {
       query = query.in("tipo", filters.tipo_included);
     } else if (filters.tipo) {
       query = query.eq("tipo", filters.tipo);
     }
+    
     if (filters.bairro) query = query.ilike("bairro", `%${filters.bairro}%`);
+    
     if (filters.preco_max) {
       if (filters.finalidade === "temporada") query = query.lte("preco_temporada_diaria", filters.preco_max);
       else query = query.lte("preco", filters.preco_max);
     }
+    if (filters.preco_min) {
+      if (filters.finalidade === "temporada") query = query.gte("preco_temporada_diaria", filters.preco_min);
+      else query = query.gte("preco", filters.preco_min);
+    }
+
+    if (filters.quartos) query = query.gte("quartos", filters.quartos);
+    if (filters.banheiros) query = query.gte("banheiros", filters.banheiros);
+    if (filters.vagas_garagem) query = query.gte("vagas_garagem", filters.vagas_garagem);
+    if (filters.capacidade_pessoas) query = query.gte("capacidade_pessoas", filters.capacidade_pessoas);
+    
+    // Boolean filters
+    const booleanFilters = ["piscina", "vista_mar", "frente_mar", "mobiliado", "aceita_pet", "churrasqueira", "ar_condicionado", "wifi"];
+    for (const key of booleanFilters) {
+      if ((filters as any)[key] === true) {
+        query = query.eq(key, true);
+      }
+    }
 
     const { data: properties, error: dbError } = await query
       .order("destaque_pago", { ascending: false })
+      .order("destaque", { ascending: false })
       .order("created_at", { ascending: false })
-      .limit(10);
+      .limit(20);
     if (dbError) throw dbError;
 
     const resultsToUse = properties || [];
@@ -418,7 +440,7 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({
       reply: assistantMessage,
-      properties: showResults ? resultsToUse.slice(0, gateActive ? 1 : 3) : [],
+      properties: showResults ? resultsToUse.slice(0, gateActive ? 2 : 10) : [],
       all_properties: showResults ? resultsToUse : [],
       filters_used: filters,
       results_count: resultsToUse.length,
