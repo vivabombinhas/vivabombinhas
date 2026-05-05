@@ -316,6 +316,7 @@ export default function Dashboard() {
                           src={prop.fotos[0]} 
                           alt={prop.titulo} 
                           className="object-cover w-full h-full transition-transform group-hover:scale-105" 
+                          referrerPolicy="no-referrer"
                           onError={(e) => {
                             const target = e.currentTarget as HTMLImageElement;
                             target.src = "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=400&fit=crop&q=60";
