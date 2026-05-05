@@ -109,12 +109,10 @@ export default function AdminMatches() {
     onError: () => toast.error("Erro ao atualizar"),
   });
 
-  const buildWhatsappLink = (m: any) => {
-    const tel = m.lead?.telefone?.replace(/\D/g, "") || "";
+  const getMatchWhatsappLink = (m: any) => {
     const preco = m.imovel?.preco ?? m.imovel?.preco_temporada_diaria;
     const msg = `Oi ${m.lead?.nome?.split(" ")[0] || ""}! Aqui é da Viva Bombinhas 🌊\n\nLembra que você procurava ${m.lead?.tipo_imovel || "imóvel"} em ${m.lead?.bairro_interesse || "Bombinhas"}? Acabou de entrar uma opção que combina muito com o que você queria:\n\n🏠 *${m.imovel?.titulo}*\n📍 ${m.imovel?.bairro}\n💰 ${formatCurrency(preco)}\n\nQuer que eu te mande mais detalhes e fotos?`;
-    // Usamos api.whatsapp.com para melhor compatibilidade
-    return buildWhatsappLink(m.lead?.telefone || "", msg);
+    return buildWALink(m.lead?.telefone || "", msg);
   };
 
   const handleWhatsapp = (e: React.MouseEvent, m: any) => {
