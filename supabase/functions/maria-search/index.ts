@@ -352,6 +352,7 @@ serve(async (req) => {
         reply: assistantMessage, properties: [], all_properties: [], filters_used: {},
         results_count: 0, broader_search: false, lead_saved: false,
         show_results: false, clear_results: true,
+        debug_config: aiConfig
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -418,6 +419,7 @@ serve(async (req) => {
       results_count: resultsToUse.length,
       gate_active: gateActive,
       show_results: showResults,
+      debug_config: aiConfig
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (error) {

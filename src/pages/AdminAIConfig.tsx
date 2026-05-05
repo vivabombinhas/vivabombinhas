@@ -19,7 +19,7 @@ export default function AdminAIConfig() {
     system_prompt: "",
   });
   const [testInput, setTestInput] = useState("Oi, tudo bem?");
-  const [testResult, setTestResult] = useState<string | null>(null);
+  const [testResult, setTestResult] = useState<{ reply: string; debug?: any } | null>(null);
   const [isTesting, setIsTesting] = useState(false);
 
   const { data: config, isLoading } = useQuery({
@@ -104,7 +104,10 @@ export default function AdminAIConfig() {
       });
 
       if (error) throw error;
-      setTestResult(data?.reply || "Sem resposta da IA.");
+      setTestResult({
+        reply: data?.reply || "Sem resposta da IA.",
+        debug: data?.debug_config
+      });
     } catch (error: any) {
       toast({
         title: "Erro no teste",
@@ -243,12 +246,34 @@ export default function AdminAIConfig() {
             </div>
 
             {testResult && (
-              <div className="p-4 rounded-lg bg-muted border animate-in fade-in slide-in-from-top-2">
-                <div className="flex items-center gap-2 mb-2 text-sm font-medium text-muted-foreground">
-                  <MessageSquare className="w-4 h-4" />
-                  Resposta da MarIA:
+              <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                <div className="p-4 rounded-lg bg-muted border">
+                  <div className="flex items-center gap-2 mb-2 text-sm font-medium text-muted-foreground">
+                    <MessageSquare className="w-4 h-4" />
+                    Resposta da MarIA:
+                  </div>
+                  <p className="text-sm whitespace-pre-wrap">{testResult.reply}</p>
                 </div>
-                <p className="text-sm whitespace-pre-wrap">{testResult}</p>
+
+                {testResult.debug && (
+                  <div className="p-4 rounded-lg bg-slate-950 text-slate-50 border font-mono text-[10px] overflow-auto">
+                    <div className="flex items-center gap-2 mb-2 font-bold text-slate-400 uppercase tracking-wider">
+                      <Cpu className="w-3 h-3" />
+                      Parâmetros Utilizados:
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-3">
+                      <div><span className="text-slate-500">model:</span> {testResult.debug.model}</div>
+                      <div><span className="text-slate-500">temp:</span> {testResult.debug.temperature}</div>
+                      <div><span className="text-slate-500">max_tokens:</span> {testResult.debug.maxTokens}</div>
+                    </div>
+                    <div className="border-t border-slate-800 pt-2 mt-2">
+                      <div className="text-slate-400 mb-1">SYSTEM_PROMPT:</div>
+                      <div className="whitespace-pre-wrap opacity-80 leading-relaxed">
+                        {testResult.debug.systemPrompt}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
