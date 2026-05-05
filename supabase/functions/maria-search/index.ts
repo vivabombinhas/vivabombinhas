@@ -324,18 +324,13 @@ serve(async (req) => {
     });
 
     const filterData = await filterResponse.json();
-    console.log("Filter Data Raw:", JSON.stringify(filterData));
-    
     let filterText = filterData.choices?.[0]?.message?.content || "{}";
     filterText = filterText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    console.log("Filter Text Cleaned:", filterText);
 
     let filters: SearchFilters & { intent?: string } = {};
     try { 
       filters = JSON.parse(filterText); 
-      console.log("Parsed Filters:", JSON.stringify(filters));
     } catch (e) { 
-      console.error("JSON Parse Error on filters:", e, "Raw text:", filterText);
       filters = {}; 
     }
 
