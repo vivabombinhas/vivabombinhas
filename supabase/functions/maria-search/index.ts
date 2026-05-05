@@ -299,7 +299,7 @@ serve(async (req) => {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash-exp",
+        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: FILTER_EXTRACTION_PROMPT },
           { role: "user", content: `Histórico:\n${conversationContext}\n\nMsg: ${userMessage}` },
@@ -320,7 +320,7 @@ serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
         body: JSON.stringify({
-          model: "google/gemini-2.0-flash-exp",
+          model: "google/gemini-3-flash-preview",
           messages: [
             { role: "system", content: SYSTEM_PROMPT + "\n\nEsta mensagem NÃO é uma busca. Use [NO_RESULTS_YET]. Responda de forma natural." },
             ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
@@ -375,7 +375,7 @@ serve(async (req) => {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash-exp",
+        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: SYSTEM_PROMPT + propertyContext },
           ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
@@ -385,7 +385,11 @@ serve(async (req) => {
     });
 
     const aiData = await aiResponse.json();
-    let assistantMessage = aiData.choices?.[0]?.message?.content || "";
+    if (aiData.error) {
+      console.error("AI Gateway Error:", aiData.error);
+      throw new Error(`AI Gateway error: ${aiData.error.message || "Unknown error"}`);
+    }
+    let assistantMessage = aiData.choices?.[0]?.message?.content || "Olá! Como posso te ajudar a encontrar seu imóvel em Bombinhas hoje?";
     let showResults = assistantMessage.includes("[SHOW_RESULTS]");
     assistantMessage = assistantMessage.replace(/^\[(SHOW_RESULTS|NO_RESULTS_YET)\]\s*/g, "");
 
