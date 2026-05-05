@@ -128,7 +128,17 @@ const PhotosManager = ({ fotos, onChange }: PhotosManagerProps) => {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {fotos.map((f, i) => (
             <div key={`${f}-${i}`} className="relative group rounded-md overflow-hidden border border-border bg-muted">
-              <img src={f} alt={`Foto ${i + 1}`} className="aspect-square object-cover w-full" loading="lazy" />
+              <img 
+                src={f} 
+                alt={`Foto ${i + 1}`} 
+                className="aspect-square object-cover w-full transition-opacity" 
+                loading="lazy"
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.src = "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=400&fit=crop&q=60";
+                  target.style.opacity = "0.5";
+                }}
+              />
 
               {i === 0 && (
                 <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-primary text-primary-foreground text-[9px] font-bold uppercase">
