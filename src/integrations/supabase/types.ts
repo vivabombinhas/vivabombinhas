@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_config: {
+        Row: {
+          created_at: string | null
+          id: string
+          max_tokens: number | null
+          model: string
+          system_prompt: string | null
+          temperature: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          max_tokens?: number | null
+          model?: string
+          system_prompt?: string | null
+          temperature?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          max_tokens?: number | null
+          model?: string
+          system_prompt?: string | null
+          temperature?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       config_imobiliaria: {
         Row: {
           ativo: boolean
