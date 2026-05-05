@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bell, MessageCircle, Check, Sparkles, Home, MapPin } from "lucide-react";
-import { buildWhatsappLink } from "@/lib/whatsapp-templates";
+import { buildWhatsappLink, openWhatsapp } from "@/lib/whatsapp-templates";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -99,8 +99,7 @@ export default function AdminAlerts() {
       ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(alert.imovel.preco)
       : "";
     const msg = `Oi ${nome}! 🎯 Apareceu um imóvel novo que combina com o que você procura:\n\n*${alert.imovel.titulo}*${alert.imovel.bairro ? `\n📍 ${alert.imovel.bairro}` : ""}${alert.imovel.quartos ? `\n🛏️ ${alert.imovel.quartos} quartos` : ""}${preco ? `\n💰 ${preco}` : ""}${alert.imovel.link_anuncio ? `\n\n${alert.imovel.link_anuncio}` : ""}\n\nQuer mais detalhes ou agendar uma visita?`;
-    const url = buildWhatsappLink(alert.lead.telefone, msg);
-    window.open(url, "_blank");
+    openWhatsapp(alert.lead.telefone, msg);
     // marca como notificado e atualiza last_contact_at do lead
     await supabase.from("lead_matches").update({ status: "sent" }).eq("id", alert.id);
     await supabase.from("leads_maria").update({ last_contact_at: new Date().toISOString() }).eq("id", alert.lead.id);

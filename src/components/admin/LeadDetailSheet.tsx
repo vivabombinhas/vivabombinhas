@@ -38,7 +38,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { WHATSAPP_TEMPLATES, buildWhatsappLink } from "@/lib/whatsapp-templates";
+import { WHATSAPP_TEMPLATES, buildWhatsappLink, openWhatsapp } from "@/lib/whatsapp-templates";
 
 interface Lead {
   id: string;
@@ -233,7 +233,7 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
 
   if (!lead) return null;
 
-  const waLink = lead.telefone ? `https://wa.me/${lead.telefone.replace(/\D/g, "")}` : null;
+  const waLink = lead.telefone ? buildWhatsappLink(lead.telefone, "") : null;
 
   const iconFor = (kind: TimelineEvent["kind"]) => {
     switch (kind) {
@@ -301,8 +301,7 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
                   <DropdownMenuItem
                     key={t.id}
                     onClick={() => {
-                      const link = buildWhatsappLink(lead.telefone!, t.build(lead));
-                      window.open(link, "_blank");
+                      openWhatsapp(lead.telefone!, t.build(lead));
                       // Marca contato automaticamente ao abrir o WhatsApp
                       updateLead.mutate({ last_contact_at: new Date().toISOString() });
                     }}

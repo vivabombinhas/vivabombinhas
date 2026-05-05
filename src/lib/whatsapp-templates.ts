@@ -80,6 +80,27 @@ export const buildWhatsappLink = (telefone: string, message: string) => {
     phone = `55${phone}`;
   }
   
-  // Voltamos para o wa.me que costuma ser mais aceito por bloqueadores de pop-up quando disparado via link direto
-  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  // Usamos wa.me por ser mais curto e amigável
+  const baseUrl = `https://wa.me/${phone}`;
+  return message ? `${baseUrl}?text=${encodeURIComponent(message)}` : baseUrl;
+};
+
+/**
+ * Abre o WhatsApp de forma segura, evitando erros de Cross-Origin (COOP) 
+ * que podem ocorrer em ambientes de sandbox como o Lovable/StackBlitz.
+ */
+export const openWhatsapp = (telefone: string, message: string) => {
+  const url = buildWhatsappLink(telefone, message);
+  
+  // Criamos um elemento <a> temporário para disparar o clique
+  // Isso é mais resiliente que window.open em muitos navegadores/sandboxes
+  const link = document.createElement("a");
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer"; // Essencial para evitar bloqueios de Cross-Origin-Opener-Policy
+  
+  // Adiciona ao documento, clica e remove
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
