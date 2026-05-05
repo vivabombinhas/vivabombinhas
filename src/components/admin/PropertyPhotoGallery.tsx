@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Plus, Loader2, X } from "lucide-react";
+import { Trash2, Plus, Loader2, X, RefreshCw } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface PropertyPhotoGalleryProps {
@@ -21,6 +21,7 @@ interface PropertyPhotoGalleryProps {
 export function PropertyPhotoGallery({ property, open, onOpenChange }: PropertyPhotoGalleryProps) {
   const [photos, setPhotos] = useState<string[]>(property.fotos || []);
   const [isUploading, setIsUploading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -45,6 +46,49 @@ export function PropertyPhotoGallery({ property, open, onOpenChange }: PropertyP
     newPhotos.splice(index, 1);
     setPhotos(newPhotos);
     updateMutation.mutate(newPhotos);
+  };
+
+  const handleRefreshPhotos = async () => {
+    if (!property.link_anuncio) {
+      toast({ 
+        title: "Link não disponível", 
+        description: "Este imóvel não possui um link de anúncio para reprocessar.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsRefreshing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("extract-property-from-link", {
+        body: { url: property.link_anuncio }
+      });
+
+      if (error) throw error;
+      if (!data.success) throw new Error(data.error || "Erro desconhecido");
+
+      const newPhotos = data.data.fotos || [];
+      if (newPhotos.length === 0) {
+        toast({ 
+          title: "Nenhuma foto encontrada", 
+          description: "A extração não encontrou novas imagens no link fornecido.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setPhotos(newPhotos);
+      await updateMutation.mutateAsync(newPhotos);
+      toast({ title: "Fotos atualizadas!", description: `${newPhotos.length} imagens extraídas.` });
+    } catch (error: any) {
+      toast({ 
+        title: "Erro ao reprocessar fotos", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,9 +133,25 @@ export function PropertyPhotoGallery({ property, open, onOpenChange }: PropertyP
       <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle className="flex items-center justify-between pr-8">
-            <span>Fotos: {property.titulo}</span>
-            <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" className="relative cursor-pointer" disabled={isUploading}>
+            <span className="truncate mr-4">Fotos: {property.titulo}</span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {property.link_anuncio && (
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handleRefreshPhotos}
+                  disabled={isRefreshing || isUploading}
+                  className="text-primary hover:text-primary-foreground hover:bg-primary"
+                >
+                  {isRefreshing ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                  )}
+                  Reprocessar do Link
+                </Button>
+              )}
+              <Button size="sm" variant="outline" className="relative cursor-pointer" disabled={isUploading || isRefreshing}>
                 {isUploading ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
                 ) : (
@@ -104,7 +164,7 @@ export function PropertyPhotoGallery({ property, open, onOpenChange }: PropertyP
                   accept="image/*"
                   className="absolute inset-0 opacity-0 cursor-pointer"
                   onChange={handleFileUpload}
-                  disabled={isUploading}
+                  disabled={isUploading || isRefreshing}
                 />
               </Button>
             </div>
