@@ -74,5 +74,6 @@ export const WHATSAPP_TEMPLATES: WhatsappTemplate[] = [
 
 export const buildWhatsappLink = (telefone: string, message: string) => {
   const phone = telefone.replace(/\D/g, "");
-  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  // Usamos api.whatsapp.com/send que é mais robusto para redirecionamentos e evita alguns bloqueios de Cross-Origin em navegadores específicos
+  return `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
 };
