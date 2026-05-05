@@ -103,7 +103,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
             {isDestaqueAtivo && (
               <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-[10px] font-bold backdrop-blur-sm shadow-md flex items-center gap-1 animate-pulse">
                 <Flame className="w-2.5 h-2.5" />
-                Destaque
+                Oportunidade Premium
               </span>
             )}
             <span className="px-2 py-0.5 rounded-full bg-primary/90 text-primary-foreground text-[10px] font-semibold backdrop-blur-sm">
