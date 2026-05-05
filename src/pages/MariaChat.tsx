@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Bot, Trash2, ArrowLeft, ChevronDown } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useMariaChat } from "@/hooks/useMariaChat";
 import { ChatMessage } from "@/components/maria/ChatMessage";
 import { ChatInput } from "@/components/maria/ChatInput";
