@@ -392,7 +392,7 @@ serve(async (req) => {
         Authorization: `Bearer ${lovableApiKey}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.0-flash-exp",
         messages: [
           { role: "system", content: FILTER_EXTRACTION_PROMPT },
           { role: "user", content: `Histórico da conversa:\n${conversationContext}\n\nÚltima mensagem do usuário: ${userMessage}` },
@@ -494,7 +494,7 @@ serve(async (req) => {
           Authorization: `Bearer ${lovableApiKey}`,
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-2.0-flash-exp",
           messages: conversationMessages,
           temperature: 0.7,
         }),
@@ -795,7 +795,7 @@ NUNCA peça e-mail. NUNCA mostre o telefone do anunciante no texto. NUNCA diga "
         Authorization: `Bearer ${lovableApiKey}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.0-flash-exp",
         messages: conversationMessages,
         temperature: 0.7,
       }),
