@@ -326,8 +326,13 @@ serve(async (req) => {
     const filterData = await filterResponse.json();
     let filterText = filterData.choices?.[0]?.message?.content || "{}";
     filterText = filterText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+
     let filters: SearchFilters & { intent?: string } = {};
-    try { filters = JSON.parse(filterText); } catch { filters = {}; }
+    try { 
+      filters = JSON.parse(filterText); 
+    } catch (e) { 
+      filters = {}; 
+    }
 
     const isConversation = filters.intent === "conversation";
     if (isConversation) {
@@ -337,7 +342,7 @@ serve(async (req) => {
         body: JSON.stringify({
           model: aiConfig.model,
           messages: [
-            { role: "system", content: aiConfig.systemPrompt + "\n\nEsta mensagem NÃO é uma busca. Use [NO_RESULTS_YET]. Responda de forma natural." },
+            { role: "system", content: aiConfig.systemPrompt + "\n\nEsta mensagem NÃO é uma busca por imóveis. Use [NO_RESULTS_YET]. Responda de forma natural e amigável, seguindo as diretrizes do system prompt." },
             ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
           ],
           temperature: aiConfig.temperature,
