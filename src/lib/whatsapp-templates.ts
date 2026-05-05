@@ -81,7 +81,8 @@ export const buildWhatsappLink = (telefone: string, message: string) => {
   }
   
   // Usamos wa.me por ser mais curto e amigável
-  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  const baseUrl = `https://wa.me/${phone}`;
+  return message ? `${baseUrl}?text=${encodeURIComponent(message)}` : baseUrl;
 };
 
 /**
