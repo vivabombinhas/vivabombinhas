@@ -184,7 +184,13 @@ export function PropertyPhotoGallery({ property, open, onOpenChange }: PropertyP
                   <img
                     src={url}
                     alt={`Foto ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-opacity duration-300"
+                    loading="lazy"
+                    onError={(e) => {
+                      const target = e.currentTarget as HTMLImageElement;
+                      target.src = "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=400&fit=crop&q=60";
+                      target.style.opacity = "0.5";
+                    }}
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                     <Button
