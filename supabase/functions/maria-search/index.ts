@@ -385,18 +385,11 @@ serve(async (req) => {
     });
 
     const aiData = await aiResponse.json();
-    console.log("AI Gateway Response:", JSON.stringify(aiData));
     if (aiData.error) {
       console.error("AI Gateway Error:", aiData.error);
       throw new Error(`AI Gateway error: ${aiData.error.message || "Unknown error"}`);
     }
-    let assistantMessage = aiData.choices?.[0]?.message?.content || "";
-    if (!assistantMessage && aiData.choices?.[0]?.finish_reason === "content_filter") {
-      assistantMessage = "Peço desculpas, mas não posso responder a isso devido a filtros de segurança. Como posso te ajudar com imóveis?";
-    } else if (!assistantMessage) {
-       console.log("AI returned empty content. Finish reason:", aiData.choices?.[0]?.finish_reason);
-       assistantMessage = "Olá! Como posso te ajudar a encontrar seu imóvel em Bombinhas hoje?";
-    }
+    let assistantMessage = aiData.choices?.[0]?.message?.content || "Olá! Como posso te ajudar a encontrar seu imóvel em Bombinhas hoje?";
     let showResults = assistantMessage.includes("[SHOW_RESULTS]");
     assistantMessage = assistantMessage.replace(/^\[(SHOW_RESULTS|NO_RESULTS_YET)\]\s*/g, "");
 
