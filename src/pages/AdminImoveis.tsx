@@ -1,0 +1,231 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  Search, 
+  MoreHorizontal, 
+  Edit, 
+  Trash2, 
+  Image as ImageIcon,
+  ExternalLink,
+  Plus
+} from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { PropertyEditSheet } from "@/components/admin/PropertyEditSheet";
+import { PropertyPhotoGallery } from "@/components/admin/PropertyPhotoGallery";
+
+export default function AdminImoveis() {
+  const [search, setSearch] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [editProperty, setEditProperty] = useState<any | null>(null);
+  const [galleryProperty, setGalleryProperty] = useState<any | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: imoveis, isLoading } = useQuery({
+    queryKey: ["admin_imoveis"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("imoveis")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("imoveis").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin_imoveis"] });
+      toast({ title: "Imóvel excluído com sucesso" });
+      setDeleteId(null);
+    },
+    onError: (error) => {
+      toast({ 
+        title: "Erro ao excluir imóvel", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const filteredImoveis = imoveis?.filter(i => 
+    i.titulo?.toLowerCase().includes(search.toLowerCase()) ||
+    i.bairro?.toLowerCase().includes(search.toLowerCase()) ||
+    i.codigo?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="container py-6 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold font-display">Meus Imóveis</h1>
+          <p className="text-muted-foreground text-sm">Gerencie os imóveis ativos no sistema</p>
+        </div>
+        <Button onClick={() => setEditProperty({})} className="gap-2">
+          <Plus className="w-4 h-4" /> Novo Imóvel
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-2 max-w-sm">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por título, bairro ou código..."
+            className="pl-8"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="border rounded-lg bg-card overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Imóvel</TableHead>
+              <TableHead>Preço</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="hidden md:table-cell">Bairro</TableHead>
+              <TableHead className="w-[80px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-10">Carregando...</TableCell>
+              </TableRow>
+            ) : filteredImoveis?.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">Nenhum imóvel encontrado</TableCell>
+              </TableRow>
+            ) : (
+              filteredImoveis?.map((imovel) => (
+                <TableRow key={imovel.id}>
+                  <TableCell>
+                    <div className="font-medium">{imovel.titulo}</div>
+                    <div className="text-xs text-muted-foreground">{imovel.tipo} · {imovel.finalidade}</div>
+                  </TableCell>
+                  <TableCell>
+                    {imovel.preco ? (
+                      <span className="font-medium text-primary">
+                        R$ {Number(imovel.preco).toLocaleString("pt-BR")}
+                      </span>
+                    ) : imovel.preco_temporada_diaria ? (
+                      <span className="font-medium text-primary">
+                        R$ {Number(imovel.preco_temporada_diaria).toLocaleString("pt-BR")} /dia
+                      </span>
+                    ) : "—"}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={imovel.status === "ativo" ? "default" : "secondary"}>
+                      {imovel.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">{imovel.bairro}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setEditProperty(imovel)}>
+                          <Edit className="mr-2 h-4 w-4" /> Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setGalleryProperty(imovel)}>
+                          <ImageIcon className="mr-2 h-4 w-4" /> Fotos ({imovel.fotos?.length || 0})
+                        </DropdownMenuItem>
+                        {imovel.link_anuncio && (
+                          <DropdownMenuItem asChild>
+                            <a href={imovel.link_anuncio} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="mr-2 h-4 w-4" /> Ver original
+                            </a>
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem 
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => setDeleteId(imovel.id)}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" /> Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Isso excluirá permanentemente o imóvel e todos os dados associados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => deleteId && deleteMutation.mutate(deleteId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {editProperty && (
+        <PropertyEditSheet
+          property={editProperty}
+          open={!!editProperty}
+          onOpenChange={(open) => !open && setEditProperty(null)}
+        />
+      )}
+
+      {galleryProperty && (
+        <PropertyPhotoGallery
+          property={galleryProperty}
+          open={!!galleryProperty}
+          onOpenChange={(open) => !open && setGalleryProperty(null)}
+        />
+      )}
+    </div>
+  );
+}
