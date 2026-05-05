@@ -33,13 +33,13 @@ const HeroSection = () => {
           Beta Aberto — Agora em Bombinhas
         </div>
 
-        <h1 className="text-4xl md:text-7xl lg:text-8xl font-black leading-[0.95] tracking-tight mb-8 animate-fade-up text-white" style={{ animationDelay: "0.1s", opacity: 0 }}>
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight mb-8 animate-fade-up text-white" style={{ animationDelay: "0.1s", opacity: 0 }}>
           Encontre seu imóvel
           <br />
           <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent italic">com Inteligência Artificial</span>
         </h1>
 
-        <p className="text-lg md:text-2xl text-white/50 mb-12 max-w-3xl mx-auto animate-fade-up leading-relaxed font-medium" style={{ animationDelay: "0.2s", opacity: 0 }}>
+        <p className="text-base md:text-xl text-white/50 mb-12 max-w-2xl mx-auto animate-fade-up leading-relaxed font-medium" style={{ animationDelay: "0.2s", opacity: 0 }}>
           Esqueça as horas perdidas em sites lentos. MarIA vasculha dezenas de fontes
           em Bombinhas e entrega as melhores oportunidades em segundos.
         </p>
@@ -48,24 +48,24 @@ const HeroSection = () => {
         <form 
           id="experimentar" 
           onSubmit={handleSearch}
-          className="rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 p-2 max-w-2xl mx-auto animate-fade-up shadow-2xl" 
+          className="rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 p-2 md:p-3 max-w-3xl mx-auto animate-fade-up shadow-2xl" 
           style={{ animationDelay: "0.3s", opacity: 0 }}
         >
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="flex-1 flex items-center gap-3 bg-white/10 rounded-xl px-4 py-4 border border-white/10 focus-within:border-primary/50 transition-colors">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1 flex items-center gap-3 bg-white/10 rounded-xl px-4 py-4 md:py-5 border border-white/10 focus-within:border-primary/50 transition-colors">
               <Search className="h-5 w-5 text-blue-400 shrink-0" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Ex: Apartamento 2 quartos em Mariscal até R$3.500..."
-                className="w-full bg-transparent text-sm md:text-base text-white outline-none placeholder:text-white/30"
+                className="w-full bg-transparent text-base md:text-lg text-white outline-none placeholder:text-white/30"
               />
             </div>
             <Button 
               type="submit"
               size="lg" 
-              className="h-auto py-4 px-8 gap-2 rounded-xl shrink-0 bg-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] text-white font-bold"
+              className="h-auto py-4 md:py-5 px-8 gap-2 rounded-xl shrink-0 bg-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] text-white font-bold text-base md:text-lg"
             >
               Perguntar à MarIA
               <ArrowRight className="h-4 w-4" />
