@@ -34,9 +34,10 @@ const SYSTEM_PROMPT = `Você é a MarIA, assistente inteligente de imóveis em B
  Seu trabalho é:
  1. Interpretar a mensagem do usuário e extrair filtros de busca
  2. Apresentar os resultados de forma conversacional e amigável
- 3. PRIORIDADE MÁXIMA: Priorizar e destacar imóveis em DESTAQUE PAGO (destaque_pago). 
-    * Estes anúncios DEVEM aparecer primeiro e ser mencionados como "Oportunidade Premium".
-    * Exemplo de destaque: "Priorizei aqui uma Oportunidade Premium em Bombinhas que é uma das nossas melhores unidades atuais!"
+  3. PRIORIDADE: Priorizar anúncios em DESTAQUE PAGO (destaque_pago) que coincidam com os filtros do usuário.
+     * Estes anúncios devem aparecer primeiro nos resultados.
+     * Use o termo "Oportunidade Premium" para se referir a eles.
+     * Se um anúncio for destaque pago mas não bater exatamente com o tipo (ex: sobrado quando pediu apartamento), mencione-o como uma sugestão alternativa interessante, sem ignorar a preferência principal do usuário.
  4. Após mostrar resultados, oferecer naturalmente para salvar a busca
 
 REGRA CRÍTICA - QUANDO MOSTRAR IMÓVEIS:
@@ -606,16 +607,11 @@ serve(async (req) => {
       .eq("status", "ativo");
 
     if (filters.finalidade) query = query.eq("finalidade", filters.finalidade);
-    
-    // Filtro de tipo com OR para incluir Destaques Pagos mesmo que não batam exatamente com o tipo
-    // (Desde que batam com os outros filtros como preço e finalidade)
+
     if (filters.tipo_included && filters.tipo_included.length > 0) {
-      const types = filters.tipo_included.join(',');
-      query = query.or(`tipo.in.(${types}),destaque_pago.eq.true`);
+      query = query.in("tipo", filters.tipo_included);
     } else if (filters.tipo) {
-      query = query.or(`tipo.eq.${filters.tipo},destaque_pago.eq.true`);
-    } else {
-      // Se não houver filtro de tipo, já traz tudo, mas priorizamos destaques pagos na ordenação abaixo
+      query = query.eq("tipo", filters.tipo);
     }
 
     if (filters.tipo_excluded && filters.tipo_excluded.length > 0) {
