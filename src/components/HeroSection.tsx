@@ -1,11 +1,47 @@
 import { Search, ArrowRight, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
   const [query, setQuery] = useState("");
+  const [placeholder, setPlaceholder] = useState("");
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  
+  const phrases = useMemo(() => [
+    "Ex: Apartamento 2 quartos em Mariscal até R$3.500...",
+    "Ex: Casa com piscina no Centro de Bombinhas...",
+    "Ex: Terreno perto da praia para investir...",
+    "Ex: Cobertura frente mar em Bombas...",
+    "Ex: Studio mobiliado para aluguel de temporada..."
+  ], []);
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const currentPhrase = phrases[phraseIndex];
+    const typingSpeed = isDeleting ? 30 : 60;
+    const pauseTime = 2500;
+
+    const timeout = setTimeout(() => {
+      if (!isDeleting && placeholderIndex < currentPhrase.length) {
+        setPlaceholder(currentPhrase.substring(0, placeholderIndex + 1));
+        setPlaceholderIndex(prev => prev + 1);
+      } else if (isDeleting && placeholderIndex > 0) {
+        setPlaceholder(currentPhrase.substring(0, placeholderIndex - 1));
+        setPlaceholderIndex(prev => prev - 1);
+      } else if (!isDeleting && placeholderIndex === currentPhrase.length) {
+        setTimeout(() => setIsDeleting(true), pauseTime);
+      } else if (isDeleting && placeholderIndex === 0) {
+        setIsDeleting(false);
+        setPhraseIndex((prev) => (prev + 1) % phrases.length);
+      }
+    }, typingSpeed);
+
+    return () => clearTimeout(timeout);
+  }, [placeholderIndex, isDeleting, phraseIndex, phrases]);
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -52,14 +88,14 @@ const HeroSection = () => {
           style={{ animationDelay: "0.3s", opacity: 0 }}
         >
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 flex items-center gap-3 bg-white/10 rounded-xl px-4 py-4 md:py-5 border border-white/10 focus-within:border-primary/50 transition-colors">
-              <Search className="h-5 w-5 text-blue-400 shrink-0" />
+            <div className="flex-1 flex items-center gap-3 bg-white/10 rounded-xl px-4 py-4 md:py-5 border border-white/10 focus-within:border-primary/50 transition-colors group">
+              <Search className="h-5 w-5 text-blue-400 shrink-0 group-focus-within:scale-110 transition-transform" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ex: Apartamento 2 quartos em Mariscal até R$3.500..."
-                className="w-full bg-transparent text-base md:text-lg text-white outline-none placeholder:text-white/30"
+                placeholder={placeholder}
+                className="w-full bg-transparent text-base md:text-lg text-white outline-none placeholder:text-white/40 font-medium"
               />
             </div>
             <Button 
