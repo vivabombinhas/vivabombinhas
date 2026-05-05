@@ -316,6 +316,11 @@ export default function Dashboard() {
                           src={prop.fotos[0]} 
                           alt={prop.titulo} 
                           className="object-cover w-full h-full transition-transform group-hover:scale-105" 
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLImageElement;
+                            target.src = "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=400&fit=crop&q=60";
+                            target.style.opacity = "0.5";
+                          }}
                         />
                       ) : (
                         <div className="flex items-center justify-center h-full">
@@ -343,8 +348,48 @@ export default function Dashboard() {
                             "Consulte"
                           }
                         </div>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" title="Editar">
+                        <div className="flex gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8" 
+                            title="Reprocessar fotos"
+                            disabled={!prop.link_anuncio}
+                            onClick={async () => {
+                              if (!prop.link_anuncio) return;
+                              toast.info("Reprocessando fotos... ✨");
+                              try {
+                                const { data: result, error } = await supabase.functions.invoke("extract-property-from-link", {
+                                  body: { url: prop.link_anuncio }
+                                });
+                                
+                                if (error) throw error;
+                                if (!result?.success || !result?.data?.fotos) throw new Error("Não foi possível extrair novas fotos");
+
+                                const { error: updateError } = await supabase
+                                  .from("imoveis")
+                                  .update({ fotos: result.data.fotos })
+                                  .eq("id", prop.id);
+
+                                if (updateError) throw updateError;
+                                
+                                toast.success(`${result.data.fotos.length} fotos atualizadas!`);
+                                fetchData(session.user.id);
+                              } catch (e) {
+                                console.error(e);
+                                toast.error("Erro ao atualizar fotos");
+                              }
+                            }}
+                          >
+                            <Sparkles className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8" 
+                            title="Editar"
+                            onClick={() => navigate(`/admin/imoveis?id=${prop.id}`)}
+                          >
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8" title="Ver Matches">
