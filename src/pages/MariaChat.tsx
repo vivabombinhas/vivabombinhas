@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Bot, Trash2, ArrowLeft, ChevronDown } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useMariaChat } from "@/hooks/useMariaChat";
 import { ChatMessage } from "@/components/maria/ChatMessage";
 import { ChatInput } from "@/components/maria/ChatInput";
@@ -9,8 +9,20 @@ import { FinalidadeQualifier } from "@/components/maria/FinalidadeQualifier";
 import { Button } from "@/components/ui/button";
 
 const MariaChat = () => {
+  const location = useLocation();
   const { messages, isLoading, sendMessage, clearChat, hasMore, showMore, submitLead, finalidade, setFinalidade, clearFinalidade } = useMariaChat();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const initializedRef = useRef(false);
+
+  useEffect(() => {
+    const state = location.state as { initialMessage?: string } | null;
+    if (state?.initialMessage && !initializedRef.current && messages.length === 0) {
+      initializedRef.current = true;
+      sendMessage(state.initialMessage);
+      // Limpa o state para não reenviar ao atualizar a página
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, sendMessage, messages.length]);
 
   useEffect(() => {
     // Use requestAnimationFrame to ensure DOM has rendered (including property cards)
