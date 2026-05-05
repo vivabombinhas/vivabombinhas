@@ -138,15 +138,46 @@ serve(async (req) => {
       }
 
       let scrapeRes = await doScrape(true, 2500);
-      let scrapeData = await scrapeRes.json();
+      let scrapeData: any = null;
+      
+      try {
+        scrapeData = await scrapeRes.json();
+      } catch (e) {
+        console.error("Failed to parse Firecrawl response:", e);
+      }
 
       if (!scrapeRes.ok) {
-        console.error("Firecrawl error (attempt 1):", scrapeRes.status, scrapeData);
-        if (scrapeRes.status === 402) {
-          return new Response(
-            JSON.stringify({ error: "Sem créditos no Firecrawl. Recarregue ou descreva o imóvel manualmente." }),
-            { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+        console.error("Firecrawl error:", scrapeRes.status, scrapeData);
+        
+        // Fallback: Try a direct fetch if Firecrawl is out of credits or failing
+        console.log("Attempting direct fetch fallback...");
+        try {
+          const directRes = await fetch(url, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            },
+          });
+          
+          if (directRes.ok) {
+            const html = await directRes.text();
+            console.log("Direct fetch successful, HTML length:", html.length);
+            scrapeData = { data: { html, markdown: "" } };
+            scrapeRes = { ok: true } as any;
+          } else if (scrapeRes.status === 402) {
+            return new Response(
+              JSON.stringify({ error: "Sem créditos no Firecrawl. Recarregue ou descreva o imóvel manualmente." }),
+              { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        } catch (directErr) {
+          console.error("Direct fetch also failed:", directErr);
+          if (scrapeRes.status === 402) {
+            return new Response(
+              JSON.stringify({ error: "Sem créditos no Firecrawl. Recarregue ou descreva o imóvel manualmente." }),
+              { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
         }
       }
 
