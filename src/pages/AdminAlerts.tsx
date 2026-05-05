@@ -100,7 +100,11 @@ export default function AdminAlerts() {
       : "";
     const msg = `Oi ${nome}! 🎯 Apareceu um imóvel novo que combina com o que você procura:\n\n*${alert.imovel.titulo}*${alert.imovel.bairro ? `\n📍 ${alert.imovel.bairro}` : ""}${alert.imovel.quartos ? `\n🛏️ ${alert.imovel.quartos} quartos` : ""}${preco ? `\n💰 ${preco}` : ""}${alert.imovel.link_anuncio ? `\n\n${alert.imovel.link_anuncio}` : ""}\n\nQuer mais detalhes ou agendar uma visita?`;
     const url = buildWhatsappLink(alert.lead.telefone, msg);
-    window.open(url, "_blank");
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.click();
     // marca como notificado e atualiza last_contact_at do lead
     await supabase.from("lead_matches").update({ status: "sent" }).eq("id", alert.id);
     await supabase.from("leads_maria").update({ last_contact_at: new Date().toISOString() }).eq("id", alert.lead.id);

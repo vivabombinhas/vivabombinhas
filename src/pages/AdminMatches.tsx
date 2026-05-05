@@ -112,7 +112,8 @@ export default function AdminMatches() {
     const tel = m.lead?.telefone?.replace(/\D/g, "") || "";
     const preco = m.imovel?.preco ?? m.imovel?.preco_temporada_diaria;
     const msg = `Oi ${m.lead?.nome?.split(" ")[0] || ""}! Aqui é da Viva Bombinhas 🌊\n\nLembra que você procurava ${m.lead?.tipo_imovel || "imóvel"} em ${m.lead?.bairro_interesse || "Bombinhas"}? Acabou de entrar uma opção que combina muito com o que você queria:\n\n🏠 *${m.imovel?.titulo}*\n📍 ${m.imovel?.bairro}\n💰 ${formatCurrency(preco)}\n\nQuer que eu te mande mais detalhes e fotos?`;
-    return `https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`;
+    // Usamos api.whatsapp.com para melhor compatibilidade
+    return `https://api.whatsapp.com/send?phone=55${tel}&text=${encodeURIComponent(msg)}`;
   };
 
   const handleWhatsapp = (e: React.MouseEvent, m: any) => {
@@ -120,10 +121,11 @@ export default function AdminMatches() {
     e.preventDefault();
     try {
       const url = buildWhatsappLink(m);
-      const win = window.open(url, "_blank", "noopener,noreferrer");
-      if (!win) {
-        window.top!.location.href = url;
-      }
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+      anchor.click();
     } catch {
       /* ignore */
     }

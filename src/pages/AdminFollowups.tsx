@@ -297,7 +297,11 @@ export default function AdminFollowups() {
                                       key={t.id}
                                       onClick={() => {
                                         const link = buildWhatsappLink(l.telefone!, t.build(l));
-                                        window.open(link, "_blank", "noopener,noreferrer");
+                                        const anchor = document.createElement("a");
+                                        anchor.href = link;
+                                        anchor.target = "_blank";
+                                        anchor.rel = "noopener noreferrer";
+                                        anchor.click();
                                       }}
                                       className="flex flex-col items-start gap-0.5 py-2"
                                     >
