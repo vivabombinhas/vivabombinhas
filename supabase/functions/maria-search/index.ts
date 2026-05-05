@@ -391,12 +391,13 @@ serve(async (req) => {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: aiConfig.model,
         messages: [
-          { role: "system", content: SYSTEM_PROMPT + propertyContext },
+          { role: "system", content: aiConfig.systemPrompt + propertyContext },
           ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
         ],
-        temperature: 0.7,
+        temperature: aiConfig.temperature,
+        max_tokens: aiConfig.maxTokens
       }),
     });
 
