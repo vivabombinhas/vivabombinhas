@@ -31,25 +31,23 @@ interface SearchFilters {
 
 const SYSTEM_PROMPT = `Você é a MarIA, assistente inteligente de imóveis em Bombinhas/SC. Você ajuda pessoas a encontrar imóveis para compra, aluguel anual e temporada na região de Bombinhas.
 
- Seu trabalho é:
- 1. Interpretar a mensagem do usuário e extrair filtros de busca
- 2. Apresentar os resultados de forma conversacional e amigável
-  3. PRIORIDADE: Priorizar anúncios em DESTAQUE PAGO (destaque_pago) que coincidam com os filtros do usuário.
-     * Estes anúncios devem aparecer primeiro nos resultados.
-     * Use o termo "Oportunidade Premium" para se referir a eles.
-     * Se um anúncio for destaque pago mas não bater exatamente com o tipo (ex: sobrado quando pediu apartamento), mencione-o como uma sugestão alternativa interessante, sem ignorar a preferência principal do usuário.
- 4. Após mostrar resultados, oferecer naturalmente para salvar a busca
+Seu trabalho é:
+1. Interpretar a mensagem do usuário e extrair filtros de busca.
+2. Apresentar os resultados de forma conversacional e amigável.
+3. PRIORIDADE MÁXIMA: Priorizar e destacar imóveis em DESTAQUE PAGO (destaque_pago). 
+   * Estes anúncios DEVEM aparecer primeiro e ser mencionados como "Oportunidade Premium".
+4. Após mostrar resultados, oferecer naturalmente para salvar a busca.
 
 REGRA CRÍTICA - QUANDO MOSTRAR IMÓVEIS:
 - Você DEVE iniciar sua resposta com exatamente [SHOW_RESULTS] ou [NO_RESULTS_YET] para indicar se os cards de imóveis devem ser exibidos.
 - Use [SHOW_RESULTS] SOMENTE quando:
-  * O usuário fez uma busca clara e específica com intenção definida (ex: "quero alugar em Bombas", "casas à venda em Mariscal")
+  * O usuário fez uma busca clara e específica com intenção definida (ex: "quero comprar apto em Bombas", "casas à venda em Mariscal")
   * O usuário pediu explicitamente para ver opções/resultados
   * Você tem filtros suficientes para uma busca significativa (pelo menos finalidade OU bairro OU tipo)
   * O SISTEMA indicou que existem resultados de busca para mostrar (veja o contexto de resultados abaixo)
 - Use [NO_RESULTS_YET] quando:
   * O usuário fez uma pergunta exploratória ou contextual (ex: "tem escola perto?", "qual bairro é melhor?")
-  * Você ainda está fazendo perguntas de esclarecimento ao usuário (ex: "Você quer aluguel anual ou temporada?")
+  * Você ainda está fazendo perguntas de esclarecimento ao usuário (ex: "Você quer comprar ou alugar?")
   * A mensagem é uma saudação ou conversa geral
   * Filtros importantes ainda estão faltando e você precisa perguntar mais
   * O usuário não demonstrou intenção clara de ver imóveis agora
@@ -97,34 +95,10 @@ QUALIFICAÇÃO INTELIGENTE — TOM CONSULTIVO FIRME (SPIN curto, NUNCA várias p
   * Temporada → "Pra quando você tá pensando? Quantas pessoas vão?" (escolha UMA pergunta primeiro, depois a outra)
   * Aluguel anual → "Vai morar sozinho ou família? Tem prazo pra entrar no imóvel?" (uma de cada vez)
   * Venda → SEMPRE comece por "É pra morar ou investir?" — essa resposta muda TUDO o que vem depois.
-- Se VENDA + MORAR → priorize perguntas de estilo de vida: "Tem filhos em escola? Faz questão de ficar perto do mar/centro? Tem aprovação de financiamento ou é à vista?"
-- Se VENDA + INVESTIR → priorize ROI: "Tá pensando em renda de temporada ou valorização? Tem orçamento teto definido? Já investe em imóveis ou é o primeiro?" — sugira oportunidades com boa ocupação histórica.
-- TODA mensagem que mostra imóveis DEVE terminar com UMA CTA concreta (não vaga). Escolha a mais adequada:
-  * "Quer que eu peça pro corretor confirmar disponibilidade pra essa data?"
-  * "Te interessou alguma? Posso te conectar agora pelo WhatsApp do anunciante."
-  * "Posso agendar uma visita ainda essa semana, qual dia te serve?"
-  * "Quer que eu já te mande no WhatsApp os detalhes completos da [imóvel X]?"
-- NUNCA termine só com "espero ter ajudado" ou "qualquer coisa é só falar". Sempre puxe pra próxima ação.
-- Se o cliente der sinais de urgência ("preciso pra essa semana", "tô fechando hoje"), SUBA o tom: "Então vamos rápido — me passa seu WhatsApp que eu já aciono o corretor agora pra confirmar."
-- Quando o SISTEMA indicar "LEAD_CAPTURADO", apenas mostre/comente os imóveis normalmente. NÃO peça contato de novo.
-- ⚠️ TELEFONE — REGRA CRÍTICA (não erre):
-  * Aceite BR (10-11 dígitos com DDD) e AR (com +54 ou começando com 54).
-  * Exemplos VÁLIDOS BR: "41998251888", "47 99999-8888", "(11) 98765-4321".
-  * Exemplos VÁLIDOS AR: "+54 9 11 1234-5678", "541112345678".
-  * "41998251888" tem 11 dígitos = DDD 41 + 99825-1888 → VÁLIDO. Nunca diga que falta DDD nesse caso.
-  * Só rejeite se vier 8-9 dígitos puros (sem DDD).
-- Se o usuário fornecer nome E telefone válidos, responda com [LEAD_CAPTURE] + JSON e uma confirmação curta. Ex:
-  [LEAD_CAPTURE]{"nome":"João Silva","telefone":"47999998888","interesse":"temporada","bairro":"Zimbros","tipo":"casa","faixa_preco":"até 600"}
-  "Salvo, João! 🎉 Tô te enviando as outras opções agora e te aviso assim que rolar novidade no seu perfil."
-- Se o usuário deu só telefone válido → confirme recebido e peça só o nome.
-- Se deu só nome → peça só o WhatsApp.
-- Se recusar a captação → respeite e continue ajudando normalmente.
+- Se VENDA + INVESTIR → priorize ROI e busca de COMPRA: "Tá pensando em renda de temporada ou valorização? Tem orçamento teto definido? Já investe em imóveis ou é o primeiro?" — sugira oportunidades com boa ocupação histórica.
 
-Regras gerais:
-- Sempre seja simpática e prestativa
-- Use emojis com moderação
-- NUNCA invente imóveis ou dados
-- Mantenha respostas curtas (2-3 frases no máximo quando houver resultados)
+⚠️ REGRA DE OURO PARA INVESTIDORES:
+- Se o usuário diz "quero comprar para renda de temporada" ou "investir em apartamento para locar", a finalidade é COMPRA (venda), NÃO temporada. Você deve buscar imóveis à VENDA que tenham perfil para gerar renda.
 
 Bairros de Bombinhas: Bombas, Centro, Mariscal, Zimbros, Canto Grande, Morrinhos, Quatro Ilhas, Praia da Conceição.`;
 
@@ -138,22 +112,6 @@ Primeiro, determine a INTENÇÃO da última mensagem do usuário. Classifique co
 Se a intenção for "conversation", retorne APENAS: {"intent":"conversation"}
 NÃO extraia filtros para mensagens conversacionais.
 
-Exemplos de "conversation":
-- "oi", "olá", "bom dia" → {"intent":"conversation"}
-- "quero anunciar meu imóvel" → {"intent":"conversation"}
-- "meu nome é João, telefone 47999..." → {"intent":"conversation"}
-- "qual bairro é melhor?" → {"intent":"conversation"}
-- "pare de mandar os cards" → {"intent":"conversation"}
-- "obrigado" → {"intent":"conversation"}
-- "você quer aluguel anual ou temporada?" (resposta: "anual") → Depende: se é resposta a uma pergunta de esclarecimento de busca, é "search". Se é conversa geral, "conversation".
-- "sim" (após MarIA perguntar se quer salvar) → {"intent":"conversation"}
-
-Exemplos de "search":
-- "quero alugar em Bombas" → search com filtros
-- "casas à venda até 500 mil" → search com filtros
-- "tem algo mais barato?" (após busca anterior) → search (refinamento)
-- "e com piscina?" (após busca anterior) → search (refinamento)
-
 REGRA CRÍTICA DE CONTEXTO (somente para intent=search):
 - Considere TODAS as mensagens anteriores do usuário para manter o contexto.
 - Se o usuário fez uma busca anterior e agora pede ajustes (ex: "mais barato", "outro bairro", "com piscina"), MANTENHA os filtros anteriores e apenas ajuste o que foi pedido.
@@ -164,9 +122,8 @@ Se intent=search, inclua "intent":"search" junto com os filtros.
 
 REGRA CRÍTICA - NÃO INVENTAR FILTROS:
 - Extraia APENAS filtros que o usuário mencionou EXPLICITAMENTE.
-- Se o usuário disser "qualquer imóvel", "qualquer coisa", "tudo", "o que tiver", "qualquer um", "mostra tudo" — NÃO defina finalidade nem tipo. Deixe ambos vazios para trazer todos os resultados disponíveis.
-- NUNCA assuma "temporada" como padrão. Só use finalidade se o usuário falar claramente em comprar, alugar (anual) ou temporada/férias/diária.
-- Se a mensagem atual usa "qualquer/tudo" e a anterior tinha finalidade definida, REMOVA a finalidade (o usuário está ampliando a busca).
+- NUNCA assuma "temporada" como padrão.
+- Se o usuário fala "comprar para alugar" ou "investir para renda", a finalidade é "compra".
 
 Campos possíveis (somente para search):
 - intent: "search"
@@ -187,20 +144,17 @@ Mapeamento de sinônimos para tipos:
 Retorne APENAS o JSON, sem texto adicional.`;
 
 // Normaliza telefone BR (10-11 dígitos) ou AR (10-13 dígitos).
-// Retorna string com prefixo país (55... ou 54...) ou null se inválido.
 function normalizePhone(raw: string | null | undefined): string | null {
   if (!raw) return null;
   const original = String(raw).trim();
   let digits = original.replace(/\D/g, "");
   if (!digits) return null;
 
-  // Detecta país explícito via "+"
   const hasPlus54 = /^\+?\s*54/.test(original);
   const hasPlus55 = /^\+?\s*55/.test(original);
 
   if (hasPlus54 || (digits.startsWith("54") && digits.length >= 12)) {
     if (digits.startsWith("54")) digits = digits.slice(2);
-    // AR aceita 10 (fixo/celular sem 9) ou 11 dígitos (celular com 9)
     if (digits.length < 10 || digits.length > 11) return null;
     return "54" + digits;
   }
@@ -209,22 +163,17 @@ function normalizePhone(raw: string | null | undefined): string | null {
     if (digits.startsWith("55")) digits = digits.slice(2);
   }
 
-  // BR padrão: 10 (fixo) ou 11 (celular com 9)
   if (digits.length < 10 || digits.length > 11) return null;
   return "55" + digits;
 }
 
-// Extrai telefone da última mensagem do usuário. Aceita BR e AR.
 function extractPhoneFromText(text: string): { normalized: string | null; hasShortPhone: boolean } {
   if (!text) return { normalized: null, hasShortPhone: false };
-
-  // Tenta padrões com possível prefixo internacional
   const patterns = [
-    /\+?\s*5[45]\s*\d[\d\s().-]{8,15}/g,           // +54/+55 explícito
-    /\(?\s*\d{2,3}\s*\)?\s*9?\s*\d{4}[-\s.]?\d{4}/g, // BR/AR sem prefixo
-    /\d{10,13}/g,                                   // dígitos puros
+    /\+?\s*5[45]\s*\d[\d\s().-]{8,15}/g,
+    /\(?\s*\d{2,3}\s*\)?\s*9?\s*\d{4}[-\s.]?\d{4}/g,
+    /\d{10,13}/g,
   ];
-
   for (const re of patterns) {
     const matches = text.match(re) || [];
     for (const m of matches) {
@@ -232,17 +181,12 @@ function extractPhoneFromText(text: string): { normalized: string | null; hasSho
       if (normalized) return { normalized, hasShortPhone: false };
     }
   }
-
-  // Fallback: pega o maior bloco de dígitos da mensagem
   const allDigits = text.replace(/\D/g, "");
   const normalized = normalizePhone(allDigits);
   if (normalized) return { normalized, hasShortPhone: false };
-
-  // Se tinha algum número curto (8-9 dígitos), é provável telefone sem DDD
   return { normalized: null, hasShortPhone: allDigits.length >= 8 && allDigits.length <= 9 };
 }
 
-// Extrai nome plausível removendo dígitos e palavras-stop comuns.
 function extractNameFromText(text: string): string | null {
   if (!text) return null;
   const cleaned = text
@@ -252,16 +196,12 @@ function extractNameFromText(text: string): string | null {
     .replace(/[,:;\-_/\\|()]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-
   if (!cleaned || cleaned.length < 2 || cleaned.length > 80) return null;
   if (!/[A-Za-zÀ-ÿ]/.test(cleaned)) return null;
   if (/^(sim|quero|ok|beleza|pode|manda|avisar|salvar|topo|claro|tá|ta|si|s[ií])$/i.test(cleaned)) return null;
-  // Pega no máximo 4 palavras (nome + sobrenome)
   return cleaned.split(/\s+/).slice(0, 4).join(" ");
 }
 
-// Faz upsert do lead anônimo / identificado pelo session_id.
-// Se identifiedData fornecido com nome+telefone válidos, "promove" o lead.
 async function upsertLeadBySession(
   supabase: ReturnType<typeof createClient>,
   sessionId: string,
@@ -269,7 +209,6 @@ async function upsertLeadBySession(
 ): Promise<string | null> {
   if (!sessionId) return null;
   try {
-    // Tenta UPDATE primeiro (lead já existe)
     const { data: existing } = await supabase
       .from("leads_maria")
       .select("id")
@@ -285,7 +224,6 @@ async function upsertLeadBySession(
       return existing.id;
     }
 
-    // Insere novo lead anônimo/identificado
     const { data: inserted, error } = await supabase
       .from("leads_maria")
       .insert({
@@ -338,48 +276,20 @@ serve(async (req) => {
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // ============= ACTION: submit_lead (formulário inline do gate) =============
     if (action === "submit_lead") {
       if (!sessionId || !nome || !telefone) {
-        return new Response(
-          JSON.stringify({ success: false, error: "missing_fields" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ success: false, error: "missing_fields" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       const cleanName = String(nome).trim().slice(0, 80);
-      if (cleanName.length < 2) {
-        return new Response(
-          JSON.stringify({ success: false, error: "invalid_name" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
       const normalizedPhone = normalizePhone(telefone);
-      if (!normalizedPhone) {
-        return new Response(
-          JSON.stringify({ success: false, error: "invalid_phone" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+      if (cleanName.length < 2 || !normalizedPhone) {
+        return new Response(JSON.stringify({ success: false, error: "invalid_data" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
-      const leadId = await upsertLeadBySession(supabase, sessionId, {
-        nome: cleanName,
-        telefone: normalizedPhone,
-        status: "novo",
-      });
-      if (!leadId) {
-        return new Response(
-          JSON.stringify({ success: false, error: "save_failed" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      return new Response(
-        JSON.stringify({ success: true, lead_id: leadId }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      const leadId = await upsertLeadBySession(supabase, sessionId, { nome: cleanName, telefone: normalizedPhone, status: "novo" });
+      return new Response(JSON.stringify({ success: !!leadId, lead_id: leadId }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const userMessage = messages?.[messages.length - 1]?.content || "";
-
-    // Step 1: Extract intent + filters using AI with conversation context
     const recentMessages = messages.slice(-6);
     const conversationContext = recentMessages
       .map((m: { role: string; content: string }) => `${m.role === "user" ? "Usuário" : "Assistente"}: ${m.content}`)
@@ -387,15 +297,12 @@ serve(async (req) => {
 
     const filterResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${lovableApiKey}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
         model: "google/gemini-2.0-flash-exp",
         messages: [
           { role: "system", content: FILTER_EXTRACTION_PROMPT },
-          { role: "user", content: `Histórico da conversa:\n${conversationContext}\n\nÚltima mensagem do usuário: ${userMessage}` },
+          { role: "user", content: `Histórico:\n${conversationContext}\n\nMsg: ${userMessage}` },
         ],
         temperature: 0.1,
       }),
@@ -404,537 +311,95 @@ serve(async (req) => {
     const filterData = await filterResponse.json();
     let filterText = filterData.choices?.[0]?.message?.content || "{}";
     filterText = filterText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    let filters: SearchFilters & { intent?: string } = {};
+    try { filters = JSON.parse(filterText); } catch { filters = {}; }
 
-    let filters: SearchFilters & { intent?: string; is_greeting?: boolean } = {};
-    try {
-      filters = JSON.parse(filterText);
-    } catch {
-      filters = {};
-    }
-
-    console.log("Extracted intent+filters:", JSON.stringify(filters));
-
-    // If intent is conversation, skip DB query entirely
     const isConversation = filters.intent === "conversation";
-
     if (isConversation) {
-      // Verifica se já existe lead identificado nessa sessão (pra contexto da MarIA)
-      const { data: existingForCtx } = sessionId
-        ? await supabase.from("leads_maria").select("id, nome, telefone").eq("session_id", sessionId).maybeSingle()
-        : { data: null };
-      const alreadyCaptured = !!clientLeadCaptured || !!(existingForCtx?.nome && existingForCtx?.telefone);
-
-      // ⚡ PRÉ-PARSER DETERMINÍSTICO: tenta capturar nome+telefone da última msg
-      // ANTES de chamar o LLM. Isso elimina o bug do "falta DDD" em números válidos.
-      if (!alreadyCaptured && sessionId) {
-        const phoneInfo = extractPhoneFromText(userMessage);
-        // Tenta combinar com mensagens recentes do usuário (caso tenha mandado nome em msg anterior)
-        const recentUserMsgs = messages
-          .filter((m: { role: string }) => m.role === "user")
-          .slice(-3)
-          .map((m: { content: string }) => m.content)
-          .join(" ");
-        const nameCandidate = extractNameFromText(userMessage) || extractNameFromText(recentUserMsgs);
-
-        if (phoneInfo.normalized && nameCandidate) {
-          // Captura completa! Salva direto e responde.
-          const leadId = await upsertLeadBySession(supabase, sessionId, {
-            nome: nameCandidate,
-            telefone: phoneInfo.normalized,
-            mensagem_original: recentUserMsgs.slice(0, 500),
-            status: "novo",
-          });
-          if (leadId) {
-            const reply = `Salvo, ${nameCandidate.split(" ")[0]}! 🎉 Vou te avisar em primeira mão pelo WhatsApp assim que aparecer um imóvel desse perfil. Quer que eu já liste outras opções pra você dar uma olhada agora?`;
-            await saveLastConversationTurn(supabase, leadId, userMessage, reply);
-            return new Response(
-              JSON.stringify({
-                reply, properties: [], all_properties: [], filters_used: {},
-                results_count: 0, broader_search: false, lead_saved: true,
-                show_results: false, clear_results: false,
-              }),
-              { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-          }
-        }
-
-        if (phoneInfo.normalized && !nameCandidate) {
-          // Só telefone — salva e pede o nome
-          await upsertLeadBySession(supabase, sessionId, {
-            telefone: phoneInfo.normalized,
-            mensagem_original: recentUserMsgs.slice(0, 500),
-          });
-          const reply = "Anotei o WhatsApp! 📲 Só me diz seu **nome** que eu finalizo seu cadastro e já te aviso assim que rolar novidade.";
-          const { data: lead } = await supabase.from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
-          if (lead?.id) await saveLastConversationTurn(supabase, lead.id, userMessage, reply);
-          return new Response(
-            JSON.stringify({
-              reply, properties: [], all_properties: [], filters_used: {},
-              results_count: 0, broader_search: false, lead_saved: false,
-              show_results: false, clear_results: false,
-            }),
-            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-      }
-
-      // Generate conversational response without any property context
-      const conversationMessages = [
-        { role: "system", content: SYSTEM_PROMPT + "\n\nEsta mensagem NÃO é uma busca de imóveis. É uma mensagem conversacional. Use [NO_RESULTS_YET] obrigatoriamente. NÃO mencione imóveis encontrados, NÃO mostre resultados. Responda de forma natural e amigável." },
-        ...messages.map((m: { role: string; content: string }) => ({
-          role: m.role,
-          content: m.content,
-        })),
-      ];
-
       const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${lovableApiKey}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
         body: JSON.stringify({
           model: "google/gemini-2.0-flash-exp",
-          messages: conversationMessages,
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT + "\n\nEsta mensagem NÃO é uma busca. Use [NO_RESULTS_YET]. Responda de forma natural." },
+            ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
+          ],
           temperature: 0.7,
         }),
       });
-
       const aiData = await aiResponse.json();
-      let assistantMessage = aiData.choices?.[0]?.message?.content || "Desculpe, tive um problema. Pode tentar novamente?";
-
-      // Strip any markers
+      let assistantMessage = aiData.choices?.[0]?.message?.content || "Desculpe, tive um problema.";
       assistantMessage = assistantMessage.replace(/^\[(SHOW_RESULTS|NO_RESULTS_YET)\]\s*/g, "");
-
-      // Handle lead capture even in conversation mode
-      let leadSaved = false;
-      const leadMatch = assistantMessage.match(/\[LEAD_CAPTURE\]\s*(\{[^}]+\})/);
-      if (leadMatch) {
-        try {
-          const leadData = JSON.parse(leadMatch[1]);
-          // Tenta o telefone do JSON; se inválido, faz fallback pra mensagem do usuário
-          const normalizedPhone = normalizePhone(leadData.telefone) || extractPhoneFromText(userMessage).normalized;
-          if (!normalizedPhone) {
-            // Telefone realmente inválido — não salva, devolve mensagem pedindo de novo
-            assistantMessage = "Quase lá! 😊 Pra eu te avisar pelo WhatsApp preciso do número com DDD. Ex: 47 99999-8888 (ou +54 11 1234-5678 pra Argentina).";
-          } else {
-            const previousFilters = messages
-              .filter((m: { role: string }) => m.role === "user")
-              .map((m: { content: string }) => m.content)
-              .join(" ");
-            const leadId = await upsertLeadBySession(supabase, sessionId, {
-              nome: leadData.nome,
-              telefone: normalizedPhone,
-              interesse: leadData.interesse || null,
-              bairro_interesse: leadData.bairro || null,
-              tipo_imovel: leadData.tipo || null,
-              faixa_preco: leadData.faixa_preco || null,
-              mensagem_original: previousFilters || messages[0]?.content || null,
-              status: "novo",
-            });
-            if (leadId) {
-              leadSaved = true;
-              console.log("Lead promoted:", leadData.nome);
-            }
-          }
-        } catch (e) { console.error("Failed to parse lead:", e); }
-        assistantMessage = assistantMessage.replace(/\[LEAD_CAPTURE\]\s*\{[^}]+\}/, "").trim();
-      }
-
-      // Salvar turn de conversa (mesmo anônimo) se já existir lead pra essa sessão
-      if (sessionId) {
-        const { data: existingLead } = await supabase
-          .from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
-        if (existingLead?.id) {
-          await saveLastConversationTurn(supabase, existingLead.id, userMessage, assistantMessage);
-        }
-      }
-
-      return new Response(
-        JSON.stringify({
-          reply: assistantMessage,
-          properties: [],
-          all_properties: [],
-          filters_used: {},
-          results_count: 0,
-          broader_search: false,
-          lead_saved: leadSaved,
-          show_results: false,
-          clear_results: true,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      
+      return new Response(JSON.stringify({
+        reply: assistantMessage, properties: [], all_properties: [], filters_used: {},
+        results_count: 0, broader_search: false, lead_saved: false,
+        show_results: false, clear_results: true,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // --- SEARCH INTENT: proceed with DB query ---
-
-    // Validate and fix enum values
-    const validFinalidades = ["compra", "aluguel_anual", "temporada"];
-    const validTipos = ["apartamento", "casa", "cobertura", "terreno", "sobrado", "studio", "pousada", "sala_comercial", "outro"];
-
-    if (filters.finalidade && !validFinalidades.includes(filters.finalidade)) {
-      const match = validFinalidades.find(v => filters.finalidade!.includes(v.slice(0, 4)) || v.includes(filters.finalidade!.slice(0, 4)));
-      filters.finalidade = match || undefined;
-    }
-
-    if (filters.tipo && !validTipos.includes(filters.tipo)) {
-      const match = validTipos.find(v => filters.tipo!.includes(v.slice(0, 4)) || v.includes(filters.tipo!.slice(0, 4)));
-      filters.tipo = match || undefined;
-    }
-
-    if (filters.tipo_included && Array.isArray(filters.tipo_included)) {
-      filters.tipo_included = filters.tipo_included
-        .map(t => validTipos.includes(t) ? t : validTipos.find(v => t.includes(v.slice(0, 4)) || v.includes(t.slice(0, 4))) || null)
-        .filter((t): t is string => t !== null);
-      if (filters.tipo_included.length === 0) delete filters.tipo_included;
-    }
-
-    if (filters.tipo_excluded && Array.isArray(filters.tipo_excluded)) {
-      filters.tipo_excluded = filters.tipo_excluded
-        .map(t => validTipos.includes(t) ? t : validTipos.find(v => t.includes(v.slice(0, 4)) || v.includes(t.slice(0, 4))) || null)
-        .filter((t): t is string => t !== null);
-      if (filters.tipo_excluded.length === 0) delete filters.tipo_excluded;
-    }
-
-    if (filters.tipo_included && filters.tipo_included.length > 0) {
-      delete filters.tipo;
-    }
-
-    // Step 2: Query the database
-    let query = supabase
-      .from("imoveis")
-      .select("*")
-      .eq("status", "ativo");
-
+    // --- SEARCH INTENT ---
+    let query = supabase.from("imoveis").select("*").eq("status", "ativo");
     if (filters.finalidade) query = query.eq("finalidade", filters.finalidade);
-    
-    // Filtro de tipo com OR para incluir Destaques Pagos mesmo que não batam exatamente com o tipo
-    // (Desde que batam com os outros filtros como preço e finalidade)
-    if (filters.tipo_included && filters.tipo_included.length > 0) {
-      const types = filters.tipo_included.join(',');
-      query = query.or(`tipo.in.(${types}),destaque_pago.eq.true`);
+    if (filters.tipo_included?.length) {
+      query = query.in("tipo", filters.tipo_included);
     } else if (filters.tipo) {
-      query = query.or(`tipo.eq.${filters.tipo},destaque_pago.eq.true`);
-    } else {
-      // Se não houver filtro de tipo, já traz tudo, mas priorizamos destaques pagos na ordenação abaixo
+      query = query.eq("tipo", filters.tipo);
     }
-
-    if (filters.tipo_excluded && filters.tipo_excluded.length > 0) {
-      for (const excluded of filters.tipo_excluded) {
-        query = query.neq("tipo", excluded);
-      }
-    }
-
     if (filters.bairro) query = query.ilike("bairro", `%${filters.bairro}%`);
-    if (filters.quartos) query = query.gte("quartos", filters.quartos);
-    if (filters.banheiros) query = query.gte("banheiros", filters.banheiros);
-    if (filters.vagas_garagem) query = query.gte("vagas_garagem", filters.vagas_garagem);
-    if (filters.capacidade_pessoas) query = query.gte("capacidade_pessoas", filters.capacidade_pessoas);
-
-    if (filters.preco_max || filters.preco_min) {
-      if (filters.finalidade === "temporada") {
-        if (filters.preco_max) query = query.lte("preco_temporada_diaria", filters.preco_max);
-        if (filters.preco_min) query = query.gte("preco_temporada_diaria", filters.preco_min);
-      } else {
-        if (filters.preco_max) query = query.lte("preco", filters.preco_max);
-        if (filters.preco_min) query = query.gte("preco", filters.preco_min);
-      }
+    if (filters.preco_max) {
+      if (filters.finalidade === "temporada") query = query.lte("preco_temporada_diaria", filters.preco_max);
+      else query = query.lte("preco", filters.preco_max);
     }
 
-    const booleanFields = ["piscina", "vista_mar", "frente_mar", "mobiliado", "aceita_pet", "churrasqueira", "ar_condicionado", "wifi"] as const;
-    for (const field of booleanFields) {
-      if (filters[field] === true) query = query.eq(field, true);
-    }
-
-    // Priorização: destaque pago ativo > destaque manual > recentes
-    query = query
+    const { data: properties, error: dbError } = await query
       .order("destaque_pago", { ascending: false })
-      .order("destaque_ate", { ascending: false, nullsFirst: false })
-      .order("destaque", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(10);
+    if (dbError) throw dbError;
 
-    const { data: properties, error: dbError } = await query;
-    if (dbError) { console.error("Database error:", dbError); throw new Error("Erro ao buscar imóveis"); }
-
-    console.log(`Found ${properties?.length || 0} properties`);
-
-    // Step 3: Broader search fallback
-    let broaderProperties: typeof properties = [];
-    let usedBroaderSearch = false;
-
-    if (!properties || properties.length === 0) {
-      let broaderQuery = supabase.from("imoveis").select("*").eq("status", "ativo");
-      if (filters.finalidade) broaderQuery = broaderQuery.eq("finalidade", filters.finalidade);
-      if (filters.tipo_excluded && filters.tipo_excluded.length > 0) {
-        for (const excluded of filters.tipo_excluded) {
-          broaderQuery = broaderQuery.neq("tipo", excluded);
-        }
-      }
-      const { data: broader } = await broaderQuery
-        .order("destaque_pago", { ascending: false })
-        .order("destaque_ate", { ascending: false, nullsFirst: false })
-        .order("destaque", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(10);
-      broaderProperties = broader || [];
-      usedBroaderSearch = broaderProperties.length > 0;
-    }
-
-    const resultsToUse = properties && properties.length > 0 ? properties : broaderProperties;
-
-    // PRÉ-CADASTRO ANÔNIMO: cria/atualiza lead vinculado à sessão com o contexto da busca
-    if (sessionId) {
-      const faixaPreco = filters.preco_max
-        ? `até ${filters.preco_max}`
-        : filters.preco_min ? `a partir de ${filters.preco_min}` : null;
-      await upsertLeadBySession(supabase, sessionId, {
-        interesse: filters.finalidade ?? null,
-        bairro_interesse: filters.bairro ?? null,
-        tipo_imovel: filters.tipo ?? (filters.tipo_included?.[0] ?? null),
-        faixa_preco: faixaPreco,
-        mensagem_original: userMessage,
-      });
-    }
-
-    // 🚪 GATE DE CAPTAÇÃO: ativa em DUAS situações:
-    //  (A) Há resultados >= 2 e o lead ainda não foi identificado → segura o resto.
-    //  (B) ZERO resultados (nem ampliando) → força captação para criar alerta de novidade.
-    let leadAlreadyCaptured = !!clientLeadCaptured;
-    let currentLeadId: string | null = null;
-    if (sessionId) {
-      const { data: leadRow } = await supabase
-        .from("leads_maria")
-        .select("id, nome, telefone")
-        .eq("session_id", sessionId)
-        .maybeSingle();
-      if (leadRow?.id) currentLeadId = leadRow.id as string;
-      if (!leadAlreadyCaptured) {
-        leadAlreadyCaptured = !!(leadRow?.nome && leadRow?.telefone);
-      }
-    }
-
+    const resultsToUse = properties || [];
     const noResults = resultsToUse.length === 0;
-    const hasMeaningfulFilters = !!(filters.finalidade || filters.bairro || filters.tipo || filters.tipo_included?.length);
-    // Gate ativa SEMPRE que houver intenção de busca real e o lead ainda não foi identificado.
-    // Mesmo com 1 resultado: mostra teaser do card mas exige contato pra liberar link/whatsapp do anunciante e novos matches.
-    const gateActive = !leadAlreadyCaptured && (resultsToUse.length >= 1 || (noResults && hasMeaningfulFilters));
-
-    // 🔔 ALERTA INTELIGENTE: se zero resultados e busca tem filtros úteis,
-    // grava um lead_alert para notificar o lead quando entrar imóvel compatível.
-    if (noResults && hasMeaningfulFilters && currentLeadId) {
-      try {
-        await supabase.from("lead_alerts").insert({
-          lead_id: currentLeadId,
-          finalidade: filters.finalidade ?? null,
-          tipo: filters.tipo ?? (filters.tipo_included?.[0] ?? null),
-          bairro: filters.bairro ?? null,
-          preco_max: filters.preco_max ?? null,
-          quartos_min: filters.quartos ?? null,
-          query_original: userMessage.slice(0, 500),
-          status: "ativo",
-        });
-      } catch (e) { console.error("lead_alerts insert failed:", e); }
+    
+    let leadAlreadyCaptured = !!clientLeadCaptured;
+    if (sessionId && !leadAlreadyCaptured) {
+      const { data: leadRow } = await supabase.from("leads_maria").select("nome, telefone").eq("session_id", sessionId).maybeSingle();
+      leadAlreadyCaptured = !!(leadRow?.nome && leadRow?.telefone);
     }
 
-    // Step 4: Generate conversational response
-    let typeNote = "";
-    if (filters.tipo_included && filters.tipo_included.length > 1 && resultsToUse.length > 0) {
-      const foundTypes = new Set(resultsToUse.map((p: Record<string, unknown>) => p.tipo));
-      const missingTypes = filters.tipo_included.filter(t => !foundTypes.has(t));
-      if (missingTypes.length > 0) {
-        typeNote = `\n\nNOTA IMPORTANTE: O usuário pediu os tipos [${filters.tipo_included.join(", ")}], mas NÃO foram encontrados imóveis do tipo [${missingTypes.join(", ")}]. Informe isso claramente ao usuário.`;
-      }
-    }
-
-    let exclusionNote = "";
-    if (filters.tipo_excluded && filters.tipo_excluded.length > 0) {
-      exclusionNote = `\n\nALERTA: O usuário EXCLUIU os tipos [${filters.tipo_excluded.join(", ")}]. NUNCA sugira esses tipos.`;
-    }
-
-    const gateNote = gateActive && !noResults
-      ? `\n\n🚪 GATE_ATIVO (${resultsToUse.length} ${resultsToUse.length === 1 ? "imóvel encontrado" : "imóveis encontrados"}):
-
-INSTRUÇÕES OBRIGATÓRIAS — siga TODAS, nessa ordem, em UMA única mensagem curta (máx 4 frases):
-
-1. **Reconheça com calor humano** o que ele pediu (ex: "Adorei sua busca por terreno em Morrinhos! 🌅"). Nada de "Encontrei X opções" seco.
-2. **Faça UMA pergunta de qualificação** ANTES do teaser, escolhida pela finalidade:
-   - VENDA → "Antes de te mostrar, me conta rapidinho: é pra morar ou investir? Isso muda muito o que vou separar pra você."
-   - TEMPORADA → "Pra quando você tá pensando? E pra quantas pessoas?"
-   - ALUGUEL_ANUAL → "Vai ser pra você, casal ou família? Tem prazo pra entrar?"
-3. **Mostre o teaser** ("Já vou adiantando uma como prévia 👇") — você verá apenas 1 card sendo renderizado.
-4. **Peça nome + WhatsApp com gatilho real** ("Os melhores em Bombinhas somem em horas na temporada. Me passa seu **nome e WhatsApp** que libero ${resultsToUse.length === 1 ? "o contato direto do anunciante" : `as outras ${resultsToUse.length - 1} opções e o contato direto`} agora + te aviso em primeira mão quando entrar imóvel novo nesse perfil. Leva 5s 💛").
-
-NUNCA peça e-mail. NUNCA mostre o telefone do anunciante no texto. NUNCA diga "se quiser saber mais é só pedir" sem antes pedir o contato. Use [SHOW_RESULTS] no início.`
-      : leadAlreadyCaptured && resultsToUse.length > 0
-      ? `\n\n✅ LEAD_CAPTURADO: Esse usuário já é cadastrado. Apresente os resultados naturalmente E faça UMA pergunta de qualificação SPIN ou ofereça ação concreta (ex: "Quer que eu peça pro corretor confirmar disponibilidade pra essa data?"). NÃO peça contato de novo. Use [SHOW_RESULTS].`
-      : "";
-
-    const semResultadosNote = noResults && hasMeaningfulFilters
-      ? (leadAlreadyCaptured
-          ? `\n\n🚨 SEM_RESULTADOS_LEAD_OK: Nenhum imóvel encontrado pra esse filtro. O lead JÁ é cadastrado — confirme com empatia que vai avisar assim que entrar (alerta já criado), e sugira ampliar o filtro (ex: bairro vizinho, preço +20%). Use [NO_RESULTS_YET]. NÃO peça contato.`
-          : `\n\n🚨 SEM_RESULTADOS_GATE: Zero imóveis pro filtro do usuário. Esse é o momento mais crítico — se ele sair sem deixar contato, perdemos pra sempre. Use [NO_RESULTS_YET]. Siga EXATAMENTE a estrutura de 3 passos do prompt (empatia + urgência futura + pedido de nome+WhatsApp). NÃO sugira "fazer outra busca" antes de pedir o contato. NÃO invente imóveis. Mencione o tipo/bairro específico que ele procurou.`)
-      : "";
-
-    const propertyContext = resultsToUse.length > 0
-      ? `\n\nResultados encontrados (${resultsToUse.length} imóveis):\n${JSON.stringify(resultsToUse, null, 2)}${usedBroaderSearch ? "\n\nNOTA: A busca exata não retornou resultados. Estes são resultados de uma busca mais ampla (respeitando exclusões). Informe ao usuário e sugira ajustes nos filtros." : ""}${gateNote}${typeNote}${exclusionNote}`
-      : `${semResultadosNote}${exclusionNote}`;
-
-    const conversationMessages = [
-      { role: "system", content: SYSTEM_PROMPT + propertyContext },
-      ...messages.map((m: { role: string; content: string }) => ({
-        role: m.role,
-        content: m.content,
-      })),
-    ];
+    const gateActive = !leadAlreadyCaptured && resultsToUse.length >= 1;
+    const propertyContext = `\n\nResultados (${resultsToUse.length}):\n${JSON.stringify(resultsToUse, null, 2)}${gateActive ? "\n\nGATE_ATIVO: Peça nome+whats para liberar o resto." : ""}`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${lovableApiKey}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
         model: "google/gemini-2.0-flash-exp",
-        messages: conversationMessages,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT + propertyContext },
+          ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
+        ],
         temperature: 0.7,
       }),
     });
 
     const aiData = await aiResponse.json();
-    let assistantMessage = aiData.choices?.[0]?.message?.content || "Desculpe, tive um problema ao processar sua busca. Pode tentar novamente?";
+    let assistantMessage = aiData.choices?.[0]?.message?.content || "";
+    let showResults = assistantMessage.includes("[SHOW_RESULTS]");
+    assistantMessage = assistantMessage.replace(/^\[(SHOW_RESULTS|NO_RESULTS_YET)\]\s*/g, "");
 
-    // Check for show_results flag
-    let showResults = true;
-    if (assistantMessage.startsWith("[NO_RESULTS_YET]")) {
-      showResults = false;
-      assistantMessage = assistantMessage.replace(/^\[NO_RESULTS_YET\]\s*/, "");
-    } else if (assistantMessage.startsWith("[SHOW_RESULTS]")) {
-      showResults = true;
-      assistantMessage = assistantMessage.replace(/^\[SHOW_RESULTS\]\s*/, "");
-    }
+    return new Response(JSON.stringify({
+      reply: assistantMessage,
+      properties: showResults ? resultsToUse.slice(0, gateActive ? 1 : 3) : [],
+      all_properties: showResults ? resultsToUse : [],
+      filters_used: filters,
+      results_count: resultsToUse.length,
+      gate_active: gateActive,
+      show_results: showResults,
+    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    // Handle lead capture (promote anonymous lead -> identified)
-    let leadSaved = false;
-    const leadMatch = assistantMessage.match(/\[LEAD_CAPTURE\]\s*(\{[^}]+\})/);
-    if (leadMatch) {
-      try {
-        const leadData = JSON.parse(leadMatch[1]);
-        const normalizedPhone = normalizePhone(leadData.telefone) || extractPhoneFromText(userMessage).normalized;
-        if (!normalizedPhone) {
-          assistantMessage = "Quase lá! 😊 Pra eu te avisar pelo WhatsApp preciso do número com DDD. Ex: 47 99999-8888 (ou +54 11 1234-5678 pra Argentina).";
-        } else {
-          const previousFilters = messages
-            .filter((m: { role: string }) => m.role === "user")
-            .map((m: { content: string }) => m.content)
-            .join(" ");
-          const leadId = await upsertLeadBySession(supabase, sessionId, {
-            nome: leadData.nome,
-            telefone: normalizedPhone,
-            interesse: filters.finalidade || leadData.interesse || null,
-            bairro_interesse: filters.bairro || leadData.bairro || null,
-            tipo_imovel: filters.tipo || leadData.tipo || null,
-            faixa_preco: filters.preco_max ? `até ${filters.preco_max}` : filters.preco_min ? `a partir de ${filters.preco_min}` : leadData.faixa_preco || null,
-            mensagem_original: previousFilters || messages[0]?.content || null,
-            status: "novo",
-          });
-          if (leadId) {
-            leadSaved = true;
-            console.log("Lead promoted:", leadData.nome);
-          }
-        }
-      } catch (e) { console.error("Failed to parse lead:", e); }
-      assistantMessage = assistantMessage.replace(/\[LEAD_CAPTURE\]\s*\{[^}]+\}/, "").trim();
-    }
-
-    // Salva turn de conversa vinculada ao lead (anônimo ou identificado)
-    if (sessionId) {
-      const { data: existingLead } = await supabase
-        .from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
-      if (existingLead?.id) {
-        await saveLastConversationTurn(supabase, existingLead.id, userMessage, assistantMessage);
-      }
-    }
-
-    // Fetch agency config for "gestão própria" override
-    const { data: agencyConfig } = await supabase
-      .from("config_imobiliaria")
-      .select("nome, whatsapp")
-      .eq("ativo", true)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    // Build property list for response
-    const allProperties = resultsToUse.map((p: Record<string, unknown>) => {
-      const isGestaoPropria = p.gestao_propria === true;
-      return {
-        id: p.id,
-        titulo: p.titulo,
-        bairro: p.bairro,
-        finalidade: p.finalidade,
-        tipo: p.tipo,
-        preco: p.preco,
-        preco_temporada_diaria: p.preco_temporada_diaria,
-        quartos: p.quartos,
-        suites: p.suites,
-        banheiros: p.banheiros,
-        vagas_garagem: p.vagas_garagem,
-        area_m2: p.area_m2,
-        capacidade_pessoas: p.capacidade_pessoas,
-        piscina: p.piscina,
-        vista_mar: p.vista_mar,
-        frente_mar: p.frente_mar,
-        mobiliado: p.mobiliado,
-        churrasqueira: p.churrasqueira,
-        ar_condicionado: p.ar_condicionado,
-        wifi: p.wifi,
-        aceita_pet: p.aceita_pet,
-        fotos: p.fotos,
-        link_anuncio: isGestaoPropria ? null : p.link_anuncio,
-        anunciante_telefone: isGestaoPropria && agencyConfig?.whatsapp
-          ? agencyConfig.whatsapp
-          : p.anunciante_telefone,
-        gestao_propria: isGestaoPropria,
-        imobiliaria_nome: isGestaoPropria ? agencyConfig?.nome ?? null : null,
-      };
-    });
-
-    // Se o gate ainda está ativo (lead não capturado nessa request), mostra só 1 imóvel teaser.
-    // Se o lead foi capturado nessa mesma request, libera tudo.
-    const gateStillActive = gateActive && !leadSaved;
-    const initialBatch = gateStillActive ? 1 : 3;
-
-    // Quando é SEM_RESULTADOS_GATE (zero imóveis + filtros válidos + lead não capturado),
-    // sinalizamos no_results_gate=true para o front mostrar o formulário de captação como
-    // "alerta de novidade" (sem cards de imóvel).
-    const noResultsGate = noResults && hasMeaningfulFilters && !leadAlreadyCaptured && !leadSaved;
-
-    return new Response(
-      JSON.stringify({
-        reply: assistantMessage,
-        properties: showResults ? allProperties.slice(0, initialBatch) : [],
-        all_properties: showResults ? allProperties : [],
-        filters_used: filters,
-        results_count: showResults ? resultsToUse.length : 0,
-        broader_search: usedBroaderSearch,
-        lead_saved: leadSaved,
-        lead_captured: leadAlreadyCaptured || leadSaved,
-        gate_active: gateStillActive || noResultsGate,
-        no_results_gate: noResultsGate,
-        show_results: showResults,
-        clear_results: !showResults && !noResultsGate,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
   } catch (error) {
-    console.error("Error in maria-search:", error);
-    return new Response(
-      JSON.stringify({
-        reply: "Desculpe, ocorreu um erro. Pode tentar novamente em instantes? 😊",
-        error: error instanceof Error ? error.message : "Unknown error",
-      }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ reply: "Erro no servidor." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
