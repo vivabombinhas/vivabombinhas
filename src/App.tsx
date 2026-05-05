@@ -18,6 +18,7 @@ import AdminFollowups from "./pages/AdminFollowups.tsx";
 import AdminAlerts from "./pages/AdminAlerts.tsx";
 import AdminRevenue from "./pages/AdminRevenue.tsx";
 import AdminAIConfig from "./pages/AdminAIConfig.tsx";
+import AdminImoveis from "./pages/AdminImoveis.tsx";
 import AdminLayout from "./components/admin/AdminLayout.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="alerts" element={<AdminAlerts />} />
             <Route path="receita" element={<AdminRevenue />} />
             <Route path="submissions" element={<AdminSubmissions />} />
+            <Route path="imoveis" element={<AdminImoveis />} />
             <Route path="importar" element={<AdminImportar />} />
             <Route path="importar-link" element={<AdminImportarLink />} />
             <Route path="matches" element={<AdminMatches />} />
