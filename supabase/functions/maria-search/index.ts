@@ -299,7 +299,7 @@ serve(async (req) => {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash",
+        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: FILTER_EXTRACTION_PROMPT },
           { role: "user", content: `Histórico:\n${conversationContext}\n\nMsg: ${userMessage}` },
@@ -320,7 +320,7 @@ serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
         body: JSON.stringify({
-          model: "google/gemini-2.0-flash",
+          model: "google/gemini-3-flash-preview",
           messages: [
             { role: "system", content: SYSTEM_PROMPT + "\n\nEsta mensagem NÃO é uma busca. Use [NO_RESULTS_YET]. Responda de forma natural." },
             ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
@@ -375,7 +375,7 @@ serve(async (req) => {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash",
+        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: SYSTEM_PROMPT + propertyContext },
           ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
