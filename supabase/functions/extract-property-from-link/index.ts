@@ -40,25 +40,36 @@ interface ExtractionRequest {
 // Filtra fotos: remove ícones, logos, avatars, placeholders, sprites
 function isLikelyPropertyPhoto(url: string): boolean {
   const u = url.toLowerCase();
+  
+  // Ignore base64 data URLs if they are small (placeholders)
+  if (u.startsWith("data:image")) {
+    // If it's a very short data URL, it's definitely a placeholder
+    return u.length > 2000; 
+  }
+
   // Remove obvious non-photo URLs
   const badPatterns = [
     "logo", "icon", "avatar", "favicon", "sprite", "placeholder",
     "/static/", "/assets/icons", "share-", "social-", "/badges/",
     "google-play", "app-store", "whatsapp.svg", "pixel.gif",
     "1x1", "spacer", "blank.", "loading.", "/flags/", "/emoji",
+    "marker", "map", "pin", "heart", "star",
   ];
   if (badPatterns.some((p) => u.includes(p))) return false;
 
   // Must be image extension or common CDN pattern
   const goodExt = /\.(jpe?g|png|webp|avif)(\?|$|#)/i.test(u);
-  const cdnPatterns = ["muscache.com", "olx.", "zap", "vivareal", "imovelweb", "booking.com", "cloudfront", "cloudinary", "imgur", "cdn"];
+  const cdnPatterns = [
+    "muscache.com", "olx.", "zap", "vivareal", "imovelweb", "booking.com", 
+    "cloudfront", "cloudinary", "imgur", "cdn", "images", "img.", "foto"
+  ];
   const looksLikeCdn = cdnPatterns.some((p) => u.includes(p));
 
   if (!goodExt && !looksLikeCdn) return false;
 
   // Reject tiny images by URL hint (e.g., w=50, 64x64)
   if (/[?&](w|width)=([1-9]?\d)(&|$)/i.test(u)) return false; // width < 100
-  if (/\b\d{1,2}x\d{1,2}\b/.test(u)) return false;
+  if (/\b(32x32|64x64|100x100|50x50)\b/.test(u)) return false;
 
   return true;
 }
