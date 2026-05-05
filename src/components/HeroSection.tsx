@@ -22,15 +22,15 @@ const HeroSection = () => {
           Beta Aberto — Agora em Bombinhas
         </div>
 
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.05] mb-6 animate-fade-up text-primary-foreground" style={{ animationDelay: "0.1s", opacity: 0 }}>
-          Busca imobiliária
+        <h1 className="text-4xl md:text-7xl lg:text-8xl font-black leading-[0.95] tracking-tight mb-8 animate-fade-up text-white" style={{ animationDelay: "0.1s", opacity: 0 }}>
+          Encontre seu imóvel
           <br />
-          <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">reinventada por IA</span>
+          <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent italic">com Inteligência Artificial</span>
         </h1>
 
-        <p className="text-lg md:text-xl text-primary-foreground/60 mb-10 max-w-2xl mx-auto animate-fade-up leading-relaxed" style={{ animationDelay: "0.2s", opacity: 0 }}>
-          Descreva o que procura em linguagem natural. MarIA vasculha dezenas de fontes
-          em Bombinhas e entrega resultados organizados em segundos.
+        <p className="text-lg md:text-2xl text-white/50 mb-12 max-w-3xl mx-auto animate-fade-up leading-relaxed font-medium" style={{ animationDelay: "0.2s", opacity: 0 }}>
+          Esqueça as horas perdidas em sites lentos. MarIA vasculha dezenas de fontes
+          em Bombinhas e entrega as melhores oportunidades em segundos.
         </p>
 
         {/* Search input */}
@@ -53,14 +53,14 @@ const HeroSection = () => {
 
         {/* Social proof strip */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-x-6 mt-8 animate-fade-up" style={{ animationDelay: "0.4s", opacity: 0 }}>
-          <div className="flex items-center gap-1.5 text-primary-foreground/60 text-sm font-medium">
-            <Sparkles className="h-3.5 w-3.5 text-accent" />
-            <span>Grátis para testar</span>
+          <div className="flex items-center gap-1.5 text-white/40 text-sm font-semibold tracking-wide">
+            <Sparkles className="h-4 w-4 text-blue-400 fill-blue-400/20" />
+            <span>GRÁTIS PARA TESTAR</span>
           </div>
-          <div className="hidden sm:block w-1 h-1 rounded-full bg-primary-foreground/20" />
-          <span className="text-primary-foreground/60 text-sm font-medium">Sem cadastro</span>
-          <div className="hidden sm:block w-1 h-1 rounded-full bg-primary-foreground/20" />
-          <span className="text-primary-foreground/60 text-sm font-medium">Resposta em &lt;10s</span>
+          <div className="hidden sm:block w-1 h-1 rounded-full bg-white/20" />
+          <span className="text-white/40 text-sm font-semibold tracking-wide uppercase">Sem Cadastro</span>
+          <div className="hidden sm:block w-1 h-1 rounded-full bg-white/20" />
+          <span className="text-white/40 text-sm font-semibold tracking-wide uppercase">Resultados em Segundos</span>
         </div>
       </div>
     </section>
