@@ -40,25 +40,36 @@ interface ExtractionRequest {
 // Filtra fotos: remove ícones, logos, avatars, placeholders, sprites
 function isLikelyPropertyPhoto(url: string): boolean {
   const u = url.toLowerCase();
+  
+  // Ignore base64 data URLs if they are small (placeholders)
+  if (u.startsWith("data:image")) {
+    // If it's a very short data URL, it's definitely a placeholder
+    return u.length > 2000; 
+  }
+
   // Remove obvious non-photo URLs
   const badPatterns = [
     "logo", "icon", "avatar", "favicon", "sprite", "placeholder",
     "/static/", "/assets/icons", "share-", "social-", "/badges/",
     "google-play", "app-store", "whatsapp.svg", "pixel.gif",
     "1x1", "spacer", "blank.", "loading.", "/flags/", "/emoji",
+    "marker", "map", "pin", "heart", "star",
   ];
   if (badPatterns.some((p) => u.includes(p))) return false;
 
   // Must be image extension or common CDN pattern
   const goodExt = /\.(jpe?g|png|webp|avif)(\?|$|#)/i.test(u);
-  const cdnPatterns = ["muscache.com", "olx.", "zap", "vivareal", "imovelweb", "booking.com", "cloudfront", "cloudinary", "imgur", "cdn"];
+  const cdnPatterns = [
+    "muscache.com", "olx.", "zap", "vivareal", "imovelweb", "booking.com", 
+    "cloudfront", "cloudinary", "imgur", "cdn", "images", "img.", "foto"
+  ];
   const looksLikeCdn = cdnPatterns.some((p) => u.includes(p));
 
   if (!goodExt && !looksLikeCdn) return false;
 
   // Reject tiny images by URL hint (e.g., w=50, 64x64)
   if (/[?&](w|width)=([1-9]?\d)(&|$)/i.test(u)) return false; // width < 100
-  if (/\b\d{1,2}x\d{1,2}\b/.test(u)) return false;
+  if (/\b(32x32|64x64|100x100|50x50)\b/.test(u)) return false;
 
   return true;
 }
@@ -221,27 +232,60 @@ serve(async (req) => {
       for (const m of scrapedMd.matchAll(/!\[.*?\]\((https?:\/\/[^\s)]+)\)/g)) {
         candidateImages.push(m[1]);
       }
-      // Extract from HTML img/src and srcset
-      if (scrapedHtml) {
-        for (const m of scrapedHtml.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)) {
-          candidateImages.push(m[1]);
+      
+      // Extract from HTML with relative URL resolution
+      if (scrapedHtml && sourceUrl) {
+        const baseUrl = new URL(sourceUrl);
+        
+        // Find all img tags and look for src, data-src, data-lazy, etc.
+        const imgRegex = /<img[^>]+(?:src|data-src|data-lazy|data-original|data-srcset)=["']([^"']+)["']/gi;
+        let match;
+        while ((match = imgRegex.exec(scrapedHtml)) !== null) {
+          let imgUrl = match[1];
+          try {
+            // Resolve relative URLs
+            if (imgUrl.startsWith("//")) {
+              imgUrl = baseUrl.protocol + imgUrl;
+            } else if (imgUrl.startsWith("/")) {
+              imgUrl = baseUrl.origin + imgUrl;
+            } else if (!imgUrl.startsWith("http") && !imgUrl.startsWith("data:")) {
+              imgUrl = new URL(imgUrl, baseUrl.origin + baseUrl.pathname).href;
+            }
+            candidateImages.push(imgUrl);
+          } catch (e) {
+            console.error("Error resolving image URL:", imgUrl, e);
+          }
         }
+
+        // srcset handling
         for (const m of scrapedHtml.matchAll(/srcset=["']([^"']+)["']/gi)) {
-          // pick the largest from srcset
           const parts = m[1].split(",").map((p) => p.trim().split(" ")[0]);
-          if (parts.length > 0) candidateImages.push(parts[parts.length - 1]);
+          if (parts.length > 0) {
+            let imgUrl = parts[parts.length - 1];
+            try {
+              if (imgUrl.startsWith("//")) {
+                imgUrl = baseUrl.protocol + imgUrl;
+              } else if (imgUrl.startsWith("/")) {
+                imgUrl = baseUrl.origin + imgUrl;
+              } else if (!imgUrl.startsWith("http")) {
+                imgUrl = new URL(imgUrl, baseUrl.origin + baseUrl.pathname).href;
+              }
+              candidateImages.push(imgUrl);
+            } catch (e) {}
+          }
         }
+        
         // OG image / meta
         for (const m of scrapedHtml.matchAll(/<meta[^>]+property=["']og:image[^"']*["'][^>]+content=["']([^"']+)["']/gi)) {
           candidateImages.unshift(m[1]); // priority
         }
       }
 
-      scrapedImages = dedupeAndFilterPhotos(candidateImages, 30);
+      scrapedImages = dedupeAndFilterPhotos(candidateImages, 40);
       console.log(`Found ${candidateImages.length} candidate images, filtered to ${scrapedImages.length}`);
 
       // Bigger context window for better extraction
-      content = scrapedMd.slice(0, 30000);
+      content = scrapedMd.slice(0, 35000);
     }
 
     // Step 2: Extract structured data with Lovable AI (tool calling)
