@@ -407,6 +407,7 @@ export default function AdminMatches() {
                   <img
                     src={selectedMatch.imovel.fotos[0]}
                     alt={selectedMatch.imovel.titulo}
+                    referrerPolicy="no-referrer"
                     className="w-full h-44 object-cover rounded-lg"
                   />
                 )}
