@@ -1,7 +1,18 @@
 import { Search, ArrowRight, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!query.trim()) return;
+    navigate("/maria", { state: { initialMessage: query.trim() } });
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20 pb-10 overflow-hidden">
       {/* Dramatic background */}
@@ -34,22 +45,33 @@ const HeroSection = () => {
         </p>
 
         {/* Search input */}
-        <div id="experimentar" className="rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 p-2 max-w-2xl mx-auto animate-fade-up shadow-2xl" style={{ animationDelay: "0.3s", opacity: 0 }}>
+        <form 
+          id="experimentar" 
+          onSubmit={handleSearch}
+          className="rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 p-2 max-w-2xl mx-auto animate-fade-up shadow-2xl" 
+          style={{ animationDelay: "0.3s", opacity: 0 }}
+        >
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="flex-1 flex items-center gap-3 bg-white/10 rounded-xl px-4 py-4 border border-white/10 focus-within:border-primary/50 transition-colors">
               <Search className="h-5 w-5 text-blue-400 shrink-0" />
               <input
                 type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
                 placeholder="Ex: Apartamento 2 quartos em Mariscal até R$3.500..."
                 className="w-full bg-transparent text-sm md:text-base text-white outline-none placeholder:text-white/30"
               />
             </div>
-            <Button size="lg" className="h-auto py-4 px-8 gap-2 rounded-xl shrink-0 bg-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] text-white font-bold">
+            <Button 
+              type="submit"
+              size="lg" 
+              className="h-auto py-4 px-8 gap-2 rounded-xl shrink-0 bg-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] text-white font-bold"
+            >
               Perguntar à MarIA
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
-        </div>
+        </form>
 
         {/* Social proof strip */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-x-6 mt-8 animate-fade-up" style={{ animationDelay: "0.4s", opacity: 0 }}>
