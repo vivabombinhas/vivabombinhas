@@ -135,7 +135,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
       {/* Body */}
       <div className="p-3 space-y-2.5">
         {/* Title */}
-        <h3 className="text-sm font-bold text-foreground leading-snug line-clamp-2">
+        <h3 className={`text-sm font-bold leading-snug line-clamp-2 ${isDestaqueAtivo ? "text-amber-900 dark:text-amber-100" : "text-foreground"}`}>
           {property.titulo}
         </h3>
 
