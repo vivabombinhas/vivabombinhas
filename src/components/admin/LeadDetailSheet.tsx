@@ -302,7 +302,11 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
                     key={t.id}
                     onClick={() => {
                       const link = buildWhatsappLink(lead.telefone!, t.build(lead));
-                      window.open(link, "_blank", "noopener,noreferrer");
+                      const anchor = document.createElement("a");
+                      anchor.href = link;
+                      anchor.target = "_blank";
+                      anchor.rel = "noopener noreferrer";
+                      anchor.click();
                       // Marca contato automaticamente ao abrir o WhatsApp
                       updateLead.mutate({ last_contact_at: new Date().toISOString() });
                     }}
