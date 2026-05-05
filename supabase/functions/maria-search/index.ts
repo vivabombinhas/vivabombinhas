@@ -607,11 +607,16 @@ serve(async (req) => {
       .eq("status", "ativo");
 
     if (filters.finalidade) query = query.eq("finalidade", filters.finalidade);
-
+    
+    // Filtro de tipo com OR para incluir Destaques Pagos mesmo que não batam exatamente com o tipo
+    // (Desde que batam com os outros filtros como preço e finalidade)
     if (filters.tipo_included && filters.tipo_included.length > 0) {
-      query = query.in("tipo", filters.tipo_included);
+      const types = filters.tipo_included.join(',');
+      query = query.or(`tipo.in.(${types}),destaque_pago.eq.true`);
     } else if (filters.tipo) {
-      query = query.eq("tipo", filters.tipo);
+      query = query.or(`tipo.eq.${filters.tipo},destaque_pago.eq.true`);
+    } else {
+      // Se não houver filtro de tipo, já traz tudo, mas priorizamos destaques pagos na ordenação abaixo
     }
 
     if (filters.tipo_excluded && filters.tipo_excluded.length > 0) {
