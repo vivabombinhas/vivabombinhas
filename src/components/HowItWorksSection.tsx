@@ -39,7 +39,7 @@ const HowItWorksSection = () => {
 
         <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {steps.map((s, i) => (
-            <div key={i} className="relative rounded-2xl border border-border bg-card p-8 text-center group hover:border-primary/30 hover:shadow-xl transition-all duration-300">
+            <div key={i} className="relative rounded-2xl border border-border bg-card p-8 text-center group hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 hover:-translate-y-2">
               {/* Step number */}
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">
                 PASSO {s.num}

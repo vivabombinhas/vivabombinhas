@@ -21,7 +21,7 @@ const BenefitsSection = () => {
 
         <div className="grid sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
           {benefits.map((b, i) => (
-            <div key={i} className="rounded-2xl border border-border bg-card p-6 hover:border-primary/30 hover:shadow-xl transition-all duration-300">
+            <div key={i} className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 hover:-translate-y-1">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <b.icon className="h-5 w-5 text-primary" />
