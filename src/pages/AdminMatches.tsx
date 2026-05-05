@@ -119,12 +119,8 @@ export default function AdminMatches() {
     e.stopPropagation();
     e.preventDefault();
     try {
-      const url = buildWhatsappLink(m);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.target = "_blank";
-      anchor.rel = "noopener noreferrer";
-      anchor.click();
+      const url = getMatchWhatsappLink(m);
+      window.open(url, "_blank");
     } catch {
       /* ignore */
     }
