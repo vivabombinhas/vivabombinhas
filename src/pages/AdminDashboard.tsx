@@ -10,6 +10,7 @@ import {
   ArrowRight,
   CalendarClock,
   DollarSign,
+  Flame,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -46,11 +47,13 @@ export default function AdminDashboard() {
         matchesAltoScore,
         imoveisAtivos,
         submissoesPendentes,
+        destaquesPendentes,
         followupsAtrasados,
         followupsHoje,
         ultimosLeads,
         topMatches,
         revenue,
+        destaquesAtivos,
       ] = await Promise.all([
         supabase.from("leads_maria").select("*", { count: "exact", head: true }).gte("created_at", today).neq("status", "anonimo"),
         supabase.from("leads_maria").select("*", { count: "exact", head: true }).gte("created_at", weekAgo).neq("status", "anonimo"),
@@ -59,11 +62,13 @@ export default function AdminDashboard() {
         supabase.from("lead_matches").select("*", { count: "exact", head: true }).eq("status", "pending").gte("score", 70),
         supabase.from("imoveis").select("*", { count: "exact", head: true }).eq("status", "ativo"),
         supabase.from("imoveis_submissions").select("*", { count: "exact", head: true }).eq("status_submission", "pendente"),
+        supabase.from("imoveis_submissions").select("*", { count: "exact", head: true }).eq("status_submission", "pendente").ilike("observacoes", "%[DESTAQUE-PAGO-SIMULADO]%"),
         supabase.from("leads_maria").select("*", { count: "exact", head: true }).not("next_followup_at", "is", null).lt("next_followup_at", nowIso).neq("status", "convertido").neq("status", "descartado").neq("status", "anonimo"),
         supabase.from("leads_maria").select("*", { count: "exact", head: true }).not("next_followup_at", "is", null).gte("next_followup_at", nowIso).lte("next_followup_at", endOfToday.toISOString()).neq("status", "convertido").neq("status", "descartado").neq("status", "anonimo"),
         supabase.from("leads_maria").select("id, nome, telefone, bairro_interesse, tipo_imovel, status, created_at").neq("status", "anonimo").order("created_at", { ascending: false }).limit(5),
         supabase.from("lead_matches").select("id, score, match_reasons, lead_id, imovel_id, created_at, leads_maria(nome, telefone), imoveis(titulo, bairro)").eq("status", "pending").order("score", { ascending: false }).limit(5),
         supabase.from("lead_revenue").select("status, valor_previsto, valor_pago"),
+        supabase.from("imoveis").select("id, titulo, bairro, anunciante_nome, anunciante_telefone, destaque_ate").eq("destaque", true).eq("status", "ativo").order("destaque_ate", { ascending: true }),
       ]);
 
       const revList = (revenue.data || []) as Array<{ status: string; valor_previsto: number | null; valor_pago: number | null }>;
@@ -80,10 +85,12 @@ export default function AdminDashboard() {
         matchesAltoScore: matchesAltoScore.count || 0,
         imoveisAtivos: imoveisAtivos.count || 0,
         submissoesPendentes: submissoesPendentes.count || 0,
+        destaquesPendentes: destaquesPendentes.count || 0,
         followupsAtrasados: followupsAtrasados.count || 0,
         followupsHoje: followupsHoje.count || 0,
         ultimosLeads: ultimosLeads.data || [],
         topMatches: topMatches.data || [],
+        destaquesAtivos: destaquesAtivos.data || [],
         previstoAtivo,
         pago,
       };
@@ -134,11 +141,15 @@ export default function AdminDashboard() {
       to: "/admin/receita",
     },
     {
-      title: "Imóveis ativos",
-      value: stats?.imoveisAtivos ?? "—",
-      sub: `${stats?.submissoesPendentes ?? 0} submissões pendentes`,
+      title: "Submissões",
+      value: stats?.submissoesPendentes ?? "—",
+      sub: (stats?.destaquesPendentes ?? 0) > 0 
+        ? `${stats?.destaquesPendentes} destaque(s) pago(s) 🔥` 
+        : `${stats?.imoveisAtivos ?? 0} imóveis ativos`,
       icon: Home,
-      color: "text-cyan-600 bg-cyan-500/10",
+      color: (stats?.destaquesPendentes ?? 0) > 0 
+        ? "text-amber-600 bg-amber-500/10 animate-pulse" 
+        : "text-cyan-600 bg-cyan-500/10",
       to: "/admin/submissions",
     },
   ];
@@ -255,6 +266,55 @@ export default function AdminDashboard() {
               </ul>
             )}
           </div>
+        </div>
+
+        {/* Destaques Ativos */}
+        <div className="bg-card border border-border rounded-xl p-4 shadow-sm mt-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold flex items-center gap-2">
+              <Flame className="w-4 h-4 text-amber-600" />
+              Imóveis em Destaque (Ativos)
+            </h2>
+            <Link to="/admin/submissions" className="text-xs text-primary hover:underline">
+              Gerenciar
+            </Link>
+          </div>
+          {isLoading ? (
+            <div className="h-12 bg-muted rounded animate-pulse" />
+          ) : !stats?.destaquesAtivos?.length ? (
+            <p className="text-sm text-muted-foreground text-center py-6">Nenhum imóvel em destaque no momento</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-muted-foreground border-b border-border">
+                    <th className="pb-2 font-medium">Imóvel</th>
+                    <th className="pb-2 font-medium">Parceiro</th>
+                    <th className="pb-2 font-medium">Validade</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {stats.destaquesAtivos.map((d: any) => (
+                    <tr key={d.id} className="group">
+                      <td className="py-2 pr-4">
+                        <div className="font-medium group-hover:text-primary transition">{d.titulo}</div>
+                        <div className="text-xs text-muted-foreground">{d.bairro}</div>
+                      </td>
+                      <td className="py-2 pr-4">
+                        <div className="text-xs font-medium">{d.anunciante_nome || "—"}</div>
+                        <div className="text-[10px] text-muted-foreground">{d.anunciante_telefone || ""}</div>
+                      </td>
+                      <td className="py-2">
+                        <Badge variant="outline" className="text-[10px] bg-amber-500/5 text-amber-700 border-amber-200">
+                          Até {new Date(d.destaque_ate).toLocaleDateString("pt-BR")}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </main>
     </div>

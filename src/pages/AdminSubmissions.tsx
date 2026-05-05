@@ -3,8 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, XCircle, Loader2, BedDouble, Bath, Car, Ruler, ExternalLink } from "lucide-react";
-
+import { CheckCircle2, XCircle, Loader2, BedDouble, Bath, Car, Ruler, ExternalLink, Flame } from "lucide-react";
 
 interface Submission {
   id: string;
@@ -40,6 +39,7 @@ interface Submission {
   anunciante_email: string | null;
   imobiliaria: string | null;
   imovel_id: string | null;
+  observacoes: string | null;
   created_at: string;
 }
 
@@ -60,8 +60,8 @@ export default function AdminSubmissions() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [gestaoPropriaMap, setGestaoPropriaMap] = useState<Record<string, boolean>>({});
+  const [destaqueMap, setDestaqueMap] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
-  
 
   const fetchSubmissions = async () => {
     setLoading(true);
@@ -73,7 +73,17 @@ export default function AdminSubmissions() {
     if (error) {
       toast({ title: "Erro ao carregar submissões", variant: "destructive" });
     } else {
-      setSubmissions((data as any) || []);
+      const subData = (data as any) || [];
+      setSubmissions(subData);
+      
+      // Auto-detect highlights from observations
+      const newDestaqueMap: Record<string, boolean> = {};
+      subData.forEach((sub: Submission) => {
+        if (sub.observacoes?.includes("[DESTAQUE-PAGO-SIMULADO]")) {
+          newDestaqueMap[sub.id] = true;
+        }
+      });
+      setDestaqueMap(newDestaqueMap);
     }
     setLoading(false);
   };
@@ -90,6 +100,10 @@ export default function AdminSubmissions() {
 
     setActionLoading(sub.id);
     const gestao_propria = !!gestaoPropriaMap[sub.id];
+    const destaque = !!destaqueMap[sub.id];
+
+    // Se tiver a marca de destaque, define a validade (30 dias)
+    const destaque_ate = destaque ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() : null;
 
     // Insert into imoveis
     const { data: inserted, error: insertError } = await supabase.from("imoveis").insert({
@@ -126,6 +140,10 @@ export default function AdminSubmissions() {
       origem: "manual" as any,
       status: "ativo" as any,
       gestao_propria,
+      destaque,
+      destaque_pago: destaque,
+      destaque_ate,
+      destaque_valor: destaque ? 49 : null,
     } as any).select("id").single();
 
     if (insertError) {
@@ -203,6 +221,8 @@ export default function AdminSubmissions() {
                       actionLoading={actionLoading}
                       gestaoPropria={!!gestaoPropriaMap[sub.id]}
                       onToggleGestao={(v) => setGestaoPropriaMap((m) => ({ ...m, [sub.id]: v }))}
+                      destaque={!!destaqueMap[sub.id]}
+                      onToggleDestaque={(v) => setDestaqueMap((m) => ({ ...m, [sub.id]: v }))}
                     />
                   ))}
                 </div>
@@ -222,6 +242,8 @@ export default function AdminSubmissions() {
                       actionLoading={actionLoading}
                       gestaoPropria={false}
                       onToggleGestao={() => {}}
+                      destaque={false}
+                      onToggleDestaque={() => {}}
                     />
                   ))}
                 </div>
@@ -241,6 +263,8 @@ function SubmissionCard({
   actionLoading,
   gestaoPropria,
   onToggleGestao,
+  destaque,
+  onToggleDestaque,
 }: {
   sub: Submission;
   onApprove: (s: Submission) => void;
@@ -248,6 +272,8 @@ function SubmissionCard({
   actionLoading: string | null;
   gestaoPropria: boolean;
   onToggleGestao: (v: boolean) => void;
+  destaque: boolean;
+  onToggleDestaque: (v: boolean) => void;
 }) {
   const isPending = sub.status_submission === "pendente";
   const isLoading = actionLoading === sub.id;
@@ -263,9 +289,16 @@ function SubmissionCard({
             {sub.bairro && <span>· {sub.bairro}</span>}
           </div>
         </div>
-        <Badge className={`${statusColors[sub.status_submission]} border text-xs`}>
-          {sub.status_submission}
-        </Badge>
+        <div className="flex items-center gap-2">
+          {sub.observacoes?.includes("[DESTAQUE-PAGO-SIMULADO]") && (
+            <Badge className="bg-amber-100 text-amber-800 border-amber-300 animate-pulse">
+              <Flame className="h-3 w-3 mr-1 text-amber-600" /> DESTAQUE PAGO
+            </Badge>
+          )}
+          <Badge className={`${statusColors[sub.status_submission]} border text-xs`}>
+            {sub.status_submission}
+          </Badge>
+        </div>
       </div>
 
       {sub.descricao && (
@@ -309,7 +342,7 @@ function SubmissionCard({
       </div>
 
       {isPending && (
-        <div className="space-y-2 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
           <label className="flex items-center gap-2 text-sm cursor-pointer select-none p-2 rounded-md bg-primary/5 border border-primary/20">
             <input
               type="checkbox"
@@ -318,13 +351,28 @@ function SubmissionCard({
               className="h-4 w-4 accent-primary"
             />
             <span className="font-medium text-foreground">
-              🏢 Gestão própria (Viva Bombinhas)
-            </span>
-            <span className="text-xs text-muted-foreground">
-              — usar nosso contato no card
+              🏢 Gestão própria
             </span>
           </label>
-          <div className="flex gap-2">
+
+          <label className={`flex items-center gap-2 text-sm cursor-pointer select-none p-2 rounded-md border ${
+            destaque 
+              ? "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400" 
+              : "bg-muted/50 border-border text-muted-foreground"
+          }`}>
+            <input
+              type="checkbox"
+              checked={destaque}
+              onChange={(e) => onToggleDestaque(e.target.checked)}
+              className="h-4 w-4 accent-amber-500"
+            />
+            <span className="font-medium flex items-center gap-1">
+              <Flame className={`h-3.5 w-3.5 ${destaque ? "fill-amber-500" : ""}`} />
+              Destaque Premium
+            </span>
+          </label>
+          
+          <div className="flex gap-2 sm:col-span-2">
             <Button
               size="sm"
               className="gap-1.5"
