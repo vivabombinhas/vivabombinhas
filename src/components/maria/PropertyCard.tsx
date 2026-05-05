@@ -95,8 +95,13 @@ export function PropertyCard({ property }: PropertyCardProps) {
           <img
             src={property.fotos[0]}
             alt={property.titulo}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-opacity duration-300"
             loading="lazy"
+            onError={(e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              target.src = "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=400&fit=crop&q=60";
+              target.style.opacity = "0.5";
+            }}
           />
           {/* Badges over image */}
           <div className="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
