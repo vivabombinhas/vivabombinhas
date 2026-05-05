@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 const MariaChat = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { messages, isLoading, sendMessage, clearChat, hasMore, showMore, submitLead, finalidade, setFinalidade, clearFinalidade } = useMariaChat();
   const scrollRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
@@ -19,10 +20,10 @@ const MariaChat = () => {
     if (state?.initialMessage && !initializedRef.current && messages.length === 0) {
       initializedRef.current = true;
       sendMessage(state.initialMessage);
-      // Limpa o state para não reenviar ao atualizar a página
-      window.history.replaceState({}, document.title);
+      // Limpa o state para não reenviar ao atualizar a página ou navegar de volta
+      navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state, sendMessage, messages.length]);
+  }, [location.state, location.pathname, navigate, sendMessage, messages.length]);
 
   useEffect(() => {
     // Use requestAnimationFrame to ensure DOM has rendered (including property cards)
