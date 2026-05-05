@@ -47,18 +47,26 @@ export default function AdminAIConfig() {
 
   const updateMutation = useMutation({
     mutationFn: async (newData: typeof formData) => {
-      const { error } = await supabase
-        .from("ai_config")
-        .update({
-          model: newData.model,
-          temperature: Number(newData.temperature),
-          max_tokens: Number(newData.max_tokens),
-          system_prompt: newData.system_prompt,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", config?.id);
+      const updateData = {
+        model: newData.model,
+        temperature: Number(newData.temperature),
+        max_tokens: Number(newData.max_tokens),
+        system_prompt: newData.system_prompt,
+        updated_at: new Date().toISOString(),
+      };
 
-      if (error) throw error;
+      if (config?.id) {
+        const { error } = await supabase
+          .from("ai_config")
+          .update(updateData)
+          .eq("id", config.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("ai_config")
+          .insert([updateData]);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ai_config"] });
