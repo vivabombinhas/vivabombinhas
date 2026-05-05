@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import LeadDetailSheet from "@/components/admin/LeadDetailSheet";
-import { WHATSAPP_TEMPLATES, buildWhatsappLink } from "@/lib/whatsapp-templates";
+import { WHATSAPP_TEMPLATES, buildWhatsappLink, openWhatsapp } from "@/lib/whatsapp-templates";
 
 type Bucket = "atrasado" | "hoje" | "esta_semana" | "agendado" | "sem_followup";
 
@@ -296,8 +296,7 @@ export default function AdminFollowups() {
                                     <DropdownMenuItem
                                       key={t.id}
                                       onClick={() => {
-                                        const link = buildWhatsappLink(l.telefone!, t.build(l));
-                                        window.open(link, "_blank");
+                                        openWhatsapp(l.telefone!, t.build(l));
                                       }}
                                       className="flex flex-col items-start gap-0.5 py-2"
                                     >
