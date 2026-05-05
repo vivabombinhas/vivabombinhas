@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { buildWhatsappLink as buildWALink } from "@/lib/whatsapp-templates";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -108,24 +109,18 @@ export default function AdminMatches() {
     onError: () => toast.error("Erro ao atualizar"),
   });
 
-  const buildWhatsappLink = (m: any) => {
-    const tel = m.lead?.telefone?.replace(/\D/g, "") || "";
+  const getMatchWhatsappLink = (m: any) => {
     const preco = m.imovel?.preco ?? m.imovel?.preco_temporada_diaria;
     const msg = `Oi ${m.lead?.nome?.split(" ")[0] || ""}! Aqui é da Viva Bombinhas 🌊\n\nLembra que você procurava ${m.lead?.tipo_imovel || "imóvel"} em ${m.lead?.bairro_interesse || "Bombinhas"}? Acabou de entrar uma opção que combina muito com o que você queria:\n\n🏠 *${m.imovel?.titulo}*\n📍 ${m.imovel?.bairro}\n💰 ${formatCurrency(preco)}\n\nQuer que eu te mande mais detalhes e fotos?`;
-    // Usamos api.whatsapp.com para melhor compatibilidade
-    return `https://api.whatsapp.com/send?phone=55${tel}&text=${encodeURIComponent(msg)}`;
+    return buildWALink(m.lead?.telefone || "", msg);
   };
 
   const handleWhatsapp = (e: React.MouseEvent, m: any) => {
     e.stopPropagation();
     e.preventDefault();
     try {
-      const url = buildWhatsappLink(m);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.target = "_blank";
-      anchor.rel = "noopener noreferrer";
-      anchor.click();
+      const url = getMatchWhatsappLink(m);
+      window.open(url, "_blank");
     } catch {
       /* ignore */
     }

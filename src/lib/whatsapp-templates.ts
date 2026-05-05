@@ -73,7 +73,13 @@ export const WHATSAPP_TEMPLATES: WhatsappTemplate[] = [
 ];
 
 export const buildWhatsappLink = (telefone: string, message: string) => {
-  const phone = telefone.replace(/\D/g, "");
-  // Usamos api.whatsapp.com/send que é mais robusto para redirecionamentos e evita alguns bloqueios de Cross-Origin em navegadores específicos
-  return `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
+  let phone = telefone.replace(/\D/g, "");
+  
+  // Se o número não começar com 55 (Brasil) e tiver 10 ou 11 dígitos, adicionamos o 55
+  if (!phone.startsWith("55") && (phone.length === 10 || phone.length === 11)) {
+    phone = `55${phone}`;
+  }
+  
+  // Voltamos para o wa.me que costuma ser mais aceito por bloqueadores de pop-up quando disparado via link direto
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 };
