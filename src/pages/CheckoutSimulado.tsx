@@ -158,7 +158,7 @@ export default function CheckoutSimulado() {
         {submission && (
           <div className="rounded-2xl border border-border bg-card p-4 mb-6 flex items-center gap-4">
             {submission.fotos && submission.fotos[0] ? (
-              <img src={submission.fotos[0]} alt="" className="w-20 h-20 rounded-lg object-cover" />
+              <img src={submission.fotos[0]} alt="" referrerPolicy="no-referrer" className="w-20 h-20 rounded-lg object-cover" />
             ) : (
               <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center text-muted-foreground text-xs">
                 Sem foto
