@@ -15,7 +15,7 @@ type Revenue = {
   id: string;
   lead_id: string;
   imovel_id: string | null;
-  tipo_negocio: "temporada" | "anual" | "venda";
+  tipo_negocio: "temporada" | "anual" | "venda" | "destaque";
   parceiro_nome: string | null;
   parceiro_telefone: string | null;
   valor_negocio: number | null;
@@ -38,6 +38,7 @@ const tipoLabel: Record<Revenue["tipo_negocio"], string> = {
   temporada: "Temporada",
   anual: "Aluguel anual",
   venda: "Venda",
+  destaque: "Destaque Premium",
 };
 
 const statusColor: Record<Revenue["status"], string> = {
@@ -97,6 +98,7 @@ export default function AdminRevenue() {
       temporada: porTipo("temporada"),
       anual: porTipo("anual"),
       venda: porTipo("venda"),
+      destaque: porTipo("destaque"),
     };
   }, [rows]);
 
@@ -136,7 +138,7 @@ export default function AdminRevenue() {
           <KpiCard icon={Clock} title="Previsto (ativos)" value={fmtBRL(kpis.previstoAtivo)} sub={`${kpis.total} negócios`} color="text-amber-600 bg-amber-500/10" />
           <KpiCard icon={Wallet} title="A receber" value={fmtBRL(kpis.aReceber)} sub="Fechados não pagos" color="text-blue-600 bg-blue-500/10" />
           <KpiCard icon={CheckCircle2} title="Pago" value={fmtBRL(kpis.pago)} sub="Comissão recebida" color="text-emerald-600 bg-emerald-500/10" />
-          <KpiCard icon={TrendingUp} title="Por tipo (previsto)" value="" sub={`Temp ${fmtBRL(kpis.temporada)} · Anual ${fmtBRL(kpis.anual)} · Venda ${fmtBRL(kpis.venda)}`} color="text-purple-600 bg-purple-500/10" />
+          <KpiCard icon={TrendingUp} title="Por tipo (previsto)" value="" sub={`Destaque ${fmtBRL(kpis.destaque)} · Temp ${fmtBRL(kpis.temporada)} · Anual ${fmtBRL(kpis.anual)} · Venda ${fmtBRL(kpis.venda)}`} color="text-purple-600 bg-purple-500/10" />
         </div>
 
         {/* Filtros */}
@@ -148,6 +150,7 @@ export default function AdminRevenue() {
               <SelectItem value="temporada">Temporada</SelectItem>
               <SelectItem value="anual">Aluguel anual</SelectItem>
               <SelectItem value="venda">Venda</SelectItem>
+              <SelectItem value="destaque">Destaque Premium</SelectItem>
             </SelectContent>
           </Select>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -345,6 +348,7 @@ function RevenueSheet({ open, record, onClose, onSaved }: { open: boolean; recor
                   <SelectItem value="temporada">Temporada</SelectItem>
                   <SelectItem value="anual">Aluguel anual</SelectItem>
                   <SelectItem value="venda">Venda</SelectItem>
+                  <SelectItem value="destaque">Destaque Premium</SelectItem>
                 </SelectContent>
               </Select>
             </div>
