@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Save, Cpu } from "lucide-react";
+import { Loader2, Save, Cpu, Play, MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function AdminAIConfig() {
@@ -18,6 +18,9 @@ export default function AdminAIConfig() {
     max_tokens: 1000,
     system_prompt: "",
   });
+  const [testInput, setTestInput] = useState("Oi, tudo bem?");
+  const [testResult, setTestResult] = useState<string | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
 
   const { data: config, isLoading } = useQuery({
     queryKey: ["ai_config"],
@@ -87,6 +90,30 @@ export default function AdminAIConfig() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateMutation.mutate(formData);
+  };
+
+  const handleTestIA = async () => {
+    setIsTesting(true);
+    setTestResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("maria-search", {
+        body: {
+          messages: [{ role: "user", content: testInput }],
+          session_id: "test-session-" + Date.now(),
+        },
+      });
+
+      if (error) throw error;
+      setTestResult(data?.reply || "Sem resposta da IA.");
+    } catch (error: any) {
+      toast({
+        title: "Erro no teste",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsTesting(false);
+    }
   };
 
   if (isLoading) {
@@ -183,6 +210,47 @@ export default function AdminAIConfig() {
                 onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
               />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Testar Configurações</CardTitle>
+            <CardDescription>
+              Envie uma mensagem de teste para validar o comportamento da IA com os parâmetros salvos.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="testInput">Mensagem de Teste</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="testInput"
+                  value={testInput}
+                  onChange={(e) => setTestInput(e.target.value)}
+                  placeholder="Digite algo para testar..."
+                />
+                <Button 
+                  type="button" 
+                  variant="secondary"
+                  onClick={handleTestIA} 
+                  disabled={isTesting}
+                >
+                  {isTesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
+                  Testar IA agora
+                </Button>
+              </div>
+            </div>
+
+            {testResult && (
+              <div className="p-4 rounded-lg bg-muted border animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-center gap-2 mb-2 text-sm font-medium text-muted-foreground">
+                  <MessageSquare className="w-4 h-4" />
+                  Resposta da MarIA:
+                </div>
+                <p className="text-sm whitespace-pre-wrap">{testResult}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
