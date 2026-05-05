@@ -365,9 +365,13 @@ export default function AdminImportarLink() {
                       <img
                         src={f}
                         alt={`Foto ${i + 1}`}
-                        className="aspect-square w-full object-cover"
+                        className="aspect-square w-full object-cover transition-opacity duration-300"
                         loading="lazy"
-                        onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = "0.3"; }}
+                        onError={(e) => { 
+                          const target = e.currentTarget as HTMLImageElement;
+                          target.src = "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=400&fit=crop&q=60";
+                          target.style.opacity = "0.5";
+                        }}
                       />
                       {i === 0 && (
                         <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-[10px] font-semibold px-1.5 py-0.5 rounded flex items-center gap-1">
