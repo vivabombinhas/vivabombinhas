@@ -121,10 +121,11 @@ export default function AdminMatches() {
     e.preventDefault();
     try {
       const url = buildWhatsappLink(m);
-      const win = window.open(url, "_blank", "noopener,noreferrer");
-      if (!win) {
-        window.top!.location.href = url;
-      }
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+      anchor.click();
     } catch {
       /* ignore */
     }
