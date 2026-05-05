@@ -1,7 +1,18 @@
 import { Search, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const CTASection = () => {
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!query.trim()) return;
+    navigate("/maria", { state: { initialMessage: query.trim() } });
+  };
+
   return (
     <section className="py-12 md:py-32">
       <div className="container max-w-3xl text-center">
@@ -15,22 +26,31 @@ const CTASection = () => {
           Descreva o que procura e deixe a MarIA trabalhar por você. Gratuito, sem cadastro.
         </p>
 
-        <div className="rounded-2xl border border-border bg-card p-2 max-w-xl mx-auto shadow-xl shadow-primary/5">
+        <form 
+          onSubmit={handleSearch}
+          className="rounded-2xl border border-border bg-card p-2 max-w-xl mx-auto shadow-xl shadow-primary/5"
+        >
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="flex-1 flex items-center gap-3 bg-background rounded-xl px-4 py-3">
               <Search className="h-5 w-5 text-muted-foreground shrink-0" />
               <input
                 type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
                 placeholder="Casa com 3 quartos em Bombas para comprar..."
                 className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/60"
               />
             </div>
-            <Button size="lg" className="gap-2 rounded-xl shrink-0 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground">
+            <Button 
+              type="submit"
+              size="lg" 
+              className="gap-2 rounded-xl shrink-0 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground"
+            >
               Perguntar
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
-        </div>
+        </form>
       </div>
     </section>
   );
