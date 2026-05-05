@@ -26,7 +26,9 @@ import {
   Trash2, 
   Image as ImageIcon,
   ExternalLink,
-  Plus
+  Plus,
+  RefreshCw,
+  Loader2
 } from "lucide-react";
 import {
   AlertDialog,
@@ -79,6 +81,48 @@ export default function AdminImoveis() {
       });
     },
   });
+  const [refreshingId, setRefreshingId] = useState<string | null>(null);
+
+  const handleRefreshPhotos = async (imovel: any) => {
+    if (!imovel.link_anuncio) {
+      toast({ 
+        title: "Link não disponível", 
+        description: "Este imóvel não possui um link de anúncio.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setRefreshingId(imovel.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("extract-property-from-link", {
+        body: { url: imovel.link_anuncio }
+      });
+
+      if (error) throw error;
+      if (!data.success) throw new Error(data.error || "Erro desconhecido");
+
+      const newPhotos = data.data.fotos || [];
+      
+      const { error: updateError } = await supabase
+        .from("imoveis")
+        .update({ fotos: newPhotos })
+        .eq("id", imovel.id);
+
+      if (updateError) throw updateError;
+
+      queryClient.invalidateQueries({ queryKey: ["admin_imoveis"] });
+      toast({ title: "Fotos atualizadas!", description: `${newPhotos.length} imagens extraídas.` });
+    } catch (error: any) {
+      toast({ 
+        title: "Erro ao reprocessar fotos", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+    } finally {
+      setRefreshingId(null);
+    }
+  };
 
   const filteredImoveis = imoveis?.filter(i => 
     i.titulo?.toLowerCase().includes(search.toLowerCase()) ||
@@ -168,6 +212,19 @@ export default function AdminImoveis() {
                         <DropdownMenuItem onClick={() => setGalleryProperty(imovel)}>
                           <ImageIcon className="mr-2 h-4 w-4" /> Fotos ({imovel.fotos?.length || 0})
                         </DropdownMenuItem>
+                        {imovel.link_anuncio && (
+                          <DropdownMenuItem 
+                            onClick={() => handleRefreshPhotos(imovel)}
+                            disabled={refreshingId === imovel.id}
+                          >
+                            {refreshingId === imovel.id ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <RefreshCw className="mr-2 h-4 w-4" />
+                            )}
+                            Reprocessar Fotos
+                          </DropdownMenuItem>
+                        )}
                         {imovel.link_anuncio && (
                           <DropdownMenuItem asChild>
                             <a href={imovel.link_anuncio} target="_blank" rel="noopener noreferrer">
