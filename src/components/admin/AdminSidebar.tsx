@@ -11,6 +11,7 @@ import {
   CalendarClock,
   Bell,
   DollarSign,
+  Settings,
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,6 +35,7 @@ const mainItems = [
   { title: "Leads", url: "/admin/leads", icon: Users },
   { title: "Matches", url: "/admin/matches", icon: Sparkles },
   { title: "Receita", url: "/admin/receita", icon: DollarSign },
+  { title: "Configuração IA", url: "/admin/ai-config", icon: Settings },
 ];
 
 const importItems = [
