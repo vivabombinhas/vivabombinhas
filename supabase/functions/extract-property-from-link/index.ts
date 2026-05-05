@@ -281,11 +281,11 @@ serve(async (req) => {
         }
       }
 
-      scrapedImages = dedupeAndFilterPhotos(candidateImages, 35);
+      scrapedImages = dedupeAndFilterPhotos(candidateImages, 40);
       console.log(`Found ${candidateImages.length} candidate images, filtered to ${scrapedImages.length}`);
 
       // Bigger context window for better extraction
-      content = scrapedMd.slice(0, 30000);
+      content = scrapedMd.slice(0, 35000);
     }
 
     // Step 2: Extract structured data with Lovable AI (tool calling)
