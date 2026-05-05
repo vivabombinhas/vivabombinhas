@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, XCircle, Loader2, BedDouble, Bath, Car, Ruler, ExternalLink } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, BedDouble, Bath, Car, Ruler, ExternalLink, Flame } from "lucide-react";
 
 
 interface Submission {
@@ -40,6 +40,7 @@ interface Submission {
   anunciante_email: string | null;
   imobiliaria: string | null;
   imovel_id: string | null;
+  observacoes: string | null;
   created_at: string;
 }
 
@@ -60,6 +61,7 @@ export default function AdminSubmissions() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [gestaoPropriaMap, setGestaoPropriaMap] = useState<Record<string, boolean>>({});
+  const [destaqueMap, setDestaqueMap] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
   
 
@@ -73,7 +75,17 @@ export default function AdminSubmissions() {
     if (error) {
       toast({ title: "Erro ao carregar submissões", variant: "destructive" });
     } else {
-      setSubmissions((data as any) || []);
+      const subData = (data as any) || [];
+      setSubmissions(subData);
+      
+      // Auto-detect highlights from observations
+      const newDestaqueMap: Record<string, boolean> = {};
+      subData.forEach((sub: Submission) => {
+        if (sub.observacoes?.includes("[DESTAQUE-PAGO-SIMULADO]")) {
+          newDestaqueMap[sub.id] = true;
+        }
+      });
+      setDestaqueMap(newDestaqueMap);
     }
     setLoading(false);
   };
@@ -203,6 +215,8 @@ export default function AdminSubmissions() {
                       actionLoading={actionLoading}
                       gestaoPropria={!!gestaoPropriaMap[sub.id]}
                       onToggleGestao={(v) => setGestaoPropriaMap((m) => ({ ...m, [sub.id]: v }))}
+                      destaque={!!destaqueMap[sub.id]}
+                      onToggleDestaque={(v) => setDestaqueMap((m) => ({ ...m, [sub.id]: v }))}
                     />
                   ))}
                 </div>
@@ -222,6 +236,8 @@ export default function AdminSubmissions() {
                       actionLoading={actionLoading}
                       gestaoPropria={false}
                       onToggleGestao={() => {}}
+                      destaque={false}
+                      onToggleDestaque={() => {}}
                     />
                   ))}
                 </div>
@@ -263,9 +279,16 @@ function SubmissionCard({
             {sub.bairro && <span>· {sub.bairro}</span>}
           </div>
         </div>
-        <Badge className={`${statusColors[sub.status_submission]} border text-xs`}>
-          {sub.status_submission}
-        </Badge>
+        <div className="flex items-center gap-2">
+          {sub.observacoes?.includes("[DESTAQUE-PAGO-SIMULADO]") && (
+            <Badge className="bg-amber-100 text-amber-800 border-amber-300 animate-pulse">
+              <Flame className="h-3 w-3 mr-1" /> DESTAQUE PAGO
+            </Badge>
+          )}
+          <Badge className={`${statusColors[sub.status_submission]} border text-xs`}>
+            {sub.status_submission}
+          </Badge>
+        </div>
       </div>
 
       {sub.descricao && (
