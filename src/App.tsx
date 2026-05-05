@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/AdminDashboard.tsx";
 import AdminFollowups from "./pages/AdminFollowups.tsx";
 import AdminAlerts from "./pages/AdminAlerts.tsx";
 import AdminRevenue from "./pages/AdminRevenue.tsx";
+import AdminAIConfig from "./pages/AdminAIConfig.tsx";
 import AdminLayout from "./components/admin/AdminLayout.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="importar" element={<AdminImportar />} />
             <Route path="importar-link" element={<AdminImportarLink />} />
             <Route path="matches" element={<AdminMatches />} />
+            <Route path="ai-config" element={<AdminAIConfig />} />
           </Route>
           <Route path="/reset-password" element={<ResetPassword />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
