@@ -152,6 +152,32 @@ export default function AdminSubmissions() {
       return;
     }
 
+    // Se for destaque pago, registra na receita
+    if (destaque) {
+      // Tenta encontrar um lead relacionado pelo telefone ou cria um novo registro
+      const { data: lead } = await supabase
+        .from("leads_maria")
+        .select("id")
+        .eq("telefone", sub.anunciante_telefone || "")
+        .maybeSingle();
+
+      if (lead) {
+        await supabase.from("lead_revenue").insert({
+          lead_id: lead.id,
+          imovel_id: inserted.id,
+          tipo_negocio: "destaque" as any,
+          parceiro_nome: sub.anunciante_nome,
+          parceiro_telefone: sub.anunciante_telefone,
+          valor_negocio: 49,
+          valor_previsto: 49,
+          valor_pago: 49,
+          status: "pago" as any,
+          data_pagamento: new Date().toISOString(),
+          observacoes: `Destaque premium para o imóvel: ${sub.titulo}`,
+        });
+      }
+    }
+
     // Update submission status
     await supabase
       .from("imoveis_submissions" as any)
