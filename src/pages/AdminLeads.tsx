@@ -271,6 +271,54 @@ export default function AdminLeads() {
               </Button>
             )}
           </div>
+
+          {/* Barra de Ações em Lote */}
+          {selectedLeads.length > 0 && (
+            <div className="mt-4 p-2 bg-primary/5 border border-primary/20 rounded-lg flex items-center justify-between animate-in fade-in slide-in-from-top-1">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-medium text-primary">
+                  {selectedLeads.length} {selectedLeads.length === 1 ? "lead selecionado" : "leads selecionados"}
+                </span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setSelectedLeads([])} 
+                  className="h-7 text-[10px] hover:bg-primary/10"
+                >
+                  Desmarcar todos
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5 border-amber-200 text-amber-700 hover:bg-amber-50"
+                  onClick={() => updateStatus.mutate({ ids: selectedLeads, status: "descartado" })}
+                >
+                  <X className="w-3.5 h-3.5" />
+                  Descartar
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5 border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                  onClick={() => updateStatus.mutate({ ids: selectedLeads, status: "convertido" })}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Converter
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Apagar
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
