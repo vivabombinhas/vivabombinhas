@@ -120,12 +120,6 @@ export default function AdminMatches() {
     onError: () => toast.error("Erro ao atualizar"),
   });
 
-  const getMatchWhatsappLink = (m: any) => {
-    const preco = m.imovel?.preco ?? m.imovel?.preco_temporada_diaria;
-    const msg = `Oi ${m.lead?.nome?.split(" ")[0] || ""}! Aqui é da Viva Bombinhas 🌊\n\nLembra que você procurava ${m.lead?.tipo_imovel || "imóvel"} em ${m.lead?.bairro_interesse || "Bombinhas"}? Acabou de entrar uma opção que combina muito com o que você queria:\n\n🏠 *${m.imovel?.titulo}*\n📍 ${m.imovel?.bairro}\n💰 ${formatCurrency(preco)}\n\nQuer que eu te mande mais detalhes e fotos?`;
-    return buildWALink(m.lead?.telefone || "", msg);
-  };
-
   const handleWhatsapp = (e: React.MouseEvent, m: any) => {
     e.stopPropagation();
     e.preventDefault();
@@ -213,7 +207,6 @@ export default function AdminMatches() {
             </div>
           </div>
 
-          {/* Filtros */}
           <div className="mt-4 flex items-center gap-2 flex-wrap">
             <div className="relative flex-1 min-w-[220px] max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -297,7 +290,7 @@ export default function AdminMatches() {
             <p className="font-medium">Nenhum match encontrado</p>
             <p className="text-xs mt-1">Matches são gerados automaticamente quando novos imóveis ou leads entram.</p>
           </div>
-        ) : (
+        ) : viewMode === "list" ? (
           <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <Table>
@@ -314,10 +307,6 @@ export default function AdminMatches() {
                   {filteredMatches.map((m: any) => {
                     const cfg = STATUS_CONFIG[m.status as MatchStatus];
                     const preco = m.imovel?.preco ?? m.imovel?.preco_temporada_diaria;
-                    const reasons: string[] = m.match_reasons || [];
-                    const hasBairro = reasons.some((r) => r.startsWith("Bairro"));
-                    const hasTipo = reasons.some((r) => r.startsWith("Tipo"));
-                    const hasPreco = reasons.some((r) => r.toLowerCase().startsWith("pre"));
                     return (
                       <TableRow
                         key={m.id}
@@ -332,11 +321,6 @@ export default function AdminMatches() {
                             <Phone className="w-3 h-3" />
                             {m.lead?.telefone || "—"}
                           </div>
-                          {m.lead?.bairro_interesse && (
-                            <div className="text-[11px] text-muted-foreground mt-0.5">
-                              quer {m.lead.tipo_imovel || "imóvel"} em {m.lead.bairro_interesse}
-                            </div>
-                          )}
                         </TableCell>
 
                         <TableCell className="align-top py-3">
@@ -344,9 +328,6 @@ export default function AdminMatches() {
                           <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
                             {m.imovel?.bairro && (
                               <span className="flex items-center gap-0.5"><MapPin className="w-3 h-3" />{m.imovel.bairro}</span>
-                            )}
-                            {m.imovel?.tipo && (
-                              <span className="flex items-center gap-0.5"><Home className="w-3 h-3" />{m.imovel.tipo}</span>
                             )}
                             {preco != null && (
                               <span className="flex items-center gap-0.5"><DollarSign className="w-3 h-3" />{formatCurrency(preco)}</span>
@@ -364,20 +345,6 @@ export default function AdminMatches() {
                               style={{ width: `${Math.min(100, m.score)}%` }}
                             />
                           </div>
-                          <div className="flex gap-1 mt-1.5">
-                            <span
-                              className={`text-[9px] px-1 rounded ${hasBairro ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-muted text-muted-foreground"}`}
-                              title={hasBairro ? "Bairro confere" : "Bairro não confere"}
-                            >B</span>
-                            <span
-                              className={`text-[9px] px-1 rounded ${hasTipo ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-muted text-muted-foreground"}`}
-                              title={hasTipo ? "Tipo confere" : "Tipo não confere"}
-                            >T</span>
-                            <span
-                              className={`text-[9px] px-1 rounded ${hasPreco ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-muted text-muted-foreground"}`}
-                              title={hasPreco ? "Preço confere" : "Preço não confere"}
-                            >P</span>
-                          </div>
                         </TableCell>
 
                         <TableCell className="align-top py-3">
@@ -391,36 +358,23 @@ export default function AdminMatches() {
                             {m.lead?.telefone && (
                               <Button
                                 size="sm"
-                                className="h-7 gap-1 text-xs"
+                                variant="ghost"
+                                className="h-7 w-7 p-0"
                                 onClick={(e) => handleWhatsapp(e, m)}
-                                title="Enviar WhatsApp pré-formatado"
+                                title="Enviar WhatsApp"
                               >
-                                <MessageCircle className="w-3 h-3" />
-                                WhatsApp
+                                <MessageCircle className="w-4 h-4 text-primary" />
                               </Button>
                             )}
-                            {m.status !== "converted" && (
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-7 w-7 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                                onClick={() => updateStatus.mutate({ id: m.id, status: "converted" })}
-                                title="Marcar como convertido"
-                              >
-                                <Check className="w-3.5 h-3.5" />
-                              </Button>
-                            )}
-                            {m.status !== "dismissed" && (
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                                onClick={() => updateStatus.mutate({ id: m.id, status: "dismissed" })}
-                                title="Descartar match"
-                              >
-                                <X className="w-3.5 h-3.5" />
-                              </Button>
-                            )}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 w-7 p-0"
+                              onClick={() => updateStatus.mutate({ id: m.id, status: "converted" })}
+                              title="Marcar como convertido"
+                            >
+                              <Check className="w-4 h-4 text-emerald-600" />
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -429,6 +383,120 @@ export default function AdminMatches() {
                 </TableBody>
               </Table>
             </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {groupedMatches.map((group) => {
+              const leadId = group.lead?.id || "unknown";
+              const isExpanded = expandedLeads[leadId];
+              return (
+                <div key={leadId} className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+                  <div 
+                    className="p-4 flex items-center gap-4 cursor-pointer hover:bg-muted/30 transition-colors"
+                    onClick={() => toggleLead(leadId)}
+                  >
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                      <Users className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-sm truncate">
+                          {group.lead?.nome || "Usuário sem nome"}
+                        </h3>
+                        <Badge variant="secondary" className="text-[10px] h-4">
+                          {group.matches.length} matches
+                        </Badge>
+                        {group.maxScore >= 70 && (
+                          <Badge className="bg-emerald-500/10 text-emerald-700 border-emerald-200 text-[10px] h-4">
+                            Alta Afinidade
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-3 mt-0.5">
+                        <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{group.lead?.telefone || "—"}</span>
+                        {group.lead?.bairro_interesse && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {group.lead.tipo_imovel || "imóvel"} em {group.lead.bairro_interesse}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right mr-2">
+                      <div className={`text-lg font-bold leading-none ${scoreTextClass(group.maxScore)}`}>
+                        {group.maxScore}<span className="text-[10px] font-normal text-muted-foreground"> max</span>
+                      </div>
+                    </div>
+                    {isExpanded ? <ChevronDown className="w-5 h-5 text-muted-foreground" /> : <ChevronRight className="w-5 h-5 text-muted-foreground" />}
+                  </div>
+
+                  {isExpanded && (
+                    <div className="border-t border-border bg-muted/20 divide-y divide-border/50">
+                      {group.matches.map((m: any) => {
+                        const cfg = STATUS_CONFIG[m.status as MatchStatus];
+                        const preco = m.imovel?.preco ?? m.imovel?.preco_temporada_diaria;
+                        return (
+                          <div 
+                            key={m.id} 
+                            className="p-3 pl-14 flex items-center gap-4 hover:bg-muted/40 transition-colors cursor-pointer"
+                            onClick={() => openDetails(m)}
+                          >
+                            <div className="w-12 h-12 rounded bg-muted overflow-hidden flex-shrink-0 border border-border">
+                              {m.imovel?.fotos?.[0] ? (
+                                <img src={m.imovel.fotos[0]} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                              ) : (
+                                <Home className="w-5 h-5 m-auto text-muted-foreground" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-medium line-clamp-1">{m.imovel?.titulo}</h4>
+                              <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{m.imovel?.bairro}</span>
+                                <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" />{formatCurrency(preco)}</span>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-1.5">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className={`text-[9px] h-4 py-0 ${cfg.className}`}>
+                                  {cfg.label}
+                                </Badge>
+                                <span className={`text-xs font-bold ${scoreTextClass(m.score)}`}>{m.score}%</span>
+                              </div>
+                              <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 px-1.5 text-[10px] gap-1"
+                                  onClick={(e) => handleWhatsapp(e, m)}
+                                >
+                                  <MessageCircle className="w-3 h-3" /> WhatsApp
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-6 w-6"
+                                  onClick={() => updateStatus.mutate({ id: m.id, status: "converted" })}
+                                >
+                                  <Check className="w-3 h-3 text-emerald-600" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-6 w-6"
+                                  onClick={() => updateStatus.mutate({ id: m.id, status: "dismissed" })}
+                                >
+                                  <X className="w-3 h-3 text-destructive" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </main>
