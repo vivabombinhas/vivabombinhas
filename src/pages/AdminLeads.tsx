@@ -435,12 +435,6 @@ export default function AdminLeads() {
                         </TableCell>
 
                         <TableCell className="align-top py-3">
-                          <span className="text-xs text-muted-foreground">
-                            {lead.faixa_preco || "—"}
-                          </span>
-                        </TableCell>
-
-                        <TableCell className="align-top py-3">
                           <span className="text-xs text-muted-foreground whitespace-nowrap">
                             {formatDate(lead.created_at)}
                           </span>
