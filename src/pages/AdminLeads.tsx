@@ -1,11 +1,14 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Phone, Mail, Filter, Search, MessageCircle, X } from "lucide-react";
+import { Users, Phone, Mail, Filter, Search, MessageCircle, X, Trash2, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import {
+  Checkbox
+} from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -21,6 +24,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import LeadDetailSheet from "@/components/admin/LeadDetailSheet";
 
@@ -56,6 +69,8 @@ export default function AdminLeads() {
   const [search, setSearch] = useState<string>("");
   const [showAnonimos, setShowAnonimos] = useState<boolean>(false);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const queryClient = useQueryClient();
 
@@ -80,19 +95,53 @@ export default function AdminLeads() {
   });
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: LeadStatus }) => {
-      const { error } = await supabase
-        .from("leads_maria")
-        .update({ status })
-        .eq("id", id);
+    mutationFn: async ({ id, ids, status }: { id?: string; ids?: string[]; status: LeadStatus }) => {
+      let query = supabase.from("leads_maria").update({ status });
+      if (id) {
+        query = query.eq("id", id);
+      } else if (ids && ids.length > 0) {
+        query = query.in("id", ids);
+      } else {
+        throw new Error("ID ou IDs necessários");
+      }
+      const { error } = await query;
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leads_maria"] });
       toast.success("Status atualizado");
+      setSelectedLeads([]);
     },
     onError: () => toast.error("Erro ao atualizar status"),
   });
+
+  const deleteLeads = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("leads_maria").delete().in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leads_maria"] });
+      toast.success("Leads excluídos permanentemente");
+      setSelectedLeads([]);
+      setIsDeleteDialogOpen(false);
+    },
+    onError: () => toast.error("Erro ao excluir leads"),
+  });
+
+  const toggleSelectAll = () => {
+    if (selectedLeads.length === filteredLeads.length) {
+      setSelectedLeads([]);
+    } else {
+      setSelectedLeads(filteredLeads.map(l => l.id));
+    }
+  };
+
+  const toggleSelectLead = (id: string) => {
+    setSelectedLeads(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
 
   // Listas únicas para filtros
   const bairros = useMemo(() => {
@@ -222,6 +271,54 @@ export default function AdminLeads() {
               </Button>
             )}
           </div>
+
+          {/* Barra de Ações em Lote */}
+          {selectedLeads.length > 0 && (
+            <div className="mt-4 p-2 bg-primary/5 border border-primary/20 rounded-lg flex items-center justify-between animate-in fade-in slide-in-from-top-1">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-medium text-primary">
+                  {selectedLeads.length} {selectedLeads.length === 1 ? "lead selecionado" : "leads selecionados"}
+                </span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setSelectedLeads([])} 
+                  className="h-7 text-[10px] hover:bg-primary/10"
+                >
+                  Desmarcar todos
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5 border-amber-200 text-amber-700 hover:bg-amber-50"
+                  onClick={() => updateStatus.mutate({ ids: selectedLeads, status: "descartado" })}
+                >
+                  <X className="w-3.5 h-3.5" />
+                  Descartar
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5 border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                  onClick={() => updateStatus.mutate({ ids: selectedLeads, status: "convertido" })}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Converter
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Apagar
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
@@ -249,11 +346,17 @@ export default function AdminLeads() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/40 hover:bg-muted/40">
-                    <TableHead className="w-[26%]">Lead</TableHead>
+                    <TableHead className="w-[40px] px-3">
+                      <Checkbox 
+                        checked={selectedLeads.length === filteredLeads.length && filteredLeads.length > 0}
+                        onCheckedChange={toggleSelectAll}
+                        aria-label="Selecionar todos"
+                      />
+                    </TableHead>
+                    <TableHead className="w-[24%]">Lead</TableHead>
                     <TableHead className="w-[18%]">Contato</TableHead>
                     <TableHead className="w-[14%]">Interesse</TableHead>
                     <TableHead className="w-[18%]">Bairro / Tipo</TableHead>
-                    <TableHead className="w-[12%]">Faixa</TableHead>
                     <TableHead className="w-[10%]">Data</TableHead>
                     <TableHead className="w-[12%] text-right">Status</TableHead>
                   </TableRow>
@@ -262,12 +365,20 @@ export default function AdminLeads() {
                   {filteredLeads.map((lead) => {
                     const status = (lead.status as LeadStatus) ?? "novo";
                     const cfg = STATUS_CONFIG[status];
+                    const isSelected = selectedLeads.includes(lead.id);
                     return (
                       <TableRow
                         key={lead.id}
-                        className="cursor-pointer hover:bg-muted/40"
+                        className={`cursor-pointer transition-colors ${isSelected ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-muted/40'}`}
                         onClick={() => { setSelectedLeadId(lead.id); setSheetOpen(true); }}
                       >
+                        <TableCell className="align-top py-3 px-3" onClick={(e) => e.stopPropagation()}>
+                          <Checkbox 
+                            checked={isSelected}
+                            onCheckedChange={() => toggleSelectLead(lead.id)}
+                            aria-label={`Selecionar lead ${lead.nome}`}
+                          />
+                        </TableCell>
                         <TableCell className="align-top py-3">
                           <div className="font-medium text-foreground truncate">
                             {lead.nome ?? <span className="italic text-muted-foreground">Sem nome</span>}
@@ -324,12 +435,6 @@ export default function AdminLeads() {
                         </TableCell>
 
                         <TableCell className="align-top py-3">
-                          <span className="text-xs text-muted-foreground">
-                            {lead.faixa_preco || "—"}
-                          </span>
-                        </TableCell>
-
-                        <TableCell className="align-top py-3">
                           <span className="text-xs text-muted-foreground whitespace-nowrap">
                             {formatDate(lead.created_at)}
                           </span>
@@ -370,6 +475,26 @@ export default function AdminLeads() {
         open={sheetOpen}
         onOpenChange={setSheetOpen}
       />
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir leads permanentemente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Isso excluirá permanentemente os {selectedLeads.length} leads selecionados e todos os seus dados associados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => deleteLeads.mutate(selectedLeads)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir permanentemente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
