@@ -95,19 +95,53 @@ export default function AdminLeads() {
   });
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: LeadStatus }) => {
-      const { error } = await supabase
-        .from("leads_maria")
-        .update({ status })
-        .eq("id", id);
+    mutationFn: async ({ id, ids, status }: { id?: string; ids?: string[]; status: LeadStatus }) => {
+      let query = supabase.from("leads_maria").update({ status });
+      if (id) {
+        query = query.eq("id", id);
+      } else if (ids && ids.length > 0) {
+        query = query.in("id", ids);
+      } else {
+        throw new Error("ID ou IDs necessários");
+      }
+      const { error } = await query;
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leads_maria"] });
       toast.success("Status atualizado");
+      setSelectedLeads([]);
     },
     onError: () => toast.error("Erro ao atualizar status"),
   });
+
+  const deleteLeads = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("leads_maria").delete().in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leads_maria"] });
+      toast.success("Leads excluídos permanentemente");
+      setSelectedLeads([]);
+      setIsDeleteDialogOpen(false);
+    },
+    onError: () => toast.error("Erro ao excluir leads"),
+  });
+
+  const toggleSelectAll = () => {
+    if (selectedLeads.length === filteredLeads.length) {
+      setSelectedLeads([]);
+    } else {
+      setSelectedLeads(filteredLeads.map(l => l.id));
+    }
+  };
+
+  const toggleSelectLead = (id: string) => {
+    setSelectedLeads(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
 
   // Listas únicas para filtros
   const bairros = useMemo(() => {
