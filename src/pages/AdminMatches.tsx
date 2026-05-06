@@ -109,13 +109,21 @@ export default function AdminMatches() {
   });
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: MatchStatus }) => {
-      const { error } = await supabase.from("lead_matches").update({ status }).eq("id", id);
+    mutationFn: async ({ id, ids, status }: { id?: string; ids?: string[]; status: MatchStatus }) => {
+      let q = supabase.from("lead_matches").update({ status });
+      if (id) {
+        q = q.eq("id", id);
+      } else if (ids && ids.length > 0) {
+        q = q.in("id", ids);
+      } else {
+        throw new Error("ID ou IDs necessários");
+      }
+      const { error } = await q;
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["lead_matches"] });
-      toast.success("Match atualizado");
+      toast.success("Status atualizado");
     },
     onError: () => toast.error("Erro ao atualizar"),
   });
