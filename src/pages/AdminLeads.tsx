@@ -69,6 +69,8 @@ export default function AdminLeads() {
   const [search, setSearch] = useState<string>("");
   const [showAnonimos, setShowAnonimos] = useState<boolean>(false);
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const queryClient = useQueryClient();
 
