@@ -400,42 +400,74 @@ export default function AdminMatches() {
               return (
                 <div key={leadId} className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
                   <div 
-                    className="p-4 flex items-center gap-4 cursor-pointer hover:bg-muted/30 transition-colors"
-                    onClick={() => toggleLead(leadId)}
+                    className="p-4 flex items-center gap-4 hover:bg-muted/30 transition-colors"
                   >
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                      <Users className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-sm truncate">
-                          {group.lead?.nome || "Usuário sem nome"}
-                        </h3>
-                        <Badge variant="secondary" className="text-[10px] h-4">
-                          {group.matches.length} matches
-                        </Badge>
-                        {group.maxScore >= 70 && (
-                          <Badge className="bg-emerald-500/10 text-emerald-700 border-emerald-200 text-[10px] h-4">
-                            Alta Afinidade
+                    <div 
+                      className="flex-1 flex items-center gap-4 cursor-pointer min-w-0"
+                      onClick={() => toggleLead(leadId)}
+                    >
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                        <Users className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-sm truncate">
+                            {group.lead?.nome || "Usuário sem nome"}
+                          </h3>
+                          <Badge variant="secondary" className="text-[10px] h-4">
+                            {group.matches.length} matches
                           </Badge>
-                        )}
+                          {group.maxScore >= 70 && (
+                            <Badge className="bg-emerald-500/10 text-emerald-700 border-emerald-200 text-[10px] h-4">
+                              Alta Afinidade
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-3 mt-0.5">
+                          <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{group.lead?.telefone || "—"}</span>
+                          {group.lead?.bairro_interesse && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {group.lead.tipo_imovel || "imóvel"} em {group.lead.bairro_interesse}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="text-xs text-muted-foreground flex items-center gap-3 mt-0.5">
-                        <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{group.lead?.telefone || "—"}</span>
-                        {group.lead?.bairro_interesse && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3" />
-                            {group.lead.tipo_imovel || "imóvel"} em {group.lead.bairro_interesse}
-                          </span>
-                        )}
+                      <div className="text-right mr-2 hidden sm:block">
+                        <div className={`text-lg font-bold leading-none ${scoreTextClass(group.maxScore)}`}>
+                          {group.maxScore}<span className="text-[10px] font-normal text-muted-foreground"> max</span>
+                        </div>
                       </div>
+                      {isExpanded ? <ChevronDown className="w-5 h-5 text-muted-foreground" /> : <ChevronRight className="w-5 h-5 text-muted-foreground" />}
                     </div>
-                    <div className="text-right mr-2">
-                      <div className={`text-lg font-bold leading-none ${scoreTextClass(group.maxScore)}`}>
-                        {group.maxScore}<span className="text-[10px] font-normal text-muted-foreground"> max</span>
-                      </div>
+
+                    <div className="flex items-center gap-1.5 pl-4 border-l border-border/50">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-[11px] gap-1.5 px-2.5 hidden sm:flex"
+                        onClick={() => updateStatus.mutate({ 
+                          ids: group.matches.map(m => m.id), 
+                          status: "converted" 
+                        })}
+                      >
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        Aceitar Tudo
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 sm:w-auto sm:px-2.5 sm:gap-1.5 text-[11px] text-muted-foreground hover:text-destructive"
+                        onClick={() => updateStatus.mutate({ 
+                          ids: group.matches.map(m => m.id), 
+                          status: "dismissed" 
+                        })}
+                        title="Descartar todos"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Descartar Tudo</span>
+                      </Button>
                     </div>
-                    {isExpanded ? <ChevronDown className="w-5 h-5 text-muted-foreground" /> : <ChevronRight className="w-5 h-5 text-muted-foreground" />}
                   </div>
 
                   {isExpanded && (
