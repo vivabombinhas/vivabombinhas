@@ -14,6 +14,11 @@ import {
   MessageCircle,
   Search,
   ExternalLink,
+  Users,
+  ChevronRight,
+  ChevronDown,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -72,8 +77,14 @@ export default function AdminMatches() {
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [scoreFilter, setScoreFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<"list" | "grouped">("grouped");
+  const [expandedLeads, setExpandedLeads] = useState<Record<string, boolean>>({});
   const [selectedMatch, setSelectedMatch] = useState<any | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  const toggleLead = (leadId: string) => {
+    setExpandedLeads(prev => ({ ...prev, [leadId]: !prev[leadId] }));
+  };
 
   const { data: matches, isLoading } = useQuery({
     queryKey: ["lead_matches", statusFilter],
@@ -150,11 +161,27 @@ export default function AdminMatches() {
     });
   }, [matches, search, scoreFilter]);
 
+  const groupedMatches = useMemo(() => {
+    const groups: Record<string, { lead: any; matches: any[]; maxScore: number }> = {};
+    filteredMatches.forEach((m: any) => {
+      const leadId = m.lead_id || "unknown";
+      if (!groups[leadId]) {
+        groups[leadId] = { lead: m.lead, matches: [], maxScore: 0 };
+      }
+      groups[leadId].matches.push(m);
+      if (m.score > groups[leadId].maxScore) {
+        groups[leadId].maxScore = m.score;
+      }
+    });
+    return Object.values(groups).sort((a, b) => b.maxScore - a.maxScore);
+  }, [filteredMatches]);
+
   const counts = {
     total: matches?.length || 0,
     filtered: filteredMatches.length,
     pending: matches?.filter((m: any) => m.status === "pending").length || 0,
     high: matches?.filter((m: any) => m.score >= 70).length || 0,
+    leads: groupedMatches.length,
   };
 
   const hasActiveFilters = statusFilter !== "pending" || scoreFilter !== "all" || !!search;
@@ -181,7 +208,7 @@ export default function AdminMatches() {
                 Matches
               </h1>
               <p className="text-xs text-muted-foreground">
-                {counts.total} no filtro · {counts.pending} pendentes · {counts.high} com alta afinidade
+                {counts.total} matches · {counts.leads} usuários · {counts.pending} pendentes
               </p>
             </div>
           </div>
@@ -225,6 +252,27 @@ export default function AdminMatches() {
                 <SelectItem value="low">Baixo (&lt;50)</SelectItem>
               </SelectContent>
             </Select>
+
+            <div className="flex bg-muted/50 p-1 rounded-lg border border-border ml-auto">
+              <Button
+                variant={viewMode === "grouped" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("grouped")}
+                className="h-7 px-2 gap-1.5 text-[11px]"
+              >
+                <Users className="w-3.5 h-3.5" />
+                Por Usuário
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+                className="h-7 px-2 gap-1.5 text-[11px]"
+              >
+                <List className="w-3.5 h-3.5" />
+                Lista Simples
+              </Button>
+            </div>
 
             {hasActiveFilters && (
               <Button variant="ghost" size="sm" onClick={clearFilters} className="h-9 text-xs gap-1">
