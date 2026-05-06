@@ -365,12 +365,20 @@ export default function AdminLeads() {
                   {filteredLeads.map((lead) => {
                     const status = (lead.status as LeadStatus) ?? "novo";
                     const cfg = STATUS_CONFIG[status];
+                    const isSelected = selectedLeads.includes(lead.id);
                     return (
                       <TableRow
                         key={lead.id}
-                        className="cursor-pointer hover:bg-muted/40"
+                        className={`cursor-pointer transition-colors ${isSelected ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-muted/40'}`}
                         onClick={() => { setSelectedLeadId(lead.id); setSheetOpen(true); }}
                       >
+                        <TableCell className="align-top py-3 px-3" onClick={(e) => e.stopPropagation()}>
+                          <Checkbox 
+                            checked={isSelected}
+                            onCheckedChange={() => toggleSelectLead(lead.id)}
+                            aria-label={`Selecionar lead ${lead.nome}`}
+                          />
+                        </TableCell>
                         <TableCell className="align-top py-3">
                           <div className="font-medium text-foreground truncate">
                             {lead.nome ?? <span className="italic text-muted-foreground">Sem nome</span>}
