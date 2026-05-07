@@ -212,6 +212,30 @@ export default function AdminSubmissions() {
     fetchSubmissions();
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir permanentemente esta submissão?")) return;
+    setActionLoading(id);
+    const { error } = await supabase.from("imoveis_submissions").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Erro ao excluir", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Submissão excluída permanentemente" });
+      fetchSubmissions();
+    }
+    setActionLoading(null);
+  };
+
+  const handleUpdate = async (id: string, updates: Partial<Submission>) => {
+    const { error } = await supabase.from("imoveis_submissions").update(updates as any).eq("id", id);
+    if (error) {
+      toast({ title: "Erro ao atualizar", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Dados atualizados" });
+      fetchSubmissions();
+      setEditSubmission(null);
+    }
+  };
+
   const pendentes = submissions.filter((s) => s.status_submission === "pendente");
   const reviewed = submissions.filter((s) => s.status_submission !== "pendente");
 
