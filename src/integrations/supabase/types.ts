@@ -93,10 +93,12 @@ export type Database = {
           codigo: string | null
           condominio: number | null
           created_at: string
+          curador_id: string | null
           descricao: string | null
           destaque: boolean | null
           destaque_ate: string | null
           destaque_pago: boolean
+          destaque_premium: boolean | null
           destaque_valor: number | null
           endereco: string | null
           estacionamento: boolean | null
@@ -107,9 +109,11 @@ export type Database = {
           id: string
           imobiliaria: string | null
           iptu_anual: number | null
+          last_curated_at: string | null
           link_anuncio: string | null
           mobiliado: boolean | null
           observacoes: string | null
+          oculta_para_maria: boolean | null
           origem: Database["public"]["Enums"]["origem_anuncio"] | null
           piscina: boolean | null
           preco: number | null
@@ -140,10 +144,12 @@ export type Database = {
           codigo?: string | null
           condominio?: number | null
           created_at?: string
+          curador_id?: string | null
           descricao?: string | null
           destaque?: boolean | null
           destaque_ate?: string | null
           destaque_pago?: boolean
+          destaque_premium?: boolean | null
           destaque_valor?: number | null
           endereco?: string | null
           estacionamento?: boolean | null
@@ -154,9 +160,11 @@ export type Database = {
           id?: string
           imobiliaria?: string | null
           iptu_anual?: number | null
+          last_curated_at?: string | null
           link_anuncio?: string | null
           mobiliado?: boolean | null
           observacoes?: string | null
+          oculta_para_maria?: boolean | null
           origem?: Database["public"]["Enums"]["origem_anuncio"] | null
           piscina?: boolean | null
           preco?: number | null
@@ -187,10 +195,12 @@ export type Database = {
           codigo?: string | null
           condominio?: number | null
           created_at?: string
+          curador_id?: string | null
           descricao?: string | null
           destaque?: boolean | null
           destaque_ate?: string | null
           destaque_pago?: boolean
+          destaque_premium?: boolean | null
           destaque_valor?: number | null
           endereco?: string | null
           estacionamento?: boolean | null
@@ -201,9 +211,11 @@ export type Database = {
           id?: string
           imobiliaria?: string | null
           iptu_anual?: number | null
+          last_curated_at?: string | null
           link_anuncio?: string | null
           mobiliado?: boolean | null
           observacoes?: string | null
+          oculta_para_maria?: boolean | null
           origem?: Database["public"]["Enums"]["origem_anuncio"] | null
           piscina?: boolean | null
           preco?: number | null

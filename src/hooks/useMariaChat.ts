@@ -86,7 +86,6 @@ export function useMariaChat() {
   }, []);
 
   const updateHasMore = useCallback(() => {
-    // Se o gate está ativo (lead ainda não preenchido), não mostra botão "Ver mais"
     if (gateActiveRef.current && !leadCapturedRef.current) {
       setHasMore(false);
       return;
@@ -102,7 +101,6 @@ export function useMariaChat() {
   }, []);
 
   const showMore = useCallback(() => {
-    // Bloqueio extra: se gate ativo e lead não capturado, não libera
     if (gateActiveRef.current && !leadCapturedRef.current) return;
 
     const remaining = allPropertiesRef.current.slice(shownCountRef.current);
@@ -131,7 +129,6 @@ export function useMariaChat() {
   const handleShowMore = useCallback((content: string): boolean => {
     const remaining = allPropertiesRef.current.slice(shownCountRef.current);
     if (!MORE_PATTERNS.test(content.trim()) || remaining.length === 0) return false;
-    // Se gate ativo e lead não capturado, não libera via "ver mais"
     if (gateActiveRef.current && !leadCapturedRef.current) return false;
 
     const userMsg: ChatMessage = {
@@ -165,8 +162,6 @@ export function useMariaChat() {
         content: m.content,
       }));
 
-      // Injeta um hint de contexto (finalidade selecionada no qualifier) APENAS na primeira
-      // chamada após a escolha. Vai como mensagem do usuário invisível pra ancorar o LLM.
       if (finalidade && !finalidadeHintSentRef.current) {
         conversationHistory.unshift({
           role: "user",
@@ -179,7 +174,7 @@ export function useMariaChat() {
         body: {
           messages: conversationHistory,
           session_id: sessionIdRef.current,
-          lead_captured: leadCapturedRef.current, // sinaliza ao backend
+          lead_captured: leadCapturedRef.current,
           finalidade_hint: finalidade ?? undefined,
         },
       });
@@ -188,7 +183,6 @@ export function useMariaChat() {
 
       const showResults = data.show_results === true;
       const clearResults = data.clear_results === true;
-      // Backend só ativa gate se lead realmente não estiver capturado
       const gateActive = data.gate_active === true && !leadCapturedRef.current;
       const noResultsGate = data.no_results_gate === true && !leadCapturedRef.current;
 
@@ -196,14 +190,11 @@ export function useMariaChat() {
         const allProps: Property[] = data.all_properties || [];
         allPropertiesRef.current = allProps;
         gateActiveRef.current = gateActive;
-        // Se gate ativo: 1 card teaser; senão até 3
         const initial = gateActive ? 1 : 3;
         shownCountRef.current = Math.min(initial, allProps.length);
       } else if (clearResults) {
         clearPropertyState();
       } else if (noResultsGate) {
-        // Sem resultados, mas precisamos capturar o lead → não limpa nem mostra cards,
-        // mas deixa gate ativo pra exibir o formulário de "alerta de novidade".
         allPropertiesRef.current = [];
         shownCountRef.current = 0;
         gateActiveRef.current = true;
@@ -213,7 +204,6 @@ export function useMariaChat() {
         ? Math.max(0, allPropertiesRef.current.length - shownCountRef.current)
         : 0;
 
-      // Mostra o formulário se: gate clássico (com ou sem mais imóveis) OU gate sem-resultados.
       const showLeadForm = gateActive || noResultsGate;
 
       const assistantMsg: ChatMessage = {
@@ -243,7 +233,6 @@ export function useMariaChat() {
     }
   }, [messages, handleShowMore, updateHasMore, clearPropertyState, finalidade]);
 
-  // Submit do formulário inline de captação
   const submitLead = useCallback(async (nome: string, telefone: string): Promise<boolean> => {
     try {
       const { data, error } = await supabase.functions.invoke("maria-search", {
@@ -256,17 +245,23 @@ export function useMariaChat() {
       });
       if (error || !data?.success) return false;
 
-      // Marca persistentemente: nunca mais pedir nessa origem
       setLeadCapturedPersistent();
       leadCapturedRef.current = true;
       gateActiveRef.current = false;
 
-      // Libera todos os resultados acumulados em uma nova mensagem da MarIA
+      // Notificação via Edge Function (Simulação de Real-time)
+      try {
+        await supabase.functions.invoke("notify-broker", {
+          body: { lead_name: nome, lead_phone: telefone, session_id: sessionIdRef.current }
+        });
+      } catch (err) {
+        console.error("Erro ao notificar corretor:", err);
+      }
+
       const all = allPropertiesRef.current;
       const remaining = all.slice(shownCountRef.current);
       shownCountRef.current = all.length;
 
-      // Remove o formulário das mensagens anteriores (não exibir mais)
       setMessages((prev) => {
         const cleaned = prev.map((m) => ({ ...m, showLeadForm: false }));
         const firstName = nome.trim().split(/\s+/)[0];
@@ -296,8 +291,6 @@ export function useMariaChat() {
     try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
     sessionIdRef.current = getOrCreateSessionId();
     finalidadeHintSentRef.current = false;
-    // NÃO limpa leadCaptured do localStorage — é permanente por usuário/dispositivo
-    // NÃO limpa finalidade — é a preferência do usuário (use clearFinalidade pra trocar)
   }, [clearPropertyState]);
 
   return {
