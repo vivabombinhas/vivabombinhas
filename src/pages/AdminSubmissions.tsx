@@ -322,6 +322,8 @@ function SubmissionCard({
   onToggleGestao,
   destaque,
   onToggleDestaque,
+  onEdit,
+  onDelete,
 }: {
   sub: Submission;
   onApprove: (s: Submission) => void;
@@ -331,6 +333,8 @@ function SubmissionCard({
   onToggleGestao: (v: boolean) => void;
   destaque: boolean;
   onToggleDestaque: (v: boolean) => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   const isPending = sub.status_submission === "pendente";
   const isLoading = actionLoading === sub.id;
