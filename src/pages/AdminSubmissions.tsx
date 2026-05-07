@@ -41,6 +41,8 @@ interface Submission {
   imovel_id: string | null;
   observacoes: string | null;
   created_at: string;
+  gestao_propria?: boolean;
+  destaque?: boolean;
 }
 
 const statusColors: Record<string, string> = {
