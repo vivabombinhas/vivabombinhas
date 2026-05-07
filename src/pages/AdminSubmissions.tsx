@@ -446,14 +446,44 @@ function SubmissionCard({
             <Button
               size="sm"
               variant="outline"
-              className="gap-1.5 text-destructive hover:text-destructive"
-              onClick={() => onReject(sub)}
+              className="gap-1.5"
+              onClick={onEdit}
               disabled={isLoading}
             >
-              <XCircle className="h-3.5 w-3.5" />
-              Rejeitar
+              <Edit className="h-3.5 w-3.5" />
+              Editar
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-destructive hover:bg-destructive/10"
+              onClick={onDelete}
+              disabled={isLoading}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Excluir
             </Button>
           </div>
+        </div>
+      )}
+      {!isPending && (
+        <div className="flex gap-2 pt-2 border-t mt-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="gap-1.5 h-8 text-xs"
+            onClick={onEdit}
+          >
+            <Edit className="h-3 w-3" /> Editar
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="gap-1.5 h-8 text-xs text-destructive hover:bg-destructive/10"
+            onClick={onDelete}
+          >
+            <Trash2 className="h-3 w-3" /> Excluir
+          </Button>
         </div>
       )}
     </div>
