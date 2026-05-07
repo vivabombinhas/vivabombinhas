@@ -321,6 +321,102 @@ export default function AdminSubmissions() {
   );
 }
 
+function EditSubmissionModal({ 
+  submission, 
+  open, 
+  onOpenChange, 
+  onSave 
+}: { 
+  submission: Submission; 
+  open: boolean; 
+  onOpenChange: (open: boolean) => void;
+  onSave: (updates: Partial<Submission>) => void;
+}) {
+  const [formData, setFormData] = useState<Partial<Submission>>({...submission});
+
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Editar Submissão</AlertDialogTitle>
+          <AlertDialogDescription>
+            Ajuste os dados antes de aprovar.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Título</label>
+              <Input 
+                value={formData.titulo || ""} 
+                onChange={e => setFormData({...formData, titulo: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Bairro</label>
+              <Input 
+                value={formData.bairro || ""} 
+                onChange={e => setFormData({...formData, bairro: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Contato Nome</label>
+              <Input 
+                value={formData.anunciante_nome || ""} 
+                onChange={e => setFormData({...formData, anunciante_nome: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Contato Telefone</label>
+              <Input 
+                value={formData.anunciante_telefone || ""} 
+                onChange={e => setFormData({...formData, anunciante_telefone: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Preço Venda</label>
+              <Input 
+                type="number"
+                value={formData.preco || ""} 
+                onChange={e => setFormData({...formData, preco: parseFloat(e.target.value) || null})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Diária Temporada</label>
+              <Input 
+                type="number"
+                value={formData.preco_temporada_diaria || ""} 
+                onChange={e => setFormData({...formData, preco_temporada_diaria: parseFloat(e.target.value) || null})}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Descrição</label>
+            <Textarea 
+              rows={4}
+              value={formData.descricao || ""} 
+              onChange={e => setFormData({...formData, descricao: e.target.value})}
+            />
+          </div>
+        </div>
+
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={() => onSave(formData)}>Salvar Alterações</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 function SubmissionCard({
   sub,
   onApprove,
