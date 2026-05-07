@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, XCircle, Loader2, BedDouble, Bath, Car, Ruler, ExternalLink, Flame } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, BedDouble, Bath, Car, Ruler, ExternalLink, Flame, Edit, Trash2 } from "lucide-react";
 
 interface Submission {
   id: string;
