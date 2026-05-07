@@ -299,6 +299,18 @@ export function PropertyEditSheet({ property, open, onOpenChange }: PropertyEdit
                 </div>
               </div>
 
+              <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-100 dark:border-amber-900/30">
+                <div className="space-y-0.5">
+                  <Label htmlFor="destaque" className="text-sm font-medium text-amber-900 dark:text-amber-200">Imóvel em Destaque</Label>
+                  <p className="text-xs text-amber-700/70 dark:text-amber-400/70">Exibir com prioridade na página inicial</p>
+                </div>
+                <Switch 
+                  id="destaque"
+                  checked={formData.destaque} 
+                  onCheckedChange={(v) => handleChange("destaque", v)} 
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="mobiliado">Mobiliado</Label>
