@@ -276,6 +276,8 @@ export default function AdminSubmissions() {
                       onToggleGestao={(v) => setGestaoPropriaMap((m) => ({ ...m, [sub.id]: v }))}
                       destaque={!!destaqueMap[sub.id]}
                       onToggleDestaque={(v) => setDestaqueMap((m) => ({ ...m, [sub.id]: v }))}
+                      onEdit={() => setEditSubmission(sub)}
+                      onDelete={() => handleDelete(sub.id)}
                     />
                   ))}
                 </div>
@@ -297,6 +299,8 @@ export default function AdminSubmissions() {
                       onToggleGestao={() => {}}
                       destaque={false}
                       onToggleDestaque={() => {}}
+                      onEdit={() => setEditSubmission(sub)}
+                      onDelete={() => handleDelete(sub.id)}
                     />
                   ))}
                 </div>
