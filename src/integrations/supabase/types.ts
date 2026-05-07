@@ -44,6 +44,44 @@ export type Database = {
         }
         Relationships: []
       }
+      broker_notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          lead_id: string | null
+          message: string
+          read: boolean | null
+          session_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          lead_id?: string | null
+          message: string
+          read?: boolean | null
+          session_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          lead_id?: string | null
+          message?: string
+          read?: boolean | null
+          session_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broker_notifications_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads_maria"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       config_imobiliaria: {
         Row: {
           ativo: boolean
@@ -670,6 +708,13 @@ export type Database = {
           lead_id: string
           reasons: string[]
           score: number
+        }[]
+      }
+      get_qualified_leads_stats: {
+        Args: never
+        Returns: {
+          total: number
+          unread: number
         }[]
       }
       has_role: {

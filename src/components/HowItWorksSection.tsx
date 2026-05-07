@@ -4,20 +4,20 @@ const steps = [
   {
     icon: MessageSquare,
     num: "01",
-    title: "Descreva o que procura",
-    desc: "Use linguagem natural: \"apartamento 2 quartos em Mariscal, até R$3.500 por mês\".",
+    title: "Inicie o Chat",
+    desc: "Diga à MarIA o que procura em Bombinhas usando linguagem natural.",
   },
   {
     icon: Cpu,
     num: "02",
-    title: "MarIA busca para você",
-    desc: "Nossa IA vasculha diversas fontes da região e cruza informações em tempo real.",
+    title: "IA em Ação",
+    desc: "A MarIA vasculha nossa base de dados e parceiros em milissegundos.",
   },
   {
     icon: ListChecks,
     num: "03",
-    title: "Resultados organizados",
-    desc: "Opções com links diretos para anúncios originais e contatos. Tudo pronto para você.",
+    title: "Resultados & Lead",
+    desc: "Você recebe as melhores opções e o corretor é avisado para te ajudar no fechamento.",
   },
 ];
 
