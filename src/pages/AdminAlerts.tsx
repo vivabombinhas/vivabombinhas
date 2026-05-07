@@ -1,229 +1,196 @@
-import { useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { 
+  Bell, 
+  Check, 
+  Trash2, 
+  User, 
+  Phone, 
+  Calendar,
+  MessageSquare,
+  ChevronRight,
+  Search
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Bell, MessageCircle, Check, Sparkles, Home, MapPin } from "lucide-react";
-import { buildWhatsappLink, openWhatsapp } from "@/lib/whatsapp-templates";
-import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-type AlertRow = {
-  id: string;
-  score: number;
-  match_reasons: string[] | null;
-  created_at: string;
-  status: string;
-  lead: {
-    id: string;
-    nome: string | null;
-    telefone: string | null;
-    bairro_interesse: string | null;
-    tipo_imovel: string | null;
-    faixa_preco: string | null;
-    status: string;
-  } | null;
-  imovel: {
-    id: string;
-    titulo: string;
-    bairro: string | null;
-    tipo: string;
-    preco: number | null;
-    quartos: number | null;
-    link_anuncio: string | null;
-  } | null;
-};
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminAlerts() {
-  const qc = useQueryClient();
-  const [tab, setTab] = useState<"pending" | "sent">("pending");
+  const [search, setSearch] = useState("");
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  const { data: alerts = [], isLoading } = useQuery({
-    queryKey: ["smart_alerts", tab],
-    refetchInterval: 30_000,
+  const { data: notifications, isLoading } = useQuery({
+    queryKey: ["broker_notifications"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("lead_matches")
-        .select(
-          `id, score, match_reasons, created_at, status,
-           lead:leads_maria!lead_matches_lead_id_fkey(id, nome, telefone, bairro_interesse, tipo_imovel, faixa_preco, status),
-           imovel:imoveis!lead_matches_imovel_id_fkey(id, titulo, bairro, tipo, preco, quartos, link_anuncio)`
-        )
-        .eq("status", tab === "pending" ? "pending" : "sent")
-        .order("score", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(100);
-      if (error) {
-        // Fallback sem foreign key alias se schema cache não reconhecer
-        const { data: d2 } = await supabase
-          .from("lead_matches")
-          .select("*")
-          .eq("status", tab === "pending" ? "pending" : "sent")
-          .order("score", { ascending: false })
-          .limit(100);
-        return (d2 ?? []) as unknown as AlertRow[];
-      }
-      return (data ?? []) as unknown as AlertRow[];
+        .from("broker_notifications")
+        .select("*, leads_maria(nome, telefone, status)")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
     },
   });
 
-  const summary = useMemo(() => {
-    const total = alerts.length;
-    const hot = alerts.filter((a) => a.score >= 60).length;
-    const leads = new Set(alerts.map((a) => a.lead?.id).filter(Boolean)).size;
-    return { total, hot, leads };
-  }, [alerts]);
+  const markAsReadMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("broker_notifications")
+        .update({ read: true })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["broker_notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["admin_dashboard_stats"] });
+    },
+  });
 
-  const markAs = async (id: string, status: "sent" | "dismissed") => {
-    const { error } = await supabase
-      .from("lead_matches")
-      .update({ status })
-      .eq("id", id);
-    if (error) {
-      toast.error("Erro ao atualizar alerta");
-      return;
-    }
-    toast.success(status === "sent" ? "Marcado como notificado" : "Alerta descartado");
-    qc.invalidateQueries({ queryKey: ["smart_alerts"] });
-  };
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("broker_notifications").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["broker_notifications"] });
+      toast({ title: "Notificação removida" });
+    },
+  });
 
-  const sendWhatsapp = async (alert: AlertRow) => {
-    if (!alert.lead?.telefone || !alert.imovel) {
-      toast.error("Lead sem telefone ou imóvel ausente");
-      return;
-    }
-    const nome = alert.lead.nome?.split(" ")[0] ?? "tudo bem";
-    const preco = alert.imovel.preco
-      ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(alert.imovel.preco)
-      : "";
-    const msg = `Oi ${nome}! 🎯 Apareceu um imóvel novo que combina com o que você procura:\n\n*${alert.imovel.titulo}*${alert.imovel.bairro ? `\n📍 ${alert.imovel.bairro}` : ""}${alert.imovel.quartos ? `\n🛏️ ${alert.imovel.quartos} quartos` : ""}${preco ? `\n💰 ${preco}` : ""}${alert.imovel.link_anuncio ? `\n\n${alert.imovel.link_anuncio}` : ""}\n\nQuer mais detalhes ou agendar uma visita?`;
-    openWhatsapp(alert.lead.telefone, msg);
-    // marca como notificado e atualiza last_contact_at do lead
-    await supabase.from("lead_matches").update({ status: "sent" }).eq("id", alert.id);
-    await supabase.from("leads_maria").update({ last_contact_at: new Date().toISOString() }).eq("id", alert.lead.id);
-    qc.invalidateQueries({ queryKey: ["smart_alerts"] });
+  const filtered = notifications?.filter(n => 
+    n.title.toLowerCase().includes(search.toLowerCase()) ||
+    n.message.toLowerCase().includes(search.toLowerCase()) ||
+    n.leads_maria?.nome?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleWhatsApp = (phone: string) => {
+    const clean = phone.replace(/\D/g, "");
+    window.open(`https://wa.me/55${clean}`, "_blank");
   };
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Bell className="w-5 h-5 text-primary" />
-        </div>
+    <div className="container py-6 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Alertas Inteligentes</h1>
-          <p className="text-sm text-muted-foreground">
-            Imóveis novos cruzados automaticamente com leads existentes — feche o loop antes do lead esfriar.
-          </p>
+          <h1 className="text-2xl font-bold font-display flex items-center gap-2">
+            <Bell className="w-6 h-6 text-primary" />
+            Central de Avisos
+          </h1>
+          <p className="text-muted-foreground text-sm">Acompanhe leads qualificados em tempo real</p>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              const unread = notifications?.filter(n => !n.read).map(n => n.id);
+              if (unread?.length) {
+                unread.forEach(id => markAsReadMutation.mutate(id));
+              }
+            }}
+          >
+            Marcar tudo como lido
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground uppercase">Pendentes</div>
-            <div className="text-2xl font-bold">{summary.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground uppercase">Score alto (≥60)</div>
-            <div className="text-2xl font-bold text-primary">{summary.hot}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground uppercase">Leads únicos</div>
-            <div className="text-2xl font-bold">{summary.leads}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="flex gap-2">
-        <Button variant={tab === "pending" ? "default" : "outline"} size="sm" onClick={() => setTab("pending")}>
-          Pendentes
-        </Button>
-        <Button variant={tab === "sent" ? "default" : "outline"} size="sm" onClick={() => setTab("sent")}>
-          Já notificados
-        </Button>
-      </div>
-
-      {isLoading ? (
-        <div className="text-sm text-muted-foreground">Carregando alertas…</div>
-      ) : alerts.length === 0 ? (
-        <Card>
-          <CardContent className="p-10 text-center text-sm text-muted-foreground">
-            <Sparkles className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            Nenhum alerta {tab === "pending" ? "pendente" : "enviado"} no momento.
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {alerts.map((a) => (
-            <Card key={a.id} className="overflow-hidden">
-              <CardHeader className="pb-2 flex flex-row items-start justify-between gap-2 space-y-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant={a.score >= 60 ? "default" : "secondary"}>Score {a.score}</Badge>
-                  {a.lead?.status && <Badge variant="outline">{a.lead.status}</Badge>}
-                  <span className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(a.created_at), { addSuffix: true, locale: ptBR })}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid md:grid-cols-2 gap-3">
-                  <div className="rounded-lg border p-3 bg-muted/30">
-                    <div className="text-[10px] uppercase text-muted-foreground mb-1">Lead</div>
-                    <div className="font-semibold">{a.lead?.nome ?? "—"}</div>
-                    <div className="text-xs text-muted-foreground flex flex-wrap gap-2 mt-1">
-                      {a.lead?.tipo_imovel && <span>🏠 {a.lead.tipo_imovel}</span>}
-                      {a.lead?.bairro_interesse && <span><MapPin className="inline w-3 h-3" /> {a.lead.bairro_interesse}</span>}
-                      {a.lead?.faixa_preco && <span>💰 {a.lead.faixa_preco}</span>}
-                    </div>
-                  </div>
-                  <div className="rounded-lg border p-3">
-                    <div className="text-[10px] uppercase text-muted-foreground mb-1">Imóvel novo</div>
-                    <div className="font-semibold flex items-center gap-1">
-                      <Home className="w-3 h-3" /> {a.imovel?.titulo ?? "—"}
-                    </div>
-                    <div className="text-xs text-muted-foreground flex flex-wrap gap-2 mt-1">
-                      {a.imovel?.bairro && <span>📍 {a.imovel.bairro}</span>}
-                      {a.imovel?.quartos ? <span>🛏️ {a.imovel.quartos}</span> : null}
-                      {a.imovel?.preco && (
-                        <span>{new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(a.imovel.preco)}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {a.match_reasons && a.match_reasons.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {a.match_reasons.map((r, i) => (
-                      <Badge key={i} variant="outline" className="text-[10px]">{r}</Badge>
-                    ))}
-                  </div>
-                )}
-
-                {tab === "pending" && (
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    <Button size="sm" onClick={() => sendWhatsapp(a)} disabled={!a.lead?.telefone}>
-                      <MessageCircle className="w-3 h-3 mr-1" /> Enviar no WhatsApp
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => markAs(a.id, "sent")}>
-                      <Check className="w-3 h-3 mr-1" /> Marcar notificado
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => markAs(a.id, "dismissed")}>
-                      Descartar
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+      <div className="flex items-center gap-2 max-w-sm">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar notificações..."
+            className="pl-8"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
-      )}
+      </div>
+
+      <div className="grid gap-4">
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => <div key={i} className="h-24 bg-muted animate-pulse rounded-xl" />)}
+          </div>
+        ) : filtered?.length === 0 ? (
+          <div className="text-center py-12 bg-card border border-dashed rounded-xl">
+            <MessageSquare className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
+            <p className="text-muted-foreground">Nenhuma notificação encontrada.</p>
+          </div>
+        ) : (
+          filtered?.map((n) => (
+            <div 
+              key={n.id}
+              className={`relative bg-card border rounded-xl p-4 transition-all hover:shadow-md ${!n.read ? 'border-primary/30 bg-primary/5' : 'border-border'}`}
+            >
+              {!n.read && <div className="absolute top-4 right-4 w-2 h-2 bg-primary rounded-full" />}
+              
+              <div className="flex flex-col md:flex-row gap-4 justify-between items-start">
+                <div className="space-y-1 flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold">{n.title}</h3>
+                    <Badge variant={n.read ? "secondary" : "default"} className="text-[10px] uppercase">
+                      {n.read ? "Lido" : "Novo Lead"}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{n.message}</p>
+                  
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <User className="w-3 h-3" />
+                      {n.leads_maria?.nome || "Lead Anonimo"}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: ptBR })}
+                    </div>
+                    {n.leads_maria?.telefone && (
+                      <div className="flex items-center gap-1">
+                        <Phone className="w-3 h-3" />
+                        {n.leads_maria.telefone}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 w-full md:w-auto shrink-0">
+                  {!n.read && (
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-8 gap-1 text-xs"
+                      onClick={() => markAsReadMutation.mutate(n.id)}
+                    >
+                      <Check className="w-3.5 h-3.5" /> Lido
+                    </Button>
+                  )}
+                  {n.leads_maria?.telefone && (
+                    <Button 
+                      size="sm" 
+                      className="h-8 gap-1 text-xs bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => handleWhatsApp(n.leads_maria.telefone)}
+                    >
+                      <Phone className="w-3.5 h-3.5" /> WhatsApp
+                    </Button>
+                  )}
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                    onClick={() => deleteMutation.mutate(n.id)}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
