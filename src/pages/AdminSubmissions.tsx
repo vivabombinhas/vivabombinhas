@@ -309,6 +309,14 @@ export default function AdminSubmissions() {
           </>
         )}
       </main>
+      {editSubmission && (
+        <EditSubmissionModal 
+          submission={editSubmission} 
+          open={!!editSubmission} 
+          onOpenChange={(open) => !open && setEditSubmission(null)}
+          onSave={(updates) => handleUpdate(editSubmission.id, updates)}
+        />
+      )}
     </div>
   );
 }
