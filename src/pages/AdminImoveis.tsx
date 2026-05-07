@@ -178,7 +178,19 @@ export default function AdminImoveis() {
               filteredImoveis?.map((imovel) => (
                 <TableRow key={imovel.id}>
                   <TableCell>
-                    <div className="font-medium">{imovel.titulo}</div>
+                    <div className="flex items-center gap-2">
+                      <div className="font-medium">{imovel.titulo}</div>
+                      {imovel.destaque && (
+                        <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200">
+                          Destaque
+                        </Badge>
+                      )}
+                      {imovel.gestao_propria && (
+                        <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200">
+                          Próprio
+                        </Badge>
+                      )}
+                    </div>
                     <div className="text-xs text-muted-foreground">{imovel.tipo} · {imovel.finalidade}</div>
                   </TableCell>
                   <TableCell>
