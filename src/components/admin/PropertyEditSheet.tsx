@@ -162,6 +162,53 @@ export function PropertyEditSheet({ property, open, onOpenChange }: PropertyEdit
                 />
               </div>
             </div>
+            
+            <div className="space-y-4 pt-4 border-t">
+              <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Contato & Gestão</h3>
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border/50">
+                <div className="space-y-0.5">
+                  <Label htmlFor="gestao_propria" className="text-sm font-medium">Imóvel Próprio / Gestão Direta</Label>
+                  <p className="text-xs text-muted-foreground">Marque se este imóvel é de propriedade ou gestão da sua imobiliária</p>
+                </div>
+                <Switch 
+                  id="gestao_propria"
+                  checked={formData.gestao_propria} 
+                  onCheckedChange={(v) => handleChange("gestao_propria", v)} 
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="anunciante_nome">Nome do Contato</Label>
+                  <Input 
+                    id="anunciante_nome" 
+                    placeholder="Nome do proprietário ou captador"
+                    value={formData.anunciante_nome || ""} 
+                    onChange={(e) => handleChange("anunciante_nome", e.target.value)} 
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="anunciante_telefone">Telefone</Label>
+                  <Input 
+                    id="anunciante_telefone" 
+                    placeholder="(00) 00000-0000"
+                    value={formData.anunciante_telefone || ""} 
+                    onChange={(e) => handleChange("anunciante_telefone", e.target.value)} 
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="anunciante_email">E-mail</Label>
+                <Input 
+                  id="anunciante_email" 
+                  type="email"
+                  placeholder="contato@exemplo.com"
+                  value={formData.anunciante_email || ""} 
+                  onChange={(e) => handleChange("anunciante_email", e.target.value)} 
+                />
+              </div>
+            </div>
 
             <div className="space-y-4 pt-4 border-t">
               <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Localização</h3>
@@ -250,6 +297,18 @@ export function PropertyEditSheet({ property, open, onOpenChange }: PropertyEdit
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-100 dark:border-amber-900/30">
+                <div className="space-y-0.5">
+                  <Label htmlFor="destaque" className="text-sm font-medium text-amber-900 dark:text-amber-200">Imóvel em Destaque</Label>
+                  <p className="text-xs text-amber-700/70 dark:text-amber-400/70">Exibir com prioridade na página inicial</p>
+                </div>
+                <Switch 
+                  id="destaque"
+                  checked={formData.destaque} 
+                  onCheckedChange={(v) => handleChange("destaque", v)} 
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-2">

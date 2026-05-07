@@ -2,8 +2,20 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle2, XCircle, Loader2, BedDouble, Bath, Car, Ruler, ExternalLink, Flame } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, BedDouble, Bath, Car, Ruler, ExternalLink, Flame, Edit, Trash2 } from "lucide-react";
 
 interface Submission {
   id: string;
@@ -41,6 +53,8 @@ interface Submission {
   imovel_id: string | null;
   observacoes: string | null;
   created_at: string;
+  gestao_propria?: boolean;
+  destaque?: boolean;
 }
 
 const statusColors: Record<string, string> = {
@@ -61,6 +75,7 @@ export default function AdminSubmissions() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [gestaoPropriaMap, setGestaoPropriaMap] = useState<Record<string, boolean>>({});
   const [destaqueMap, setDestaqueMap] = useState<Record<string, boolean>>({});
+  const [editSubmission, setEditSubmission] = useState<Submission | null>(null);
   const { toast } = useToast();
 
   const fetchSubmissions = async () => {
@@ -209,6 +224,30 @@ export default function AdminSubmissions() {
     fetchSubmissions();
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir permanentemente esta submissão?")) return;
+    setActionLoading(id);
+    const { error } = await supabase.from("imoveis_submissions").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Erro ao excluir", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Submissão excluída permanentemente" });
+      fetchSubmissions();
+    }
+    setActionLoading(null);
+  };
+
+  const handleUpdate = async (id: string, updates: Partial<Submission>) => {
+    const { error } = await supabase.from("imoveis_submissions").update(updates as any).eq("id", id);
+    if (error) {
+      toast({ title: "Erro ao atualizar", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Dados atualizados" });
+      fetchSubmissions();
+      setEditSubmission(null);
+    }
+  };
+
   const pendentes = submissions.filter((s) => s.status_submission === "pendente");
   const reviewed = submissions.filter((s) => s.status_submission !== "pendente");
 
@@ -249,6 +288,8 @@ export default function AdminSubmissions() {
                       onToggleGestao={(v) => setGestaoPropriaMap((m) => ({ ...m, [sub.id]: v }))}
                       destaque={!!destaqueMap[sub.id]}
                       onToggleDestaque={(v) => setDestaqueMap((m) => ({ ...m, [sub.id]: v }))}
+                      onEdit={() => setEditSubmission(sub)}
+                      onDelete={() => handleDelete(sub.id)}
                     />
                   ))}
                 </div>
@@ -270,6 +311,8 @@ export default function AdminSubmissions() {
                       onToggleGestao={() => {}}
                       destaque={false}
                       onToggleDestaque={() => {}}
+                      onEdit={() => setEditSubmission(sub)}
+                      onDelete={() => handleDelete(sub.id)}
                     />
                   ))}
                 </div>
@@ -278,7 +321,111 @@ export default function AdminSubmissions() {
           </>
         )}
       </main>
+      {editSubmission && (
+        <EditSubmissionModal 
+          submission={editSubmission} 
+          open={!!editSubmission} 
+          onOpenChange={(open) => !open && setEditSubmission(null)}
+          onSave={(updates) => handleUpdate(editSubmission.id, updates)}
+        />
+      )}
     </div>
+  );
+}
+
+function EditSubmissionModal({ 
+  submission, 
+  open, 
+  onOpenChange, 
+  onSave 
+}: { 
+  submission: Submission; 
+  open: boolean; 
+  onOpenChange: (open: boolean) => void;
+  onSave: (updates: Partial<Submission>) => void;
+}) {
+  const [formData, setFormData] = useState<Partial<Submission>>({...submission});
+
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Editar Submissão</AlertDialogTitle>
+          <AlertDialogDescription>
+            Ajuste os dados antes de aprovar.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Título</label>
+              <Input 
+                value={formData.titulo || ""} 
+                onChange={e => setFormData({...formData, titulo: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Bairro</label>
+              <Input 
+                value={formData.bairro || ""} 
+                onChange={e => setFormData({...formData, bairro: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Contato Nome</label>
+              <Input 
+                value={formData.anunciante_nome || ""} 
+                onChange={e => setFormData({...formData, anunciante_nome: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Contato Telefone</label>
+              <Input 
+                value={formData.anunciante_telefone || ""} 
+                onChange={e => setFormData({...formData, anunciante_telefone: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Preço Venda</label>
+              <Input 
+                type="number"
+                value={formData.preco || ""} 
+                onChange={e => setFormData({...formData, preco: parseFloat(e.target.value) || null})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Diária Temporada</label>
+              <Input 
+                type="number"
+                value={formData.preco_temporada_diaria || ""} 
+                onChange={e => setFormData({...formData, preco_temporada_diaria: parseFloat(e.target.value) || null})}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Descrição</label>
+            <Textarea 
+              rows={4}
+              value={formData.descricao || ""} 
+              onChange={e => setFormData({...formData, descricao: e.target.value})}
+            />
+          </div>
+        </div>
+
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={() => onSave(formData)}>Salvar Alterações</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 
@@ -291,6 +438,8 @@ function SubmissionCard({
   onToggleGestao,
   destaque,
   onToggleDestaque,
+  onEdit,
+  onDelete,
 }: {
   sub: Submission;
   onApprove: (s: Submission) => void;
@@ -300,6 +449,8 @@ function SubmissionCard({
   onToggleGestao: (v: boolean) => void;
   destaque: boolean;
   onToggleDestaque: (v: boolean) => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   const isPending = sub.status_submission === "pendente";
   const isLoading = actionLoading === sub.id;
@@ -411,14 +562,44 @@ function SubmissionCard({
             <Button
               size="sm"
               variant="outline"
-              className="gap-1.5 text-destructive hover:text-destructive"
-              onClick={() => onReject(sub)}
+              className="gap-1.5"
+              onClick={onEdit}
               disabled={isLoading}
             >
-              <XCircle className="h-3.5 w-3.5" />
-              Rejeitar
+              <Edit className="h-3.5 w-3.5" />
+              Editar
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-destructive hover:bg-destructive/10"
+              onClick={onDelete}
+              disabled={isLoading}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Excluir
             </Button>
           </div>
+        </div>
+      )}
+      {!isPending && (
+        <div className="flex gap-2 pt-2 border-t mt-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="gap-1.5 h-8 text-xs"
+            onClick={onEdit}
+          >
+            <Edit className="h-3 w-3" /> Editar
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="gap-1.5 h-8 text-xs text-destructive hover:bg-destructive/10"
+            onClick={onDelete}
+          >
+            <Trash2 className="h-3 w-3" /> Excluir
+          </Button>
         </div>
       )}
     </div>
