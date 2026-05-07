@@ -511,6 +511,34 @@ export default function AdminLeads() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      <AlertDialog 
+        open={batchActionConfirm.isOpen} 
+        onOpenChange={(open) => !open && setBatchActionConfirm({ ...batchActionConfirm, isOpen: false })}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar ação em lote</AlertDialogTitle>
+            <AlertDialogDescription>
+              Você selecionou {selectedLeads.length} leads. Tem certeza que deseja alterá-los para 
+              <strong> {batchActionConfirm.status === "convertido" ? "Convertido" : "Descartado"}</strong>?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                if (batchActionConfirm.status) {
+                  updateStatus.mutate({ ids: selectedLeads, status: batchActionConfirm.status });
+                  setBatchActionConfirm({ isOpen: false, status: null });
+                }
+              }}
+            >
+              Confirmar alteração
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
