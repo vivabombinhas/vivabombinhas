@@ -71,6 +71,10 @@ export default function AdminLeads() {
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [batchActionConfirm, setBatchActionConfirm] = useState<{
+    isOpen: boolean;
+    status: LeadStatus | null;
+  }>({ isOpen: false, status: null });
   const [sheetOpen, setSheetOpen] = useState(false);
   const queryClient = useQueryClient();
 
@@ -293,7 +297,13 @@ export default function AdminLeads() {
                   variant="outline"
                   size="sm"
                   className="h-8 text-xs gap-1.5 border-amber-200 text-amber-700 hover:bg-amber-50"
-                  onClick={() => updateStatus.mutate({ ids: selectedLeads, status: "descartado" })}
+                  onClick={() => {
+                    if (selectedLeads.length >= 5) {
+                      setBatchActionConfirm({ isOpen: true, status: "descartado" });
+                    } else {
+                      updateStatus.mutate({ ids: selectedLeads, status: "descartado" });
+                    }
+                  }}
                 >
                   <X className="w-3.5 h-3.5" />
                   Descartar
@@ -302,7 +312,13 @@ export default function AdminLeads() {
                   variant="outline"
                   size="sm"
                   className="h-8 text-xs gap-1.5 border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                  onClick={() => updateStatus.mutate({ ids: selectedLeads, status: "convertido" })}
+                  onClick={() => {
+                    if (selectedLeads.length >= 5) {
+                      setBatchActionConfirm({ isOpen: true, status: "convertido" });
+                    } else {
+                      updateStatus.mutate({ ids: selectedLeads, status: "convertido" });
+                    }
+                  }}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   Converter
