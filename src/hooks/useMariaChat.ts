@@ -269,7 +269,20 @@ export function useMariaChat() {
       // Remove o formulário das mensagens anteriores (não exibir mais)
       setMessages((prev) => {
         const cleaned = prev.map((m) => ({ ...m, showLeadForm: false }));
-        const firstName = nome.trim().split(/\s+/)[0];
+      const firstName = nome.trim().split(/\s+/)[0];
+      
+      // Notificação via Edge Function (Simulação de Real-time)
+      try {
+        await supabase.functions.invoke("notify-broker", {
+          body: { lead_name: nome, lead_phone: telefone, session_id: sessionIdRef.current }
+        });
+      } catch (err) {
+        console.error("Erro ao notificar corretor:", err);
+      }
+
+      // Remove o formulário das mensagens anteriores (não exibir mais)
+      setMessages((prev) => {
+        const cleaned = prev.map((m) => ({ ...m, showLeadForm: false }));
         const reply: ChatMessage = {
           id: crypto.randomUUID(),
           role: "assistant",

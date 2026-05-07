@@ -69,15 +69,14 @@ const HeroSection = () => {
           Beta Aberto — Agora em Bombinhas
         </div>
 
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight mb-8 animate-fade-up text-white" style={{ animationDelay: "0.1s", opacity: 0 }}>
-          Encontre seu imóvel
+        <h1 className="text-4xl md:text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight mb-8 animate-fade-up text-white" style={{ animationDelay: "0.1s", opacity: 0 }}>
+          Seu próximo imóvel
           <br />
-          <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent italic">com Inteligência Artificial</span>
+          <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">encontrado por IA</span>
         </h1>
 
-        <p className="text-base md:text-xl text-white/50 mb-12 max-w-2xl mx-auto animate-fade-up leading-relaxed font-medium" style={{ animationDelay: "0.2s", opacity: 0 }}>
-          Esqueça as horas perdidas em sites lentos. MarIA vasculha dezenas de fontes
-          em Bombinhas e entrega as melhores oportunidades em segundos.
+        <p className="text-base md:text-xl text-white/60 mb-12 max-w-2xl mx-auto animate-fade-up leading-relaxed font-medium" style={{ animationDelay: "0.2s", opacity: 0 }}>
+          Diga adeus às buscas manuais exaustivas. MarIA analisa centenas de opções em Bombinhas e te entrega apenas as que dão match com você.
         </p>
 
         {/* Search input */}

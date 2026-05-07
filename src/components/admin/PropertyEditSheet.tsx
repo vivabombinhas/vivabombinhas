@@ -301,13 +301,25 @@ export function PropertyEditSheet({ property, open, onOpenChange }: PropertyEdit
 
               <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-100 dark:border-amber-900/30">
                 <div className="space-y-0.5">
-                  <Label htmlFor="destaque" className="text-sm font-medium text-amber-900 dark:text-amber-200">Imóvel em Destaque</Label>
-                  <p className="text-xs text-amber-700/70 dark:text-amber-400/70">Exibir com prioridade na página inicial</p>
+                  <Label htmlFor="destaque_premium" className="text-sm font-medium text-amber-900 dark:text-amber-200">Destaque Premium</Label>
+                  <p className="text-xs text-amber-700/70 dark:text-amber-400/70">Exibir no topo e com selo especial</p>
                 </div>
                 <Switch 
-                  id="destaque"
-                  checked={formData.destaque} 
-                  onCheckedChange={(v) => handleChange("destaque", v)} 
+                  id="destaque_premium"
+                  checked={formData.destaque_premium} 
+                  onCheckedChange={(v) => handleChange("destaque_premium", v)} 
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/20 rounded-lg border border-slate-100 dark:border-slate-800/30">
+                <div className="space-y-0.5">
+                  <Label htmlFor="oculta_para_maria" className="text-sm font-medium">Ocultar da MarIA</Label>
+                  <p className="text-xs text-muted-foreground">Impedir que a IA recomende este imóvel</p>
+                </div>
+                <Switch 
+                  id="oculta_para_maria"
+                  checked={formData.oculta_para_maria} 
+                  onCheckedChange={(v) => handleChange("oculta_para_maria", v)} 
                 />
               </div>
 

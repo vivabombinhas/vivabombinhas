@@ -180,9 +180,14 @@ export default function AdminImoveis() {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <div className="font-medium">{imovel.titulo}</div>
-                      {imovel.destaque && (
-                        <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-200">
-                          Destaque
+                      {imovel.destaque_premium && (
+                        <Badge variant="outline" className="text-[10px] bg-amber-100 text-amber-800 border-amber-300 font-bold">
+                          PREMIUM
+                        </Badge>
+                      )}
+                      {imovel.oculta_para_maria && (
+                        <Badge variant="outline" className="text-[10px] bg-slate-100 text-slate-600 border-slate-300">
+                          Oculto MarIA
                         </Badge>
                       )}
                       {imovel.gestao_propria && (
