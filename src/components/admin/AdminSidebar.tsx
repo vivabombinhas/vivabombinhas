@@ -30,7 +30,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const mainItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true },
-  { title: "Alertas", url: "/admin/alerts", icon: Bell, badgeKey: "alerts" as const },
+  { title: "Central de Avisos", url: "/admin/alerts", icon: Bell, badgeKey: "alerts" as const },
   { title: "Follow-ups", url: "/admin/followups", icon: CalendarClock, badgeKey: "followups" as const },
   { title: "Leads", url: "/admin/leads", icon: Users },
   { title: "Matches", url: "/admin/matches", icon: Sparkles },
@@ -72,15 +72,15 @@ export function AdminSidebar() {
     },
   });
 
-  // Badge: alertas inteligentes pendentes (matches novos)
+  // Badge: Alertas não lidos na Central de Avisos
   const { data: alertsBadge } = useQuery({
     queryKey: ["sidebar_alerts_badge"],
-    refetchInterval: 60_000,
+    refetchInterval: 10_000, // Mais frequente para avisos real-time
     queryFn: async () => {
       const { count } = await supabase
-        .from("lead_matches")
+        .from("broker_notifications")
         .select("id", { count: "exact", head: true })
-        .eq("status", "pending");
+        .eq("read", false);
       return count ?? 0;
     },
   });

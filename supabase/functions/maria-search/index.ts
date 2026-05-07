@@ -301,6 +301,20 @@ serve(async (req) => {
         return new Response(JSON.stringify({ success: false, error: "invalid_data" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       const leadId = await upsertLeadBySession(supabase, sessionId, { nome: cleanName, telefone: normalizedPhone, status: "novo" });
+      
+      // Notificação interna para o dashboard do corretor
+      if (leadId) {
+        await supabase.from("broker_notifications").insert({
+          lead_id: leadId,
+          title: "Novo Lead Qualificado! 🔥",
+          message: `${cleanName} acabou de se qualificar via MarIA Chat.`,
+          session_id: sessionId
+        });
+        
+        // Simulação de Integração WhatsApp via Edge Function dedicada ou Log
+        console.log(`[WHATSAPP NOTIFICATION] Para Corretor: Novo Lead ${cleanName} (${normalizedPhone})`);
+      }
+
       return new Response(JSON.stringify({ success: !!leadId, lead_id: leadId }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
