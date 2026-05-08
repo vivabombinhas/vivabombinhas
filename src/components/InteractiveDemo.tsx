@@ -245,19 +245,19 @@ const InteractiveDemo = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 1 }}
-              className="absolute -bottom-8 -right-4 md:-right-12 bg-white/90 backdrop-blur-xl rounded-[24px] border border-border/40 p-5 shadow-2xl max-w-[240px] hidden md:block"
+              className="absolute -bottom-8 -right-4 md:-right-12 bg-white/90 backdrop-blur-xl rounded-[28px] border border-border/40 p-6 shadow-2xl max-w-[260px] hidden md:block"
             >
-              <div className="flex items-center gap-4 mb-3">
-                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center border border-green-100 shadow-inner">
-                  <MessageSquare className="h-5 w-5 text-green-600" />
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center border border-green-100 shadow-inner">
+                  <MessageSquare className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-primary uppercase tracking-widest block mb-0.5">Alerta Inteligente</span>
-                  <span className="text-[12px] font-bold text-foreground">Enviado ao WhatsApp</span>
+                  <span className="text-[10px] font-bold text-primary uppercase tracking-[0.15em] block mb-0.5">Alerta Inteligente</span>
+                  <span className="text-[14px] font-bold text-foreground">Aviso no WhatsApp</span>
                 </div>
               </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
-                "A MarIA acabou de encontrar uma oportunidade off-market em Bombas."
+              <p className="text-[12px] text-muted-foreground leading-relaxed font-medium mb-4">
+                "A MarIA avisa automaticamente quando surgem imóveis parecidos com sua busca."
               </p>
               
               <div className="mt-3 pt-3 border-t border-border/20 flex items-center justify-between">
