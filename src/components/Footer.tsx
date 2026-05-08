@@ -20,7 +20,7 @@ const Footer = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-16">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-10 md:gap-16">
             <div className="flex flex-col gap-6">
               <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">Produto</span>
               <div className="flex flex-col gap-4">
