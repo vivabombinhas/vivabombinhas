@@ -152,6 +152,14 @@ export default function AdminDashboard() {
         : "text-cyan-600 bg-cyan-500/10",
       to: "/admin/submissions",
     },
+    {
+      title: "Curadoria",
+      value: stats?.imoveisAtivos ?? "—",
+      sub: "Gerenciar destaques & visibilidade",
+      icon: Sparkles,
+      color: "text-amber-600 bg-amber-500/10",
+      to: "/admin/curadoria",
+    },
   ];
 
   return (
