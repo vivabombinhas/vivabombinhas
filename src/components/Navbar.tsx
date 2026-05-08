@@ -20,50 +20,46 @@ const Navbar = () => {
   ];
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "glass shadow-sm" : "bg-transparent"}`}>
-      <div className="container flex h-16 items-center justify-between">
-        <a href="#" className="flex items-center gap-2 font-bold text-xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          <Bot className="h-7 w-7 text-primary" />
+    <header className={`fixed top-4 left-0 right-0 z-50 transition-all duration-500 flex justify-center px-4`}>
+      <div className={`container max-w-5xl flex h-16 items-center justify-between rounded-full transition-all duration-500 px-8 ${scrolled ? "glass shadow-xl shadow-primary/5 border-white/20" : "bg-white/10 backdrop-blur-md border border-white/10"}`}>
+        <a href="#" className="flex items-center gap-2 font-bold text-xl group" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+            <Bot className="h-5 w-5 text-white" />
+          </div>
           <span className="text-primary">Mar</span>
-          <span className={scrolled ? "text-slate-900" : "text-slate-800"}>IA</span>
+          <span className="text-foreground">IA</span>
         </a>
 
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-8">
           {links.map((l) => (
-            <a key={l.href} href={l.href} className={`text-sm font-medium transition-colors ${scrolled ? "text-slate-600 hover:text-primary" : "text-slate-700 hover:text-primary"}`}>
+            <a key={l.href} href={l.href} className="text-sm font-semibold text-slate-700 hover:text-primary transition-colors">
               {l.label}
             </a>
           ))}
-          <Link to="/anuncie" className={`text-sm font-medium transition-colors ${scrolled ? "text-slate-600 hover:text-primary" : "text-slate-700 hover:text-primary"}`}>
+          <Link to="/anuncie" className="text-sm font-semibold text-slate-700 hover:text-primary transition-colors">
             Anuncie
           </Link>
-          <Link to="/dashboard" className={`text-sm font-medium transition-colors ${scrolled ? "text-slate-600 hover:text-primary" : "text-slate-700 hover:text-primary"}`}>
-            Meu Painel
-          </Link>
-          <Button asChild size="sm" className="rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground">
+          <Button asChild size="sm" className="rounded-full bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20">
             <a href="#experimentar">Experimentar Grátis</a>
           </Button>
         </nav>
 
         <button className="md:hidden" onClick={() => setOpen(!open)}>
-          {open ? <X className={`h-6 w-6 ${scrolled ? "text-foreground" : "text-primary-foreground"}`} /> : <Menu className={`h-6 w-6 ${scrolled ? "text-foreground" : "text-primary-foreground"}`} />}
+          {open ? <X className="h-6 w-6 text-foreground" /> : <Menu className="h-6 w-6 text-foreground" />}
         </button>
       </div>
 
       {open && (
-        <nav className="md:hidden glass border-t border-border px-6 pb-4 flex flex-col gap-3">
+        <nav className="absolute top-20 left-4 right-4 md:hidden glass rounded-3xl border border-white/20 p-6 flex flex-col gap-4 shadow-2xl animate-fade-up">
           {links.map((l) => (
-            <a key={l.href} href={l.href} onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground py-2">
+            <a key={l.href} href={l.href} onClick={() => setOpen(false)} className="text-base font-medium text-slate-700 py-2 border-b border-slate-100">
               {l.label}
             </a>
           ))}
-          <Link to="/anuncie" onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground py-2">
+          <Link to="/anuncie" onClick={() => setOpen(false)} className="text-base font-medium text-slate-700 py-2 border-b border-slate-100">
             Anuncie
           </Link>
-          <Link to="/dashboard" onClick={() => setOpen(false)} className="text-sm font-medium text-muted-foreground py-2">
-            Meu Painel
-          </Link>
-          <Button asChild size="sm" className="w-full rounded-full">
+          <Button asChild className="w-full rounded-full mt-2">
             <a href="#experimentar" onClick={() => setOpen(false)}>Experimentar Grátis</a>
           </Button>
         </nav>

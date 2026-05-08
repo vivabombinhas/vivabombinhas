@@ -7,18 +7,18 @@ const partners = [
 
 const PartnerLogos = () => {
   return (
-    <div className="bg-white py-12 border-b border-slate-50">
+    <div className="bg-white py-16 border-y border-slate-50">
       <div className="container px-4 mx-auto">
-        <p className="text-center text-sm font-semibold text-slate-400 uppercase tracking-widest mb-10">
-          Tecnologia conectada com as maiores plataformas
+        <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-12">
+          Inteligência conectada aos principais players do mercado
         </p>
-        <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
+        <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-30 grayscale contrast-125">
           {partners.map((p, i) => (
             <img 
               key={i} 
               src={p.logo} 
               alt={p.name} 
-              className="h-6 md:h-8 w-auto object-contain" 
+              className="h-6 md:h-7 w-auto object-contain" 
             />
           ))}
         </div>
