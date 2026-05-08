@@ -115,14 +115,25 @@ const InteractiveDemo = () => {
   const [messages, setMessages] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const currentConv = CONVERSATIONS[currentConvIndex];
+
+  // Auto-scroll when messages or typing status changes
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }
+  }, [messages, isTyping]);
 
   useEffect(() => {
     if (currentIndex < currentConv.messages.length) {
       const msg = currentConv.messages[currentIndex];
       
-      const delay = currentIndex === 0 ? 1000 : 2000;
+      const delay = currentIndex === 0 ? 1500 : 2500;
       
       const typingTimer = setTimeout(() => {
         if (msg.type === 'ai') setIsTyping(true);
@@ -131,18 +142,19 @@ const InteractiveDemo = () => {
           setIsTyping(false);
           setMessages((prev) => [...prev, msg]);
           setCurrentIndex((prev) => prev + 1);
-        }, msg.type === 'ai' ? 1500 : 500);
+        }, msg.type === 'ai' ? 1800 : 800);
 
         return () => clearTimeout(deliverTimer);
       }, delay);
 
       return () => clearTimeout(typingTimer);
     } else {
+      // Pause between flows
       const nextConvTimer = setTimeout(() => {
         setMessages([]);
         setCurrentIndex(0);
         setCurrentConvIndex((prev) => (prev + 1) % CONVERSATIONS.length);
-      }, 6000);
+      }, 8000); // 8 seconds pause between different conversations
       return () => clearTimeout(nextConvTimer);
     }
   }, [currentIndex, currentConvIndex]);
