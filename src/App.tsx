@@ -46,6 +46,7 @@ const App = () => (
             <Route path="receita" element={<AdminRevenue />} />
             <Route path="submissions" element={<AdminSubmissions />} />
             <Route path="imoveis" element={<AdminImoveis />} />
+            <Route path="curadoria" element={<AdminCuradoria />} />
             <Route path="importar" element={<AdminImportar />} />
             <Route path="importar-link" element={<AdminImportarLink />} />
             <Route path="matches" element={<AdminMatches />} />
