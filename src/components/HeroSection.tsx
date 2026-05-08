@@ -18,7 +18,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-[90vh] flex items-center pt-24 pb-16 overflow-hidden bg-slate-50">
+    <section className="relative min-h-[85vh] flex items-center pt-20 pb-12 overflow-hidden bg-slate-50">
       {/* Background Image with sophisticated overlay */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -42,7 +42,7 @@ const HeroSection = () => {
               Inteligência Imobiliária em Bombinhas
             </div>
             
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.1]">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.1]">
               A concierge imobiliária inteligente de <span className="text-primary italic">Bombinhas</span>
             </h1>
             
@@ -50,7 +50,7 @@ const HeroSection = () => {
               Aluguel de temporada, anual, compra ou investimento — a MarIA entende o que você precisa e mostra apenas imóveis que fazem sentido para o seu perfil.
             </p>
 
-            <div className="flex flex-wrap gap-3 md:gap-4 mb-10">
+            <div className="flex flex-wrap lg:flex-nowrap gap-2 md:gap-3 mb-8 overflow-x-auto pb-2 scrollbar-hide">
               {[
                 { label: "🏖 Temporada", index: 0 },
                 { label: "🏠 Aluguel anual", index: 1 },
@@ -60,7 +60,7 @@ const HeroSection = () => {
                 <button
                   key={chip.label}
                   onClick={() => handleFlowSelect(chip.index)}
-                  className="px-4 py-2.5 rounded-full border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:border-primary/30 hover:text-primary transition-all bg-white/50 backdrop-blur-sm shadow-sm flex items-center gap-2"
+                  className="px-4 py-2 rounded-full border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:border-primary/30 hover:text-primary transition-all bg-white/50 backdrop-blur-sm shadow-sm flex items-center gap-2 whitespace-nowrap"
                 >
                   {chip.label}
                 </button>
@@ -87,20 +87,20 @@ const HeroSection = () => {
             </div>
 
             {/* Trust Badges */}
-            <div className="mt-12 flex items-center gap-8 text-slate-400">
-              <div className="flex flex-col">
-                <span className="text-2xl font-bold text-slate-900">40+</span>
-                <span className="text-sm font-medium uppercase tracking-wider">Imobiliárias</span>
+            <div className="mt-10 flex flex-wrap items-center gap-6 text-slate-400">
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-bold text-slate-900">+20</span>
+                <span className="text-xs font-medium uppercase tracking-wider">Imobiliárias parceiras</span>
               </div>
-              <div className="w-px h-10 bg-slate-200" />
-              <div className="flex flex-col">
-                <span className="text-2xl font-bold text-slate-900">1.5k+</span>
-                <span className="text-sm font-medium uppercase tracking-wider">Imóveis Ativos</span>
+              <div className="hidden sm:block w-px h-4 bg-slate-300" />
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-bold text-slate-900">+580</span>
+                <span className="text-xs font-medium uppercase tracking-wider">Imóveis cadastrados</span>
               </div>
-              <div className="w-px h-10 bg-slate-200" />
-              <div className="flex flex-col">
-                <span className="text-2xl font-bold text-slate-900">100%</span>
-                <span className="text-sm font-medium uppercase tracking-wider">Bombinhas</span>
+              <div className="hidden sm:block w-px h-4 bg-slate-300" />
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-bold text-slate-900">100%</span>
+                <span className="text-xs font-medium uppercase tracking-wider">Bombinhas</span>
               </div>
             </div>
           </div>
