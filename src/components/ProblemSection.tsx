@@ -1,74 +1,66 @@
 import { LayoutGrid, Users, Copy, EyeOff, AlertCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
 const problems = [
   { 
     icon: LayoutGrid, 
-    title: "Imobiliárias espalhadas", 
-    desc: "Você precisa procurar em dezenas de sites diferentes para ter uma visão real do que está disponível." 
+    title: "Pulverização", 
+    desc: "Dezenas de sites e grupos para encontrar uma única informação real." 
   },
   { 
     icon: Users, 
-    title: "Grupos e redes sociais", 
-    desc: "Informações desorganizadas, fotos de baixa qualidade e anúncios que desaparecem tão rápido quanto surgem." 
+    title: "Desorganização", 
+    desc: "Anúncios duplicados, preços conflitantes e fotos amadoras." 
   },
   { 
     icon: Copy, 
-    title: "Anúncios repetidos", 
-    desc: "O mesmo imóvel em vários lugares com preços e informações conflitantes em portais desatualizados." 
+    title: "Invisibilidade", 
+    desc: "As melhores oportunidades raramente chegam aos grandes portais." 
   },
   { 
     icon: EyeOff, 
-    title: "Oportunidades invisíveis", 
-    desc: "As melhores unidades e lançamentos exclusivos muitas vezes nem chegam aos grandes portais de busca." 
+    title: "Lentidão", 
+    desc: "Falar com cada anunciante e esperar retorno consome dias de busca." 
   },
 ];
 
 const ProblemSection = () => {
   return (
-    <section className="py-16 md:py-24 relative overflow-hidden bg-secondary/30">
-      <div className="container relative z-10">
-        {/* Header Section */}
-        <div className="text-center mb-24 max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-100 text-orange-600 text-xs font-bold uppercase tracking-[0.2em] mb-10 animate-fade-up shadow-sm">
-            <AlertCircle className="h-4 w-4" />
-            O desafio atual
-          </div>
-          
-          <h2 className="text-4xl md:text-7xl font-bold mb-10 tracking-tight leading-[1.05] text-foreground">
-            Encontrar imóvel em <span className="text-primary italic">Bombinhas</span> virou um <span className="text-gradient">caos.</span>
-          </h2>
-          
-          <p className="text-muted-foreground text-xl md:text-2xl font-light leading-relaxed max-w-2xl mx-auto">
-            Sites diferentes, anúncios repetidos e oportunidades que passam despercebidas por falta de organização.
-          </p>
-        </div>
-
-        {/* Problem Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-32 relative">
-          {/* Subtle background glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/5 blur-[120px] -z-10 pointer-events-none"></div>
-          
-          {problems.map((p, i) => (
-            <div 
-              key={i} 
-              className="group relative rounded-[40px] border border-border/50 bg-background/80 backdrop-blur-md p-10 hover:border-primary/20 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] transition-all duration-700 flex flex-col items-center text-center animate-fade-up"
-              style={{ animationDelay: `${i * 150}ms` }}
-            >
-              <div className="w-24 h-24 rounded-3xl bg-secondary flex items-center justify-center mb-10 group-hover:bg-primary/10 group-hover:scale-110 transition-all duration-500 shadow-sm border border-border/10">
-                <p.icon className="h-10 w-10 text-foreground/70 group-hover:text-primary transition-colors" />
-              </div>
-              <h3 className="text-2xl font-semibold text-foreground mb-4 tracking-tight">{p.title}</h3>
-              <p className="text-muted-foreground leading-relaxed font-light text-lg">{p.desc}</p>
+    <section className="py-20 bg-white relative overflow-hidden">
+      <div className="container max-w-7xl mx-auto px-6 lg:px-12">
+        
+        <div className="flex flex-col lg:flex-row items-end justify-between gap-10 mb-20">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-6">
+              <AlertCircle className="h-3 w-3" />
+              O cenário imobiliário
             </div>
-          ))}
+            <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-950 leading-[1.1]">
+              Encontrar o imóvel ideal em Bombinhas virou <span className="text-primary italic">um caos.</span>
+            </h2>
+          </div>
+          <p className="text-slate-500 text-lg md:text-xl font-medium max-w-md leading-relaxed">
+            A busca manual é fragmentada, lenta e cheia de informações desatualizadas.
+          </p>
         </div>
 
-        {/* Transition to Solution */}
-        <div className="text-center flex flex-col items-center max-w-lg mx-auto">
-          <p className="text-muted-foreground text-xl md:text-2xl font-light italic mb-8">
-            Foi exatamente por isso que criamos a MarIA.
-          </p>
-          <div className="w-px h-16 md:h-24 bg-gradient-to-b from-primary via-primary/40 to-transparent"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {problems.map((p, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              viewport={{ once: true }}
+              className="group p-8 rounded-[32px] border border-slate-100 bg-slate-50/30 hover:bg-white hover:border-slate-200 hover:shadow-2xl hover:shadow-slate-200 transition-all duration-500"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                <p.icon className="h-5 w-5 text-slate-900" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-950 mb-3 tracking-tight">{p.title}</h3>
+              <p className="text-slate-500 text-sm leading-relaxed font-medium">{p.desc}</p>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
