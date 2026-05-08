@@ -29,7 +29,7 @@ const ProblemSection = () => {
       <div className="container relative z-10">
         {/* Header Section */}
         <div className="text-center mb-24 max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-100 text-orange-600 text-xs font-bold uppercase tracking-[0.2em] mb-10 animate-fade-in shadow-sm">
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-100 text-orange-600 text-xs font-bold uppercase tracking-[0.2em] mb-10 animate-fade-up shadow-sm">
             <AlertCircle className="h-4 w-4" />
             O desafio atual
           </div>
