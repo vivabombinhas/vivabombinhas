@@ -1,4 +1,4 @@
-import { MessageSquare, LayoutGrid, UserCheck } from "lucide-react";
+import { MessageSquare, LayoutGrid, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 
 const steps = [
@@ -6,30 +6,30 @@ const steps = [
     icon: MessageSquare,
     num: "01",
     title: "Converse com a MarIA",
-    desc: "Diga o que você busca usando linguagem natural, como se falasse com um amigo.",
+    desc: "Diga o que você busca usando linguagem natural, como se falasse com um amigo local.",
   },
   {
     icon: LayoutGrid,
     num: "02",
-    title: "Receba a Curadoria",
-    desc: "Nossa IA filtra centenas de opções e entrega apenas o que realmente faz sentido.",
+    title: "Curadoria Instantânea",
+    desc: "Nossa IA organiza centenas de anúncios e entrega apenas o que realmente faz sentido para você.",
   },
   {
-    icon: UserCheck,
+    icon: ExternalLink,
     num: "03",
-    title: "Fale com Especialistas",
-    desc: "O corretor responsável recebe seu interesse e te chama direto no WhatsApp.",
+    title: "Acesse o Anúncio Real",
+    desc: "Conectamos você diretamente à página original do imóvel para falar com o anunciante.",
   },
 ];
 
 const HowItWorksSection = () => {
   return (
-    <section id="como-funciona" className="py-24 bg-slate-50 relative overflow-hidden">
+    <section id="como-funciona" className="py-24 bg-white relative overflow-hidden">
       <div className="container max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="text-center max-w-2xl mx-auto mb-20">
-          <p className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] mb-4">Metodologia</p>
+        <div className="max-w-2xl mb-20">
+          <p className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em] mb-4">Como funciona</p>
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-950">
-            Três passos. <span className="text-slate-400">Zero complicação.</span>
+            Três passos. <span className="text-slate-400">Sem complicação.</span>
           </h2>
         </div>
 
@@ -37,17 +37,17 @@ const HowItWorksSection = () => {
           {steps.map((s, i) => (
             <motion.div 
               key={i}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="relative p-10 rounded-[40px] bg-white border border-slate-100 shadow-sm group hover:shadow-2xl hover:shadow-slate-200 transition-all duration-500"
+              className="relative p-10 rounded-[32px] bg-slate-50/50 border border-slate-100 group hover:bg-white hover:shadow-2xl hover:shadow-slate-100 transition-all duration-500"
             >
-              <div className="absolute top-6 right-10 text-4xl font-black text-slate-50 group-hover:text-primary/5 transition-colors">
+              <div className="absolute top-6 right-10 text-4xl font-black text-slate-100/50 group-hover:text-blue-500/5 transition-colors">
                 {s.num}
               </div>
-              <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
-                <s.icon className="h-6 w-6 text-primary" />
+              <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center mb-8 shadow-sm group-hover:scale-110 transition-transform">
+                <s.icon className="h-6 w-6 text-slate-900" />
               </div>
               <h3 className="text-xl font-bold text-slate-950 mb-3 tracking-tight">{s.title}</h3>
               <p className="text-slate-500 text-sm leading-relaxed font-medium">{s.desc}</p>
