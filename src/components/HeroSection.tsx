@@ -50,7 +50,7 @@ const HeroSection = () => {
               Aluguel de temporada, anual, compra ou investimento — a MarIA entende o que você precisa e mostra apenas imóveis que fazem sentido para o seu perfil.
             </p>
 
-            <div className="flex flex-wrap gap-4 mb-10">
+            <div className="flex flex-wrap gap-3 md:gap-4 mb-10">
               {[
                 { label: "🏖 Temporada", index: 0 },
                 { label: "🏠 Aluguel anual", index: 1 },
@@ -60,7 +60,7 @@ const HeroSection = () => {
                 <button
                   key={chip.label}
                   onClick={() => handleFlowSelect(chip.index)}
-                  className="px-4 py-2 rounded-full border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition-colors bg-white/50 backdrop-blur-sm"
+                  className="px-4 py-2.5 rounded-full border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:border-primary/30 hover:text-primary transition-all bg-white/50 backdrop-blur-sm shadow-sm flex items-center gap-2"
                 >
                   {chip.label}
                 </button>
