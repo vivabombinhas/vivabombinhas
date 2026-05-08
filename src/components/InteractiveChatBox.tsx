@@ -257,13 +257,13 @@ export const InteractiveChatBox = ({
         </div>
 
         {/* Input Area */}
-        <div className="p-4 md:p-6 border-t border-border/40 bg-white/50 backdrop-blur-md">
-          <div className="flex gap-3">
-            <div className="flex-1 bg-secondary/50 border border-border/30 rounded-full px-5 md:px-6 py-2.5 md:py-3 text-[12px] md:text-sm text-muted-foreground/60 font-medium flex items-center">
+        <div className="p-3 md:p-4 border-t border-border/40 bg-white/50 backdrop-blur-md">
+          <div className="flex gap-2 md:gap-3">
+            <div className="flex-1 bg-secondary/50 border border-border/30 rounded-full px-4 md:px-5 py-2 md:py-2.5 text-[11px] md:text-[13px] text-muted-foreground/60 font-medium flex items-center">
               Pergunte sobre Bombinhas...
             </div>
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/25 hover:scale-105 transition-transform cursor-pointer">
-              <Send className="h-4 w-4 md:h-5 md:w-5" />
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/25 hover:scale-105 transition-transform cursor-pointer">
+              <Send className="h-3.5 w-3.5 md:h-4 md:w-4" />
             </div>
           </div>
         </div>
