@@ -50,7 +50,7 @@ const HeroSection = () => {
               Aluguel de temporada, anual, compra ou investimento — a MarIA entende o que você precisa e mostra apenas imóveis que fazem sentido para o seu perfil.
             </p>
 
-            <div className="flex flex-wrap gap-3 mb-10">
+            <div className="flex flex-wrap gap-4 mb-10">
               {[
                 { label: "🏖 Temporada", index: 0 },
                 { label: "🏠 Aluguel anual", index: 1 },
