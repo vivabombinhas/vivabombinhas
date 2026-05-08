@@ -507,6 +507,7 @@ export default function AdminLeads() {
         lead={(leads?.find((l) => l.id === selectedLeadId) as never) ?? null}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
+        defaultTab={initialTab as any}
       />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
