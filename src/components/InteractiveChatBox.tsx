@@ -109,7 +109,13 @@ const CONVERSATIONS = [
   }
 ];
 
-export const InteractiveChatBox = ({ forcedConvIndex }: { forcedConvIndex?: number | null }) => {
+export const InteractiveChatBox = ({ 
+  forcedConvIndex,
+  onConvIndexChange
+}: { 
+  forcedConvIndex?: number | null;
+  onConvIndexChange?: (index: number) => void;
+}) => {
   const [currentConvIndex, setCurrentConvIndex] = useState(0);
   const [messages, setMessages] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
