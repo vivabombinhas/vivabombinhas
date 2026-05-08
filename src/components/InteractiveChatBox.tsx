@@ -187,7 +187,7 @@ export const InteractiveChatBox = ({
                   </p>
 
                   {msg.properties && (
-                    <div className="mt-5 space-y-4 w-[200px] md:w-[280px]">
+                    <div className="mt-5 space-y-4 w-full max-w-[200px] md:max-w-[280px]">
                       {msg.properties.map((prop: Property) => (
                         <div key={prop.id} className="scale-[0.85] md:scale-95 origin-top-left -mb-8 md:-mb-6 last:mb-0">
                           <PropertyCard property={prop} />
