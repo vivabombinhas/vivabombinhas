@@ -99,7 +99,7 @@ export default function HeroSection() {
 
         {/* ── RIGHT: Chat ── */}
         <div className="relative flex items-center justify-center lg:justify-end animate-fade-up px-4 md:px-0" style={{ animationDelay: "0.2s" }}>
-          <div className="w-full max-w-[320px] xs:max-w-[360px] md:max-w-[400px]">
+          <div className="w-full max-w-[320px] md:max-w-[400px]">
             <InteractiveChatBox 
               forcedConvIndex={activeFlow} 
               onConvIndexChange={(index) => setActiveFlow(index)}
