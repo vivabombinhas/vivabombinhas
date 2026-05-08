@@ -20,34 +20,33 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#0EA5E9", // Ocean Blue
+          DEFAULT: "#2563eb", // Vibrant Blue
           foreground: "#FFFFFF",
         },
         secondary: {
-          DEFAULT: "#F8FAFC", // Sophisticated off-white
+          DEFAULT: "#F8FAFC", 
           foreground: "#0F172A",
         },
         accent: {
-          DEFAULT: "#0284C7", // Deep Ocean
+          DEFAULT: "#3b82f6", 
           foreground: "#FFFFFF",
         },
-        tropical: {
-          50: "#F0FDFA",
-          100: "#CCFBF1",
-          500: "#14B8A6",
-          600: "#0D9488",
+        slate: {
+          50: "#f8fafc",
+          100: "#f1f5f9",
+          200: "#e2e8f0",
+          300: "#cbd5e1",
+          400: "#94a3b8",
+          500: "#64748b",
+          600: "#475569",
+          700: "#334155",
+          800: "#1e293b",
+          900: "#0f172a",
+          950: "#020617",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
         },
       },
       borderRadius: {
