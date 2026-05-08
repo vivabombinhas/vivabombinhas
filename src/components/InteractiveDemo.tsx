@@ -320,34 +320,26 @@ const InteractiveDemo = () => {
               </div>
             </motion.div>
 
-            {/* Floating Alert Badge - Replaces "Lead Qualificado" */}
+            {/* Floating Alert Badge */}
             <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 0.7, scale: 0.85 }}
               viewport={{ once: true }}
               transition={{ delay: 1 }}
-              className="absolute bottom-[15%] -left-8 md:-left-20 bg-white/90 backdrop-blur-xl rounded-[28px] border border-border/40 p-6 shadow-2xl max-w-[260px] hidden md:block z-20"
+              className="absolute bottom-[10%] -left-6 md:-left-16 bg-white/40 backdrop-blur-md rounded-[24px] border border-border/20 p-4 shadow-xl max-w-[200px] hidden md:block z-20 grayscale-[0.3] hover:opacity-100 hover:scale-100 transition-all duration-500"
             >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center border border-green-100 shadow-inner">
-                  <MessageSquare className="h-6 w-6 text-green-600" />
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20">
+                  <MessageSquare className="h-4 w-4 text-green-600/70" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-primary uppercase tracking-[0.15em] block mb-0.5">Alerta Inteligente</span>
-                  <span className="text-[14px] font-bold text-foreground">Aviso no WhatsApp</span>
+                  <span className="text-[8px] font-bold text-primary/60 uppercase tracking-widest block">Alerta</span>
+                  <span className="text-[12px] font-bold text-foreground/70">WhatsApp</span>
                 </div>
               </div>
-              <p className="text-[12px] text-muted-foreground leading-relaxed font-medium mb-4">
-                "A MarIA avisa automaticamente quando surgem imóveis parecidos com sua busca."
+              <p className="text-[10px] text-muted-foreground/80 leading-tight font-medium">
+                "Novos imóveis em Mariscal acabaram de entrar."
               </p>
-              
-              <div className="mt-3 pt-3 border-t border-border/20 flex items-center justify-between">
-                <span className="text-[10px] text-muted-foreground">Agora mesmo</span>
-                <span className="text-[10px] font-bold text-green-600 flex items-center gap-1">
-                  <div className="w-1 h-1 rounded-full bg-green-600 animate-pulse" />
-                  Ativo
-                </span>
-              </div>
             </motion.div>
           </div>
 
