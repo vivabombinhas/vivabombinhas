@@ -1,42 +1,63 @@
-import { UtensilsCrossed, Palmtree, Wrench, Rocket } from "lucide-react";
+import { UtensilsCrossed, Palmtree, Wrench, Rocket, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 
 const items = [
-  { icon: UtensilsCrossed, label: "Restaurantes" },
-  { icon: Palmtree, label: "Turismo" },
-  { icon: Wrench, label: "Serviços" },
-  { icon: Rocket, label: "E mais..." },
+  { icon: UtensilsCrossed, label: "Gastronomia" },
+  { icon: Palmtree, label: "Experiências" },
+  { icon: Wrench, label: "Service Concierge" },
+  { icon: Rocket, label: "Market Intel" },
 ];
 
 const FutureSection = () => {
   return (
-    <section className="py-12 md:py-20">
-      <div className="container">
-        <div className="rounded-3xl bg-gradient-to-br from-foreground to-foreground/90 p-10 md:p-16 text-center max-w-4xl mx-auto relative overflow-hidden">
-          {/* Glows */}
-          <div className="absolute top-0 left-1/3 w-64 h-64 bg-primary/20 rounded-full blur-[100px]" />
-          <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-accent/20 rounded-full blur-[80px]" />
+    <section className="py-24 md:py-32 bg-white">
+      <div className="container px-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="rounded-[48px] bg-slate-900 p-12 md:p-24 text-center max-w-5xl mx-auto relative overflow-hidden shadow-2xl"
+        >
+          {/* Subtle Glows */}
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px]" />
           
           <div className="relative z-10">
-            <p className="text-sm font-bold text-accent uppercase tracking-widest mb-4">Roadmap</p>
-            <h2 className="text-3xl md:text-5xl font-bold mb-4 text-primary-foreground">
-              Mais que imóveis.
-              <br />
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Uma plataforma digital local.</span>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="inline-flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-[0.3em] mb-8"
+            >
+              <Sparkles className="h-4 w-4" />
+              Visão de Futuro
+            </motion.div>
+            
+            <h2 className="text-4xl md:text-7xl font-bold mb-8 text-white tracking-tight leading-[1.05]">
+              Muito além do <br />
+              <span className="text-primary italic">setor imobiliário.</span>
             </h2>
-            <p className="text-primary-foreground/50 text-lg mb-10 max-w-xl mx-auto">
-              MarIA começa pelos imóveis, mas em breve será sua assistente para tudo em Bombinhas.
+            
+            <p className="text-slate-400 text-lg md:text-2xl mb-16 max-w-2xl mx-auto font-light leading-relaxed">
+              A MarIA está evoluindo para se tornar o sistema operacional de Bombinhas, integrando todo o ecossistema local em uma única interface inteligente.
             </p>
 
-            <div className="flex flex-wrap justify-center gap-3">
+            <div className="flex flex-wrap justify-center gap-4">
               {items.map((it, i) => (
-                <div key={i} className="flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 rounded-full px-5 py-2.5 text-sm font-medium text-primary-foreground/80">
-                  <it.icon className="h-4 w-4 text-accent" />
+                <motion.div 
+                  key={i} 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.4 + (i * 0.1) }}
+                  className="flex items-center gap-3 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-6 py-3.5 text-sm font-bold text-white/90 hover:bg-white/10 transition-colors"
+                >
+                  <it.icon className="h-4 w-4 text-primary" />
                   {it.label}
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
