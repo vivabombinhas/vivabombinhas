@@ -1,48 +1,52 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { motion } from "framer-motion";
 
 const faqs = [
   {
-    q: "MarIA é gratuita?",
-    a: "Sim! Você pode testar a MarIA gratuitamente. Basta descrever o imóvel que procura e ela mostra as opções disponíveis na região de Bombinhas.",
+    q: "A MarIA é gratuita?",
+    a: "Sim! O uso da MarIA para encontrar imóveis é totalmente gratuito para o usuário final.",
   },
   {
-    q: "Como a MarIA encontra os imóveis?",
-    a: "MarIA busca em diversas fontes públicas da região: sites de imobiliárias, classificados online, redes sociais e outras plataformas. Ela cruza e organiza essas informações para você.",
+    q: "Como os imóveis são selecionados?",
+    a: "Nossa IA analisa bases de dados locais, sites parceiros e anúncios verificados para garantir que você receba apenas opções reais e atualizadas.",
   },
   {
-    q: "Preciso criar conta para usar?",
-    a: "Não! Você pode fazer suas primeiras buscas sem nenhum cadastro. Rápido e sem burocracia.",
+    q: "Preciso de cadastro?",
+    a: "Não é necessário criar conta para iniciar uma conversa. Você pode descrever o que busca e receber sugestões instantaneamente.",
   },
   {
-    q: "A MarIA é uma imobiliária?",
-    a: "Não. MarIA é uma assistente de busca inteligente. Ela não vende nem aluga imóveis — ela ajuda você a encontrar anúncios existentes e conecta você diretamente aos anunciantes.",
-  },
-  {
-    q: "MarIA funciona só para Bombinhas?",
-    a: "Inicialmente sim. Nosso foco é a região de Bombinhas, Santa Catarina. No futuro, pretendemos expandir para outras regiões e outros tipos de informação local.",
-  },
-  {
-    q: "Posso confiar nos resultados?",
-    a: "MarIA sempre fornece links para os anúncios originais, para que você possa verificar as informações diretamente na fonte e entrar em contato com os responsáveis.",
+    q: "Como falo com o anunciante?",
+    a: "Após a curadoria da MarIA, se você se interessar por um imóvel, nós conectamos você diretamente ao WhatsApp do corretor ou imobiliária responsável.",
   },
 ];
 
 const FAQSection = () => {
   return (
-    <section id="faq" className="py-20 md:py-28 bg-gradient-to-b from-primary/[0.02] to-transparent">
-      <div className="container max-w-2xl">
-        <div className="text-center mb-12">
-          <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">FAQ</p>
-          <h2 className="text-3xl md:text-4xl font-bold">Perguntas frequentes</h2>
+    <section id="faq" className="py-24 bg-white">
+      <div className="container max-w-3xl mx-auto px-6 lg:px-12">
+        <div className="text-center mb-16">
+          <p className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] mb-4">FAQ</p>
+          <h2 className="text-4xl font-bold tracking-tight text-slate-950">Dúvidas Frequentes</h2>
         </div>
-        <Accordion type="single" collapsible className="space-y-3">
-          {faqs.map((f, i) => (
-            <AccordionItem key={i} value={`faq-${i}`} className="glass rounded-xl px-6 border-none">
-              <AccordionTrigger className="text-left font-semibold hover:no-underline">{f.q}</AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-relaxed">{f.a}</AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <Accordion type="single" collapsible className="space-y-4">
+            {faqs.map((f, i) => (
+              <AccordionItem key={i} value={`faq-${i}`} className="border border-slate-100 rounded-[24px] px-8 bg-slate-50/50 overflow-hidden transition-all duration-300 data-[state=open]:bg-white data-[state=open]:shadow-2xl data-[state=open]:shadow-slate-100">
+                <AccordionTrigger className="text-left font-bold text-slate-900 hover:no-underline py-6">
+                  {f.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-slate-500 font-medium leading-relaxed pb-6">
+                  {f.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </motion.div>
       </div>
     </section>
   );
