@@ -382,7 +382,7 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
         <Separator className="my-4" />
 
         {/* Tabs com histórico unificado, notas, conversa */}
-        <Tabs defaultValue="historico" className="w-full pb-6">
+        <Tabs defaultValue={defaultTab} className="w-full pb-6">
           <TabsList className="grid grid-cols-3 w-full">
             <TabsTrigger value="historico" className="text-xs gap-1">
               <Activity className="w-3.5 h-3.5" /> Histórico
