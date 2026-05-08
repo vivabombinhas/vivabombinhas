@@ -268,7 +268,10 @@ const InteractiveDemo = () => {
               </div>
 
               {/* Chat Body */}
-              <div className="h-[450px] overflow-y-auto p-8 space-y-6 bg-gradient-to-b from-transparent to-slate-50/50 scrollbar-hide">
+              <div 
+                ref={scrollContainerRef}
+                className="h-[450px] overflow-y-auto p-8 space-y-6 bg-gradient-to-b from-transparent to-slate-50/50 scrollbar-hide"
+              >
                 <AnimatePresence initial={false}>
                   {messages.map((msg, idx) => (
                     <motion.div
