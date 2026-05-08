@@ -109,7 +109,7 @@ const CONVERSATIONS = [
   }
 ];
 
-export const InteractiveChatBox = () => {
+export const InteractiveChatBox = ({ forcedConvIndex }: { forcedConvIndex?: number | null }) => {
   const [currentConvIndex, setCurrentConvIndex] = useState(0);
   const [messages, setMessages] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -117,6 +117,14 @@ export const InteractiveChatBox = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const currentConv = CONVERSATIONS[currentConvIndex];
+
+  useEffect(() => {
+    if (forcedConvIndex !== undefined && forcedConvIndex !== null) {
+      setMessages([]);
+      setCurrentIndex(0);
+      setCurrentConvIndex(forcedConvIndex);
+    }
+  }, [forcedConvIndex]);
 
   useEffect(() => {
     if (scrollContainerRef.current) {
