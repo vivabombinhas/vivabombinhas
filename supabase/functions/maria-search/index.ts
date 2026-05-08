@@ -460,6 +460,17 @@ serve(async (req) => {
     let showResults = assistantMessage.includes("[SHOW_RESULTS]");
     assistantMessage = assistantMessage.replace(/^\[(SHOW_RESULTS|NO_RESULTS_YET)\]\s*/g, "");
 
+    // Save conversation turn
+    const leadId = await upsertLeadBySession(supabase, sessionId, {
+      mensagem_original: userMessage,
+      interesse: filters.finalidade || undefined,
+      bairro_interesse: filters.bairro || undefined,
+      tipo_imovel: filters.tipo || undefined
+    });
+    if (leadId) {
+      await saveLastConversationTurn(supabase, leadId, userMessage, assistantMessage);
+    }
+
     return new Response(JSON.stringify({
       reply: assistantMessage,
       properties: showResults ? resultsToUse.slice(0, gateActive ? 2 : 10) : [],
