@@ -92,20 +92,7 @@ export default function StatsSection() {
         </div>
       </div>
       
-      {/* WaBadge replacement/Online indicator */}
-      <div className="mt-16 flex justify-center">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1 }}
-          className="relative"
-        >
-          <div className="bg-[#25D366] text-white px-4 py-2 rounded-full text-[10px] font-bold shadow-xl flex items-center gap-2 border-2 border-white/10 backdrop-blur-sm">
-            <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-            MARIA ONLINE AGORA • SISTEMAS ATUALIZADOS
-          </div>
-        </motion.div>
-      </div>
+      {/* Online indicator removed - moved to HeroSection */}
     </section>
   );
 }
