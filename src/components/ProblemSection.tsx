@@ -25,44 +25,50 @@ const problems = [
 
 const ProblemSection = () => {
   return (
-    <section className="py-20 md:py-32 relative overflow-hidden bg-secondary/30">
-      <div className="container">
+    <section className="py-24 md:py-40 relative overflow-hidden bg-secondary/30">
+      <div className="container relative z-10">
         {/* Header Section */}
-        <div className="text-center mb-20 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-100 text-orange-600 text-xs font-bold uppercase tracking-widest mb-8 animate-fade-in">
-            <AlertCircle className="h-3.5 w-3.5" />
+        <div className="text-center mb-24 max-w-4xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-100 text-orange-600 text-xs font-bold uppercase tracking-[0.2em] mb-10 animate-fade-in shadow-sm">
+            <AlertCircle className="h-4 w-4" />
             O desafio atual
           </div>
           
-          <h2 className="text-4xl md:text-6xl font-bold mb-8 tracking-tight leading-[1.1]">
-            Encontrar imóvel em <span className="text-primary italic font-serif">Bombinhas</span> virou um caos.
+          <h2 className="text-4xl md:text-7xl font-bold mb-10 tracking-tight leading-[1.05] text-foreground">
+            Encontrar imóvel em <span className="text-primary italic">Bombinhas</span> virou um caos.
           </h2>
           
-          <p className="text-muted-foreground text-xl md:text-2xl font-light leading-relaxed">
+          <p className="text-muted-foreground text-xl md:text-2xl font-light leading-relaxed max-w-2xl mx-auto">
             Sites diferentes, anúncios repetidos e oportunidades que passam despercebidas por falta de organização.
           </p>
         </div>
 
         {/* Problem Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-32 relative">
+          {/* Subtle background glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/5 blur-[120px] -z-10 pointer-events-none"></div>
+          
           {problems.map((p, i) => (
             <div 
               key={i} 
-              className="group relative rounded-3xl border border-border bg-background p-8 hover:border-primary/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-500 flex flex-col items-center text-center"
+              className="group relative rounded-[40px] border border-border/50 bg-background/80 backdrop-blur-md p-10 hover:border-primary/20 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] transition-all duration-700 flex flex-col items-center text-center animate-fade-up"
+              style={{ animationDelay: `${i * 150}ms` }}
             >
-              <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center mb-6 group-hover:bg-primary/10 group-hover:scale-110 transition-all duration-500">
-                <p.icon className="h-8 w-8 text-foreground group-hover:text-primary transition-colors" />
+              <div className="w-24 h-24 rounded-3xl bg-secondary flex items-center justify-center mb-10 group-hover:bg-primary/10 group-hover:scale-110 transition-all duration-500 shadow-sm border border-border/10">
+                <p.icon className="h-10 w-10 text-foreground/70 group-hover:text-primary transition-colors" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-4">{p.title}</h3>
-              <p className="text-muted-foreground leading-relaxed font-light">{p.desc}</p>
+              <h3 className="text-2xl font-semibold text-foreground mb-4 tracking-tight">{p.title}</h3>
+              <p className="text-muted-foreground leading-relaxed font-light text-lg">{p.desc}</p>
             </div>
           ))}
         </div>
 
         {/* Transition to Solution */}
-        <div className="text-center pt-10 border-t border-border/50">
-          <p className="text-muted-foreground text-lg italic mb-2">Foi exatamente por isso que criamos a MarIA.</p>
-          <div className="inline-block h-12 w-[1px] bg-gradient-to-b from-primary to-transparent mx-auto"></div>
+        <div className="text-center flex flex-col items-center max-w-lg mx-auto">
+          <p className="text-muted-foreground text-xl md:text-2xl font-light italic mb-8">
+            Foi exatamente por isso que criamos a MarIA.
+          </p>
+          <div className="w-px h-32 bg-gradient-to-b from-primary via-primary/40 to-transparent"></div>
         </div>
       </div>
     </section>
