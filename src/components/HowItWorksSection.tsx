@@ -1,55 +1,57 @@
 import { MessageSquare, LayoutGrid, UserCheck } from "lucide-react";
+import { motion } from "framer-motion";
 
 const steps = [
   {
     icon: MessageSquare,
     num: "01",
     title: "Converse com a MarIA",
-    desc: "Diga o que você busca em Bombinhas usando linguagem natural. É como falar com um especialista.",
+    desc: "Diga o que você busca usando linguagem natural, como se falasse com um amigo.",
   },
   {
     icon: LayoutGrid,
     num: "02",
     title: "Receba a Curadoria",
-    desc: "A MarIA analisa centenas de opções e te entrega apenas os imóveis que dão match com seu perfil.",
+    desc: "Nossa IA filtra centenas de opções e entrega apenas o que realmente faz sentido.",
   },
   {
     icon: UserCheck,
     num: "03",
-    title: "Direto ao Ponto",
-    desc: "Um corretor especialista recebe seu interesse e te chama no WhatsApp para agendar visitas.",
+    title: "Fale com Especialistas",
+    desc: "O corretor responsável recebe seu interesse e te chama direto no WhatsApp.",
   },
 ];
 
 const HowItWorksSection = () => {
   return (
-    <section id="como-funciona" className="py-12 md:py-20 relative overflow-hidden">
-      {/* Subtle bg */}
-      <div className="absolute inset-0 bg-gradient-to-b from-muted/50 to-transparent" />
-      
-      <div className="container relative z-10">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">Como funciona</p>
-          <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            Três passos.
-            <br />
-            <span className="text-gradient">Zero complicação.</span>
+    <section id="como-funciona" className="py-24 bg-slate-50 relative overflow-hidden">
+      <div className="container max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="text-center max-w-2xl mx-auto mb-20">
+          <p className="text-[10px] font-bold text-primary uppercase tracking-[0.3em] mb-4">Metodologia</p>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-950">
+            Três passos. <span className="text-slate-400">Zero complicação.</span>
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8">
           {steps.map((s, i) => (
-            <div key={i} className="relative rounded-2xl border border-border bg-card p-8 text-center group hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 hover:-translate-y-2">
-              {/* Step number */}
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">
-                PASSO {s.num}
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              viewport={{ once: true }}
+              className="relative p-10 rounded-[40px] bg-white border border-slate-100 shadow-sm group hover:shadow-2xl hover:shadow-slate-200 transition-all duration-500"
+            >
+              <div className="absolute top-6 right-10 text-4xl font-black text-slate-50 group-hover:text-primary/5 transition-colors">
+                {s.num}
               </div>
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5 mt-2 group-hover:bg-primary/15 transition-colors">
-                <s.icon className="h-7 w-7 text-primary" />
+              <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                <s.icon className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-bold text-lg mb-2 text-foreground">{s.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-            </div>
+              <h3 className="text-xl font-bold text-slate-950 mb-3 tracking-tight">{s.title}</h3>
+              <p className="text-slate-500 text-sm leading-relaxed font-medium">{s.desc}</p>
+            </motion.div>
           ))}
         </div>
       </div>

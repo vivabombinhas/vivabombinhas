@@ -1,7 +1,8 @@
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const CTASection = () => {
   const [query, setQuery] = useState("");
@@ -14,42 +15,64 @@ const CTASection = () => {
   };
 
   return (
-    <section className="py-12 md:py-20">
-      <div className="container max-w-3xl text-center">
-        <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-4">Comece agora</p>
-        <h2 className="text-3xl md:text-5xl font-bold mb-4">
-          Pronto para encontrar
-          <br />
-          <span className="text-gradient">seu imóvel?</span>
-        </h2>
-        <p className="text-muted-foreground text-lg mb-10 max-w-lg mx-auto">
-          Descreva o que procura e deixe a MarIA trabalhar por você. Gratuito, sem cadastro.
-        </p>
-        <form 
-          onSubmit={handleSearch}
-          className="rounded-2xl border border-border bg-card p-2 max-w-xl mx-auto shadow-xl shadow-primary/5"
-        >
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="flex-1 flex items-center gap-3 bg-background rounded-xl px-4 py-3">
-              <Search className="h-5 w-5 text-muted-foreground shrink-0" />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Casa com 3 quartos em Bombas para comprar..."
-                className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/60"
-              />
+    <section className="py-32 relative overflow-hidden bg-white">
+      {/* Background Decorative Grid */}
+      <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+
+      <div className="container max-w-5xl mx-auto px-6 lg:px-12 relative z-10">
+        <div className="flex flex-col items-center text-center">
+          
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="w-20 h-20 rounded-[32px] bg-slate-950 flex items-center justify-center mb-10 shadow-2xl shadow-slate-300 group"
+          >
+            <Sparkles className="h-8 w-8 text-white group-hover:rotate-12 transition-transform duration-500" />
+          </motion.div>
+
+          <h2 className="text-4xl md:text-7xl font-bold tracking-tight text-slate-950 mb-6 leading-[1.05]">
+            Pronto para encontrar<br /><span className="text-primary italic">o seu imóvel?</span>
+          </h2>
+          
+          <p className="text-slate-500 text-lg md:text-xl font-medium mb-12 max-w-2xl leading-relaxed">
+            Experimente a forma mais inteligente de buscar em Bombinhas. Sem formulários, apenas conversa.
+          </p>
+
+          <motion.form 
+            onSubmit={handleSearch}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="w-full max-w-2xl"
+          >
+            <div className="relative p-2 rounded-[32px] bg-slate-50 border border-slate-100 flex flex-col sm:flex-row gap-2 shadow-2xl shadow-slate-100">
+              <div className="flex-1 flex items-center gap-4 px-6 py-4">
+                <Search className="h-5 w-5 text-slate-400 shrink-0" />
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Descreva o imóvel que você imagina..."
+                  className="w-full bg-transparent text-slate-900 font-medium outline-none placeholder:text-slate-300"
+                />
+              </div>
+              <Button 
+                type="submit"
+                size="lg" 
+                className="h-14 px-8 rounded-2xl bg-slate-950 text-white font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
+              >
+                Começar
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
-            <Button 
-              type="submit"
-              size="lg" 
-              className="gap-2 rounded-xl shrink-0 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground"
-            >
-              Perguntar
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </form>
+          </motion.form>
+
+          <p className="mt-8 text-[10px] font-bold text-slate-300 uppercase tracking-[0.3em]">
+            Gratuito • Instantâneo • Sem Cadastro
+          </p>
+
+        </div>
       </div>
     </section>
   );

@@ -1,67 +1,82 @@
 import { Link } from "react-router-dom";
 import { Building2, Users, Eye, TrendingUp, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 const benefits = [
-  { icon: Eye, title: "Mais visibilidade", desc: "Seus imóveis aparecem para quem busca ativamente em Bombinhas." },
-  { icon: Users, title: "Leads qualificados", desc: "Conecte-se com pessoas que já descreveram exatamente o que procuram." },
-  { icon: TrendingUp, title: "IA recomenda você", desc: "A MarIA sugere seus imóveis quando batem com a busca do usuário." },
-  { icon: Building2, title: "Cadastro em 30s", desc: "Cole o link de um anúncio existente e a IA preenche tudo." },
+  { icon: Eye, title: "Visibilidade", desc: "Seus imóveis aparecem para quem busca ativamente na região." },
+  { icon: Users, title: "Qualificação", desc: "Conecte-se com leads que já sabem exatamente o que querem." },
+  { icon: TrendingUp, title: "Recomendação", desc: "A MarIA sugere seu imóvel quando o perfil do cliente dá match." },
+  { icon: Building2, title: "Agilidade", desc: "Cadastro rápido via link: a IA lê as informações para você." },
 ];
 
 const PartnersSection = () => {
   return (
-    <section id="anunciar" className="py-12 md:py-20 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.03] to-transparent" />
-      <div className="container relative z-10">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
-            <div className="inline-flex items-center gap-2 text-sm font-semibold text-accent uppercase tracking-wider mb-4">
-              <Building2 className="h-4 w-4" />
-              Para anunciantes
+    <section id="anunciar" className="py-24 bg-white relative overflow-hidden">
+      <div className="container max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-8">
+              <Building2 className="h-3 w-3" />
+              Para Imobiliárias e Corretores
             </div>
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Anuncie sua casa de praia <span className="text-gradient">grátis</span>
+            <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-950 mb-8 leading-[1.1]">
+              Potencialize seus <span className="text-primary italic">resultados.</span>
             </h2>
-            <p className="text-muted-foreground text-lg">
-              Proprietários, corretores e imobiliárias: cole o link do anúncio que você já tem e a IA cuida do resto.
+            <p className="text-slate-500 text-lg md:text-xl font-medium mb-12 leading-relaxed">
+              MarIA não é uma concorrente. É uma aliada que qualifica o lead antes mesmo do primeiro contato.
             </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-4 mb-10 md:mb-12">
-            {benefits.map((b, i) => (
-              <div key={i} className="rounded-2xl border border-border bg-card p-6 hover:border-accent/30 hover:shadow-lg transition-all duration-300">
-                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
-                  <b.icon className="h-5 w-5 text-accent" />
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              {benefits.map((b, i) => (
+                <div key={i} className="flex gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100">
+                    <b.icon className="h-5 w-5 text-slate-900" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900 mb-1">{b.title}</h4>
+                    <p className="text-xs text-slate-400 leading-relaxed font-medium">{b.desc}</p>
+                  </div>
                 </div>
-                <h3 className="font-bold text-foreground mb-1">{b.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{b.desc}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          {/* CTA card */}
-          <div className="rounded-2xl border border-accent/20 bg-gradient-to-br from-accent/5 to-primary/5 p-8 md:p-10 text-center">
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary uppercase tracking-wider mb-3">
-              <Sparkles className="h-3.5 w-3.5" /> Cadastro com IA
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="p-10 rounded-[48px] bg-slate-950 text-white relative overflow-hidden shadow-2xl shadow-slate-200"
+          >
+            <div className="relative z-10 text-center flex flex-col items-center">
+              <div className="w-16 h-16 rounded-3xl bg-white/10 flex items-center justify-center mb-8 border border-white/10">
+                <Sparkles className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold mb-4 tracking-tight">Anuncie agora.</h3>
+              <p className="text-white/40 text-sm mb-10 max-w-xs font-medium leading-relaxed">
+                Cole o link do seu anúncio existente e deixe nossa IA fazer o trabalho pesado de cadastro.
+              </p>
+              <Button
+                asChild
+                size="lg"
+                className="w-full h-14 rounded-2xl bg-white text-slate-950 font-bold hover:bg-white/90 transition-all"
+              >
+                <Link to="/anuncie" className="flex items-center justify-center gap-2">
+                  Começar gratuitamente
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <p className="mt-6 text-[10px] font-bold text-white/20 uppercase tracking-widest">
+                Sem custos ocultos • Cadastro em 30s
+              </p>
             </div>
-            <h3 className="text-xl md:text-2xl font-bold mb-2">
-              Cole o link, a IA preenche tudo
-            </h3>
-            <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-              Funciona com Airbnb, OLX, ZAP, VivaReal, Instagram e a maioria dos sites. É 100% grátis.
-            </p>
-            <Button
-              asChild
-              size="lg"
-              className="gap-2 rounded-xl bg-gradient-to-r from-accent to-primary hover:opacity-90 text-primary-foreground"
-            >
-              <Link to="/anuncie">
-                Anunciar meu imóvel
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
+            
+            {/* Visual background details */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-[60px]" />
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-500/10 rounded-full blur-[80px]" />
+          </motion.div>
+
         </div>
       </div>
     </section>

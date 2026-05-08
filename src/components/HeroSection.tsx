@@ -1,117 +1,147 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MessageCircle } from "lucide-react";
+import { ArrowRight, MessageCircle, Sparkles } from "lucide-react";
 import { InteractiveChatBox } from "./InteractiveChatBox";
+import { motion } from "framer-motion";
 
-// ─── Main HeroSection ─────────────────────────────────────────────────────────
 export default function HeroSection() {
   const [activeFlow, setActiveFlow] = useState<number>(0);
 
-  const handleFlowSelect = (index: number) => {
-    setActiveFlow(index);
-  };
-
   const flows = [
     { label: "Temporada", emoji: "🏖", index: 0 },
-    { label: "Aluguel anual", emoji: "🏠", index: 1 },
+    { label: "Anual", emoji: "🏠", index: 1 },
     { label: "Compra", emoji: "🔑", index: 2 },
   ];
 
   return (
-    <section className="relative min-h-0 lg:min-h-screen flex flex-col overflow-hidden py-16 lg:py-0">
-
-      {/* ── Background ── */}
-      <div className="absolute inset-0 z-0">
-        {/* Base gradient — ocean deep */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #04111f 0%, #062340 45%, #083660 70%, #0a4a7a 100%)" }} />
-        {/* Mesh glow */}
-        <div className="absolute inset-0 opacity-15" style={{ background: "radial-gradient(ellipse 70% 55% at 65% 35%, rgba(56,182,255,0.7) 0%, transparent 60%), radial-gradient(ellipse 40% 30% at 85% 75%, rgba(26,157,224,0.4) 0%, transparent 50%)" }} />
-        {/* Subtle horizontal lines — water ripple feel */}
-        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(56,182,255,0.5) 28px, rgba(56,182,255,0.5) 29px)", maskImage: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)" }} />
+    <section className="relative min-h-[80vh] lg:min-h-[85vh] flex flex-col justify-center overflow-hidden pt-32 pb-16 lg:pt-20 lg:pb-0">
+      
+      {/* ── Background: Modern Deep Ocean ── */}
+      <div className="absolute inset-0 z-0 bg-[#020817]">
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(#ffffff 0.5px, transparent 0.5px)", backgroundSize: "24px 24px" }} />
+        
+        {/* Modern glowing orbs */}
+        <div className="absolute top-[20%] left-[10%] w-[400px] h-[400px] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[10%] right-[10%] w-[300px] h-[300px] bg-blue-400/10 rounded-full blur-[100px]" />
+        
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020817]/50 to-[#020817]" />
       </div>
 
-      {/* ── Content grid ── */}
-      <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-2 items-center gap-10 max-w-7xl mx-auto w-full px-6 lg:px-12 pt-20 lg:pt-28 pb-10">
-
-        {/* ── LEFT ── */}
-        <div className="flex flex-col animate-fade-up">
-
-          {/* Online Badge for Hero */}
-          <div className="inline-flex items-center gap-2 self-start mb-6 px-3.5 py-1.5 rounded-full border border-white/20 bg-[#25D366]/10 backdrop-blur-md text-[#25D366] text-[11px] font-bold tracking-wider uppercase">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse" />
-            MarIA Online Agora • Bombinhas
-          </div>
-
-          {/* Headline */}
-          <h1 className="font-bold leading-[1.1] tracking-tight text-white mb-5" style={{ fontSize: "clamp(34px, 5vw, 62px)" }}>
-            A inteligência que<br />conecta você ao imóvel<br />ideal em{" "}
-            <span className="italic" style={{ background: "linear-gradient(90deg, #1a9de0, #38b6ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-              Bombinhas
-            </span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="text-white/75 text-[15px] leading-relaxed font-light max-w-[440px] mb-8">
-            Aluguel de temporada, anual, compra ou investimento — a MarIA entende o que você precisa e mostra apenas imóveis que fazem sentido para o seu perfil.
-          </p>
-
-          {/* Chips */}
-          <div className="flex flex-wrap gap-2 mb-8">
-            {flows.map((flow) => (
-              <button
-                key={flow.label}
-                onClick={() => handleFlowSelect(flow.index)}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12.5px] border transition-all duration-200 ${
-                  activeFlow === flow.index
-                    ? "bg-[#38b6ff] border-[#38b6ff] text-[#04111f] font-medium shadow-[0_4px_16px_rgba(56,182,255,0.35)]"
-                    : "bg-white/8 border-white/20 text-white/80 hover:bg-white/15 hover:border-white/40 hover:text-white"
-                }`}
-              >
-                <span>{flow.emoji}</span>
-                <span>{flow.label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* CTAs */}
-          <div className="flex flex-wrap items-center gap-3 mb-10">
-            <Button
-              size="lg"
-              className="flex items-center gap-2 rounded-full px-6 text-[14px] font-medium text-[#04111f] border-0"
-              style={{ background: "#38b6ff", boxShadow: "0 8px 32px rgba(56,182,255,0.35)" }}
-              onClick={() => window.open('https://wa.me/5547999999999', '_blank')}
-            >
-              <MessageCircle size={15} />
-              Conversar com a MarIA
-              <ArrowRight size={14} />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="rounded-full px-6 text-[14px] font-medium text-white/80 border-white/25 bg-transparent hover:bg-white/10 hover:text-white hover:border-white/50"
-              onClick={() => document.getElementById('como-funciona')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              Como funciona
-            </Button>
-          </div>
-
-        </div>
-
-        {/* ── RIGHT: Chat ── */}
-        <div className="relative flex items-center justify-center lg:justify-end animate-fade-up px-4 md:px-0" style={{ animationDelay: "0.2s" }}>
-          <div className="w-full max-w-[320px] md:max-w-[400px]">
-            <InteractiveChatBox 
-              forcedConvIndex={activeFlow} 
-              onConvIndexChange={(index) => setActiveFlow(index)}
-            />
-          </div>
+      <div className="relative z-10 container max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr,0.9fr] items-center gap-12 lg:gap-20">
           
-          {/* Decorative elements */}
-          <div className="absolute -top-12 -right-12 w-64 h-64 bg-[#3b9fe8]/20 rounded-full blur-[80px] -z-10" />
-          <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-blue-400/10 rounded-full blur-[80px] -z-10" />
-        </div>
+          {/* ── LEFT: Content ── */}
+          <div className="flex flex-col">
+            
+            {/* Premium Badge */}
+            <motion.div 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 self-start mb-8 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl shadow-blue-500/10"
+            >
+              <div className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+              </div>
+              <span className="text-[10px] font-bold text-white/90 uppercase tracking-[0.2em] flex items-center gap-1.5">
+                MarIA Online Agora <span className="text-white/30">•</span> Bombinhas
+              </span>
+            </motion.div>
 
+            {/* Headline: Clean, bold, architectural */}
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-white font-bold tracking-[-0.03em] leading-[0.95] mb-6" 
+              style={{ fontSize: "clamp(42px, 6vw, 76px)" }}
+            >
+              A inteligência que<br />
+              <span className="text-white/40">conecta você</span><br />
+              ao imóvel ideal.
+            </motion.h1>
+
+            {/* Description: Light, readable */}
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-white/50 text-lg md:text-xl leading-relaxed font-medium max-w-[480px] mb-10"
+            >
+              Do aluguel de temporada ao investimento dos sonhos. A MarIA entende seu perfil e filtra o melhor de Bombinhas para você.
+            </motion.p>
+
+            {/* Interaction Row */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex flex-col sm:flex-row items-start sm:items-center gap-6"
+            >
+              <Button
+                size="lg"
+                className="h-14 px-8 rounded-2xl bg-white text-slate-950 font-bold hover:bg-white/90 transition-all duration-300 shadow-2xl shadow-white/10 group"
+                onClick={() => window.open('https://wa.me/5547999999999', '_blank')}
+              >
+                Conversar agora
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+
+              <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 backdrop-blur-sm">
+                {flows.map((flow) => (
+                  <button
+                    key={flow.label}
+                    onClick={() => setActiveFlow(flow.index)}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+                      activeFlow === flow.index
+                        ? "bg-white/10 text-white border border-white/10 shadow-lg"
+                        : "text-white/40 hover:text-white/70"
+                    }`}
+                  >
+                    {flow.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* ── RIGHT: Chat (Refined & Compact) ── */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: 0.4, type: "spring", stiffness: 100, damping: 20 }}
+            className="relative"
+          >
+            <div className="relative z-10 w-full max-w-[420px] mx-auto lg:ml-auto group">
+              {/* Inner glow around chat */}
+              <div className="absolute -inset-4 bg-primary/10 rounded-[48px] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              
+              <InteractiveChatBox 
+                forcedConvIndex={activeFlow} 
+                onConvIndexChange={(index) => setActiveFlow(index)}
+              />
+            </div>
+            
+            {/* Architectural light leaks */}
+            <div className="absolute -top-20 -right-20 w-80 h-80 bg-blue-500/10 rounded-full blur-[100px] -z-10" />
+            <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-primary/10 rounded-full blur-[80px] -z-10" />
+          </motion.div>
+
+        </div>
       </div>
+      
+      {/* Scroll Indicator */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center gap-2 text-white/20"
+      >
+        <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Explore</span>
+        <div className="w-px h-12 bg-gradient-to-b from-white/20 to-transparent" />
+      </motion.div>
     </section>
   );
 }
