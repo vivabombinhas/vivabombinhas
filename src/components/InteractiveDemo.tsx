@@ -322,11 +322,11 @@ const InteractiveDemo = () => {
 
             {/* Floating Alert Badge */}
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 0.7, scale: 0.85 }}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 0.8, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 1 }}
-              className="absolute bottom-[10%] -left-6 md:-left-16 bg-white/40 backdrop-blur-md rounded-[24px] border border-border/20 p-4 shadow-xl max-w-[200px] hidden md:block z-20 grayscale-[0.3] hover:opacity-100 hover:scale-100 transition-all duration-500"
+              className="absolute -bottom-6 left-1/2 -translate-x-1/2 md:bottom-[10%] md:-left-16 md:translate-x-0 bg-white/40 backdrop-blur-md rounded-[24px] border border-border/20 p-4 shadow-xl w-[180px] md:w-[200px] z-20 grayscale-[0.3] hover:opacity-100 hover:scale-105 transition-all duration-500"
             >
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20">
