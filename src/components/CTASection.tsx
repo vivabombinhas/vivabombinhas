@@ -15,10 +15,7 @@ const CTASection = () => {
   };
 
   return (
-    <section className="py-32 relative overflow-hidden bg-white">
-      {/* Background Decorative Grid */}
-      <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
-
+    <section className="py-32 relative overflow-hidden bg-white border-t border-slate-50">
       <div className="container max-w-5xl mx-auto px-6 lg:px-12 relative z-10">
         <div className="flex flex-col items-center text-center">
           
@@ -26,22 +23,22 @@ const CTASection = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="w-20 h-20 rounded-[32px] bg-slate-950 flex items-center justify-center mb-10 shadow-2xl shadow-slate-300 group"
+            className="w-20 h-20 rounded-[32px] bg-slate-950 flex items-center justify-center mb-10 shadow-xl shadow-slate-200 group"
           >
             <Sparkles className="h-8 w-8 text-white group-hover:rotate-12 transition-transform duration-500" />
           </motion.div>
 
-          <h2 className="text-4xl md:text-7xl font-bold tracking-tight text-slate-950 mb-6 leading-[1.05]">
-            Pronto para encontrar<br /><span className="text-primary italic">o seu imóvel?</span>
+          <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-950 mb-6 leading-[1.05]">
+            Pronto para encontrar<br /><span className="text-blue-600 italic">o seu imóvel?</span>
           </h2>
           
-          <p className="text-slate-500 text-lg md:text-xl font-medium mb-12 max-w-2xl leading-relaxed">
+          <p className="text-slate-500 text-lg font-medium mb-12 max-w-2xl leading-relaxed">
             Experimente a forma mais inteligente de buscar em Bombinhas. Sem formulários, apenas conversa.
           </p>
 
           <motion.form 
             onSubmit={handleSearch}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="w-full max-w-2xl"
