@@ -18,7 +18,7 @@ export default function HeroSection() {
   ];
 
   return (
-    <section className="relative min-h-screen flex flex-col overflow-hidden">
+    <section className="relative min-h-0 lg:min-h-screen flex flex-col overflow-hidden py-16 lg:py-0">
 
       {/* ── Background ── */}
       <div className="absolute inset-0 z-0">
@@ -31,20 +31,20 @@ export default function HeroSection() {
       </div>
 
       {/* ── Content grid ── */}
-      <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-2 items-center gap-10 max-w-7xl mx-auto w-full px-6 lg:px-12 pt-24 pb-10">
+      <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-2 items-center gap-10 max-w-7xl mx-auto w-full px-6 lg:px-12 pt-20 lg:pt-28 pb-10">
 
         {/* ── LEFT ── */}
         <div className="flex flex-col animate-fade-up">
 
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 self-start mb-7 px-3.5 py-1.5 rounded-full border border-white/20 bg-white/8 backdrop-blur-sm text-white/80 text-[12px] tracking-wide">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#38b6ff] shadow-[0_0_6px_rgba(56,182,255,0.8)]" />
-            Inteligência Imobiliária em Bombinhas
+          {/* Online Badge for Hero */}
+          <div className="inline-flex items-center gap-2 self-start mb-6 px-3.5 py-1.5 rounded-full border border-white/20 bg-[#25D366]/10 backdrop-blur-md text-[#25D366] text-[11px] font-bold tracking-wider uppercase">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse" />
+            MarIA Online Agora • Bombinhas
           </div>
 
           {/* Headline */}
-          <h1 className="font-bold leading-[1.05] tracking-tight text-white mb-5" style={{ fontSize: "clamp(38px, 4vw, 58px)" }}>
-            A concierge<br />imobiliária<br />inteligente de{" "}
+          <h1 className="font-bold leading-[1.1] tracking-tight text-white mb-5" style={{ fontSize: "clamp(34px, 5vw, 62px)" }}>
+            A inteligência que<br />conecta você ao imóvel<br />ideal em{" "}
             <span className="italic" style={{ background: "linear-gradient(90deg, #1a9de0, #38b6ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
               Bombinhas
             </span>
@@ -98,8 +98,8 @@ export default function HeroSection() {
         </div>
 
         {/* ── RIGHT: Chat ── */}
-        <div className="relative flex items-center justify-center lg:justify-end animate-fade-up" style={{ animationDelay: "0.2s" }}>
-          <div className="w-full max-w-[400px]">
+        <div className="relative flex items-center justify-center lg:justify-end animate-fade-up px-4 md:px-0" style={{ animationDelay: "0.2s" }}>
+          <div className="w-full max-w-[320px] md:max-w-[400px]">
             <InteractiveChatBox 
               forcedConvIndex={activeFlow} 
               onConvIndexChange={(index) => setActiveFlow(index)}
