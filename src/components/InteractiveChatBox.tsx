@@ -164,7 +164,7 @@ export const InteractiveChatBox = ({
         {/* Chat Body */}
         <div 
           ref={scrollContainerRef}
-          className="h-[360px] md:h-[420px] overflow-y-auto p-6 md:p-8 space-y-6 scrollbar-hide bg-white/50"
+          className="h-[320px] md:h-[420px] overflow-y-auto p-5 md:p-8 space-y-5 md:space-y-6 scrollbar-hide bg-white/50"
         >
           <AnimatePresence initial={false}>
             {messages.map((msg, idx) => (
@@ -187,9 +187,9 @@ export const InteractiveChatBox = ({
                   </p>
 
                   {msg.properties && (
-                    <div className="mt-5 space-y-4 w-[220px] md:w-[280px]">
+                    <div className="mt-5 space-y-4 w-[200px] md:w-[280px]">
                       {msg.properties.map((prop: Property) => (
-                        <div key={prop.id} className="scale-95 origin-top-left -mb-6 last:mb-0">
+                        <div key={prop.id} className="scale-[0.85] md:scale-95 origin-top-left -mb-8 md:-mb-6 last:mb-0">
                           <PropertyCard property={prop} />
                         </div>
                       ))}
