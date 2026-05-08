@@ -31,7 +31,7 @@ export default function HeroSection() {
       </div>
 
       {/* ── Content grid ── */}
-      <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-2 items-center gap-10 max-w-7xl mx-auto w-full px-6 lg:px-12 pt-28 pb-10">
+      <div className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-2 items-center gap-10 max-w-7xl mx-auto w-full px-6 lg:px-12 pt-20 lg:pt-28 pb-10">
 
         {/* ── LEFT ── */}
         <div className="flex flex-col animate-fade-up">
