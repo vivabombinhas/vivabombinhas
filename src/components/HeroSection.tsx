@@ -5,11 +5,10 @@ import { InteractiveChatBox } from "./InteractiveChatBox";
 
 // ─── Main HeroSection ─────────────────────────────────────────────────────────
 export default function HeroSection() {
-  const [activeFlow, setActiveFlow] = useState<number | null>(null);
+  const [activeFlow, setActiveFlow] = useState<number>(0);
 
   const handleFlowSelect = (index: number) => {
-    setActiveFlow(null); // Force a reset in the child
-    setTimeout(() => setActiveFlow(index), 10);
+    setActiveFlow(index);
   };
 
   const flows = [
