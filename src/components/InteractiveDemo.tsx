@@ -4,60 +4,148 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { PropertyCard, type Property } from "./maria/PropertyCard";
 
-const CHAT_SCRIPT = [
-  { type: "user", text: "Quero um apartamento em Bombas perto da praia" },
-  { type: "ai", text: "Você procura algo para morar ou investir? 😊" },
-  { type: "user", text: "Investimento para Airbnb" },
-  { 
-    type: "ai", 
-    text: "Então vou priorizar imóveis com boa ocupação na temporada 👇",
-    property: {
-      id: "demo-1",
-      titulo: "Residencial Vista Mar - Alto Padrão",
-      preco: 985000,
-      bairro: "Bombas",
-      tipo: "apartamento",
-      finalidade: "compra",
-      quartos: 3,
-      suites: 1,
-      banheiros: 2,
-      vagas_garagem: 2,
-      area_m2: 92,
-      fotos: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"],
-      anunciante_telefone: "47999999999",
-      link_anuncio: "#",
-      destaque_pago: true,
-      piscina: true,
-      vista_mar: true,
-      churrasqueira: true,
-      ar_condicionado: true
-    } as Property
+const CONVERSATIONS = [
+  {
+    id: "temporada",
+    messages: [
+      { type: "user", text: "Quero uma casa para temporada em Mariscal perto da praia." },
+      { type: "ai", text: "Claro 😊 Você procura algo mais para família, grupo de amigos ou casal?" },
+      { type: "user", text: "Família." },
+      { type: "ai", text: "Perfeito. Para quantas pessoas seria? E qual faixa de valor por diária você pretende investir?" },
+      { type: "user", text: "5 pessoas. Até R$ 600 por diária." },
+      { 
+        type: "ai", 
+        text: "Encontrei algumas opções muito alinhadas ao que você procura em Mariscal 👇",
+        properties: [
+          {
+            id: "temp-1",
+            titulo: "Casa Mariscal - 100m da Praia",
+            preco_temporada_diaria: 550,
+            bairro: "Mariscal",
+            tipo: "casa",
+            finalidade: "temporada",
+            quartos: 3,
+            capacidade_pessoas: 6,
+            fotos: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80"],
+            anunciante_telefone: "47999999999",
+            piscina: true,
+            churrasqueira: true
+          },
+          {
+            id: "temp-2",
+            titulo: "Sobrado Moderno Mariscal",
+            preco_temporada_diaria: 580,
+            bairro: "Mariscal",
+            tipo: "casa",
+            finalidade: "temporada",
+            quartos: 2,
+            capacidade_pessoas: 5,
+            fotos: ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80"],
+            anunciante_telefone: "47999999999",
+            ar_condicionado: true,
+            wifi: true
+          }
+        ]
+      }
+    ]
   },
-  { type: "user", text: "Tem algo até 1 milhão?" },
-  { type: "ai", text: "Encontrei algumas opções alinhadas ao seu perfil. Deseja ver os detalhes no WhatsApp?" }
+  {
+    id: "aluguel",
+    messages: [
+      { type: "user", text: "Tem casas para aluguel anual em Bombinhas?" },
+      { type: "ai", text: "Sim 😊 Encontrei diversas opções disponíveis para aluguel anual." },
+      { type: "ai", text: "Você prefere qual região? Bombas, Centro, Mariscal, Canto Grande ou Zimbros?" },
+      { type: "user", text: "Bombas." },
+      { 
+        type: "ai", 
+        text: "Perfeito. Encontrei ótimas opções em Bombas para aluguel anual 👇",
+        properties: [
+          {
+            id: "anual-1",
+            titulo: "Apartamento Solar das Bombas",
+            preco: 3200,
+            bairro: "Bombas",
+            tipo: "apartamento",
+            finalidade: "aluguel_anual",
+            quartos: 2,
+            vagas_garagem: 1,
+            area_m2: 70,
+            fotos: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80"],
+            anunciante_telefone: "47999999999",
+            mobiliado: true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "compra",
+    messages: [
+      { type: "user", text: "Quero comprar apartamento em Bombinhas para investir." },
+      { type: "ai", text: "Ótima escolha 😊 Bombinhas possui regiões com excelente rentabilidade para temporada." },
+      { type: "ai", text: "Você procura algo: perto da praia, alto padrão, mais valorização ou melhor custo-benefício?" },
+      { type: "user", text: "Mais valorização." },
+      { 
+        type: "ai", 
+        text: "Então vou priorizar regiões muito procuradas para temporada como Mariscal e Bombas 👇",
+        properties: [
+          {
+            id: "compra-1",
+            titulo: "Lançamento Premium Mariscal",
+            preco: 1250000,
+            bairro: "Mariscal",
+            tipo: "apartamento",
+            finalidade: "compra",
+            quartos: 3,
+            suites: 3,
+            area_m2: 110,
+            fotos: ["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80"],
+            anunciante_telefone: "47999999999",
+            destaque_pago: true,
+            vista_mar: true
+          }
+        ]
+      }
+    ]
+  }
 ];
 
 const InteractiveDemo = () => {
+  const [currentConvIndex, setCurrentConvIndex] = useState(0);
   const [messages, setMessages] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(false);
+
+  const currentConv = CONVERSATIONS[currentConvIndex];
 
   useEffect(() => {
-    if (currentIndex < CHAT_SCRIPT.length) {
-      const timer = setTimeout(() => {
-        setMessages((prev) => [...prev, CHAT_SCRIPT[currentIndex]]);
-        setCurrentIndex((prev) => prev + 1);
-      }, currentIndex === 0 ? 1000 : 2500);
+    if (currentIndex < currentConv.messages.length) {
+      const msg = currentConv.messages[currentIndex];
+      
+      const delay = currentIndex === 0 ? 1000 : 2000;
+      
+      const typingTimer = setTimeout(() => {
+        if (msg.type === 'ai') setIsTyping(true);
+        
+        const deliverTimer = setTimeout(() => {
+          setIsTyping(false);
+          setMessages((prev) => [...prev, msg]);
+          setCurrentIndex((prev) => prev + 1);
+        }, msg.type === 'ai' ? 1500 : 500);
 
-      return () => clearTimeout(timer);
+        return () => clearTimeout(deliverTimer);
+      }, delay);
+
+      return () => clearTimeout(typingTimer);
     } else {
-      // Loop back after a delay
-      const restartTimer = setTimeout(() => {
+      const nextConvTimer = setTimeout(() => {
         setMessages([]);
         setCurrentIndex(0);
-      }, 5000);
-      return () => clearTimeout(restartTimer);
+        setCurrentConvIndex((prev) => (prev + 1) % CONVERSATIONS.length);
+      }, 6000);
+      return () => clearTimeout(nextConvTimer);
     }
-  }, [currentIndex]);
+  }, [currentIndex, currentConvIndex]);
 
   return (
     <section className="py-12 md:py-20 relative overflow-hidden bg-background">
@@ -189,22 +277,26 @@ const InteractiveDemo = () => {
                           {msg.text}
                         </p>
 
-                        {msg.property && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                            className="mt-4 max-w-[280px]"
-                          >
-                            <PropertyCard property={msg.property} />
-                          </motion.div>
+                        {msg.properties && (
+                          <div className="mt-4 space-y-4 max-w-[280px]">
+                            {msg.properties.map((prop: Property) => (
+                              <motion.div 
+                                key={prop.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                              >
+                                <PropertyCard property={prop} />
+                              </motion.div>
+                            ))}
+                          </div>
                         )}
                       </div>
                     </motion.div>
                   ))}
                 </AnimatePresence>
                 
-                {currentIndex < CHAT_SCRIPT.length && (
+                {isTyping && (
                   <div className="flex justify-start">
                     <div className="bg-white border border-border/40 rounded-2xl rounded-tl-none p-4 flex gap-1">
                       <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5, times: [0, 0.5, 1] }} className="w-1.5 h-1.5 rounded-full bg-primary" />
@@ -228,34 +320,26 @@ const InteractiveDemo = () => {
               </div>
             </motion.div>
 
-            {/* Floating Alert Badge - Replaces "Lead Qualificado" */}
+            {/* Floating Alert Badge */}
             <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 0.8, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 1 }}
-              className="absolute bottom-[15%] -left-8 md:-left-20 bg-white/90 backdrop-blur-xl rounded-[28px] border border-border/40 p-6 shadow-2xl max-w-[260px] hidden md:block z-20"
+              className="absolute -bottom-6 left-1/2 -translate-x-1/2 md:bottom-[10%] md:-left-16 md:translate-x-0 bg-white/40 backdrop-blur-md rounded-[24px] border border-border/20 p-4 shadow-xl w-[180px] md:w-[200px] z-20 grayscale-[0.3] hover:opacity-100 hover:scale-105 transition-all duration-500"
             >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center border border-green-100 shadow-inner">
-                  <MessageSquare className="h-6 w-6 text-green-600" />
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20">
+                  <MessageSquare className="h-4 w-4 text-green-600/70" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-primary uppercase tracking-[0.15em] block mb-0.5">Alerta Inteligente</span>
-                  <span className="text-[14px] font-bold text-foreground">Aviso no WhatsApp</span>
+                  <span className="text-[8px] font-bold text-primary/60 uppercase tracking-widest block">Alerta</span>
+                  <span className="text-[12px] font-bold text-foreground/70">WhatsApp</span>
                 </div>
               </div>
-              <p className="text-[12px] text-muted-foreground leading-relaxed font-medium mb-4">
-                "A MarIA avisa automaticamente quando surgem imóveis parecidos com sua busca."
+              <p className="text-[10px] text-muted-foreground/80 leading-tight font-medium">
+                "Novos imóveis em Mariscal acabaram de entrar."
               </p>
-              
-              <div className="mt-3 pt-3 border-t border-border/20 flex items-center justify-between">
-                <span className="text-[10px] text-muted-foreground">Agora mesmo</span>
-                <span className="text-[10px] font-bold text-green-600 flex items-center gap-1">
-                  <div className="w-1 h-1 rounded-full bg-green-600 animate-pulse" />
-                  Ativo
-                </span>
-              </div>
             </motion.div>
           </div>
 
