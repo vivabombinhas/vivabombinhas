@@ -163,8 +163,10 @@ export const InteractiveChatBox = ({
       const nextConvTimer = setTimeout(() => {
         setMessages([]);
         setCurrentIndex(0);
-        setCurrentConvIndex((prev) => (prev + 1) % CONVERSATIONS.length);
-      }, 8000);
+        const nextIndex = (currentConvIndex + 1) % CONVERSATIONS.length;
+        setCurrentConvIndex(nextIndex);
+        onConvIndexChange?.(nextIndex);
+      }, 12000); // 12 seconds for a slower, more premium feel
       return () => clearTimeout(nextConvTimer);
     }
   }, [currentIndex, currentConvIndex]);
