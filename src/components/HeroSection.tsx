@@ -31,7 +31,7 @@ const HeroSection = () => {
               Inteligência Imobiliária em Bombinhas
             </div>
             
-            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
               A concierge imobiliária inteligente de <span className="text-[#3b9fe8] italic">Bombinhas</span>
             </h1>
             
