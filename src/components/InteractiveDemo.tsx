@@ -277,22 +277,26 @@ const InteractiveDemo = () => {
                           {msg.text}
                         </p>
 
-                        {msg.property && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                            className="mt-4 max-w-[280px]"
-                          >
-                            <PropertyCard property={msg.property} />
-                          </motion.div>
+                        {msg.properties && (
+                          <div className="mt-4 space-y-4 max-w-[280px]">
+                            {msg.properties.map((prop: Property) => (
+                              <motion.div 
+                                key={prop.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                              >
+                                <PropertyCard property={prop} />
+                              </motion.div>
+                            ))}
+                          </div>
                         )}
                       </div>
                     </motion.div>
                   ))}
                 </AnimatePresence>
                 
-                {currentIndex < CHAT_SCRIPT.length && (
+                {isTyping && (
                   <div className="flex justify-start">
                     <div className="bg-white border border-border/40 rounded-2xl rounded-tl-none p-4 flex gap-1">
                       <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5, times: [0, 0.5, 1] }} className="w-1.5 h-1.5 rounded-full bg-primary" />
