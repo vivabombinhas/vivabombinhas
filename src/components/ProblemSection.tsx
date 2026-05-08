@@ -35,7 +35,7 @@ const ProblemSection = () => {
           </div>
           
           <h2 className="text-4xl md:text-7xl font-bold mb-10 tracking-tight leading-[1.05] text-foreground">
-            Encontrar imóvel em <span className="text-primary italic">Bombinhas</span> virou um caos.
+            Encontrar imóvel em <span className="text-primary italic">Bombinhas</span> virou um <span className="text-gradient">caos.</span>
           </h2>
           
           <p className="text-muted-foreground text-xl md:text-2xl font-light leading-relaxed max-w-2xl mx-auto">
