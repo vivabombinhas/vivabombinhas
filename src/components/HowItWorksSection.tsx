@@ -1,23 +1,23 @@
-import { MessageSquare, Cpu, ListChecks } from "lucide-react";
+import { MessageSquare, LayoutGrid, UserCheck } from "lucide-react";
 
 const steps = [
   {
     icon: MessageSquare,
     num: "01",
-    title: "Inicie o Chat",
-    desc: "Diga à MarIA o que procura em Bombinhas usando linguagem natural.",
+    title: "Converse com a MarIA",
+    desc: "Diga o que você busca em Bombinhas usando linguagem natural. É como falar com um especialista.",
   },
   {
-    icon: Cpu,
+    icon: LayoutGrid,
     num: "02",
-    title: "IA em Ação",
-    desc: "A MarIA vasculha nossa base de dados e parceiros em milissegundos.",
+    title: "Receba a Curadoria",
+    desc: "A MarIA analisa centenas de opções e te entrega apenas os imóveis que dão match com seu perfil.",
   },
   {
-    icon: ListChecks,
+    icon: UserCheck,
     num: "03",
-    title: "Resultados & Lead",
-    desc: "Você recebe as melhores opções e o corretor é avisado para te ajudar no fechamento.",
+    title: "Direto ao Ponto",
+    desc: "Um corretor especialista recebe seu interesse e te chama no WhatsApp para agendar visitas.",
   },
 ];
 
