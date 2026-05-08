@@ -15,59 +15,82 @@ const CTASection = () => {
   };
 
   return (
-    <section className="py-32 relative overflow-hidden bg-white border-t border-slate-50">
+    <section className="py-40 relative overflow-hidden bg-white border-t border-slate-50">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(37,99,235,0.04),transparent_60%)]" />
+      
       <div className="container max-w-5xl mx-auto px-6 lg:px-12 relative z-10">
         <div className="flex flex-col items-center text-center">
           
           <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="w-20 h-20 rounded-[32px] bg-slate-950 flex items-center justify-center mb-10 shadow-xl shadow-slate-200 group"
+            className="w-24 h-24 rounded-[36px] bg-slate-950 flex items-center justify-center mb-12 shadow-2xl shadow-slate-200 group"
           >
-            <Sparkles className="h-8 w-8 text-white group-hover:rotate-12 transition-transform duration-500" />
+            <Sparkles className="h-10 w-10 text-white group-hover:rotate-12 transition-transform duration-700" />
           </motion.div>
 
-          <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-950 mb-6 leading-[1.05]">
-            Pronto para encontrar<br /><span className="text-blue-600 italic">o seu imóvel?</span>
-          </h2>
+          <motion.h2 
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-[-0.04em] text-slate-950 mb-10 leading-[0.95]"
+          >
+            Pronto para encontrar<br /><span className="text-blue-600 italic font-medium">seu lugar?</span>
+          </motion.h2>
           
-          <p className="text-slate-500 text-lg font-medium mb-12 max-w-2xl leading-relaxed">
+          <motion.p 
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-slate-500 text-xl md:text-2xl font-medium mb-16 max-w-2xl leading-relaxed"
+          >
             Experimente a forma mais inteligente de buscar em Bombinhas. Sem formulários, apenas conversa.
-          </p>
+          </motion.p>
 
           <motion.form 
             onSubmit={handleSearch}
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             viewport={{ once: true }}
-            className="w-full max-w-2xl"
+            className="w-full max-w-2xl group"
           >
-            <div className="relative p-2 rounded-[32px] bg-slate-50 border border-slate-100 flex flex-col sm:flex-row gap-2 shadow-2xl shadow-slate-100">
-              <div className="flex-1 flex items-center gap-4 px-6 py-4">
-                <Search className="h-5 w-5 text-slate-400 shrink-0" />
+            <div className="relative p-3 rounded-[40px] bg-white border border-slate-100 flex flex-col sm:flex-row gap-3 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] focus-within:shadow-[0_40px_80px_-20px_rgba(37,99,235,0.15)] transition-all duration-700">
+              <div className="flex-1 flex items-center gap-5 px-8 py-5">
+                <Search className="h-6 w-6 text-slate-400 shrink-0" />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Descreva o imóvel que você imagina..."
-                  className="w-full bg-transparent text-slate-900 font-medium outline-none placeholder:text-slate-300"
+                  placeholder="Ex: Apartamento 3 quartos em Bombas..."
+                  className="w-full bg-transparent text-slate-900 font-bold text-lg outline-none placeholder:text-slate-200"
                 />
               </div>
               <Button 
                 type="submit"
                 size="lg" 
-                className="h-14 px-8 rounded-2xl bg-slate-950 text-white font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
+                className="h-16 px-12 rounded-[28px] bg-slate-950 text-white font-bold text-lg hover:bg-slate-800 transition-all duration-500 shadow-xl group-hover:scale-[1.02] active:scale-[0.98]"
               >
-                Começar
-                <ArrowRight className="ml-2 h-4 w-4" />
+                Buscar agora
+                <ArrowRight className="ml-3 h-5 w-5" />
               </Button>
             </div>
           </motion.form>
 
-          <p className="mt-8 text-[10px] font-bold text-slate-300 uppercase tracking-[0.3em]">
-            Gratuito • Instantâneo • Sem Cadastro
-          </p>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="mt-12 flex flex-wrap justify-center gap-8"
+          >
+            {['Gratuito', 'Instantâneo', 'Sem Cadastro'].map((item) => (
+              <div key={item} className="flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-blue-600" />
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.25em]">{item}</span>
+              </div>
+            ))}
+          </motion.div>
 
         </div>
       </div>

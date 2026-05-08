@@ -2,49 +2,61 @@ import { Bot } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="py-20 bg-slate-50 border-t border-slate-100">
+    <footer className="py-24 bg-white border-t border-slate-100">
       <div className="container max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+        <div className="flex flex-col lg:flex-row items-start justify-between gap-16">
           
-          <div className="flex flex-col items-center md:items-start gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-slate-950 flex items-center justify-center">
-                <Bot className="h-5 w-5 text-white" />
+          <div className="flex flex-col items-start gap-6 max-w-sm">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-[12px] bg-slate-950 flex items-center justify-center">
+                <Bot className="h-6 w-6 text-white" />
               </div>
-              <span className="text-xl font-bold tracking-tighter flex items-center">
-                <span className="text-primary">Mar</span>
-                <span className="text-slate-900">IA</span>
+              <span className="text-2xl font-black tracking-[-0.05em] text-slate-950">
+                Mar<span className="text-blue-600">IA</span>
               </span>
             </div>
-            <p className="text-slate-400 text-sm font-medium text-center md:text-left">
-              Inteligência Artificial aplicada ao mercado imobiliário local.
+            <p className="text-slate-500 text-[15px] font-medium leading-relaxed">
+              Simplificando a busca imobiliária em Bombinhas através de inteligência artificial e curadoria real.
             </p>
           </div>
 
-          <div className="flex gap-10">
-            <div className="flex flex-col gap-4">
-              <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Produto</span>
-              <a href="#como-funciona" className="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Como Funciona</a>
-              <a href="#anunciar" className="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Para Anunciantes</a>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-16">
+            <div className="flex flex-col gap-6">
+              <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">Produto</span>
+              <div className="flex flex-col gap-4">
+                <a href="#como-funciona" className="text-[13px] font-bold text-slate-600 hover:text-blue-600 transition-colors">Como Funciona</a>
+                <a href="/anuncie" className="text-[13px] font-bold text-slate-600 hover:text-blue-600 transition-colors">Anunciar</a>
+                <a href="#demo" className="text-[13px] font-bold text-slate-600 hover:text-blue-600 transition-colors">Demonstração</a>
+              </div>
             </div>
-            <div className="flex flex-col gap-4">
-              <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Suporte</span>
-              <a href="#faq" className="text-sm font-bold text-slate-600 hover:text-primary transition-colors">FAQ</a>
-              <a href="#" className="text-sm font-bold text-slate-600 hover:text-primary transition-colors">Privacidade</a>
+            <div className="flex flex-col gap-6">
+              <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">Suporte</span>
+              <div className="flex flex-col gap-4">
+                <a href="#faq" className="text-[13px] font-bold text-slate-600 hover:text-blue-600 transition-colors">FAQ</a>
+                <a href="#" className="text-[13px] font-bold text-slate-600 hover:text-blue-600 transition-colors">Privacidade</a>
+                <a href="#" className="text-[13px] font-bold text-slate-600 hover:text-blue-600 transition-colors">Contato</a>
+              </div>
+            </div>
+            <div className="hidden md:flex flex-col gap-6">
+              <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">Localização</span>
+              <p className="text-[13px] font-bold text-slate-600">
+                Bombinhas, SC<br />
+                Brasil
+              </p>
             </div>
           </div>
 
         </div>
 
-        <div className="mt-20 pt-10 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-xs font-bold text-slate-300 uppercase tracking-widest">
-            © {new Date().getFullYear()} MarIA • Bombinhas, SC
+        <div className="mt-24 pt-12 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8">
+          <p className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">
+            © {new Date().getFullYear()} MarIA • Tecnologia Imobiliária
           </p>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Status:</span>
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-50 text-[9px] font-black text-green-600 border border-green-100 uppercase tracking-wider">
-              <span className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
-              Sistemas Online
+          <div className="flex items-center gap-4">
+            <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">Status</span>
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-[10px] font-bold text-emerald-600 border border-emerald-100 uppercase tracking-widest">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse" />
+              Sistemas Operacionais
             </div>
           </div>
         </div>

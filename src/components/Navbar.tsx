@@ -20,39 +20,38 @@ const Navbar = () => {
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 border-b ${
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 ${
         scrolled 
-          ? "py-3 bg-white/70 backdrop-blur-xl border-border/40 shadow-sm" 
-          : "py-5 bg-transparent border-transparent"
+          ? "py-4 bg-white/80 backdrop-blur-xl border-b border-slate-100/50 shadow-[0_2px_20px_rgba(0,0,0,0.03)]" 
+          : "py-8 bg-transparent"
       }`}
     >
       <div className="container max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-2 group transition-transform duration-300 hover:scale-[1.02]">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+        <a href="#" className="flex items-center gap-3.5 group">
+          <div className="w-11 h-11 rounded-[14px] bg-slate-950 flex items-center justify-center shadow-lg shadow-slate-200 group-hover:scale-105 transition-all duration-500">
             <Bot className="h-6 w-6 text-white" />
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-bold tracking-tighter leading-none flex items-center">
-              <span className="text-primary">Mar</span>
-              <span className="text-slate-900">IA</span>
+            <span className="text-2xl font-black tracking-[-0.05em] leading-none text-slate-950">
+              Mar<span className="text-blue-600">IA</span>
             </span>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">Bombinhas • SC</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] leading-none mt-1.5">Bombinhas • SC</span>
           </div>
         </a>
 
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-10">
           {links.map((l) => (
             <a 
               key={l.href} 
               href={l.href} 
-              className="text-[13px] font-semibold text-slate-600 hover:text-primary transition-colors tracking-wide uppercase"
+              className="text-[12px] font-bold text-slate-500 hover:text-slate-950 transition-colors tracking-[0.1em] uppercase"
             >
               {l.label}
             </a>
           ))}
           <Link 
             to="/anuncie" 
-            className="text-[13px] font-semibold text-slate-600 hover:text-primary transition-colors tracking-wide uppercase"
+            className="text-[12px] font-bold text-slate-500 hover:text-slate-950 transition-colors tracking-[0.1em] uppercase"
           >
             Anunciar
           </Link>
@@ -60,7 +59,7 @@ const Navbar = () => {
           <Button 
             asChild 
             size="sm" 
-            className="rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider px-6 h-10 shadow-xl shadow-slate-200"
+            className="rounded-full bg-slate-950 hover:bg-slate-800 text-white font-bold text-[11px] uppercase tracking-widest px-8 h-11 shadow-xl shadow-slate-100 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200"
           >
             <a href="#experimentar">Entrar</a>
           </Button>

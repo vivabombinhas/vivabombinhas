@@ -141,20 +141,20 @@ export const InteractiveChatBox = ({
   return (
     <div className="w-full relative">
       <motion.div 
-        className="relative rounded-[32px] border border-slate-100 bg-white shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)] overflow-hidden"
+        className="relative rounded-[40px] border border-slate-100 bg-white shadow-[0_30px_70px_-20px_rgba(0,0,0,0.12)] overflow-hidden"
       >
-        {/* Header */}
-        <div className="bg-slate-50/50 p-4 border-b border-slate-100 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center border border-blue-100">
-              <Sparkles className="h-5 w-5 text-blue-600" />
+        {/* Header: More refined and application-like */}
+        <div className="bg-slate-50/50 backdrop-blur-md p-5 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-[18px] bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-100">
+              <Sparkles className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h4 className="font-bold text-sm tracking-tight text-slate-950 leading-none mb-1.5">MarIA</h4>
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none block">
-                  Online
+              <h4 className="font-bold text-[15px] tracking-tight text-slate-950 leading-none mb-2">MarIA</h4>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.1em] leading-none">
+                  Sempre pronta
                 </span>
               </div>
             </div>
@@ -164,31 +164,32 @@ export const InteractiveChatBox = ({
         {/* Chat Body */}
         <div 
           ref={scrollContainerRef}
-          className="h-[320px] md:h-[360px] overflow-y-auto p-5 md:p-6 space-y-4 scrollbar-hide bg-white"
+          className="h-[360px] md:h-[420px] overflow-y-auto p-6 md:p-8 space-y-6 scrollbar-hide bg-white/50"
         >
           <AnimatePresence initial={false}>
             {messages.map((msg, idx) => (
               <motion.div
                 key={idx + msg.text}
-                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                initial={{ opacity: 0, y: 15, scale: 0.96 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div 
-                  className={`max-w-[85%] p-3.5 rounded-2xl ${
+                  className={`max-w-[88%] p-4 rounded-2xl md:rounded-[22px] ${
                     msg.type === 'user' 
-                      ? 'bg-slate-950 text-white shadow-sm' 
-                      : 'bg-slate-50 border border-slate-100 text-slate-700'
+                      ? 'bg-slate-950 text-white shadow-xl shadow-slate-200' 
+                      : 'bg-white border border-slate-100 text-slate-700 shadow-sm'
                   }`}
                 >
-                  <p className="text-[13px] md:text-[14px] leading-relaxed font-medium">
+                  <p className="text-[14px] md:text-[15px] leading-relaxed font-medium">
                     {msg.text}
                   </p>
 
                   {msg.properties && (
-                    <div className="mt-4 space-y-3 w-[200px] md:w-[240px]">
+                    <div className="mt-5 space-y-4 w-[220px] md:w-[280px]">
                       {msg.properties.map((prop: Property) => (
-                        <div key={prop.id} className="scale-90 origin-top-left -mb-4">
+                        <div key={prop.id} className="scale-95 origin-top-left -mb-6 last:mb-0">
                           <PropertyCard property={prop} />
                         </div>
                       ))}
@@ -201,23 +202,23 @@ export const InteractiveChatBox = ({
           
           {isTyping && (
             <div className="flex justify-start">
-              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3 flex gap-1">
-                <span className="w-1 h-1 rounded-full bg-blue-500 animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-1 h-1 rounded-full bg-blue-500 animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-1 h-1 rounded-full bg-blue-500 animate-bounce" />
+              <div className="bg-white border border-slate-100 rounded-2xl p-4 flex gap-1.5 shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600/40 animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600/40 animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600/40 animate-bounce" />
               </div>
             </div>
           )}
         </div>
 
-        {/* Fake Input Area */}
-        <div className="p-4 bg-slate-50/30 border-t border-slate-100">
-          <div className="flex gap-3">
-            <div className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[11px] text-slate-400 font-semibold flex items-center">
-              Pergunte algo...
+        {/* Fake Input Area: Clean & Professional */}
+        <div className="p-5 bg-white border-t border-slate-100">
+          <div className="flex gap-4">
+            <div className="flex-1 bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-3.5 text-[13px] text-slate-400 font-medium flex items-center">
+              Como posso ajudar hoje?
             </div>
-            <div className="w-10 h-10 rounded-xl bg-slate-950 flex items-center justify-center text-white">
-              <Send className="h-4 w-4" />
+            <div className="w-12 h-12 rounded-2xl bg-slate-950 flex items-center justify-center text-white shadow-lg shadow-slate-100">
+              <Send className="h-5 w-5" />
             </div>
           </div>
         </div>
