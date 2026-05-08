@@ -179,32 +179,32 @@ export const InteractiveChatBox = ({
         className="rounded-[32px] md:rounded-[40px] border border-border/40 bg-white/90 backdrop-blur-xl shadow-[0_40px_100px_-20px_rgba(0,0,0,0.12)] overflow-hidden"
       >
         {/* Header */}
-        <div className="bg-secondary/30 p-4 md:p-6 border-b border-border/40 flex items-center justify-between backdrop-blur-md">
-          <div className="flex items-center gap-3 md:gap-4">
+        <div className="bg-secondary/30 p-3 md:p-4 border-b border-border/40 flex items-center justify-between backdrop-blur-md">
+          <div className="flex items-center gap-2 md:gap-3">
             <div className="relative">
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner">
-                <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner">
+                <Sparkles className="h-4 w-4 md:h-5 md:w-5 text-primary" />
               </div>
-              <span className="absolute bottom-0 right-0 w-3 h-3 md:w-3.5 md:h-3.5 rounded-full bg-green-500 border-2 border-white shadow-sm" />
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-green-500 border-2 border-white shadow-sm" />
             </div>
             <div>
-              <h4 className="font-bold text-sm md:text-base tracking-tight text-slate-900">MarIA</h4>
-              <span className="text-[9px] md:text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+              <h4 className="font-bold text-[13px] md:text-sm tracking-tight text-slate-900 leading-none mb-0.5">MarIA</h4>
+              <span className="text-[8px] md:text-[9px] text-muted-foreground font-bold uppercase tracking-widest leading-none block">
                 Concierge Imobiliária
               </span>
             </div>
           </div>
-          <div className="flex gap-1.5">
-             <div className="w-1.5 h-1.5 rounded-full bg-border/60" />
-             <div className="w-1.5 h-1.5 rounded-full bg-border/60" />
-             <div className="w-1.5 h-1.5 rounded-full bg-border/60" />
+          <div className="flex gap-1">
+             <div className="w-1 h-1 rounded-full bg-border/60" />
+             <div className="w-1 h-1 rounded-full bg-border/60" />
+             <div className="w-1 h-1 rounded-full bg-border/60" />
           </div>
         </div>
 
         {/* Chat Body */}
         <div 
           ref={scrollContainerRef}
-          className="h-[350px] md:h-[450px] overflow-y-auto p-5 md:p-8 space-y-5 md:space-y-6 bg-gradient-to-b from-transparent to-slate-50/50 scrollbar-hide"
+          className="h-[320px] md:h-[400px] overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-5 bg-gradient-to-b from-transparent to-slate-50/50 scrollbar-hide"
         >
           <AnimatePresence initial={false}>
             {messages.map((msg, idx) => (
@@ -257,13 +257,13 @@ export const InteractiveChatBox = ({
         </div>
 
         {/* Input Area */}
-        <div className="p-4 md:p-6 border-t border-border/40 bg-white/50 backdrop-blur-md">
-          <div className="flex gap-3">
-            <div className="flex-1 bg-secondary/50 border border-border/30 rounded-full px-5 md:px-6 py-2.5 md:py-3 text-[12px] md:text-sm text-muted-foreground/60 font-medium flex items-center">
+        <div className="p-3 md:p-4 border-t border-border/40 bg-white/50 backdrop-blur-md">
+          <div className="flex gap-2 md:gap-3">
+            <div className="flex-1 bg-secondary/50 border border-border/30 rounded-full px-4 md:px-5 py-2 md:py-2.5 text-[11px] md:text-[13px] text-muted-foreground/60 font-medium flex items-center">
               Pergunte sobre Bombinhas...
             </div>
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/25 hover:scale-105 transition-transform cursor-pointer">
-              <Send className="h-4 w-4 md:h-5 md:w-5" />
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/25 hover:scale-105 transition-transform cursor-pointer">
+              <Send className="h-3.5 w-3.5 md:h-4 md:w-4" />
             </div>
           </div>
         </div>
