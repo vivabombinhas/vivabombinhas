@@ -2,12 +2,19 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { InteractiveChatBox } from "./InteractiveChatBox";
+import { useState } from "react";
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const [activeFlow, setActiveFlow] = useState<number | null>(null);
 
   const handleStartChat = () => {
     navigate("/maria");
+  };
+
+  const handleFlowSelect = (index: number) => {
+    setActiveFlow(null); // Force a reset in the child
+    setTimeout(() => setActiveFlow(index), 10);
   };
 
   return (
@@ -36,12 +43,29 @@ const HeroSection = () => {
             </div>
             
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.1]">
-              Encontre seu lugar em <span className="text-primary italic">Bombinhas</span>
+              A concierge imobiliária inteligente de <span className="text-primary italic">Bombinhas</span>
             </h1>
             
             <p className="text-lg md:text-xl text-slate-600 mb-10 leading-relaxed max-w-xl">
-              A forma mais leve e inteligente de descobrir o imóvel ideal. Converse com a MarIA e encontre oportunidades que realmente combinam com seu estilo de vida.
+              Aluguel de temporada, anual, compra ou investimento — a MarIA entende o que você precisa e mostra apenas imóveis que fazem sentido para o seu perfil.
             </p>
+
+            <div className="flex flex-wrap gap-3 mb-10">
+              {[
+                { label: "🏖 Temporada", index: 0 },
+                { label: "🏠 Aluguel anual", index: 1 },
+                { label: "🔑 Compra", index: 2 },
+                { label: "📈 Investimento", index: 2 },
+              ].map((chip) => (
+                <button
+                  key={chip.label}
+                  onClick={() => handleFlowSelect(chip.index)}
+                  className="px-4 py-2 rounded-full border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition-colors bg-white/50 backdrop-blur-sm"
+                >
+                  {chip.label}
+                </button>
+              ))}
+            </div>
 
             <div className="flex flex-wrap gap-4">
               <Button 
@@ -83,7 +107,7 @@ const HeroSection = () => {
 
           {/* Real Interactive Chat Box */}
           <div className="relative animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            <InteractiveChatBox />
+            <InteractiveChatBox forcedConvIndex={activeFlow} />
             
             {/* Decorative elements */}
             <div className="absolute -top-12 -right-12 w-64 h-64 bg-primary/10 rounded-full blur-[80px] -z-10" />
