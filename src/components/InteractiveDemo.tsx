@@ -1,7 +1,8 @@
-import { MessageSquare, Sparkles, Send, MapPin, Home, CheckCircle2 } from "lucide-react";
+import { MessageSquare, Sparkles, Send, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import { PropertyCard, type Property } from "./maria/PropertyCard";
 
 const CHAT_SCRIPT = [
   { type: "user", text: "Quero um apartamento em Bombas perto da praia" },
@@ -11,12 +12,22 @@ const CHAT_SCRIPT = [
     type: "ai", 
     text: "Então vou priorizar imóveis com boa ocupação na temporada 👇",
     property: {
-      name: "Residencial Vista Mar",
-      price: "R$ 980.000",
-      location: "150m da praia",
-      specs: "2 Suítes + Lavabo",
-      image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80"
-    }
+      id: "demo-1",
+      titulo: "Residencial Vista Mar - Alto Padrão",
+      preco: 980000,
+      bairro: "Bombas",
+      tipo: "apartamento",
+      finalidade: "compra",
+      quartos: 2,
+      suites: 2,
+      banheiros: 3,
+      vagas_garagem: 1,
+      area_m2: 85,
+      fotos: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"],
+      anunciante_telefone: "47999999999",
+      link_anuncio: "#",
+      destaque_pago: true
+    } as Property
   },
   { type: "user", text: "Tem algo até 1 milhão?" },
   { type: "ai", text: "Encontrei algumas opções alinhadas ao seu perfil. Deseja ver os detalhes no WhatsApp?" }
