@@ -375,8 +375,7 @@ export default function AdminLeads() {
                     <TableHead className="w-[14%]">Interesse</TableHead>
                     <TableHead className="w-[18%]">Bairro / Tipo</TableHead>
                     <TableHead className="w-[10%]">Data</TableHead>
-                    <TableHead className="w-[10%] text-right">Ação</TableHead>
-                    <TableHead className="w-[12%] text-right">Status</TableHead>
+                    <TableHead className="w-[18%] text-right">Status / Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
