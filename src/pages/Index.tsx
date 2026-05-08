@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
+import PartnerLogos from "@/components/PartnerLogos";
 import FloatingChatButton from "@/components/FloatingChatButton";
 import ProblemSection from "@/components/ProblemSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
