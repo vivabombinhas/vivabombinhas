@@ -139,35 +139,32 @@ export const InteractiveChatBox = ({
   }, [currentIndex, currentConvIndex]);
 
   return (
-    <div className="w-full relative group">
-      {/* Background glass effect */}
-      <div className="absolute inset-0 bg-white/5 rounded-[40px] blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
-      
+    <div className="w-full relative">
       <motion.div 
-        className="relative rounded-[32px] border border-white/10 bg-[#0a0a0a]/80 backdrop-blur-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] overflow-hidden"
+        className="relative rounded-[32px] border border-slate-100 bg-white shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)] overflow-hidden"
       >
         {/* Header */}
-        <div className="bg-white/5 p-4 border-b border-white/5 flex items-center justify-between">
+        <div className="bg-slate-50/50 p-4 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/30">
-              <Sparkles className="h-5 w-5 text-primary" />
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center border border-blue-100">
+              <Sparkles className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h4 className="font-bold text-sm tracking-tight text-white leading-none mb-1">MarIA</h4>
+              <h4 className="font-bold text-sm tracking-tight text-slate-950 leading-none mb-1.5">MarIA</h4>
               <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest leading-none block">
-                  IA • ONLINE
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none block">
+                  Online
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Chat Body - More compact */}
+        {/* Chat Body */}
         <div 
           ref={scrollContainerRef}
-          className="h-[300px] md:h-[340px] overflow-y-auto p-5 md:p-6 space-y-4 scrollbar-hide"
+          className="h-[320px] md:h-[360px] overflow-y-auto p-5 md:p-6 space-y-4 scrollbar-hide bg-white"
         >
           <AnimatePresence initial={false}>
             {messages.map((msg, idx) => (
@@ -178,13 +175,13 @@ export const InteractiveChatBox = ({
                 className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div 
-                  className={`max-w-[85%] p-3.5 shadow-sm rounded-2xl ${
+                  className={`max-w-[85%] p-3.5 rounded-2xl ${
                     msg.type === 'user' 
-                      ? 'bg-white text-slate-950 font-semibold' 
-                      : 'bg-white/5 border border-white/10 text-white/80'
+                      ? 'bg-slate-950 text-white shadow-sm' 
+                      : 'bg-slate-50 border border-slate-100 text-slate-700'
                   }`}
                 >
-                  <p className="text-[13px] md:text-[14px] leading-relaxed">
+                  <p className="text-[13px] md:text-[14px] leading-relaxed font-medium">
                     {msg.text}
                   </p>
 
@@ -204,22 +201,22 @@ export const InteractiveChatBox = ({
           
           {isTyping && (
             <div className="flex justify-start">
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-3 flex gap-1">
-                <span className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-1 h-1 rounded-full bg-primary animate-bounce" />
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3 flex gap-1">
+                <span className="w-1 h-1 rounded-full bg-blue-500 animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-1 h-1 rounded-full bg-blue-500 animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-1 h-1 rounded-full bg-blue-500 animate-bounce" />
               </div>
             </div>
           )}
         </div>
 
         {/* Fake Input Area */}
-        <div className="p-4 bg-white/[0.02] border-t border-white/5">
+        <div className="p-4 bg-slate-50/30 border-t border-slate-100">
           <div className="flex gap-3">
-            <div className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-[11px] text-white/30 font-medium flex items-center">
+            <div className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[11px] text-slate-400 font-semibold flex items-center">
               Pergunte algo...
             </div>
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
+            <div className="w-10 h-10 rounded-xl bg-slate-950 flex items-center justify-center text-white">
               <Send className="h-4 w-4" />
             </div>
           </div>
