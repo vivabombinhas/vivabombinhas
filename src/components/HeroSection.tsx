@@ -14,79 +14,79 @@ export default function HeroSection() {
   ];
 
   return (
-    <section className="relative min-h-[70vh] flex flex-col justify-center overflow-hidden pt-32 pb-16 lg:pt-20 lg:pb-12 bg-white">
+    <section className="relative min-h-[85vh] flex flex-col justify-center overflow-hidden pt-36 pb-20 lg:pt-24 lg:pb-16 bg-white">
       
-      {/* ── Background: Subtle & Refined ── */}
+      {/* ── Background: Subtle Gradient & Pattern ── */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-slate-50/50 to-transparent" />
-        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(#000 0.5px, transparent 0.5px)", backgroundSize: "32px 32px" }} />
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_70%_30%,rgba(37,99,235,0.03),transparent_50%)]" />
+        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "radial-gradient(#000 0.5px, transparent 0.5px)", backgroundSize: "40px 40px" }} />
       </div>
 
       <div className="relative z-10 container max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr,0.8fr] items-center gap-12 lg:gap-24">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr,0.85fr] items-center gap-16 lg:gap-32">
           
           {/* ── LEFT: Content ── */}
-          <div className="flex flex-col">
+          <div className="flex flex-col items-start">
             
-            {/* Minimal Badge */}
+            {/* Minimalist Status Badge */}
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 self-start mb-10 px-3 py-1.5 rounded-full border border-slate-100 bg-slate-50/50"
+              className="inline-flex items-center gap-2.5 mb-10 px-4 py-2 rounded-full border border-slate-100 bg-white/50 backdrop-blur-sm shadow-sm"
             >
-              <div className="flex h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-                Assistente de busca imobiliária • Bombinhas
+              <div className="flex h-2 w-2 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.5)] animate-pulse" />
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.15em]">
+                Assistente Imobiliária • Bombinhas
               </span>
             </motion.div>
 
-            {/* Headline: Editorial & Sophisticated */}
+            {/* Headline: Precise & Powerful */}
             <motion.h1 
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-slate-950 font-bold tracking-tight leading-[1.1] mb-8" 
-              style={{ fontSize: "clamp(36px, 5vw, 64px)" }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="text-slate-950 font-extrabold tracking-[-0.03em] leading-[1.05] mb-8" 
+              style={{ fontSize: "clamp(42px, 5.5vw, 72px)" }}
             >
-              Descubra imóveis em<br />
-              <span className="text-blue-600">Bombinhas</span> sem perder<br />
-              horas pesquisando.
+              Encontre o imóvel<br />
+              certo em <span className="text-blue-600">Bombinhas</span><br />
+              sem complicação.
             </motion.h1>
 
-            {/* Description: Clean & Clear */}
+            {/* Description: Balanced & Sophisticated */}
             <motion.p 
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-slate-500 text-lg leading-relaxed font-medium max-w-[480px] mb-10"
+              transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="text-slate-500 text-lg md:text-xl leading-relaxed font-medium max-w-[520px] mb-12"
             >
-              A MarIA organiza anúncios de toda a cidade para você. Converse, filtre e encontre opções reais em um só lugar, direto com o anunciante.
+              A MarIA centraliza anúncios de toda a cidade e filtra o que realmente importa. Converse, explore e conecte-se direto com o anunciante.
             </motion.p>
 
             {/* Interaction Row */}
             <motion.div 
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-start sm:items-center gap-6"
+              transition={{ delay: 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 w-full sm:w-auto"
             >
               <Button
                 size="lg"
-                className="h-14 px-10 rounded-2xl bg-slate-950 text-white font-bold hover:bg-slate-800 transition-all duration-300 shadow-xl shadow-slate-200 group"
+                className="h-16 px-10 rounded-2xl bg-slate-950 text-white font-bold hover:bg-slate-800 transition-all duration-500 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] group"
                 onClick={() => window.open('https://wa.me/5547999999999', '_blank')}
               >
-                Conversar agora
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                Começar agora
+                <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-1.5 transition-transform duration-500" />
               </Button>
 
-              <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
+              <div className="flex bg-slate-50 p-1.5 rounded-[20px] border border-slate-100/80 shadow-inner">
                 {flows.map((flow) => (
                   <button
                     key={flow.label}
                     onClick={() => setActiveFlow(flow.index)}
-                    className={`px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-300 ${
+                    className={`px-5 py-3 rounded-[14px] text-[11px] font-bold uppercase tracking-wider transition-all duration-500 ${
                       activeFlow === flow.index
-                        ? "bg-white text-slate-950 shadow-sm border border-slate-100"
+                        ? "bg-white text-slate-950 shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-slate-100"
                         : "text-slate-400 hover:text-slate-600"
                     }`}
                   >
