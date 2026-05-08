@@ -60,6 +60,7 @@ interface Props {
   lead: Lead | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultTab?: "historico" | "notas" | "conversa";
 }
 
 const formatDateTime = (iso?: string | null) =>
@@ -83,7 +84,7 @@ type TimelineEvent = {
   meta?: string;
 };
 
-export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
+export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab = "historico" }: Props) {
   const qc = useQueryClient();
   const [newNote, setNewNote] = useState("");
   const [followup, setFollowup] = useState("");
