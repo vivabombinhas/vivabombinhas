@@ -25,7 +25,7 @@ const problems = [
 
 const ProblemSection = () => {
   return (
-    <section className="py-24 md:py-40 relative overflow-hidden bg-secondary/30">
+    <section className="py-16 md:py-24 relative overflow-hidden bg-secondary/30">
       <div className="container relative z-10">
         {/* Header Section */}
         <div className="text-center mb-24 max-w-4xl mx-auto">
@@ -68,7 +68,7 @@ const ProblemSection = () => {
           <p className="text-muted-foreground text-xl md:text-2xl font-light italic mb-8">
             Foi exatamente por isso que criamos a MarIA.
           </p>
-          <div className="w-px h-32 bg-gradient-to-b from-primary via-primary/40 to-transparent"></div>
+          <div className="w-px h-16 md:h-24 bg-gradient-to-b from-primary via-primary/40 to-transparent"></div>
         </div>
       </div>
     </section>

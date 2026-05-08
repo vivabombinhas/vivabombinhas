@@ -23,7 +23,7 @@ const steps = [
 
 const HowItWorksSection = () => {
   return (
-    <section id="como-funciona" className="py-12 md:py-32 relative overflow-hidden">
+    <section id="como-funciona" className="py-12 md:py-20 relative overflow-hidden">
       {/* Subtle bg */}
       <div className="absolute inset-0 bg-gradient-to-b from-muted/50 to-transparent" />
       

@@ -11,7 +11,7 @@ const benefits = [
 
 const PartnersSection = () => {
   return (
-    <section id="anunciar" className="py-12 md:py-32 relative overflow-hidden">
+    <section id="anunciar" className="py-12 md:py-20 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.03] to-transparent" />
       <div className="container relative z-10">
         <div className="max-w-5xl mx-auto">
