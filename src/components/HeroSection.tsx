@@ -1,6 +1,7 @@
-import { ArrowRight, MessageSquare, MapPin, BedDouble, Bath, Maximize } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { InteractiveChatBox } from "./InteractiveChatBox";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const HeroSection = () => {
       </div>
 
       <div className="container relative z-10 px-4 mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Text Content */}
           <div className="max-w-2xl animate-fade-up">
             <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-sm font-semibold text-primary mb-6 border border-blue-100">
@@ -80,66 +81,13 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Visual Mockup Section */}
+          {/* Real Interactive Chat Box */}
           <div className="relative animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            <div className="relative z-10 bg-white/80 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-2xl border border-white/20 max-w-md mx-auto">
-              <div className="space-y-6">
-                {/* User Message */}
-                <div className="flex justify-end">
-                  <div className="bg-primary text-white px-5 py-3 rounded-2xl rounded-tr-none shadow-lg max-w-[80%] text-sm font-medium leading-relaxed">
-                    Quero um apartamento em Mariscal perto da praia, com piscina e 3 quartos. 🏖️
-                  </div>
-                </div>
-
-                {/* MarIA Message */}
-                <div className="flex justify-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0 border border-blue-200 shadow-sm">
-                    <MessageSquare className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="bg-white px-5 py-3 rounded-2xl rounded-tl-none shadow-md border border-slate-100 max-w-[85%]">
-                    <p className="text-sm text-slate-800 leading-relaxed">
-                      Com certeza! Encontrei 3 opções incríveis em Mariscal que combinam exatamente com o que você busca:
-                    </p>
-                  </div>
-                </div>
-
-                {/* Property Mockup Cards */}
-                <div className="space-y-3 pt-2">
-                  <div className="flex gap-3 bg-white p-3 rounded-2xl shadow-sm border border-slate-50 hover:border-primary/20 transition-all hover:scale-[1.02]">
-                    <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-100">
-                      <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=400&fit=crop" alt="Property" className="w-full h-full object-cover" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-bold text-slate-900 truncate">Edifício Mar de Fora</h4>
-                      <p className="text-[10px] text-slate-500 flex items-center gap-0.5 mt-0.5">
-                        <MapPin className="w-2.5 h-2.5" /> Mariscal, Bombinhas
-                      </p>
-                      <div className="flex items-center gap-3 mt-2">
-                        <span className="text-xs font-bold text-primary">R$ 1.250.000</span>
-                        <div className="flex gap-2 text-[10px] text-slate-400">
-                          <span className="flex items-center gap-1"><BedDouble className="w-3 h-3" /> 3</span>
-                          <span className="flex items-center gap-1"><Bath className="w-3 h-3" /> 2</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 bg-white p-3 rounded-2xl shadow-sm border border-slate-50 opacity-60 scale-95 translate-y-2 translate-x-4">
-                    <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-100">
-                      <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&h=200&fit=crop" alt="Property" className="w-full h-full object-cover" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-bold text-slate-900 truncate">Residencial Brisa do Mar</h4>
-                      <div className="h-4 w-24 bg-slate-100 rounded mt-2 animate-pulse" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+            <InteractiveChatBox />
+            
             {/* Decorative elements */}
-            <div className="absolute -top-12 -right-12 w-64 h-64 bg-primary/10 rounded-full blur-[80px] z-0" />
-            <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-tropical-100/50 rounded-full blur-[80px] z-0" />
+            <div className="absolute -top-12 -right-12 w-64 h-64 bg-primary/10 rounded-full blur-[80px] -z-10" />
+            <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-tropical-100/50 rounded-full blur-[80px] -z-10" />
           </div>
         </div>
       </div>
