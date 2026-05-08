@@ -20,12 +20,14 @@ const Navbar = () => {
   ];
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "glass shadow-sm" : "bg-transparent"}`}>
-      <div className="container flex h-16 items-center justify-between">
-        <a href="#" className="flex items-center gap-2 font-bold text-xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          <Bot className="h-7 w-7 text-primary" />
-          <span className="text-primary">Mar</span>
-          <span className={scrolled ? "text-slate-900" : "text-slate-800"}>IA</span>
+    <header className={`fixed top-4 left-0 right-0 z-50 transition-all duration-500`}>
+      <div className={`container max-w-5xl flex h-16 items-center justify-between rounded-full transition-all duration-500 px-8 ${scrolled ? \"glass shadow-xl shadow-primary/5 border-white/20\" : \"bg-white/10 backdrop-blur-md border border-white/10\"}`}>
+        <a href=\"#\" className=\"flex items-center gap-2 font-bold text-xl group\" style={{ fontFamily: \"'Space Grotesk', sans-serif\" }}>
+          <div className=\"w-8 h-8 rounded-lg bg-primary flex items-center justify-center group-hover:rotate-12 transition-transform duration-300\">
+            <Bot className=\"h-5 w-5 text-white\" />
+          </div>
+          <span className=\"text-primary\">Mar</span>
+          <span className=\"text-foreground\">IA</span>
         </a>
 
         <nav className="hidden md:flex items-center gap-6">

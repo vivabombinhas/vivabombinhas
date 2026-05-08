@@ -203,7 +203,7 @@ export const InteractiveChatBox = () => {
                   className={`max-w-[85%] p-3.5 md:p-4 shadow-sm ${
                     msg.type === 'user' 
                       ? 'bg-primary text-white rounded-2xl rounded-tr-none' 
-                      : 'bg-white border border-border/40 rounded-2xl rounded-tl-none text-foreground'
+                      : 'bg-white/80 backdrop-blur-sm border border-white/60 rounded-2xl rounded-tl-none text-foreground'
                   }`}
                 >
                   <p className="text-[13px] md:text-[15px] leading-relaxed font-medium">
