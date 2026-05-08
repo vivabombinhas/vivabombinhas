@@ -9,7 +9,7 @@ const benefits = [
 
 const BenefitsSection = () => {
   return (
-    <section className="py-12 md:py-32 relative overflow-hidden">
+    <section className="py-12 md:py-20 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-muted/50 to-transparent" />
       <div className="container relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-16">
