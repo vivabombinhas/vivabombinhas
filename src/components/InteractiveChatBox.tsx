@@ -261,37 +261,7 @@ export const InteractiveChatBox = ({ forcedConvIndex }: { forcedConvIndex?: numb
         </div>
       </motion.div>
 
-      {/* Floating Alert Badge */}
-      <motion.div 
-        initial={{ opacity: 0, x: 20 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: 1, duration: 0.8 }}
-        className="absolute -bottom-6 right-2 md:-bottom-8 md:-right-12 bg-white/95 backdrop-blur-xl rounded-2xl border border-primary/10 p-4 md:p-5 shadow-[0_20px_50px_rgba(0,0,0,0.1)] w-[220px] md:w-[280px] z-30"
-      >
-        <div className="flex items-center gap-3 mb-2 md:mb-3">
-          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20 shadow-inner">
-            <MessageSquare className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
-          </div>
-          <div>
-            <span className="text-[9px] md:text-[10px] font-bold text-primary uppercase tracking-[0.1em] block">Notificação Real</span>
-            <span className="text-[12px] md:text-[14px] font-bold text-foreground">Aviso no WhatsApp</span>
-          </div>
-        </div>
-        <p className="text-[11px] md:text-[12px] text-muted-foreground leading-relaxed font-medium">
-          "Oi! Sou a MarIA. Encontrei 3 novas opções em Mariscal que acabaram de entrar."
-        </p>
-        <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-between">
-          <span className="text-[9px] md:text-[10px] text-muted-foreground">Agora mesmo</span>
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            <span className="text-[9px] md:text-[10px] font-bold text-green-600">Simulação Real</span>
-          </div>
-        </div>
-      </motion.div>
+      {/* Removed artificial urgency notification as per user feedback */}
     </div>
   );
 };
