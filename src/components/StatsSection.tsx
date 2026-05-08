@@ -34,18 +34,18 @@ export default function StatsSection() {
   ];
 
   return (
-    <section className="py-12 bg-[#020817] relative">
+    <section className="py-12 bg-white relative">
       <div className="container max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-1px bg-white/5 rounded-[40px] border border-white/5 overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-slate-100 rounded-[32px] border border-slate-100 overflow-hidden shadow-sm">
           {stats.map((stat, i) => (
             <div 
               key={i}
-              className="relative p-10 md:p-14 flex flex-col items-center text-center bg-[#020817] hover:bg-white/[0.02] transition-colors duration-500"
+              className="relative p-10 flex flex-col items-center text-center bg-white hover:bg-slate-50 transition-colors duration-500"
             >
-              <div className="text-4xl md:text-5xl font-bold text-white tracking-tighter mb-3">
+              <div className="text-4xl font-bold text-slate-950 tracking-tight mb-2">
                 <Counter value={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
               </div>
-              <div className="text-[10px] md:text-[11px] text-white/40 font-bold uppercase tracking-[0.2em]">
+              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">
                 {stat.label}
               </div>
             </div>
