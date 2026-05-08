@@ -95,31 +95,16 @@ export default function HeroSection() {
             </Button>
           </div>
 
-          {/* Stats — single row */}
-          <div className="flex items-center gap-0 flex-wrap">
-            {[
-              { num: "+20",  label: "Imobiliárias parceiras" },
-              { num: "+580", label: "Imóveis cadastrados" },
-              { num: "100%", label: "Foco em Bombinhas" },
-            ].map((stat, i, arr) => (
-              <div key={i} className={`pr-6 mr-6 ${i < arr.length - 1 ? "border-r border-white/20" : ""}`}>
-                <p className="text-[22px] font-semibold text-white tracking-tight leading-none">
-                  <span className="text-[#38b6ff]">{stat.num.replace(/[0-9]/g, "")}</span>
-                  {stat.num.replace(/\D/g, "")}
-                  {stat.num.endsWith("%") ? <span className="text-[#38b6ff]">%</span> : ""}
-                </p>
-                <p className="text-[10px] uppercase tracking-widest text-white/50 mt-1">{stat.label}</p>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* ── RIGHT: Chat ── */}
         <div className="relative flex items-center justify-center lg:justify-end animate-fade-up" style={{ animationDelay: "0.2s" }}>
-          <InteractiveChatBox 
-            forcedConvIndex={activeFlow} 
-            onConvIndexChange={(index) => setActiveFlow(index)}
-          />
+          <div className="w-full max-w-[400px]">
+            <InteractiveChatBox 
+              forcedConvIndex={activeFlow} 
+              onConvIndexChange={(index) => setActiveFlow(index)}
+            />
+          </div>
           
           {/* Decorative elements */}
           <div className="absolute -top-12 -right-12 w-64 h-64 bg-[#3b9fe8]/20 rounded-full blur-[80px] -z-10" />
