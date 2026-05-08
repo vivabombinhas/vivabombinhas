@@ -367,6 +367,14 @@ serve(async (req) => {
       let assistantMessage = aiData.choices?.[0]?.message?.content || "Desculpe, tive um problema.";
       assistantMessage = assistantMessage.replace(/^\[(SHOW_RESULTS|NO_RESULTS_YET)\]\s*/g, "");
       
+      // Save anonymous conversation turn if lead doesn't exist yet
+      const leadId = await upsertLeadBySession(supabase, sessionId, {
+        mensagem_original: userMessage
+      });
+      if (leadId) {
+        await saveLastConversationTurn(supabase, leadId, userMessage, assistantMessage);
+      }
+
       return new Response(JSON.stringify({
         reply: assistantMessage, properties: [], all_properties: [], filters_used: {},
         results_count: 0, broader_search: false, lead_saved: false,
