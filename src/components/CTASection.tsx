@@ -14,7 +14,7 @@ const CTASection = () => {
   };
 
   return (
-    <section className="py-12 md:py-32">
+    <section className="py-12 md:py-20">
       <div className="container max-w-3xl text-center">
         <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-4">Comece agora</p>
         <h2 className="text-3xl md:text-5xl font-bold mb-4">

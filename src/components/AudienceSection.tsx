@@ -29,7 +29,7 @@ const audiences = [
 
 const AudienceSection = () => {
   return (
-    <section id="para-quem" className="py-12 md:py-32">
+    <section id="para-quem" className="py-12 md:py-20">
       <div className="container">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">Para quem</p>

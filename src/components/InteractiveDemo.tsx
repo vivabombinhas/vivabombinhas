@@ -45,7 +45,7 @@ const InteractiveDemo = () => {
   }, [currentIndex]);
 
   return (
-    <section className="py-16 md:py-24 relative overflow-hidden bg-background">
+    <section className="py-12 md:py-20 relative overflow-hidden bg-background">
       {/* Background patterns - Subtle glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-[0.05] pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-primary blur-[150px] animate-pulse" />
