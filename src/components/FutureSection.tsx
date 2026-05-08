@@ -1,4 +1,5 @@
 import { UtensilsCrossed, Palmtree, Wrench, Rocket } from "lucide-react";
+import { motion } from "framer-motion";
 
 const items = [
   { icon: UtensilsCrossed, label: "Restaurantes" },
@@ -9,29 +10,35 @@ const items = [
 
 const FutureSection = () => {
   return (
-    <section className="py-12 md:py-20">
-      <div className="container">
-        <div className="rounded-3xl bg-gradient-to-br from-foreground to-foreground/90 p-10 md:p-16 text-center max-w-4xl mx-auto relative overflow-hidden">
-          {/* Glows */}
-          <div className="absolute top-0 left-1/3 w-64 h-64 bg-primary/20 rounded-full blur-[100px]" />
-          <div className="absolute bottom-0 right-1/4 w-48 h-48 bg-accent/20 rounded-full blur-[80px]" />
+    <section className="py-24 bg-white">
+      <div className="container max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="relative rounded-[64px] bg-slate-50 border border-slate-100 p-12 md:p-24 overflow-hidden flex flex-col items-center text-center">
           
-          <div className="relative z-10">
-            <p className="text-sm font-bold text-accent uppercase tracking-widest mb-4">Roadmap</p>
-            <h2 className="text-3xl md:text-5xl font-bold mb-4 text-primary-foreground">
-              Mais que imóveis.
-              <br />
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Uma plataforma digital local.</span>
+          {/* Subtle light leak */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-primary/5 blur-[120px] rounded-full" />
+
+          <div className="relative z-10 max-w-3xl">
+            <p className="text-[10px] font-bold text-primary uppercase tracking-[0.4em] mb-6">Próximos Passos</p>
+            <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-950 mb-8 leading-[1.1]">
+              Mais que imóveis.<br /><span className="text-slate-400">Um ecossistema local.</span>
             </h2>
-            <p className="text-primary-foreground/50 text-lg mb-10 max-w-xl mx-auto">
-              MarIA começa pelos imóveis, mas em breve será sua assistente para tudo em Bombinhas.
+            <p className="text-slate-500 text-lg font-medium mb-12 leading-relaxed">
+              MarIA começa pelos imóveis, mas nosso objetivo é ser a sua assistente definitiva para tudo o que acontece em Bombinhas.
             </p>
-            <div className="flex flex-wrap justify-center gap-3">
+            
+            <div className="flex flex-wrap justify-center gap-4">
               {items.map((it, i) => (
-                <div key={i} className="flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/10 rounded-full px-5 py-2.5 text-sm font-medium text-primary-foreground/80">
-                  <it.icon className="h-4 w-4 text-accent" />
+                <motion.div 
+                  key={i} 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                  className="flex items-center gap-3 bg-white border border-slate-100 rounded-2xl px-6 py-4 text-sm font-bold text-slate-950 shadow-sm"
+                >
+                  <it.icon className="h-4 w-4 text-primary" />
                   {it.label}
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
