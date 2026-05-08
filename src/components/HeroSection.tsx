@@ -44,7 +44,7 @@ export default function HeroSection() {
 
           {/* Headline */}
           <h1 className="font-bold leading-[1.1] tracking-tight text-white mb-5" style={{ fontSize: "clamp(34px, 5vw, 62px)" }}>
-            O jeito inteligente<br />de encontrar seu<br />imóvel em{" "}
+            A inteligência que<br />conecta você ao imóvel<br />ideal em{" "}
             <span className="italic" style={{ background: "linear-gradient(90deg, #1a9de0, #38b6ff)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
               Bombinhas
             </span>
