@@ -4,60 +4,148 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { PropertyCard, type Property } from "./maria/PropertyCard";
 
-const CHAT_SCRIPT = [
-  { type: "user", text: "Quero um apartamento em Bombas perto da praia" },
-  { type: "ai", text: "Você procura algo para morar ou investir? 😊" },
-  { type: "user", text: "Investimento para Airbnb" },
-  { 
-    type: "ai", 
-    text: "Então vou priorizar imóveis com boa ocupação na temporada 👇",
-    property: {
-      id: "demo-1",
-      titulo: "Residencial Vista Mar - Alto Padrão",
-      preco: 985000,
-      bairro: "Bombas",
-      tipo: "apartamento",
-      finalidade: "compra",
-      quartos: 3,
-      suites: 1,
-      banheiros: 2,
-      vagas_garagem: 2,
-      area_m2: 92,
-      fotos: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"],
-      anunciante_telefone: "47999999999",
-      link_anuncio: "#",
-      destaque_pago: true,
-      piscina: true,
-      vista_mar: true,
-      churrasqueira: true,
-      ar_condicionado: true
-    } as Property
+const CONVERSATIONS = [
+  {
+    id: "temporada",
+    messages: [
+      { type: "user", text: "Quero uma casa para temporada em Mariscal perto da praia." },
+      { type: "ai", text: "Claro 😊 Você procura algo mais para família, grupo de amigos ou casal?" },
+      { type: "user", text: "Família." },
+      { type: "ai", text: "Perfeito. Para quantas pessoas seria? E qual faixa de valor por diária você pretende investir?" },
+      { type: "user", text: "5 pessoas. Até R$ 600 por diária." },
+      { 
+        type: "ai", 
+        text: "Encontrei algumas opções muito alinhadas ao que você procura em Mariscal 👇",
+        properties: [
+          {
+            id: "temp-1",
+            titulo: "Casa Mariscal - 100m da Praia",
+            preco_temporada_diaria: 550,
+            bairro: "Mariscal",
+            tipo: "casa",
+            finalidade: "temporada",
+            quartos: 3,
+            capacidade_pessoas: 6,
+            fotos: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80"],
+            anunciante_telefone: "47999999999",
+            piscina: true,
+            churrasqueira: true
+          },
+          {
+            id: "temp-2",
+            titulo: "Sobrado Moderno Mariscal",
+            preco_temporada_diaria: 580,
+            bairro: "Mariscal",
+            tipo: "casa",
+            finalidade: "temporada",
+            quartos: 2,
+            capacidade_pessoas: 5,
+            fotos: ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80"],
+            anunciante_telefone: "47999999999",
+            ar_condicionado: true,
+            wifi: true
+          }
+        ]
+      }
+    ]
   },
-  { type: "user", text: "Tem algo até 1 milhão?" },
-  { type: "ai", text: "Encontrei algumas opções alinhadas ao seu perfil. Deseja ver os detalhes no WhatsApp?" }
+  {
+    id: "aluguel",
+    messages: [
+      { type: "user", text: "Tem casas para aluguel anual em Bombinhas?" },
+      { type: "ai", text: "Sim 😊 Encontrei diversas opções disponíveis para aluguel anual." },
+      { type: "ai", text: "Você prefere qual região? Bombas, Centro, Mariscal, Canto Grande ou Zimbros?" },
+      { type: "user", text: "Bombas." },
+      { 
+        type: "ai", 
+        text: "Perfeito. Encontrei ótimas opções em Bombas para aluguel anual 👇",
+        properties: [
+          {
+            id: "anual-1",
+            titulo: "Apartamento Solar das Bombas",
+            preco: 3200,
+            bairro: "Bombas",
+            tipo: "apartamento",
+            finalidade: "aluguel_anual",
+            quartos: 2,
+            vagas_garagem: 1,
+            area_m2: 70,
+            fotos: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80"],
+            anunciante_telefone: "47999999999",
+            mobiliado: true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "compra",
+    messages: [
+      { type: "user", text: "Quero comprar apartamento em Bombinhas para investir." },
+      { type: "ai", text: "Ótima escolha 😊 Bombinhas possui regiões com excelente rentabilidade para temporada." },
+      { type: "ai", text: "Você procura algo: perto da praia, alto padrão, mais valorização ou melhor custo-benefício?" },
+      { type: "user", text: "Mais valorização." },
+      { 
+        type: "ai", 
+        text: "Então vou priorizar regiões muito procuradas para temporada como Mariscal e Bombas 👇",
+        properties: [
+          {
+            id: "compra-1",
+            titulo: "Lançamento Premium Mariscal",
+            preco: 1250000,
+            bairro: "Mariscal",
+            tipo: "apartamento",
+            finalidade: "compra",
+            quartos: 3,
+            suites: 3,
+            area_m2: 110,
+            fotos: ["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80"],
+            anunciante_telefone: "47999999999",
+            destaque_pago: true,
+            vista_mar: true
+          }
+        ]
+      }
+    ]
+  }
 ];
 
 const InteractiveDemo = () => {
+  const [currentConvIndex, setCurrentConvIndex] = useState(0);
   const [messages, setMessages] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(false);
+
+  const currentConv = CONVERSATIONS[currentConvIndex];
 
   useEffect(() => {
-    if (currentIndex < CHAT_SCRIPT.length) {
-      const timer = setTimeout(() => {
-        setMessages((prev) => [...prev, CHAT_SCRIPT[currentIndex]]);
-        setCurrentIndex((prev) => prev + 1);
-      }, currentIndex === 0 ? 1000 : 2500);
+    if (currentIndex < currentConv.messages.length) {
+      const msg = currentConv.messages[currentIndex];
+      
+      const delay = currentIndex === 0 ? 1000 : 2000;
+      
+      const typingTimer = setTimeout(() => {
+        if (msg.type === 'ai') setIsTyping(true);
+        
+        const deliverTimer = setTimeout(() => {
+          setIsTyping(false);
+          setMessages((prev) => [...prev, msg]);
+          setCurrentIndex((prev) => prev + 1);
+        }, msg.type === 'ai' ? 1500 : 500);
 
-      return () => clearTimeout(timer);
+        return () => clearTimeout(deliverTimer);
+      }, delay);
+
+      return () => clearTimeout(typingTimer);
     } else {
-      // Loop back after a delay
-      const restartTimer = setTimeout(() => {
+      const nextConvTimer = setTimeout(() => {
         setMessages([]);
         setCurrentIndex(0);
-      }, 5000);
-      return () => clearTimeout(restartTimer);
+        setCurrentConvIndex((prev) => (prev + 1) % CONVERSATIONS.length);
+      }, 6000);
+      return () => clearTimeout(nextConvTimer);
     }
-  }, [currentIndex]);
+  }, [currentIndex, currentConvIndex]);
 
   return (
     <section className="py-12 md:py-20 relative overflow-hidden bg-background">
