@@ -19,6 +19,7 @@ import AdminAlerts from "./pages/AdminAlerts.tsx";
 import AdminRevenue from "./pages/AdminRevenue.tsx";
 import AdminAIConfig from "./pages/AdminAIConfig.tsx";
 import AdminImoveis from "./pages/AdminImoveis.tsx";
+import AdminCuradoria from "./pages/AdminCuradoria.tsx";
 import AdminLayout from "./components/admin/AdminLayout.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import NotFound from "./pages/NotFound.tsx";
