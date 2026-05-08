@@ -29,7 +29,7 @@ const partners = [
 
 export const TestimonialsSection = () => {
   return (
-    <section className="py-20 bg-slate-50 dark:bg-slate-900/50">
+    <section className="py-12 md:py-20 bg-slate-50 dark:bg-slate-900/50">
       <div className="container">
         <div className="text-center mb-16">
           <h2 className="text-3xl font-bold mb-4 font-display">Quem usa, aprova</h2>
