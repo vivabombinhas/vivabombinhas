@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Phone, Mail, Filter, Search, MessageCircle, X, Trash2, CheckCircle2 } from "lucide-react";
+import { Users, Phone, Mail, Filter, Search, MessageCircle, X, Trash2, CheckCircle2, MessageSquare } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
