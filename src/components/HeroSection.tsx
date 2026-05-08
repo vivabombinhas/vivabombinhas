@@ -18,7 +18,7 @@ export default function HeroSection() {
   ];
 
   return (
-    <section className="relative min-h-[calc(100vh-80px)] lg:min-h-screen flex flex-col overflow-hidden">
+    <section className="relative min-h-0 lg:min-h-screen flex flex-col overflow-hidden py-16 lg:py-0">
 
       {/* ── Background ── */}
       <div className="absolute inset-0 z-0">
