@@ -1,7 +1,8 @@
-import { MessageSquare, Sparkles, Send, MapPin, Home, CheckCircle2 } from "lucide-react";
+import { MessageSquare, Sparkles, Send, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import { PropertyCard, type Property } from "./maria/PropertyCard";
 
 const CHAT_SCRIPT = [
   { type: "user", text: "Quero um apartamento em Bombas perto da praia" },
@@ -11,12 +12,26 @@ const CHAT_SCRIPT = [
     type: "ai", 
     text: "Então vou priorizar imóveis com boa ocupação na temporada 👇",
     property: {
-      name: "Residencial Vista Mar",
-      price: "R$ 980.000",
-      location: "150m da praia",
-      specs: "2 Suítes + Lavabo",
-      image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80"
-    }
+      id: "demo-1",
+      titulo: "Residencial Vista Mar - Alto Padrão",
+      preco: 985000,
+      bairro: "Bombas",
+      tipo: "apartamento",
+      finalidade: "compra",
+      quartos: 3,
+      suites: 1,
+      banheiros: 2,
+      vagas_garagem: 2,
+      area_m2: 92,
+      fotos: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80"],
+      anunciante_telefone: "47999999999",
+      link_anuncio: "#",
+      destaque_pago: true,
+      piscina: true,
+      vista_mar: true,
+      churrasqueira: true,
+      ar_condicionado: true
+    } as Property
   },
   { type: "user", text: "Tem algo até 1 milhão?" },
   { type: "ai", text: "Encontrei algumas opções alinhadas ao seu perfil. Deseja ver os detalhes no WhatsApp?" }
@@ -179,35 +194,9 @@ const InteractiveDemo = () => {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="mt-4 rounded-xl border border-border/30 overflow-hidden bg-slate-50/80 group"
+                            className="mt-4 max-w-[280px]"
                           >
-                            <div className="relative h-36 overflow-hidden">
-                              <img 
-                                src={msg.property.image} 
-                                alt={msg.property.name} 
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                              />
-                              <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg text-[10px] font-bold text-primary border border-primary/10">
-                                Destaque MarIA
-                              </div>
-                            </div>
-                            <div className="p-4">
-                              <div className="flex justify-between items-start mb-2">
-                                <h5 className="font-bold text-sm tracking-tight">{msg.property.name}</h5>
-                                <span className="text-primary font-bold text-sm">{msg.property.price}</span>
-                              </div>
-                              <div className="flex items-center gap-3 text-[11px] text-muted-foreground font-medium">
-                                <span className="flex items-center gap-1">
-                                  <MapPin className="h-3 w-3" />
-                                  {msg.property.location}
-                                </span>
-                                <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                                <span className="flex items-center gap-1">
-                                  <Home className="h-3 w-3" />
-                                  {msg.property.specs}
-                                </span>
-                              </div>
-                            </div>
+                            <PropertyCard property={msg.property} />
                           </motion.div>
                         )}
                       </div>
