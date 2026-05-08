@@ -76,6 +76,7 @@ export default function AdminLeads() {
     status: LeadStatus | null;
   }>({ isOpen: false, status: null });
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [initialTab, setInitialTab] = useState<string>("historico");
   const queryClient = useQueryClient();
 
   const { data: leads, isLoading } = useQuery({
