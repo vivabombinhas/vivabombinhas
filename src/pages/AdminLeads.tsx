@@ -459,24 +459,39 @@ export default function AdminLeads() {
                         </TableCell>
 
                         <TableCell className="align-top py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                          <Select
-                            value={status}
-                            onValueChange={(val) =>
-                              updateStatus.mutate({ id: lead.id, status: val as LeadStatus })
-                            }
-                          >
-                            <SelectTrigger
-                              className={`h-7 w-28 text-xs ml-auto border ${cfg.className}`}
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
+                              onClick={() => {
+                                setSelectedLeadId(lead.id);
+                                setInitialTab("conversa");
+                                setSheetOpen(true);
+                              }}
+                              title="Ver conversa com MarIA"
                             >
-                              <SelectValue>{cfg.label}</SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="novo">Novo</SelectItem>
-                              <SelectItem value="contatado">Contatado</SelectItem>
-                              <SelectItem value="convertido">Convertido</SelectItem>
-                              <SelectItem value="descartado">Descartado</SelectItem>
-                            </SelectContent>
-                          </Select>
+                              <MessageSquare className="w-4 h-4" />
+                            </Button>
+                            <Select
+                              value={status}
+                              onValueChange={(val) =>
+                                updateStatus.mutate({ id: lead.id, status: val as LeadStatus })
+                              }
+                            >
+                              <SelectTrigger
+                                className={`h-7 w-28 text-xs border ${cfg.className}`}
+                              >
+                                <SelectValue>{cfg.label}</SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="novo">Novo</SelectItem>
+                                <SelectItem value="contatado">Contatado</SelectItem>
+                                <SelectItem value="convertido">Convertido</SelectItem>
+                                <SelectItem value="descartado">Descartado</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
