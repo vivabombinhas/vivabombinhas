@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Phone, Mail, Filter, Search, MessageCircle, X, Trash2, CheckCircle2 } from "lucide-react";
+import { Users, Phone, Mail, Filter, Search, MessageCircle, X, Trash2, CheckCircle2, MessageSquare } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +76,7 @@ export default function AdminLeads() {
     status: LeadStatus | null;
   }>({ isOpen: false, status: null });
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [initialTab, setInitialTab] = useState<string>("historico");
   const queryClient = useQueryClient();
 
   const { data: leads, isLoading } = useQuery({
@@ -374,7 +375,7 @@ export default function AdminLeads() {
                     <TableHead className="w-[14%]">Interesse</TableHead>
                     <TableHead className="w-[18%]">Bairro / Tipo</TableHead>
                     <TableHead className="w-[10%]">Data</TableHead>
-                    <TableHead className="w-[12%] text-right">Status</TableHead>
+                    <TableHead className="w-[18%] text-right">Status / Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -386,7 +387,7 @@ export default function AdminLeads() {
                       <TableRow
                         key={lead.id}
                         className={`cursor-pointer transition-colors ${isSelected ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-muted/40'}`}
-                        onClick={() => { setSelectedLeadId(lead.id); setSheetOpen(true); }}
+                        onClick={() => { setSelectedLeadId(lead.id); setInitialTab("historico"); setSheetOpen(true); }}
                       >
                         <TableCell className="align-top py-3 px-3" onClick={(e) => e.stopPropagation()}>
                           <Checkbox 
@@ -457,24 +458,39 @@ export default function AdminLeads() {
                         </TableCell>
 
                         <TableCell className="align-top py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                          <Select
-                            value={status}
-                            onValueChange={(val) =>
-                              updateStatus.mutate({ id: lead.id, status: val as LeadStatus })
-                            }
-                          >
-                            <SelectTrigger
-                              className={`h-7 w-28 text-xs ml-auto border ${cfg.className}`}
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
+                              onClick={() => {
+                                setSelectedLeadId(lead.id);
+                                setInitialTab("conversa");
+                                setSheetOpen(true);
+                              }}
+                              title="Ver conversa com MarIA"
                             >
-                              <SelectValue>{cfg.label}</SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="novo">Novo</SelectItem>
-                              <SelectItem value="contatado">Contatado</SelectItem>
-                              <SelectItem value="convertido">Convertido</SelectItem>
-                              <SelectItem value="descartado">Descartado</SelectItem>
-                            </SelectContent>
-                          </Select>
+                              <MessageSquare className="w-4 h-4" />
+                            </Button>
+                            <Select
+                              value={status}
+                              onValueChange={(val) =>
+                                updateStatus.mutate({ id: lead.id, status: val as LeadStatus })
+                              }
+                            >
+                              <SelectTrigger
+                                className={`h-7 w-28 text-xs border ${cfg.className}`}
+                              >
+                                <SelectValue>{cfg.label}</SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="novo">Novo</SelectItem>
+                                <SelectItem value="contatado">Contatado</SelectItem>
+                                <SelectItem value="convertido">Convertido</SelectItem>
+                                <SelectItem value="descartado">Descartado</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -490,6 +506,7 @@ export default function AdminLeads() {
         lead={(leads?.find((l) => l.id === selectedLeadId) as never) ?? null}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
+        defaultTab={initialTab as any}
       />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

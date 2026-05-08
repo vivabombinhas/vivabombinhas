@@ -60,6 +60,7 @@ interface Props {
   lead: Lead | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultTab?: "historico" | "notas" | "conversa";
 }
 
 const formatDateTime = (iso?: string | null) =>
@@ -83,7 +84,7 @@ type TimelineEvent = {
   meta?: string;
 };
 
-export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
+export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab = "historico" }: Props) {
   const qc = useQueryClient();
   const [newNote, setNewNote] = useState("");
   const [followup, setFollowup] = useState("");
@@ -381,7 +382,7 @@ export default function LeadDetailSheet({ lead, open, onOpenChange }: Props) {
         <Separator className="my-4" />
 
         {/* Tabs com histórico unificado, notas, conversa */}
-        <Tabs defaultValue="historico" className="w-full pb-6">
+        <Tabs key={`${lead.id}-${defaultTab}`} defaultValue={defaultTab} className="w-full pb-6">
           <TabsList className="grid grid-cols-3 w-full">
             <TabsTrigger value="historico" className="text-xs gap-1">
               <Activity className="w-3.5 h-3.5" /> Histórico
