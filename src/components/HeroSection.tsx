@@ -105,9 +105,9 @@ const HeroSection = () => {
 
                 {/* Property Mockup Cards */}
                 <div className="space-y-3 pt-2">
-                  <div className="flex gap-3 bg-white p-3 rounded-2xl shadow-sm border border-slate-50 hover:border-primary/20 transition-colors">
+                  <div className="flex gap-3 bg-white p-3 rounded-2xl shadow-sm border border-slate-50 hover:border-primary/20 transition-all hover:scale-[1.02]">
                     <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-100">
-                      <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=200&h=200&fit=crop" alt="Property" className="w-full h-full object-cover" />
+                      <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&h=400&fit=crop" alt="Property" className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-bold text-slate-900 truncate">Edifício Mar de Fora</h4>
