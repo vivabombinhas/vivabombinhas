@@ -3,7 +3,6 @@ import HeroSection from "@/components/HeroSection";
 import PartnerLogos from "@/components/PartnerLogos";
 import FloatingChatButton from "@/components/FloatingChatButton";
 import ProblemSection from "@/components/ProblemSection";
-import InteractiveDemo from "@/components/InteractiveDemo";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import AudienceSection from "@/components/AudienceSection";
 import BenefitsSection from "@/components/BenefitsSection";
@@ -21,7 +20,6 @@ const Index = () => {
       <HeroSection />
       <PartnerLogos />
       <ProblemSection />
-      <InteractiveDemo />
       <HowItWorksSection />
       <AudienceSection />
       <BenefitsSection />
