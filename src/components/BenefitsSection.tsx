@@ -1,84 +1,39 @@
-import { Zap, Link2, LayoutList, MessageCircle, Star } from "lucide-react";
-import { motion } from "framer-motion";
+import { Zap, Link2, LayoutList, MessageCircle } from "lucide-react";
 
 const benefits = [
-  { 
-    icon: Zap, 
-    title: "Eficiência Operacional", 
-    desc: "Redução drástica no tempo de pesquisa e triagem de propriedades.", 
-    stat: "10x", 
-    statLabel: "Agilidade" 
-  },
-  { 
-    icon: LayoutList, 
-    title: "Inteligência de Dados", 
-    desc: "Análise profunda de mercado para identificar ativos com real potencial de valorização.", 
-    stat: "100%", 
-    statLabel: "Curadoria" 
-  },
-  { 
-    icon: Link2, 
-    title: "Transparência Total", 
-    desc: "Acesso direto à origem da informação, eliminando ruídos e intermediários desnecessários.", 
-    stat: "0", 
-    statLabel: "Conflitos" 
-  },
-  { 
-    icon: MessageCircle, 
-    title: "Interface Intuitiva", 
-    desc: "A tecnologia mais avançada de IA servida através de uma conversa simples e fluida.", 
-    stat: "24/7", 
-    statLabel: "Disponibilidade" 
-  },
+  { icon: Zap, title: "Economia de tempo", desc: "Encontre em segundos o que levaria horas pesquisando manualmente.", stat: "10x", statLabel: "mais rápido" },
+  { icon: LayoutList, title: "Resultados organizados", desc: "Opções claras e comparáveis. Sem duplicatas ou informação desatualizada.", stat: "100%", statLabel: "organizado" },
+  { icon: Link2, title: "Links diretos", desc: "Acesse o anúncio original e fale direto com o anunciante.", stat: "0", statLabel: "intermediários" },
+  { icon: MessageCircle, title: "Busca conversacional", desc: "Fale com a MarIA como fala com um amigo. Sem filtros complicados.", stat: "∞", statLabel: "formas de buscar" },
 ];
 
 const BenefitsSection = () => {
   return (
-    <section className="py-24 md:py-32 relative overflow-hidden bg-slate-50/50">
+    <section className="py-12 md:py-20 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-muted/50 to-transparent" />
       <div className="container relative z-10">
-        <div className="text-center max-w-3xl mx-auto mb-20">
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-[0.2em] mb-4"
-          >
-            <Star className="h-3.5 w-3.5" />
-            Diferenciais Competitivos
-          </motion.div>
-          <motion.h2 
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl md:text-6xl font-bold mb-6 tracking-tight text-slate-900"
-          >
-            Por que confiar na <span className="text-gradient italic">MarIA?</span>
-          </motion.h2>
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">Benefícios</p>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4">
+            Por que usar a <span className="text-gradient">MarIA</span>?
+          </h2>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div className="grid sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
           {benefits.map((b, i) => (
-            <motion.div 
-              key={i} 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="rounded-[32px] border border-slate-200/60 bg-white p-10 hover:border-primary/20 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)] transition-all duration-500"
-            >
-              <div className="flex items-center gap-6 mb-8">
-                <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-colors">
-                  <b.icon className="h-6 w-6 text-primary" />
+            <div key={i} className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 hover:-translate-y-1">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <b.icon className="h-5 w-5 text-primary" />
                 </div>
                 <div className="ml-auto text-right">
-                  <div className="text-3xl font-bold text-slate-900 italic tracking-tighter leading-none">{b.stat}</div>
-                  <div className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mt-1">{b.statLabel}</div>
+                  <div className="text-2xl font-bold text-gradient">{b.stat}</div>
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{b.statLabel}</div>
                 </div>
               </div>
-              <h3 className="font-bold text-xl text-slate-900 mb-4 tracking-tight leading-tight">{b.title}</h3>
-              <p className="text-[15px] text-slate-500 leading-relaxed font-medium">{b.desc}</p>
-            </motion.div>
+              <h3 className="font-bold text-foreground mb-1">{b.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{b.desc}</p>
+            </div>
           ))}
         </div>
       </div>
