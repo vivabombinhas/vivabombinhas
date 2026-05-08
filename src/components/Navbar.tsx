@@ -23,21 +23,21 @@ const Navbar = () => {
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "glass shadow-sm" : "bg-transparent"}`}>
       <div className="container flex h-16 items-center justify-between">
         <a href="#" className="flex items-center gap-2 font-bold text-xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          <Bot className={`h-7 w-7 ${scrolled ? "text-primary" : "text-primary"}`} />
+          <Bot className="h-7 w-7 text-primary" />
           <span className="text-primary">Mar</span>
-          <span className={scrolled ? "text-foreground" : "text-white"}>IA</span>
+          <span className={scrolled ? "text-slate-900" : "text-slate-800"}>IA</span>
         </a>
 
         <nav className="hidden md:flex items-center gap-6">
           {links.map((l) => (
-            <a key={l.href} href={l.href} className={`text-sm font-medium transition-colors ${scrolled ? "text-muted-foreground hover:text-primary" : "text-white/70 hover:text-white"}`}>
+            <a key={l.href} href={l.href} className={`text-sm font-medium transition-colors ${scrolled ? "text-slate-600 hover:text-primary" : "text-slate-700 hover:text-primary"}`}>
               {l.label}
             </a>
           ))}
-          <Link to="/anuncie" className={`text-sm font-medium transition-colors ${scrolled ? "text-muted-foreground hover:text-primary" : "text-white/70 hover:text-white"}`}>
+          <Link to="/anuncie" className={`text-sm font-medium transition-colors ${scrolled ? "text-slate-600 hover:text-primary" : "text-slate-700 hover:text-primary"}`}>
             Anuncie
           </Link>
-          <Link to="/dashboard" className={`text-sm font-medium transition-colors ${scrolled ? "text-muted-foreground hover:text-primary" : "text-white/70 hover:text-white"}`}>
+          <Link to="/dashboard" className={`text-sm font-medium transition-colors ${scrolled ? "text-slate-600 hover:text-primary" : "text-slate-700 hover:text-primary"}`}>
             Meu Painel
           </Link>
           <Button asChild size="sm" className="rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground">
