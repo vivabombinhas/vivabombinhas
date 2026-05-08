@@ -230,11 +230,11 @@ const InteractiveDemo = () => {
 
             {/* Floating Alert Badge - Replaces "Lead Qualificado" */}
             <motion.div 
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 1 }}
-              className="absolute -bottom-8 -right-4 md:-right-12 bg-white/90 backdrop-blur-xl rounded-[28px] border border-border/40 p-6 shadow-2xl max-w-[260px] hidden md:block"
+              className="absolute -top-12 -left-4 md:-left-12 bg-white/90 backdrop-blur-xl rounded-[28px] border border-border/40 p-6 shadow-2xl max-w-[260px] hidden md:block z-20"
             >
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center border border-green-100 shadow-inner">
