@@ -24,7 +24,7 @@ const steps = [
 
 const HowItWorksSection = () => {
   return (
-    <section id="como-funciona" className="py-32 bg-slate-50/30 relative overflow-hidden">
+    <section id="como-funciona" className="py-32 bg-muted/30 relative overflow-hidden">
       {/* Subtle Background Elements */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-[radial-gradient(circle_at_50%_50%,rgba(37,99,235,0.02),transparent_70%)]" />
 
@@ -33,7 +33,7 @@ const HowItWorksSection = () => {
           <motion.p 
             initial={{ opacity: 0, x: -10 }}
             whileInView={{ opacity: 1, x: 0 }}
-            className="text-[11px] font-bold text-blue-600 uppercase tracking-[0.3em] mb-6"
+            className="text-[11px] font-bold text-primary uppercase tracking-[0.3em] mb-6"
           >
             Processo Inteligente
           </motion.p>
@@ -41,10 +41,10 @@ const HowItWorksSection = () => {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.03em] text-slate-950 leading-[1.1]"
+            className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.03em] text-foreground leading-[1.1]"
           >
             Três passos para encontrar seu <br className="hidden md:block" />
-            <span className="text-slate-400 italic font-medium">lugar no paraíso.</span>
+            <span className="text-muted-foreground/60 italic font-medium">lugar no paraíso.</span>
           </motion.h2>
         </div>
 
@@ -56,16 +56,16 @@ const HowItWorksSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.15, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               viewport={{ once: true }}
-              className="relative p-10 md:p-12 rounded-[40px] bg-white border border-slate-100 group hover:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.08)] transition-all duration-700"
+              className="relative p-10 md:p-12 rounded-[40px] bg-background border border-border group hover:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.08)] transition-all duration-700"
             >
-              <div className="absolute top-8 right-12 text-6xl font-black text-slate-50 group-hover:text-blue-600/5 transition-colors duration-700">
+              <div className="absolute top-8 right-12 text-6xl font-black text-slate-50 group-hover:text-primary/5 transition-colors duration-700">
                 {s.num}
               </div>
-              <div className="w-16 h-16 rounded-[22px] bg-slate-50 flex items-center justify-center mb-10 shadow-sm group-hover:bg-blue-600 group-hover:scale-110 transition-all duration-700">
-                <s.icon className="h-7 w-7 text-slate-950 group-hover:text-white transition-colors duration-700" />
+              <div className="w-16 h-16 rounded-[22px] bg-muted flex items-center justify-center mb-10 shadow-sm group-hover:bg-primary group-hover:scale-110 transition-all duration-700">
+                <s.icon className="h-7 w-7 text-foreground group-hover:text-white transition-colors duration-700" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-950 mb-5 tracking-tight">{s.title}</h3>
-              <p className="text-slate-500 text-[15px] leading-relaxed font-medium">{s.desc}</p>
+              <h3 className="text-2xl font-bold text-foreground mb-5 tracking-tight">{s.title}</h3>
+              <p className="text-muted-foreground text-[15px] leading-relaxed font-medium">{s.desc}</p>
             </motion.div>
           ))}
         </div>

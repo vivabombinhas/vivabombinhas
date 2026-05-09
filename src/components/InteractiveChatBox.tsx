@@ -141,19 +141,19 @@ export const InteractiveChatBox = ({
   return (
     <div className="w-full relative">
       <motion.div 
-        className="relative rounded-[40px] border border-slate-100 bg-white shadow-[0_30px_70px_-20px_rgba(0,0,0,0.12)] overflow-hidden"
+        className="relative rounded-[40px] border border-border bg-background shadow-[0_30px_70px_-20px_rgba(0,0,0,0.12)] overflow-hidden"
       >
         {/* Header: More refined and application-like */}
-        <div className="bg-slate-50/50 backdrop-blur-md p-5 border-b border-slate-100 flex items-center justify-between">
+        <div className="bg-muted/50 backdrop-blur-md p-5 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-[18px] bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-100">
+            <div className="w-12 h-12 rounded-[18px] bg-primary flex items-center justify-center shadow-lg shadow-blue-100">
               <Sparkles className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h4 className="font-bold text-[15px] tracking-tight text-slate-950 leading-none mb-2">MarIA</h4>
+              <h4 className="font-bold text-[15px] tracking-tight text-foreground leading-none mb-2">MarIA</h4>
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.1em] leading-none">
+                <span className="text-[10px] text-muted-foreground/60 font-bold uppercase tracking-[0.1em] leading-none">
                   Sempre pronta
                 </span>
               </div>
@@ -164,7 +164,7 @@ export const InteractiveChatBox = ({
         {/* Chat Body */}
         <div 
           ref={scrollContainerRef}
-          className="h-[300px] xs:h-[340px] md:h-[420px] overflow-y-auto p-5 md:p-8 space-y-5 md:space-y-6 scrollbar-hide bg-white/50"
+          className="h-[300px] xs:h-[340px] md:h-[420px] overflow-y-auto p-5 md:p-8 space-y-5 md:space-y-6 scrollbar-hide bg-background/50"
         >
           <AnimatePresence initial={false}>
             {messages.map((msg, idx) => (
@@ -178,8 +178,8 @@ export const InteractiveChatBox = ({
                 <div 
                   className={`max-w-[88%] p-4 rounded-2xl md:rounded-[22px] ${
                     msg.type === 'user' 
-                      ? 'bg-slate-950 text-white shadow-xl shadow-slate-200' 
-                      : 'bg-white border border-slate-100 text-slate-700 shadow-sm'
+                      ? 'bg-foreground text-white shadow-xl shadow-slate-200' 
+                      : 'bg-background border border-border text-slate-700 shadow-sm'
                   }`}
                 >
                   <p className="text-[14px] md:text-[15px] leading-relaxed font-medium">
@@ -202,22 +202,22 @@ export const InteractiveChatBox = ({
           
           {isTyping && (
             <div className="flex justify-start">
-              <div className="bg-white border border-slate-100 rounded-2xl p-4 flex gap-1.5 shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600/40 animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600/40 animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600/40 animate-bounce" />
+              <div className="bg-background border border-border rounded-2xl p-4 flex gap-1.5 shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-bounce" />
               </div>
             </div>
           )}
         </div>
 
         {/* Fake Input Area: Clean & Professional */}
-        <div className="p-5 bg-white border-t border-slate-100">
+        <div className="p-5 bg-background border-t border-border">
           <div className="flex gap-4">
-            <div className="flex-1 bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-3.5 text-[13px] text-slate-400 font-medium flex items-center">
+            <div className="flex-1 bg-muted/50 border border-slate-200 rounded-2xl px-5 py-3.5 text-[13px] text-muted-foreground/60 font-medium flex items-center">
               Como posso ajudar hoje?
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-slate-950 flex items-center justify-center text-white shadow-lg shadow-slate-100">
+            <div className="w-12 h-12 rounded-2xl bg-foreground flex items-center justify-center text-white shadow-lg shadow-slate-100">
               <Send className="h-5 w-5" />
             </div>
           </div>

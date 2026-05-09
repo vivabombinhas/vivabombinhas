@@ -2,20 +2,20 @@ import { Bot } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="py-24 bg-white border-t border-slate-100">
+    <footer className="py-24 bg-background border-t border-border">
       <div className="container max-w-7xl mx-auto px-6 lg:px-12">
         <div className="flex flex-col lg:flex-row items-start justify-between gap-16">
           
           <div className="flex flex-col items-start gap-6 max-w-sm">
             <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-[12px] bg-slate-950 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-[12px] bg-foreground flex items-center justify-center">
                 <Bot className="h-6 w-6 text-white" />
               </div>
-              <span className="text-2xl font-black tracking-[-0.05em] text-slate-950">
-                Mar<span className="text-blue-600">IA</span>
+              <span className="text-2xl font-black tracking-[-0.05em] text-foreground">
+                Mar<span className="text-primary">IA</span>
               </span>
             </div>
-            <p className="text-slate-500 text-[15px] font-medium leading-relaxed">
+            <p className="text-muted-foreground text-[15px] font-medium leading-relaxed">
               Simplificando a busca imobiliária em Bombinhas através de inteligência artificial e curadoria real.
             </p>
           </div>
@@ -24,22 +24,22 @@ const Footer = () => {
             <div className="flex flex-col gap-6">
               <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">Produto</span>
               <div className="flex flex-col gap-4">
-                <a href="#como-funciona" className="text-[13px] font-bold text-slate-600 hover:text-blue-600 transition-colors">Como Funciona</a>
-                <a href="/anuncie" className="text-[13px] font-bold text-slate-600 hover:text-blue-600 transition-colors">Anunciar</a>
-                <a href="#demo" className="text-[13px] font-bold text-slate-600 hover:text-blue-600 transition-colors">Demonstração</a>
+                <a href="#como-funciona" className="text-[13px] font-bold text-muted-foreground hover:text-primary transition-colors">Como Funciona</a>
+                <a href="/anuncie" className="text-[13px] font-bold text-muted-foreground hover:text-primary transition-colors">Anunciar</a>
+                <a href="#demo" className="text-[13px] font-bold text-muted-foreground hover:text-primary transition-colors">Demonstração</a>
               </div>
             </div>
             <div className="flex flex-col gap-6">
               <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">Suporte</span>
               <div className="flex flex-col gap-4">
-                <a href="#faq" className="text-[13px] font-bold text-slate-600 hover:text-blue-600 transition-colors">FAQ</a>
-                <a href="#" className="text-[13px] font-bold text-slate-600 hover:text-blue-600 transition-colors">Privacidade</a>
-                <a href="#" className="text-[13px] font-bold text-slate-600 hover:text-blue-600 transition-colors">Contato</a>
+                <a href="#faq" className="text-[13px] font-bold text-muted-foreground hover:text-primary transition-colors">FAQ</a>
+                <a href="#" className="text-[13px] font-bold text-muted-foreground hover:text-primary transition-colors">Privacidade</a>
+                <a href="#" className="text-[13px] font-bold text-muted-foreground hover:text-primary transition-colors">Contato</a>
               </div>
             </div>
             <div className="hidden md:flex flex-col gap-6">
               <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">Localização</span>
-              <p className="text-[13px] font-bold text-slate-600">
+              <p className="text-[13px] font-bold text-muted-foreground">
                 Bombinhas, SC<br />
                 Brasil
               </p>
@@ -48,7 +48,7 @@ const Footer = () => {
 
         </div>
 
-        <div className="mt-24 pt-12 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="mt-24 pt-12 border-t border-border flex flex-col md:flex-row items-center justify-between gap-8">
           <p className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">
             © {new Date().getFullYear()} MarIA • Tecnologia Imobiliária
           </p>
