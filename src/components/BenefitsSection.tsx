@@ -44,8 +44,8 @@ const BenefitsSection = () => {
                 <b.icon className="h-8 w-8 text-foreground group-hover:text-white transition-colors duration-700" />
               </div>
               <div className="flex-1 text-center md:text-left">
-                <h3 className="text-2xl font-bold text-foreground mb-3 tracking-tight">{b.title}</h3>
-                <p className="text-muted-foreground text-[15px] leading-relaxed font-medium">{b.desc}</p>
+                <h3 className="text-h3 mb-3">{b.title}</h3>
+                <p className="text-body">{b.desc}</p>
               </div>
               <div className="text-center shrink-0 min-w-[120px] pt-6 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-10">
                 <div className="text-4xl font-extrabold text-foreground tracking-tighter mb-1 tabular-nums">{b.stat}</div>
