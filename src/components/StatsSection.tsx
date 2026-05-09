@@ -52,7 +52,7 @@ export default function StatsSection() {
                   <div className="text-3xl md:text-4xl font-bold tabular-nums text-foreground tracking-tighter mb-1 group-hover:text-primary transition-colors duration-500">
                     <Counter value={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
                   </div>
-                  <div className="text-badge text-muted-foreground/60 tracking-[0.2em]">
+                  <div className="text-badge">
                     {stat.label}
                   </div>
                 </div>
