@@ -59,10 +59,10 @@ const AudienceSection = () => {
               <div className="w-14 h-14 rounded-[18px] bg-background flex items-center justify-center mb-10 shadow-sm border border-border group-hover:scale-110 transition-transform duration-700">
                 <a.icon className="h-6 w-6 text-foreground" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3 tracking-tight">
+              <h3 className="text-h3 mb-3">
                 {a.title}
               </h3>
-              <p className="text-muted-foreground text-[15px] leading-relaxed font-medium">
+              <p className="text-body">
                 {a.desc}
               </p>
             </motion.div>
