@@ -3,6 +3,7 @@ import { LandingAccordionItem } from "@/components/ui/interactive-image-accordio
 import StatsSection from "@/components/StatsSection";
 import ProblemSection from "@/components/ProblemSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
+import UseCasesSection from "@/components/UseCasesSection";
 import AudienceSection from "@/components/AudienceSection";
 import BenefitsSection from "@/components/BenefitsSection";
 import PartnersSection from "@/components/PartnersSection";
@@ -21,6 +22,7 @@ const Index = () => {
       <StatsSection />
       <ProblemSection />
       <HowItWorksSection />
+      <UseCasesSection />
       <AudienceSection />
       <BenefitsSection />
       <TestimonialsSection />
