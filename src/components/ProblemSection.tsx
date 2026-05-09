@@ -27,12 +27,12 @@ const problems = [
 
 const ProblemSection = () => {
   return (
-    <section className="section-padding bg-background relative mx-0 px-0 my-0 mb-[18px] mr-[5px] pb-0 pr-px text-left">
+    <section className="section-padding bg-background relative">
       <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: "radial-gradient(#000 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
       <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px]" />
-      <div className="container-wide px-[6px]">
+      <div className="container-wide">
         
-        <div className="max-w-4xl mb-24">
+        <div className="max-w-4xl mb-14 md:mb-16">
           <motion.div 
             initial={{ opacity: 0, x: -10 }}
             whileInView={{ opacity: 1, x: 0 }}
