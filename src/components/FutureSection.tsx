@@ -15,11 +15,11 @@ const FutureSection = () => {
         <div className="relative rounded-[48px] bg-muted border border-border p-12 md:p-24 overflow-hidden flex flex-col items-center text-center">
           
           <div className="relative z-10 max-w-3xl">
-            <p className="text-[10px] font-bold text-primary uppercase tracking-[0.4em] mb-6">Em breve</p>
-            <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground mb-8 leading-[1.1]">
+            <p className="text-badge text-primary mb-6">Em breve</p>
+            <h2 className="text-h2 mb-8">
               A inteligência de Bombinhas<br /><span className="text-muted-foreground/60">além dos imóveis.</span>
             </h2>
-            <p className="text-muted-foreground text-lg font-medium mb-12 leading-relaxed">
+            <p className="text-subtitle mb-12">
               MarIA está evoluindo para se tornar sua assistente completa na cidade, ajudando você a descobrir o melhor de Bombinhas em todos os setores.
             </p>
             
