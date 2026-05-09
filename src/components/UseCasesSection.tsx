@@ -71,7 +71,7 @@ const UseCasesSection = () => {
             </TabsList>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr,1.2fr] gap-12 lg:gap-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.1fr,0.9fr] gap-12 lg:gap-20 items-center">
             <div className="order-2 lg:order-1">
               <TabsContent value="temporada" className="mt-0 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
                 <div className="space-y-6">
@@ -143,7 +143,7 @@ const UseCasesSection = () => {
             </div>
 
             <div className="order-1 lg:order-2">
-              <div className="relative aspect-square md:aspect-[4/3] lg:aspect-square bg-muted/10 rounded-[40px] border border-border/50 overflow-hidden premium-shadow">
+              <div className="relative aspect-square md:aspect-[4/3] lg:aspect-[4/5] max-w-[460px] mx-auto lg:mr-0 bg-muted/10 rounded-[40px] border border-border/50 overflow-hidden premium-shadow">
                 <TabsContent value="temporada" className="m-0 h-full">
                   <InteractiveChatBox forcedConvIndex={0} />
                 </TabsContent>
