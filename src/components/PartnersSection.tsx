@@ -56,7 +56,7 @@ const PartnersSection = () => {
                     <b.icon className="h-6 w-6 text-slate-900" />
                   </div>
                   <div>
-                    <h4 className="text-[15px] font-bold text-foreground mb-1.5">{b.title}</h4>
+                    <h4 className="text-body font-bold mb-1.5">{b.title}</h4>
                     <p className="text-[13px] text-muted-foreground leading-relaxed font-medium">{b.desc}</p>
                   </div>
                 </motion.div>
