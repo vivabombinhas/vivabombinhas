@@ -151,7 +151,7 @@ export const InteractiveChatBox = ({
   return (
     <div className="w-full h-full relative flex flex-col">
       <motion.div 
-        className="relative flex-1 flex flex-col rounded-[32px] border border-white/20 bg-background/90 backdrop-blur-xl shadow-2xl overflow-hidden"
+        className="relative flex-1 flex flex-col rounded-[24px] border border-border bg-background shadow-none overflow-hidden"
       >
         {/* Header: More refined and application-like */}
         <div className="bg-muted/30 backdrop-blur-md p-4 border-b border-border/50 flex items-center justify-between">
