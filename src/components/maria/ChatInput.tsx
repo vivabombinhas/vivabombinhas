@@ -10,12 +10,21 @@ interface ChatInputProps {
 export function ChatInput({ onSend, isLoading }: ChatInputProps) {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const isSendingRef = useRef(false);
 
   const handleSend = () => {
     const trimmed = input.trim();
-    if (!trimmed || isLoading) return;
+    if (!trimmed || isLoading || isSendingRef.current) return;
+    
+    isSendingRef.current = true;
     onSend(trimmed);
     setInput("");
+    
+    // Pequeno timeout para evitar envios duplos rápidos
+    setTimeout(() => {
+      isSendingRef.current = false;
+    }, 500);
+
     inputRef.current?.focus();
   };
 

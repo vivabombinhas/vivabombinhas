@@ -11,8 +11,9 @@ const CTASection = () => {
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!query.trim()) return;
-    navigate("/maria", { state: { initialMessage: query.trim() } });
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    navigate("/maria", { state: { initialMessage: trimmed } });
   };
 
   const images = [
