@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Bot } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -36,7 +37,7 @@ const Navbar = () => {
             <span className="text-2xl font-black tracking-[-0.05em] leading-none text-foreground">
               Mar<span className="text-primary">IA</span>
             </span>
-            <span className="text-badge leading-none mt-1.5">Bombinhas • SC</span>
+            <span className="text-badge leading-none mt-1.5 text-muted-foreground">Bombinhas • SC</span>
           </div>
         </Link>
 
@@ -66,22 +67,26 @@ const Navbar = () => {
           >
             Anunciar
           </Link>
-          <div className="w-px h-4 bg-slate-200" />
+          <div className="w-px h-4 bg-slate-200 dark:bg-slate-800" />
+          <ThemeToggle />
           <Button 
             asChild 
             size="sm" 
-            className="rounded-full bg-foreground hover:bg-slate-800 text-white text-badge px-8 h-11 shadow-xl shadow-slate-100 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200"
+            className="rounded-full bg-foreground hover:bg-slate-800 text-background text-badge px-8 h-11 shadow-xl shadow-slate-100 dark:shadow-none transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200 dark:hover:bg-slate-200 dark:bg-white dark:text-black"
           >
             <a href="#experimentar">Entrar</a>
           </Button>
         </nav>
 
-        <button 
-          className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-muted text-slate-900" 
-          onClick={() => setOpen(!open)}
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-4 md:hidden">
+          <ThemeToggle />
+          <button 
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-muted text-slate-900 dark:text-white" 
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
