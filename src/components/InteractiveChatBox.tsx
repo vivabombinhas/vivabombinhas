@@ -174,7 +174,7 @@ export const InteractiveChatBox = ({
         {/* Chat Body */}
         <div 
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide bg-transparent"
+          className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide bg-transparent py-[24px] px-[24px] my-0 mx-0 mr-0"
         >
           <AnimatePresence initial={false}>
             {messages.map((msg, idx) => (
