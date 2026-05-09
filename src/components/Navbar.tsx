@@ -35,7 +35,7 @@ const Navbar = () => {
             <span className="text-2xl font-black tracking-[-0.05em] leading-none text-foreground">
               Mar<span className="text-primary">IA</span>
             </span>
-            <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] leading-none mt-1.5">Bombinhas • SC</span>
+            <span className="text-badge leading-none mt-1.5">Bombinhas • SC</span>
           </div>
         </a>
 
