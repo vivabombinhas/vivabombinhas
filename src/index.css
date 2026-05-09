@@ -136,7 +136,7 @@
   }
 
   .text-badge {
-    @apply text-[11px] md:text-[12px] font-extrabold uppercase tracking-[0.2em] text-muted-foreground/80;
+    @apply text-[11px] md:text-[12px] font-extrabold uppercase tracking-[0.2em] text-muted-foreground;
   }
 }
 
