@@ -41,7 +41,7 @@ const HowItWorksSection = () => {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.03em] text-foreground leading-[1.1]"
+            className="text-h2"
           >
             Três passos para encontrar seu <br className="hidden md:block" />
             <span className="text-muted-foreground/60 italic font-medium">lugar no paraíso.</span>
