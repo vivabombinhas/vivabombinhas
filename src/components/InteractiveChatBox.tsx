@@ -156,8 +156,8 @@ export const InteractiveChatBox = ({
         {/* Header: More refined and application-like */}
         <div className="bg-muted/30 backdrop-blur-md p-4 border-b border-border/50 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-[18px] bg-primary flex items-center justify-center shadow-lg shadow-blue-100">
-              <Sparkles className="h-6 w-6 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div>
               <h4 className="font-bold text-[15px] tracking-tight text-foreground leading-none mb-2">MarIA</h4>
