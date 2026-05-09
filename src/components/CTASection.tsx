@@ -87,7 +87,7 @@ const CTASection = () => {
             {['Gratuito', 'Instantâneo', 'Sem Cadastro'].map((item) => (
               <div key={item} className="flex items-center gap-2">
                 <div className="w-1 h-1 rounded-full bg-primary" />
-                <span className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.25em]">{item}</span>
+                <span className="text-badge">{item}</span>
               </div>
             ))}
           </motion.div>
