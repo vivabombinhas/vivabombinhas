@@ -27,7 +27,7 @@ const CTASection = () => {
   ];
 
   return (
-    <section className="py-40 relative overflow-hidden bg-background border-t border-slate-50 group/cta">
+    <section className="py-40 relative overflow-hidden bg-muted/30 border-t border-border group/cta">
       <ImageCursorTrail 
         items={images} 
         maxNumberOfImages={6} 
@@ -82,13 +82,13 @@ const CTASection = () => {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Ex: Apartamento 3 quartos em Bombas..."
-                  className="w-full bg-transparent text-slate-900 font-bold text-lg outline-none placeholder:text-slate-200"
+                  className="w-full bg-transparent text-foreground font-bold text-lg outline-none placeholder:text-muted-foreground/40"
                 />
               </div>
               <Button 
                 type="submit"
                 size="lg" 
-                className="h-16 px-12 rounded-[28px] bg-foreground text-white font-bold text-lg hover:bg-slate-800 transition-all duration-500 shadow-xl group-hover:scale-[1.02] active:scale-[0.98]"
+                className="h-16 px-12 rounded-[28px] bg-primary text-primary-foreground font-bold text-lg hover:brightness-110 transition-all duration-500 shadow-xl shadow-primary/20 group-hover:scale-[1.02] active:scale-[0.98]"
               >
                 Buscar agora
                 <ArrowRight className="ml-3 h-5 w-5" />

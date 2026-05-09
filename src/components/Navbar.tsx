@@ -70,7 +70,7 @@ const Navbar = () => {
           <Button 
             asChild 
             size="sm" 
-            className="rounded-full bg-foreground hover:bg-slate-800 text-white text-badge px-8 h-11 shadow-xl shadow-slate-100 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200"
+            className="rounded-full bg-primary hover:brightness-110 text-primary-foreground text-badge px-8 h-11 shadow-xl shadow-primary/10 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20"
           >
             <a href="#experimentar">Entrar</a>
           </Button>
