@@ -40,7 +40,7 @@ const AudienceSection = () => {
           <motion.p 
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            className="text-muted-foreground/60 font-bold uppercase tracking-[0.2em] text-[11px]"
+            className="text-badge"
           >
             Utilidade Real
           </motion.p>
