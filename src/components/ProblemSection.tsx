@@ -43,7 +43,7 @@ const ProblemSection = () => {
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.03em] text-foreground leading-[1.05]"
+              className="text-h2"
             >
               Buscar um imóvel em Bombinhas <br className="hidden lg:block" />
               não precisa ser <span className="text-muted-foreground/60 italic font-medium">um desafio.</span>
