@@ -45,8 +45,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="text-foreground font-extrabold tracking-[-0.03em] leading-[1.05] mb-6 lg:mb-8" 
-              style={{ fontSize: "clamp(38px, 6vw, 72px)" }}
+              className="text-foreground text-h1 mb-6 lg:mb-8" 
             >
               Encontre o imóvel<br />
               certo em <span className="text-primary">Bombinhas</span><br />
