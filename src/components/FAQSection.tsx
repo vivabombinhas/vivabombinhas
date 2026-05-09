@@ -28,14 +28,14 @@ const FAQSection = () => {
           <motion.p 
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            className="text-[11px] font-bold text-primary uppercase tracking-[0.4em] mb-6"
+            className="text-badge text-primary mb-6"
           >
             FAQ
           </motion.p>
           <motion.h2 
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.03em] text-foreground"
+            className="text-h2"
           >
             Dúvidas Frequentes
           </motion.h2>
