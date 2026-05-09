@@ -221,16 +221,6 @@ export const InteractiveChatBox = ({
           )}
         </div>
 
-        {/* Functional CTA: Clearer purpose */}
-        <div className="px-6 py-6 bg-white/80 backdrop-blur-md border-t border-border/40">
-          <a 
-            href="/search" 
-            className="flex items-center justify-center gap-3 w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/20 active:scale-[0.98] group"
-          >
-            Começar minha busca
-            <Sparkles className="h-4 w-4 group-hover:animate-pulse" />
-          </a>
-        </div>
       </motion.div>
     </div>
   );
