@@ -16,22 +16,34 @@ const UseCasesSection = () => {
         </div>
 
         <Tabs defaultValue="temporada" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-12 h-auto p-1 bg-muted/50">
-            <TabsTrigger value="temporada" className="py-4 flex flex-col gap-2">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-12 h-auto p-1.5 bg-muted/50 rounded-2xl border border-border/50">
+            <TabsTrigger 
+              value="temporada" 
+              className="py-4 flex flex-col gap-2 rounded-xl transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
+            >
               <Sun className="h-5 w-5" />
-              <span>Temporada</span>
+              <span className="font-bold">Temporada</span>
             </TabsTrigger>
-            <TabsTrigger value="anual" className="py-4 flex flex-col gap-2">
+            <TabsTrigger 
+              value="anual" 
+              className="py-4 flex flex-col gap-2 rounded-xl transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
+            >
               <Key className="h-5 w-5" />
-              <span>Aluguel Anual</span>
+              <span className="font-bold">Aluguel Anual</span>
             </TabsTrigger>
-            <TabsTrigger value="compra" className="py-4 flex flex-col gap-2">
+            <TabsTrigger 
+              value="compra" 
+              className="py-4 flex flex-col gap-2 rounded-xl transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
+            >
               <Home className="h-5 w-5" />
-              <span>Compra</span>
+              <span className="font-bold">Compra</span>
             </TabsTrigger>
-            <TabsTrigger value="interacao" className="py-4 flex flex-col gap-2">
+            <TabsTrigger 
+              value="interacao" 
+              className="py-4 flex flex-col gap-2 rounded-xl transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
+            >
               <MessageSquare className="h-5 w-5" />
-              <span>Interação</span>
+              <span className="font-bold">Interação</span>
             </TabsTrigger>
           </TabsList>
 
