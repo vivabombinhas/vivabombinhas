@@ -39,31 +39,31 @@ const UseCasesSection = () => {
 
         <Tabs defaultValue="temporada" className="w-full">
           <div className="flex justify-center mb-16">
-            <TabsList className="h-auto p-2 bg-muted/30 backdrop-blur-md rounded-full border border-border/50 flex flex-wrap justify-center gap-1 md:gap-2">
+            <TabsList className="h-auto p-2 bg-white/50 backdrop-blur-xl rounded-full border border-border/40 flex flex-wrap justify-center gap-1 md:gap-2 shadow-premium">
               <TabsTrigger 
                 value="temporada" 
-                className="px-6 py-3 rounded-full transition-all duration-500 data-[state=active]:bg-foreground data-[state=active]:text-white data-[state=active]:shadow-xl font-bold text-xs uppercase tracking-widest gap-2"
+                className="px-8 py-4 rounded-full transition-all duration-500 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 font-bold text-xs uppercase tracking-widest gap-3 group"
               >
-                <Sun className="h-4 w-4" />
+                <Sun className="h-4 w-4 group-data-[state=active]:animate-spin-slow" />
                 Temporada
               </TabsTrigger>
               <TabsTrigger 
                 value="anual" 
-                className="px-6 py-3 rounded-full transition-all duration-500 data-[state=active]:bg-foreground data-[state=active]:text-white data-[state=active]:shadow-xl font-bold text-xs uppercase tracking-widest gap-2"
+                className="px-8 py-4 rounded-full transition-all duration-500 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 font-bold text-xs uppercase tracking-widest gap-3 group"
               >
                 <Key className="h-4 w-4" />
                 Aluguel Anual
               </TabsTrigger>
               <TabsTrigger 
                 value="compra" 
-                className="px-6 py-3 rounded-full transition-all duration-500 data-[state=active]:bg-foreground data-[state=active]:text-white data-[state=active]:shadow-xl font-bold text-xs uppercase tracking-widest gap-2"
+                className="px-8 py-4 rounded-full transition-all duration-500 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 font-bold text-xs uppercase tracking-widest gap-3 group"
               >
                 <Home className="h-4 w-4" />
                 Compra
               </TabsTrigger>
               <TabsTrigger 
                 value="interacao" 
-                className="px-6 py-3 rounded-full transition-all duration-500 data-[state=active]:bg-foreground data-[state=active]:text-white data-[state=active]:shadow-xl font-bold text-xs uppercase tracking-widest gap-2"
+                className="px-8 py-4 rounded-full transition-all duration-500 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 font-bold text-xs uppercase tracking-widest gap-3 group"
               >
                 <MessageSquare className="h-4 w-4" />
                 Interação
