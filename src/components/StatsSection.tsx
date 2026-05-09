@@ -40,7 +40,7 @@ export default function StatsSection() {
         <div className="absolute top-1/2 right-1/4 w-[250px] h-[250px] bg-accent/10 rounded-full blur-[80px] -translate-y-1/2" />
       </div>
 
-      <div className="container-wide">
+      <div className="container-wide relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-24">
           {stats.map((stat, i) => (
             <motion.div 
