@@ -32,10 +32,10 @@ export default function HeroSection() {
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2.5 mb-8 lg:mb-10 px-4 py-2 rounded-full border border-slate-100 bg-white/50 backdrop-blur-sm shadow-sm"
+              className="inline-flex items-center gap-2.5 mb-8 lg:mb-10 px-4 py-2 rounded-full border border-slate-100 bg-white/50 backdrop-blur-sm shadow-sm max-w-full overflow-hidden"
             >
-              <div className="flex h-2 w-2 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.5)] animate-pulse" />
-              <span className="text-[10px] md:text-[11px] font-bold text-slate-500 uppercase tracking-[0.15em]">
+              <div className="flex h-2 w-2 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.5)] animate-pulse shrink-0" />
+              <span className="text-[10px] md:text-[11px] font-bold text-slate-500 uppercase tracking-[0.15em] whitespace-nowrap overflow-hidden text-ellipsis">
                 Assistente Imobiliária • Bombinhas
               </span>
             </motion.div>

@@ -82,7 +82,7 @@
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    @apply tracking-tight;
+    @apply tracking-[-0.02em] leading-[1.15];
   }
 }
 
