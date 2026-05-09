@@ -64,8 +64,8 @@ const HowItWorksSection = () => {
               <div className="w-16 h-16 rounded-[22px] bg-muted flex items-center justify-center mb-10 shadow-sm group-hover:bg-primary group-hover:scale-110 transition-all duration-700">
                 <s.icon className="h-7 w-7 text-foreground group-hover:text-white transition-colors duration-700" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-5 tracking-tight">{s.title}</h3>
-              <p className="text-muted-foreground text-[15px] leading-relaxed font-medium">{s.desc}</p>
+              <h3 className="text-h3 mb-5">{s.title}</h3>
+              <p className="text-body">{s.desc}</p>
             </motion.div>
           ))}
         </div>
