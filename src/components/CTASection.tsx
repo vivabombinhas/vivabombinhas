@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { ImageCursorTrail } from "@/components/ui/image-cursor-trail";
 
 const CTASection = () => {
   const [query, setQuery] = useState("");
@@ -14,10 +15,30 @@ const CTASection = () => {
     navigate("/maria", { state: { initialMessage: query.trim() } });
   };
 
+  const images = [
+    "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1600585154340-be6199f7a096?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1600607687940-c52fb0729a5c?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1600566752355-3979ff69a3bc?q=80&w=800&auto=format",
+  ];
+
   return (
     <section className="py-40 relative overflow-hidden bg-background border-t border-slate-50">
-      {/* Background Decorative Elements */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(37,99,235,0.04),transparent_60%)]" />
+      <div className="absolute inset-0 z-0 opacity-40">
+        <ImageCursorTrail 
+          items={images} 
+          maxNumberOfImages={4} 
+          distance={20} 
+          fadeAnimation={true}
+          imgClass="w-32 h-40 md:w-48 md:h-64"
+          className="h-full w-full"
+        />
+      </div>
       
       <div className="container max-w-5xl mx-auto px-6 lg:px-12 relative z-10">
         <div className="flex flex-col items-center text-center">
