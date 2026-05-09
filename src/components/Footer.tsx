@@ -2,21 +2,21 @@ import { Bot } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="py-24 bg-background border-t border-border">
-      <div className="container max-w-7xl mx-auto px-6 lg:px-12">
+    <footer className="py-24 bg-background border-t border-border/50">
+      <div className="container-wide">
         <div className="flex flex-col lg:flex-row items-start justify-between gap-16">
           
-          <div className="flex flex-col items-start gap-6 max-w-sm">
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-[12px] bg-foreground flex items-center justify-center">
-                <Bot className="h-6 w-6 text-white" />
+          <div className="flex flex-col items-start gap-8 max-w-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center">
+                <Bot className="h-5 w-5 text-white" />
               </div>
-              <span className="text-2xl font-black tracking-[-0.05em] text-foreground">
-                Mar<span className="text-primary">IA</span>
+              <span className="text-xl font-bold tracking-tight text-foreground">
+                Mar<span className="text-primary italic">IA</span>
               </span>
             </div>
-            <p className="text-body">
-              Simplificando a busca imobiliária em Bombinhas através de inteligência artificial e curadoria real.
+            <p className="text-body max-w-xs">
+              Redefinindo a experiência imobiliária em Bombinhas com tecnologia elegante e curadoria local.
             </p>
           </div>
 
