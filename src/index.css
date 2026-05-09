@@ -96,14 +96,14 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--font-sans);
   }
   ::selection {
-    background-color: oklch(0.6723 0.1606 244.9955 / 0.1);
-    color: oklch(0.6723 0.1606 244.9955);
+    background-color: var(--primary);
+    color: var(--primary-foreground);
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font-sans);
   }
 
   .text-display {
