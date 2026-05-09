@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Building2, Users, Eye, Search, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { TypingText } from "@/components/ui/TypingText";
 
 const benefits = [
   { icon: Eye, title: "Visibilidade", desc: "Apareça para quem busca ativamente na região." },
