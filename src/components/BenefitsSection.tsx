@@ -24,7 +24,7 @@ const BenefitsSection = () => {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-muted-foreground text-lg md:text-xl font-medium leading-relaxed"
+            className="text-subtitle"
           >
             Menos tempo procurando. Mais tempo visitando e aproveitando Bombinhas.
           </motion.p>
