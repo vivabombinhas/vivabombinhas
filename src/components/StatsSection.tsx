@@ -34,7 +34,7 @@ export default function StatsSection() {
   ];
 
   return (
-    <section className="py-8 bg-background relative overflow-hidden -mt-12 md:-mt-16 z-20">
+    <section className="py-12 bg-background relative overflow-hidden -mt-16 md:-mt-20 z-20">
       <div className="container-wide">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
