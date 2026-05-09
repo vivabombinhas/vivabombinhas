@@ -40,7 +40,7 @@ function ImageCursorTrail({
     image.style.left = `${relativeX}px`
     image.style.top = `${relativeY}px`
 
-    if (currentZIndexRef.current > 100) {
+    if (currentZIndexRef.current > 1000) {
       currentZIndexRef.current = 1
     }
     image.style.zIndex = String(currentZIndexRef.current)
@@ -49,9 +49,11 @@ function ImageCursorTrail({
     image.dataset.status = "active"
 
     if (fadeAnimation) {
+      // Clear any existing timeout if we're reusing the image index
+      // But we use a ring buffer, so it's unlikely to clash within 2s
       setTimeout(() => {
         image.dataset.status = "inactive"
-      }, 1500)
+      }, 2000)
     }
 
     lastRef.current = { x, y }
@@ -72,7 +74,7 @@ function ImageCursorTrail({
       if (e instanceof MouseEvent) {
         x = e.clientX
         y = e.clientY
-      } else if (e instanceof TouchEvent && e.touches.length > 0) {
+      } else if (typeof TouchEvent !== 'undefined' && e instanceof TouchEvent && e.touches.length > 0) {
         x = e.touches[0].clientX
         y = e.touches[0].clientY
       } else {
@@ -83,10 +85,6 @@ function ImageCursorTrail({
       
       const rect = containerRef.current.getBoundingClientRect()
       const isInside = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
-      
-      if (isInside) {
-        // console.log("Inside container, distance from last:", distanceFromLast(x, y));
-      }
 
       if (isInside && distanceFromLast(x, y) > distance) {
         const lead = refs.current[globalIndexRef.current % refs.current.length].current
@@ -114,7 +112,7 @@ function ImageCursorTrail({
     <div
       ref={containerRef}
       className={cn(
-        "relative w-full overflow-hidden pointer-events-none",
+        "absolute inset-0 overflow-hidden pointer-events-none",
         className
       )}
     >
@@ -122,7 +120,7 @@ function ImageCursorTrail({
         <img
           key={index}
           className={cn(
-            "pointer-events-none opacity-0 absolute -translate-x-[50%] -translate-y-[50%] scale-0 rounded-2xl object-cover transition-all duration-300 data-[status='active']:scale-100 data-[status='active']:opacity-100 data-[status='active']:duration-500 shadow-xl border-2 border-white",
+            "pointer-events-none opacity-0 absolute -translate-x-[50%] -translate-y-[50%] scale-0 rounded-2xl object-cover transition-all duration-500 data-[status='active']:scale-100 data-[status='active']:opacity-100 data-[status='active']:duration-700 shadow-2xl border border-white/20",
             imgClass
           )}
           data-index={index}
