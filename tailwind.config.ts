@@ -81,6 +81,7 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-up": "fade-up 0.6s ease-out forwards",
         "float": "float 3s ease-in-out infinite",
+        "spin-slow": "spin 8s linear infinite",
       },
     },
   },
