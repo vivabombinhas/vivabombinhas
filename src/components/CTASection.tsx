@@ -31,7 +31,7 @@ const CTASection = () => {
       <ImageCursorTrail 
         items={images} 
         maxNumberOfImages={6} 
-        distance={40} 
+        distance={30} 
         fadeAnimation={true}
         imgClass="w-32 h-44 md:w-52 md:h-72"
         className="z-10"
