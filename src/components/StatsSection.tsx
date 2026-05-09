@@ -35,6 +35,8 @@ export default function StatsSection() {
 
   return (
     <section className="py-12 bg-background relative border-y border-border/40 overflow-hidden">
+      {/* Texture & Atmosphere */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: "radial-gradient(#000 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
       <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
         <div className="absolute top-1/2 left-1/4 w-[300px] h-[300px] bg-primary/10 rounded-full blur-[100px] -translate-y-1/2" />
         <div className="absolute top-1/2 right-1/4 w-[250px] h-[250px] bg-accent/10 rounded-full blur-[80px] -translate-y-1/2" />
@@ -51,10 +53,10 @@ export default function StatsSection() {
               viewport={{ once: true }}
               className="flex flex-col items-center md:items-start text-center md:text-left group"
             >
-              <div className="text-h1 mb-2 tabular-nums text-foreground tracking-tighter">
+              <div className="text-h1 mb-2 tabular-nums text-foreground tracking-tighter group-hover:text-primary transition-colors duration-500">
                 <Counter value={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
               </div>
-              <div className="text-badge text-muted-foreground tracking-[0.2em]">
+              <div className="text-badge text-muted-foreground/60 tracking-[0.2em] font-bold">
                 {stat.label}
               </div>
             </motion.div>
