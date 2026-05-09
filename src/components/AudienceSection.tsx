@@ -37,7 +37,7 @@ const AudienceSection = () => {
               className="inline-flex items-center gap-2 mb-6"
             >
               <MapPin className="h-4 w-4 text-primary" />
-              <span className="text-badge text-primary">Bombinhas em foco</span>
+              <TypingText text="Bombinhas em foco" className="text-badge text-primary" />
             </motion.div>
             <motion.h2 
               initial={{ opacity: 0, y: 15 }}
