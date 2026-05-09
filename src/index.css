@@ -148,7 +148,7 @@
     @apply bg-black/40 backdrop-blur-md border border-white/10 shadow-xl;
   }
   .section-padding {
-    @apply py-20 md:py-32 lg:py-40;
+    @apply py-16 md:py-20 lg:py-24;
   }
   .section-margin {
     @apply my-20 md:my-32 lg:my-40;
