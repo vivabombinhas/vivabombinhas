@@ -26,18 +26,16 @@ const CTASection = () => {
 
   return (
     <section className="py-40 relative overflow-hidden bg-background border-t border-slate-50 group/cta">
-      <div className="absolute inset-0 z-0 opacity-100">
-        <ImageCursorTrail 
-          items={images} 
-          maxNumberOfImages={5} 
-          distance={80} 
-          fadeAnimation={true}
-          imgClass="w-28 h-36 md:w-40 md:h-52"
-          className="h-full w-full"
-        />
-      </div>
+      <ImageCursorTrail 
+        items={images} 
+        maxNumberOfImages={6} 
+        distance={40} 
+        fadeAnimation={true}
+        imgClass="w-32 h-44 md:w-52 md:h-72"
+        className="z-10"
+      />
       
-      <div className="container max-w-5xl mx-auto px-6 lg:px-12 relative z-10">
+      <div className="container max-w-5xl mx-auto px-6 lg:px-12 relative z-20">
         <div className="flex flex-col items-center text-center">
           
           <motion.div 
