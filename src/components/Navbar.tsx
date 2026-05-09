@@ -51,7 +51,7 @@ const Navbar = () => {
           ))}
           <Link 
             to="/anuncie" 
-            className="text-[12px] font-bold text-muted-foreground hover:text-foreground transition-colors tracking-[0.1em] uppercase"
+            className="text-badge text-muted-foreground hover:text-foreground transition-colors"
           >
             Anunciar
           </Link>
