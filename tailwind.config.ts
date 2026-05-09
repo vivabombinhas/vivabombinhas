@@ -14,9 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Open Sans", "sans-serif"],
-        serif: ["Georgia", "serif"],
-        mono: ["Menlo", "monospace"],
+        sans: ["DM Sans", "sans-serif"],
+        serif: ["Lora", "serif"],
+        mono: ["IBM Plex Mono", "monospace"],
       },
       colors: {
         border: "var(--border)",
