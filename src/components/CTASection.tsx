@@ -25,12 +25,12 @@ const CTASection = () => {
   ];
 
   return (
-    <section className="py-40 relative overflow-hidden bg-background border-t border-slate-50">
-      <div className="absolute inset-0 z-0 opacity-40">
+    <section className="py-40 relative overflow-hidden bg-background border-t border-slate-50 group/cta">
+      <div className="absolute inset-0 z-0 opacity-100">
         <ImageCursorTrail 
           items={images} 
-          maxNumberOfImages={3} 
-          distance={30} 
+          maxNumberOfImages={5} 
+          distance={80} 
           fadeAnimation={true}
           imgClass="w-28 h-36 md:w-40 md:h-52"
           className="h-full w-full"
