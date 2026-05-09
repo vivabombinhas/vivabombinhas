@@ -75,7 +75,7 @@ const UseCasesSection = () => {
             </TabsList>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1.1fr,0.9fr] gap-12 lg:gap-20 items-center">
+          <div className="max-w-3xl mx-auto">
             <div className="order-2 lg:order-1">
               <TabsContent value="temporada" className="mt-0 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
                 <div className="space-y-6">
