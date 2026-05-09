@@ -27,7 +27,10 @@ const audiences = [
 
 const AudienceSection = () => {
   return (
-    <section id="para-quem" className="section-padding bg-background">
+    <section id="para-quem" className="section-padding bg-background relative overflow-hidden">
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
+      </div>
       <div className="container-wide">
         <div className="flex flex-col lg:flex-row items-end justify-between gap-12 mb-24">
           <div className="max-w-2xl">
@@ -65,7 +68,7 @@ const AudienceSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.7 }}
               viewport={{ once: true }}
-              className="group p-10 rounded-[32px] bg-muted/20 hover:bg-white border border-transparent hover:border-border/50 hover:shadow-premium transition-all duration-700"
+              className="group p-10 rounded-[32px] bg-white border border-border/50 hover:shadow-premium transition-all duration-700"
             >
               <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-10 shadow-sm border border-border group-hover:scale-105 transition-transform duration-700">
                 <a.icon className="h-5 w-5 text-foreground" />

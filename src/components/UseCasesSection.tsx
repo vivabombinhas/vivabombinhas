@@ -8,7 +8,11 @@ import { TypingText } from "@/components/ui/TypingText";
 
 const UseCasesSection = () => {
   return (
-    <section id="casos-de-uso" className="section-padding bg-background relative overflow-hidden">
+    <section id="casos-de-uso" className="section-padding bg-muted/20 relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
+      </div>
       <div className="container-wide">
         <div className="text-center mb-20 max-w-3xl mx-auto">
           <motion.div 
@@ -71,7 +75,7 @@ const UseCasesSection = () => {
             </TabsList>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr,1.2fr] gap-12 lg:gap-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.1fr,0.9fr] gap-12 lg:gap-20 items-center">
             <div className="order-2 lg:order-1">
               <TabsContent value="temporada" className="mt-0 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
                 <div className="space-y-6">
@@ -143,7 +147,7 @@ const UseCasesSection = () => {
             </div>
 
             <div className="order-1 lg:order-2">
-              <div className="relative aspect-square md:aspect-[4/3] lg:aspect-square bg-muted/10 rounded-[40px] border border-border/50 overflow-hidden premium-shadow">
+              <div className="relative aspect-square md:aspect-[4/3] lg:aspect-[4/5] max-w-[460px] mx-auto lg:mr-0 bg-muted/10 rounded-[40px] border border-border/50 overflow-hidden premium-shadow">
                 <TabsContent value="temporada" className="m-0 h-full">
                   <InteractiveChatBox forcedConvIndex={0} />
                 </TabsContent>
