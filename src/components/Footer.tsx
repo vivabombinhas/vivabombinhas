@@ -49,11 +49,11 @@ const Footer = () => {
         </div>
 
         <div className="mt-24 pt-12 border-t border-border flex flex-col md:flex-row items-center justify-between gap-8">
-          <p className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">
+          <p className="text-badge">
             © {new Date().getFullYear()} MarIA • Tecnologia Imobiliária
           </p>
           <div className="flex items-center gap-4">
-            <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">Status</span>
+            <span className="text-badge">Status</span>
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-[10px] font-bold text-emerald-600 border border-emerald-100 uppercase tracking-widest">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse" />
               Sistemas Operacionais
