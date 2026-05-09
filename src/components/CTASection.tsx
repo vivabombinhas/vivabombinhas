@@ -29,8 +29,8 @@ const CTASection = () => {
       <div className="absolute inset-0 z-0 opacity-100">
         <ImageCursorTrail 
           items={images} 
-          maxNumberOfImages={3} 
-          distance={30} 
+          maxNumberOfImages={5} 
+          distance={80} 
           fadeAnimation={true}
           imgClass="w-28 h-36 md:w-40 md:h-52"
           className="h-full w-full"
