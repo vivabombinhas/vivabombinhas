@@ -83,6 +83,10 @@ function ImageCursorTrail({
       
       const rect = containerRef.current.getBoundingClientRect()
       const isInside = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+      
+      if (isInside) {
+        // console.log("Inside container, distance from last:", distanceFromLast(x, y));
+      }
 
       if (isInside && distanceFromLast(x, y) > distance) {
         const lead = refs.current[globalIndexRef.current % refs.current.length].current
