@@ -15,7 +15,7 @@ const Footer = () => {
                 Mar<span className="text-primary">IA</span>
               </span>
             </div>
-            <p className="text-muted-foreground text-[15px] font-medium leading-relaxed">
+            <p className="text-body">
               Simplificando a busca imobiliária em Bombinhas através de inteligência artificial e curadoria real.
             </p>
           </div>
