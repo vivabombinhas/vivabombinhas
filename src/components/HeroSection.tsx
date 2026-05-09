@@ -57,7 +57,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="text-muted-foreground text-base md:text-xl leading-relaxed font-medium max-w-[520px] mb-10 lg:mb-12"
+              className="text-subtitle max-w-[520px] mb-10 lg:mb-12"
             >
               A MarIA centraliza anúncios de toda a cidade e filtra o que realmente importa. Converse, explore e conecte-se direto com o anunciante.
             </motion.p>
