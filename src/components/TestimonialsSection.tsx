@@ -47,8 +47,8 @@ const TestimonialsSection = () => {
                   {t.author.charAt(0)}
                 </div>
                 <div className="text-left">
-                  <h4 className="text-[13px] font-bold text-foreground leading-none mb-1.5">{t.author}</h4>
-                  <p className="text-[11px] text-muted-foreground/60 font-bold uppercase tracking-wider leading-none">{t.role}</p>
+                   <h4 className="text-body font-bold text-foreground leading-none mb-1.5">{t.author}</h4>
+                  <p className="text-badge leading-none">{t.role}</p>
                 </div>
               </div>
             </motion.div>
