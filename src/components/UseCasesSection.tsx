@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sun, Home, Key, MessageSquare, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import { TypingText } from "@/components/ui/TypingText";
 
 const UseCasesSection = () => {
   return (
