@@ -39,7 +39,7 @@ const TestimonialsSection = () => {
               viewport={{ once: true }}
               className="p-10 rounded-[40px] border border-border bg-muted/30 hover:bg-background hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] transition-all duration-700 group"
             >
-              <p className="text-muted-foreground text-[15px] leading-relaxed font-medium mb-10 italic">
+              <p className="text-body mb-10 italic">
                 "{t.text}"
               </p>
               <div className="flex items-center gap-4">
