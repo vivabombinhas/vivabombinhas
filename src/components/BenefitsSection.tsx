@@ -48,8 +48,8 @@ const BenefitsSection = () => {
                 <p className="text-body">{b.desc}</p>
               </div>
               <div className="text-center shrink-0 min-w-[120px] pt-6 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-10">
-                <div className="text-4xl font-extrabold text-foreground tracking-tighter mb-1 tabular-nums">{b.stat}</div>
-                <div className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">{b.label}</div>
+                <div className="text-h3 mb-1 tabular-nums">{b.stat}</div>
+                <div className="text-badge">{b.label}</div>
               </div>
             </motion.div>
           ))}
