@@ -22,6 +22,7 @@ import AdminImoveis from "./pages/AdminImoveis.tsx";
 import AdminCuradoria from "./pages/AdminCuradoria.tsx";
 import AdminLayout from "./components/admin/AdminLayout.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
+import UseCases from "./pages/UseCases.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/maria" element={<MariaChat />} />
           <Route path="/anuncie" element={<Anunciar />} />
+          <Route path="/casos-de-uso" element={<UseCases />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/destacar/:submissionId" element={<CheckoutSimulado />} />
           <Route path="/admin" element={<AdminLayout />}>
