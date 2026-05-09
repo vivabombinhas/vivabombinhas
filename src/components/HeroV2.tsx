@@ -25,7 +25,7 @@ export const HeroV2 = () => {
               className="inline-flex items-center gap-2.5 mb-8 px-4 py-2 rounded-full border border-primary/10 bg-primary/5 backdrop-blur-sm"
             >
               <div className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-              <span className="text-badge text-primary">Inteligência Imobiliária • Bombinhas</span>
+              <TypingText text="Inteligência Imobiliária • Bombinhas" className="text-badge text-primary" />
             </motion.div>
 
             <motion.h1 
