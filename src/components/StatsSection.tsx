@@ -46,7 +46,7 @@ export default function StatsSection() {
               viewport={{ once: true }}
               className="relative flex flex-col items-center md:items-start text-center md:text-left group"
             >
-              <div className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground tracking-[-0.04em] mb-2 md:mb-4 tabular-nums">
+              <div className="text-h2 mb-2 md:mb-4 tabular-nums">
                 <Counter value={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
               </div>
               <div className="text-[11px] lg:text-[12px] text-muted-foreground/60 font-bold uppercase tracking-[0.2em] max-w-full md:max-w-[140px] leading-relaxed">
