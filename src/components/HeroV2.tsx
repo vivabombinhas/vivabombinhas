@@ -72,7 +72,7 @@ export const HeroV2 = () => {
                   ))}
                 </div>
                 <div className="text-left">
-                  <div className="text-[11px] font-bold text-foreground leading-none mb-1">+500 buscas hoje</div>
+                  <div className="text-[11px] font-bold text-foreground leading-none mb-1 my-[20px]">+500 buscas hoje</div>
                   
                 </div>
               </div>
