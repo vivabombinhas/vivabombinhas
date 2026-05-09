@@ -22,24 +22,24 @@ const Footer = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-10 md:gap-16">
             <div className="flex flex-col gap-6">
-              <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">Produto</span>
+              <span className="text-badge">Produto</span>
               <div className="flex flex-col gap-4">
-                <a href="#como-funciona" className="text-[13px] font-bold text-muted-foreground hover:text-primary transition-colors">Como Funciona</a>
-                <a href="/anuncie" className="text-[13px] font-bold text-muted-foreground hover:text-primary transition-colors">Anunciar</a>
-                <a href="#demo" className="text-[13px] font-bold text-muted-foreground hover:text-primary transition-colors">Demonstração</a>
+                <a href="#como-funciona" className="text-body !text-[13px] hover:text-primary transition-colors">Como Funciona</a>
+                <a href="/anuncie" className="text-body !text-[13px] hover:text-primary transition-colors">Anunciar</a>
+                <a href="#demo" className="text-body !text-[13px] hover:text-primary transition-colors">Demonstração</a>
               </div>
             </div>
             <div className="flex flex-col gap-6">
-              <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">Suporte</span>
+              <span className="text-badge">Suporte</span>
               <div className="flex flex-col gap-4">
-                <a href="#faq" className="text-[13px] font-bold text-muted-foreground hover:text-primary transition-colors">FAQ</a>
-                <a href="#" className="text-[13px] font-bold text-muted-foreground hover:text-primary transition-colors">Privacidade</a>
-                <a href="#" className="text-[13px] font-bold text-muted-foreground hover:text-primary transition-colors">Contato</a>
+                <a href="#faq" className="text-body !text-[13px] hover:text-primary transition-colors">FAQ</a>
+                <a href="#" className="text-body !text-[13px] hover:text-primary transition-colors">Privacidade</a>
+                <a href="#" className="text-body !text-[13px] hover:text-primary transition-colors">Contato</a>
               </div>
             </div>
             <div className="hidden md:flex flex-col gap-6">
-              <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.2em]">Localização</span>
-              <p className="text-[13px] font-bold text-muted-foreground">
+              <span className="text-badge">Localização</span>
+              <p className="text-body !text-[13px]">
                 Bombinhas, SC<br />
                 Brasil
               </p>
