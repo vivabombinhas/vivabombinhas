@@ -66,6 +66,7 @@ function ImageCursorTrail({
   }
 
   const handleOnMove = (e: { clientX: number; clientY: number }) => {
+    console.log("Mouse move detected at:", e.clientX, e.clientY);
     // Check distance in pixels directly for better control
     if (distanceFromLast(e.clientX, e.clientY) > distance) {
       const lead = refs.current[globalIndex % refs.current.length].current
