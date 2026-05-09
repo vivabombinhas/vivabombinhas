@@ -34,7 +34,12 @@ export default function StatsSection() {
   ];
 
   return (
-    <section className="py-20 bg-background relative border-y border-border/40">
+    <section className="py-12 bg-background relative border-y border-border/40 overflow-hidden">
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
+        <div className="absolute top-1/2 left-1/4 w-[300px] h-[300px] bg-primary/10 rounded-full blur-[100px] -translate-y-1/2" />
+        <div className="absolute top-1/2 right-1/4 w-[250px] h-[250px] bg-accent/10 rounded-full blur-[80px] -translate-y-1/2" />
+      </div>
+
       <div className="container-wide">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-24">
           {stats.map((stat, i) => (
