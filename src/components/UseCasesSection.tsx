@@ -76,7 +76,7 @@ const UseCasesSection = () => {
           </div>
 
           <div className="max-w-3xl mx-auto">
-            <div className="order-2 lg:order-1">
+            <div>
               <TabsContent value="temporada" className="mt-0 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
                 <div className="space-y-6">
                   <h3 className="text-h2">Aluguel de Temporada</h3>
