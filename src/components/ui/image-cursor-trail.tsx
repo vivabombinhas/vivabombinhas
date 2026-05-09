@@ -1,5 +1,5 @@
 "use client"
-import React, { createRef, useRef, type ReactNode } from "react"
+import React, { createRef, useRef, type ReactNode, useEffect } from "react"
 
 function cn(...classes: (string | undefined | null | false)[]) {
   return classes.filter(Boolean).join(" ")
@@ -27,9 +27,8 @@ function ImageCursorTrail({
   const containerRef = useRef<HTMLDivElement>(null)
   const refs = useRef(items.map(() => createRef<HTMLImageElement>()))
   const currentZIndexRef = useRef(1)
-
-  let globalIndex = 0
-  let last = { x: 0, y: 0 }
+  const globalIndexRef = useRef(0)
+  const lastRef = useRef({ x: 0, y: 0 })
 
   const activate = (image: HTMLImageElement, x: number, y: number) => {
     const containerRect = containerRef.current?.getBoundingClientRect()
@@ -55,39 +54,53 @@ function ImageCursorTrail({
       }, 1500)
     }
 
-    last = { x, y }
+    lastRef.current = { x, y }
   }
 
   const distanceFromLast = (x: number, y: number) =>
-    Math.hypot(x - last.x, y - last.y)
+    Math.hypot(x - lastRef.current.x, y - lastRef.current.y)
 
   const deactivate = (image: HTMLImageElement) => {
     image.dataset.status = "inactive"
   }
 
-  const handleOnMove = (e: { clientX: number; clientY: number }) => {
-    console.log("Mouse move detected at:", e.clientX, e.clientY);
-    // Check distance in pixels directly for better control
-    if (distanceFromLast(e.clientX, e.clientY) > distance) {
-      const lead = refs.current[globalIndex % refs.current.length].current
-      const tail =
-        refs.current[(globalIndex - maxNumberOfImages) % refs.current.length]
-          ?.current
+  useEffect(() => {
+    const handleMove = (e: MouseEvent | Touch) => {
+      const x = 'clientX' in e ? e.clientX : e.touches[0].clientX
+      const y = 'clientY' in e ? e.clientY : e.touches[0].clientY
 
-      if (lead) activate(lead, e.clientX, e.clientY)
-      if (tail) deactivate(tail)
+      if (!containerRef.current) return
+      
+      const rect = containerRef.current.getBoundingClientRect()
+      const isInside = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
 
-      globalIndex++
+      if (isInside && distanceFromLast(x, y) > distance) {
+        const lead = refs.current[globalIndexRef.current % refs.current.length].current
+        const tail =
+          refs.current[(globalIndexRef.current - maxNumberOfImages) % refs.current.length]
+            ?.current
+
+        if (lead) activate(lead, x, y)
+        if (tail) deactivate(tail)
+
+        globalIndexRef.current++
+      }
     }
-  }
+
+    window.addEventListener('mousemove', handleMove)
+    window.addEventListener('touchmove', handleMove)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMove)
+      window.removeEventListener('touchmove', handleMove)
+    }
+  }, [distance, maxNumberOfImages, fadeAnimation])
 
   return (
-    <section
-      onMouseMove={(e) => handleOnMove(e)}
-      onTouchMove={(e) => handleOnMove(e.touches[0])}
+    <div
       ref={containerRef}
       className={cn(
-        "relative grid h-[600px] w-full place-content-center overflow-hidden",
+        "relative w-full overflow-hidden pointer-events-none",
         className
       )}
     >
@@ -106,35 +119,7 @@ function ImageCursorTrail({
         />
       ))}
       {children}
-    </section>
-  )
-}
-
-export default function CursorTrailDemo() {
-  const images = [
-    "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=1200&auto=format",
-    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200&auto=format",
-    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=1200&auto=format",
-    "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=1200&auto=format",
-    "https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=1200&auto=format",
-    "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?q=80&w=1200&auto=format",
-    "https://images.unsplash.com/photo-1600585154340-be6199f7a096?q=80&w=1200&auto=format",
-    "https://images.unsplash.com/photo-1600607687940-c52fb0729a5c?q=80&w=1200&auto=format",
-    "https://images.unsplash.com/photo-1600566752355-3979ff69a3bc?q=80&w=1200&auto=format",
-  ]
-
-  return (
-    <section className="mx-auto w-full max-w-4xl rounded-[24px] border border-black/5 p-2 shadow-sm md:rounded-t-[44px]">
-      <div className="relative mx-auto flex w-full flex-col rounded-[24px] border border-black/5 bg-neutral-800/5 shadow-sm md:items-start md:gap-8 md:rounded-b-[20px] md:rounded-t-[40px]">
-        <ImageCursorTrail
-          items={images}
-          maxNumberOfImages={5}
-          distance={50}
-          imgClass="sm:w-40 w-28 sm:h-48 h-36"
-          className="max-w-4xl rounded-3xl"
-        />
-      </div>
-    </section>
+    </div>
   )
 }
 
