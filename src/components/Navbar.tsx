@@ -23,20 +23,20 @@ const Navbar = () => {
     <header 
       className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 ${
         scrolled 
-          ? "py-4 bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-[0_2px_20px_rgba(0,0,0,0.03)]" 
-          : "py-8 bg-transparent"
+          ? "py-3 bg-white/80 backdrop-blur-md border-b border-border/40 shadow-sm" 
+          : "py-6 bg-transparent"
       }`}
     >
-      <div className="container max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3.5 group">
-          <div className="w-11 h-11 rounded-[14px] bg-foreground flex items-center justify-center shadow-lg shadow-slate-200 group-hover:scale-105 transition-all duration-500">
-            <Bot className="h-6 w-6 text-white" />
+      <div className="container-wide flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center group-hover:scale-105 transition-all duration-500">
+            <Bot className="h-5 w-5 text-white" />
           </div>
           <div className="flex flex-col">
-            <span className="text-2xl font-black tracking-[-0.05em] leading-none text-foreground">
-              Mar<span className="text-primary">IA</span>
+            <span className="text-xl font-bold tracking-tight text-foreground">
+              Mar<span className="text-primary italic">IA</span>
             </span>
-            <span className="text-badge leading-none mt-1.5 text-muted-foreground">Bombinhas • SC</span>
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60 leading-none">Bombinhas • SC</span>
           </div>
         </Link>
 
