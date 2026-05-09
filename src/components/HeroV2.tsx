@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InteractiveChatBox } from "@/components/InteractiveChatBox";
+import { TypingText } from "@/components/ui/TypingText";
 
 export const HeroV2 = () => {
   return (
@@ -14,7 +15,7 @@ export const HeroV2 = () => {
       </div>
 
       <div className="container-wide relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr,1.1fr] gap-16 lg:gap-24 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.15fr,0.85fr] gap-12 lg:gap-20 items-center">
           
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
             <motion.div 
@@ -24,7 +25,7 @@ export const HeroV2 = () => {
               className="inline-flex items-center gap-2.5 mb-8 px-4 py-2 rounded-full border border-primary/10 bg-primary/5 backdrop-blur-sm"
             >
               <div className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-              <span className="text-badge text-primary">Inteligência Imobiliária • Bombinhas</span>
+              <TypingText text="Inteligência Imobiliária • Bombinhas" className="text-badge text-primary" />
             </motion.div>
 
             <motion.h1 
@@ -82,7 +83,7 @@ export const HeroV2 = () => {
             initial={{ opacity: 0, scale: 0.95, x: 20 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full aspect-[4/5] md:aspect-square lg:aspect-[4/5] max-w-[580px] mx-auto"
+            className="relative w-full aspect-[4/5] md:aspect-square lg:aspect-[4/5] max-w-[500px] mx-auto lg:mr-0"
           >
             {/* Elegant chat window frame */}
             <div className="absolute inset-0 rounded-[40px] border border-white/40 bg-white/30 backdrop-blur-2xl shadow-premium overflow-hidden z-10">

@@ -1,5 +1,6 @@
 import { MessageSquare, LayoutGrid, ExternalLink, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import { TypingText } from "@/components/ui/TypingText";
 
 const steps = [
   {
@@ -33,7 +34,7 @@ const HowItWorksSection = () => {
             className="inline-flex items-center gap-2 mb-6"
           >
             <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-badge text-primary">Simplicidade</span>
+            <TypingText text="Simplicidade" className="text-badge text-primary" />
           </motion.div>
           <motion.h2 
             initial={{ opacity: 0, y: 15 }}

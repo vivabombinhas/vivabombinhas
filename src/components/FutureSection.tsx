@@ -1,5 +1,6 @@
 import { UtensilsCrossed, Palmtree, Wrench, Sparkles, Rocket } from "lucide-react";
 import { motion } from "framer-motion";
+import { TypingText } from "@/components/ui/TypingText";
 
 const items = [
   { icon: UtensilsCrossed, label: "Gastronomia" },
@@ -21,7 +22,7 @@ const FutureSection = () => {
               className="inline-flex items-center gap-2 mb-8"
             >
               <Rocket className="h-4 w-4 text-primary" />
-              <span className="text-badge text-primary">Próximos passos</span>
+              <TypingText text="Próximos passos" className="text-badge text-primary" />
             </motion.div>
             <h2 className="text-h2 mb-8">
               A inteligência de Bombinhas<br /><span className="text-muted-foreground/40 italic font-serif">além dos imóveis.</span>

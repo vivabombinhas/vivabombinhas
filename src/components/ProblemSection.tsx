@@ -1,5 +1,6 @@
 import { LayoutGrid, Users, Copy, EyeOff, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { TypingText } from "@/components/ui/TypingText";
 
 const problems = [
   { 
@@ -36,7 +37,7 @@ const ProblemSection = () => {
             className="inline-flex items-center gap-2 mb-8"
           >
             <AlertCircle className="h-4 w-4 text-primary" />
-            <span className="text-badge text-primary">O cenário atual</span>
+            <TypingText text="O cenário atual" className="text-badge text-primary" />
           </motion.div>
           <motion.h2 
             initial={{ opacity: 0, y: 15 }}
