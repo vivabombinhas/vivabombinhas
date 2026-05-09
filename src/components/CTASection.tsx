@@ -34,7 +34,7 @@ const CTASection = () => {
           <motion.h2 
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-[-0.04em] text-foreground mb-10 leading-[0.95]"
+            className="text-display mb-10"
           >
             Pronto para encontrar<br /><span className="text-primary italic font-medium">seu lugar?</span>
           </motion.h2>
