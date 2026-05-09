@@ -24,7 +24,7 @@ const PartnersSection = () => {
               className="inline-flex items-center gap-2 mb-8"
             >
               <Building2 className="h-4 w-4 text-primary" />
-              <span className="text-badge text-primary">Parceiros</span>
+              <TypingText text="Parceiros" className="text-badge text-primary" />
             </motion.div>
             <motion.h2 
               initial={{ opacity: 0, y: 15 }}
