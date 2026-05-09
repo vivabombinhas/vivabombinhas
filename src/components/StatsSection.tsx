@@ -41,7 +41,7 @@ export default function StatsSection() {
       </div>
 
       <div className="container-wide relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-24">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-16">
           {stats.map((stat, i) => (
             <motion.div 
               key={i}
