@@ -33,7 +33,7 @@ const FAQSection = () => {
             className="inline-flex items-center gap-2 mb-6"
           >
             <HelpCircle className="w-4 h-4 text-primary" />
-            <span className="text-badge text-primary">Dúvidas</span>
+            <TypingText text="Dúvidas" className="text-badge text-primary" />
           </motion.div>
           <motion.h2 
             initial={{ opacity: 0, y: 15 }}
