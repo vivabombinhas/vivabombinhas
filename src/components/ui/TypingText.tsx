@@ -24,7 +24,7 @@ export const TypingText = ({ text, className = "", delay = 0 }: TypingTextProps)
       opacity: 1,
       x: 0,
       transition: {
-        type: "spring",
+        type: "spring" as const,
         damping: 12,
         stiffness: 100,
       },
@@ -33,7 +33,7 @@ export const TypingText = ({ text, className = "", delay = 0 }: TypingTextProps)
       opacity: 0,
       x: 5,
       transition: {
-        type: "spring",
+        type: "spring" as const,
         damping: 12,
         stiffness: 100,
       },
