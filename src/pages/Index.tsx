@@ -1,5 +1,5 @@
 import Navbar from "@/components/Navbar";
-import { HeroSection } from "@/components/HeroSection";
+import { LandingAccordionItem } from "@/components/ui/interactive-image-accordion";
 import StatsSection from "@/components/StatsSection";
 import ProblemSection from "@/components/ProblemSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
@@ -17,7 +17,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20">
       <Navbar />
-      <HeroSection />
+      <LandingAccordionItem />
       <StatsSection />
       <ProblemSection />
       <HowItWorksSection />
