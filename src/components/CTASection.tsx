@@ -43,7 +43,7 @@ const CTASection = () => {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-muted-foreground text-xl md:text-2xl font-medium mb-16 max-w-2xl leading-relaxed"
+            className="text-subtitle mb-16 max-w-2xl"
           >
             Experimente a forma mais inteligente de buscar em Bombinhas. Sem formulários, apenas conversa.
           </motion.p>
