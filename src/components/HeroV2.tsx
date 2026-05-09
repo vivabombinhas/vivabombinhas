@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InteractiveChatBox } from "@/components/InteractiveChatBox";
+import { TypingText } from "@/components/ui/TypingText";
 
 export const HeroV2 = () => {
   return (
