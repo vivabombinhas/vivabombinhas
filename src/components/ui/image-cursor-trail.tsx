@@ -130,6 +130,7 @@ function ImageCursorTrail({
           ref={refs.current[index]}
         />
       ))}
+      <div className="absolute top-4 left-4 w-4 h-4 bg-red-500 rounded-full z-[9999]" />
       {children}
     </div>
   )
