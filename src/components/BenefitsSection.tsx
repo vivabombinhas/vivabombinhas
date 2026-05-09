@@ -22,7 +22,7 @@ const BenefitsSection = () => {
               className="inline-flex items-center gap-2 mb-8"
             >
               <Star className="h-4 w-4 text-primary fill-primary" />
-              <span className="text-badge text-primary">Vantagem MarIA</span>
+              <TypingText text="Vantagem MarIA" className="text-badge text-primary" />
             </motion.div>
             <motion.h2 
               initial={{ opacity: 0, y: 15 }}
