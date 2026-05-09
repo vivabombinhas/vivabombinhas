@@ -53,7 +53,7 @@ const ProblemSection = () => {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-muted-foreground text-lg md:text-xl font-medium max-w-md leading-relaxed lg:pt-16"
+            className="text-subtitle max-w-md lg:pt-16"
           >
             Centralizamos o mercado local para que você encontre o que busca com clareza e agilidade.
           </motion.p>
