@@ -1,5 +1,5 @@
 import Navbar from "@/components/Navbar";
-import StatsSection from "@/components/StatsSection";
+
 import ProblemSection from "@/components/ProblemSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import UseCasesSection from "@/components/UseCasesSection";
@@ -20,7 +20,6 @@ const Index = () => {
       <Navbar />
       <HeroV2 />
       <div className="space-y-0">
-        <StatsSection />
         <ProblemSection />
         <HowItWorksSection />
         <UseCasesSection />
