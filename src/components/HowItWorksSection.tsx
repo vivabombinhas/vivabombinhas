@@ -33,7 +33,7 @@ const HowItWorksSection = () => {
           <motion.p 
             initial={{ opacity: 0, x: -10 }}
             whileInView={{ opacity: 1, x: 0 }}
-            className="text-[11px] font-bold text-primary uppercase tracking-[0.3em] mb-6"
+            className="text-badge text-primary mb-6"
           >
             Processo Inteligente
           </motion.p>
