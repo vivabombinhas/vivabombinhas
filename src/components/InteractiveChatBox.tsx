@@ -149,12 +149,12 @@ export const InteractiveChatBox = ({
   }, [currentIndex, currentConvIndex]);
 
   return (
-    <div className="w-full relative">
+    <div className="w-full h-full relative flex flex-col">
       <motion.div 
-        className="relative rounded-[40px] border border-border bg-background shadow-[0_30px_70px_-20px_rgba(0,0,0,0.12)] overflow-hidden"
+        className="relative flex-1 flex flex-col rounded-[32px] border border-white/20 bg-background/90 backdrop-blur-xl shadow-2xl overflow-hidden"
       >
         {/* Header: More refined and application-like */}
-        <div className="bg-muted/50 backdrop-blur-md p-5 border-b border-border flex items-center justify-between">
+        <div className="bg-muted/30 backdrop-blur-md p-4 border-b border-border/50 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-[18px] bg-primary flex items-center justify-center shadow-lg shadow-blue-100">
               <Sparkles className="h-6 w-6 text-white" />
@@ -174,7 +174,7 @@ export const InteractiveChatBox = ({
         {/* Chat Body */}
         <div 
           ref={scrollContainerRef}
-          className="h-[300px] xs:h-[340px] md:h-[420px] overflow-y-auto p-5 md:p-8 space-y-5 md:space-y-6 scrollbar-hide bg-background/50"
+          className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide bg-transparent"
         >
           <AnimatePresence initial={false}>
             {messages.map((msg, idx) => (
@@ -222,7 +222,7 @@ export const InteractiveChatBox = ({
         </div>
 
         {/* Fake Input Area: Clean & Professional */}
-        <div className="p-5 bg-background border-t border-border">
+        <div className="p-4 bg-background/50 border-t border-border/50">
           <div className="flex gap-4">
             <div className="flex-1 bg-muted/50 border border-slate-200 rounded-2xl px-5 py-3.5 text-[13px] text-muted-foreground/60 font-medium flex items-center">
               Como posso ajudar hoje?
