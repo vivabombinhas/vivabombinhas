@@ -1,0 +1,140 @@
+"use client"
+import React, { createRef, useRef, type ReactNode } from "react"
+import { SparklesIcon } from "lucide-react"
+
+function cn(...classes: (string | undefined | null | false)[]) {
+  return classes.filter(Boolean).join(" ")
+}
+
+interface ImageMouseTrailProps {
+  items: string[]
+  children?: ReactNode
+  className?: string
+  imgClass?: string
+  distance?: number
+  maxNumberOfImages?: number
+  fadeAnimation?: boolean
+}
+
+function ImageCursorTrail({
+  items,
+  children,
+  className,
+  maxNumberOfImages = 5,
+  imgClass = "w-40 h-48",
+  distance = 20,
+  fadeAnimation = false,
+}: ImageMouseTrailProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const refs = useRef(items.map(() => createRef<HTMLImageElement>()))
+  const currentZIndexRef = useRef(1)
+
+  let globalIndex = 0
+  let last = { x: 0, y: 0 }
+
+  const activate = (image: HTMLImageElement, x: number, y: number) => {
+    const containerRect = containerRef.current?.getBoundingClientRect()
+    if (!containerRect) return
+
+    const relativeX = x - containerRect.left
+    const relativeY = y - containerRect.top
+
+    image.style.left = `${relativeX}px`
+    image.style.top = `${relativeY}px`
+
+    if (currentZIndexRef.current > 40) {
+      currentZIndexRef.current = 1
+    }
+    image.style.zIndex = String(currentZIndexRef.current)
+    currentZIndexRef.current++
+
+    image.dataset.status = "active"
+
+    if (fadeAnimation) {
+      setTimeout(() => {
+        image.dataset.status = "inactive"
+      }, 1500)
+    }
+
+    last = { x, y }
+  }
+
+  const distanceFromLast = (x: number, y: number) =>
+    Math.hypot(x - last.x, y - last.y)
+
+  const deactivate = (image: HTMLImageElement) => {
+    image.dataset.status = "inactive"
+  }
+
+  const handleOnMove = (e: MouseEvent | Touch) => {
+    if (distanceFromLast(e.clientX, e.clientY) > window.innerWidth / distance) {
+      const lead = refs.current[globalIndex % refs.current.length].current
+      const tail =
+        refs.current[(globalIndex - maxNumberOfImages) % refs.current.length]
+          ?.current
+
+      if (lead) activate(lead, e.clientX, e.clientY)
+      if (tail) deactivate(tail)
+
+      globalIndex++
+    }
+  }
+
+  return (
+    <section
+      onMouseMove={(e) => handleOnMove(e as unknown as MouseEvent)}
+      onTouchMove={(e) => handleOnMove(e.touches[0])}
+      ref={containerRef}
+      className={cn(
+        "relative grid h-[600px] w-full place-content-center overflow-hidden rounded-lg",
+        className
+      )}
+    >
+      {items.map((item, index) => (
+        <img
+          key={index}
+          className={cn(
+            "opacity-0 data-[status='active']:ease-out-expo absolute -translate-x-[50%] -translate-y-[50%] scale-0 rounded-3xl object-cover transition-transform duration-300 data-[status='active']:scale-100 data-[status='active']:opacity-100 data-[status='active']:duration-500",
+            imgClass
+          )}
+          data-index={index}
+          data-status="inactive"
+          src={item}
+          alt={`image-${index}`}
+          ref={refs.current[index]}
+        />
+      ))}
+      {children}
+    </section>
+  )
+}
+
+export default function CursorTrailDemo() {
+  const images = [
+    "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=1200&auto=format",
+    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200&auto=format",
+    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=1200&auto=format",
+    "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=1200&auto=format",
+    "https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=1200&auto=format",
+    "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?q=80&w=1200&auto=format",
+    "https://images.unsplash.com/photo-1600585154340-be6199f7a096?q=80&w=1200&auto=format",
+    "https://images.unsplash.com/photo-1600607687940-c52fb0729a5c?q=80&w=1200&auto=format",
+    "https://images.unsplash.com/photo-1600566752355-3979ff69a3bc?q=80&w=1200&auto=format",
+  ]
+
+  return (
+    <section className="mx-auto w-full max-w-4xl rounded-[24px] border border-black/5 p-2 shadow-sm md:rounded-t-[44px]">
+      <div className="relative mx-auto flex w-full flex-col rounded-[24px] border border-black/5 bg-neutral-800/5 shadow-sm md:items-start md:gap-8 md:rounded-b-[20px] md:rounded-t-[40px]">
+        <ImageCursorTrail
+          items={images}
+          maxNumberOfImages={5}
+          distance={25}
+          imgClass="sm:w-40 w-28 sm:h-48 h-36"
+          className="max-w-4xl rounded-3xl"
+        />
+      </div>
+    </section>
+  )
+}
+
+export { ImageCursorTrail }
