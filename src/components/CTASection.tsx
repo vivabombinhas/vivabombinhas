@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ImageCursorTrail } from "@/components/ui/image-cursor-trail";
 
 const CTASection = () => {
   const [query, setQuery] = useState("");
@@ -16,38 +15,21 @@ const CTASection = () => {
     navigate("/maria", { state: { initialMessage: trimmed } });
   };
 
-  const images = [
-    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800&auto=format",
-    "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?q=80&w=800&auto=format",
-    "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=800&auto=format",
-    "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800&auto=format",
-    "https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800&auto=format",
-    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800&auto=format",
-    "https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=800&auto=format",
-    "https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?q=80&w=800&auto=format",
-  ];
-
   return (
-    <section className="py-40 relative overflow-hidden bg-muted/30 border-t border-border group/cta">
-      <ImageCursorTrail 
-        items={images} 
-        maxNumberOfImages={6} 
-        distance={30} 
-        fadeAnimation={true}
-        imgClass="w-32 h-44 md:w-52 md:h-72"
-        className="z-10"
-      />
+    <section className="section-padding relative overflow-hidden bg-muted/20 border-t border-border/40">
+      {/* Decorative Atmosphere */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-full bg-[radial-gradient(circle_at_50%_0%,rgba(34,197,94,0.05),transparent_70%)] pointer-events-none" />
       
-      <div className="container max-w-5xl mx-auto px-6 lg:px-12 relative z-20">
+      <div className="container-wide relative z-10">
         <div className="flex flex-col items-center text-center">
           
           <motion.div 
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="w-24 h-24 rounded-[36px] bg-foreground flex items-center justify-center mb-12 shadow-2xl shadow-slate-200 group"
+            className="w-20 h-20 rounded-[32px] bg-foreground flex items-center justify-center mb-12 shadow-2xl shadow-slate-200 group"
           >
-            <Sparkles className="h-10 w-10 text-white group-hover:rotate-12 transition-transform duration-700" />
+            <Sparkles className="h-8 w-8 text-white group-hover:rotate-12 transition-transform duration-700" />
           </motion.div>
 
           <motion.h2 
@@ -55,7 +37,7 @@ const CTASection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             className="text-display mb-10"
           >
-            Pronto para encontrar<br /><span className="text-primary italic font-medium">seu lugar?</span>
+            Pronto para encontrar<br /><span className="text-primary italic font-serif">seu lugar no paraíso?</span>
           </motion.h2>
           
           <motion.p 
@@ -64,7 +46,7 @@ const CTASection = () => {
             transition={{ delay: 0.1 }}
             className="text-subtitle mb-16 max-w-2xl"
           >
-            Experimente a forma mais inteligente de buscar em Bombinhas. Sem formulários, apenas conversa.
+            Experimente a forma mais elegante e inteligente de buscar em Bombinhas. Sem formulários, apenas conversa fluida.
           </motion.p>
 
           <motion.form 
@@ -75,21 +57,21 @@ const CTASection = () => {
             viewport={{ once: true }}
             className="w-full max-w-2xl group"
           >
-            <div className="relative p-3 rounded-[40px] bg-background border border-border flex flex-col sm:flex-row gap-3 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] focus-within:shadow-[0_40px_80px_-20px_rgba(37,99,235,0.15)] transition-all duration-700">
-              <div className="flex-1 flex items-center gap-5 px-8 py-5">
-                <Search className="h-6 w-6 text-muted-foreground/60 shrink-0" />
+            <div className="relative p-2 rounded-full bg-background border border-border/60 flex flex-col sm:flex-row gap-2 shadow-premium focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-700">
+              <div className="flex-1 flex items-center gap-4 px-8 py-4">
+                <Search className="h-5 w-5 text-muted-foreground/50 shrink-0" />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Ex: Apartamento 3 quartos em Bombas..."
-                  className="w-full bg-transparent text-foreground font-bold text-lg outline-none placeholder:text-muted-foreground/40"
+                  placeholder="Ex: Cobertura em Bombas até R$ 2M..."
+                  className="w-full bg-transparent text-foreground font-bold text-lg outline-none placeholder:text-muted-foreground/30"
                 />
               </div>
               <Button 
                 type="submit"
                 size="lg" 
-                className="h-16 px-12 rounded-[28px] bg-primary text-primary-foreground font-bold text-lg hover:brightness-110 transition-all duration-500 shadow-xl shadow-primary/20 group-hover:scale-[1.02] active:scale-[0.98]"
+                className="h-14 px-10 rounded-full bg-primary text-primary-foreground font-bold text-lg hover:brightness-105 transition-all duration-500 shadow-xl shadow-primary/10 group-hover:scale-[1.01]"
               >
                 Buscar agora
                 <ArrowRight className="ml-3 h-5 w-5" />
@@ -103,9 +85,9 @@ const CTASection = () => {
             transition={{ delay: 0.4 }}
             className="mt-12 flex flex-wrap justify-center gap-8"
           >
-            {['Gratuito', 'Instantâneo', 'Sem Cadastro'].map((item) => (
+            {['Discovery Real', 'Instantâneo', 'Sem Cadastro'].map((item) => (
               <div key={item} className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full bg-primary" />
+                <div className="w-1 h-1 rounded-full bg-primary/40" />
                 <span className="text-badge">{item}</span>
               </div>
             ))}

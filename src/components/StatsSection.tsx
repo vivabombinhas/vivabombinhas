@@ -28,15 +28,15 @@ function Counter({ value, prefix = "", suffix = "" }: { value: number; prefix?: 
 
 export default function StatsSection() {
   const stats = [
-    { value: 20, prefix: "+", label: "Imobiliárias parceiras" },
-    { value: 580, prefix: "+", label: "Imóveis cadastrados" },
+    { value: 20, prefix: "+", label: "Imobiliárias locais" },
+    { value: 580, prefix: "+", label: "Imóveis ativos" },
     { value: 100, suffix: "%", label: "Foco em Bombinhas" },
   ];
 
   return (
-    <section className="py-12 lg:py-20 bg-background relative">
-      <div className="container max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-8 lg:gap-12">
+    <section className="py-20 bg-background relative border-y border-border/40">
+      <div className="container-wide">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-24">
           {stats.map((stat, i) => (
             <motion.div 
               key={i}
@@ -44,17 +44,14 @@ export default function StatsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.8 }}
               viewport={{ once: true }}
-              className="relative flex flex-col items-center md:items-start text-center md:text-left group"
+              className="flex flex-col items-center md:items-start text-center md:text-left group"
             >
-              <div className="text-h2 mb-2 md:mb-4 tabular-nums">
+              <div className="text-h1 mb-2 tabular-nums text-foreground tracking-tighter">
                 <Counter value={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
               </div>
-              <div className="text-badge max-w-full md:max-w-[140px]">
+              <div className="text-badge text-muted-foreground tracking-[0.2em]">
                 {stat.label}
               </div>
-              
-              {/* Subtle accent line on hover */}
-              <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-0 bg-primary rounded-full transition-all duration-500 group-hover:h-12 hidden md:block" />
             </motion.div>
           ))}
         </div>

@@ -5,61 +5,51 @@ const problems = [
   { 
     icon: LayoutGrid, 
     title: "Pulverização", 
-    desc: "Anúncios espalhados por dezenas de sites e grupos dificultam a comparação." 
+    desc: "Anúncios espalhados por dezenas de sites e grupos dificultam a comparação real." 
   },
   { 
     icon: Users, 
     title: "Desorganização", 
-    desc: "Informações duplicadas e fotos que não mostram a realidade do imóvel." 
+    desc: "Informações duplicadas e fotos que muitas vezes não refletem o estado atual." 
   },
   { 
     icon: Copy, 
     title: "Invisibilidade", 
-    desc: "As melhores oportunidades locais muitas vezes não chegam aos grandes portais." 
+    desc: "As melhores oportunidades locais nem sempre chegam aos grandes portais nacionais." 
   },
   { 
     icon: EyeOff, 
     title: "Perda de Tempo", 
-    desc: "Falar com múltiplos anunciantes e aguardar retornos consome dias preciosos." 
+    desc: "Falar com múltiplos anunciantes consome dias preciosos das suas férias ou trabalho." 
   },
 ];
 
 const ProblemSection = () => {
   return (
-    <section className="py-32 bg-background relative overflow-hidden">
-      <div className="container max-w-7xl mx-auto px-6 lg:px-12">
+    <section className="section-padding bg-background relative overflow-hidden">
+      <div className="container-wide">
         
-        <div className="flex flex-col lg:flex-row items-start justify-between gap-12 mb-24">
-          <div className="max-w-3xl">
-            <motion.div 
-              initial={{ opacity: 0, x: -10 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-muted border border-border text-badge mb-8"
-            >
-              <AlertCircle className="h-4 w-4 text-primary" />
-              O cenário atual
-            </motion.div>
-            <motion.h2 
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-h2"
-            >
-              Buscar um imóvel em Bombinhas <br className="hidden lg:block" />
-              não precisa ser <span className="text-muted-foreground/60 italic font-medium">um desafio.</span>
-            </motion.h2>
-          </div>
-          <motion.p 
+        <div className="max-w-4xl mb-24">
+          <motion.div 
+            initial={{ opacity: 0, x: -10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            className="inline-flex items-center gap-2 mb-8"
+          >
+            <AlertCircle className="h-4 w-4 text-primary" />
+            <span className="text-badge text-primary">O cenário atual</span>
+          </motion.div>
+          <motion.h2 
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-subtitle max-w-md lg:pt-16"
+            transition={{ delay: 0.1 }}
+            className="text-h2"
           >
-            Centralizamos o mercado local para que você encontre o que busca com clareza e agilidade.
-          </motion.p>
+            Buscar um imóvel em Bombinhas <br className="hidden lg:block" />
+            não precisa ser <span className="text-muted-foreground/40 italic font-serif">exaustivo.</span>
+          </motion.h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {problems.map((p, i) => (
             <motion.div 
               key={i}
@@ -67,10 +57,10 @@ const ProblemSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.7 }}
               viewport={{ once: true }}
-              className="group p-10 rounded-[40px] border border-border bg-background hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] transition-all duration-700"
+              className="group p-8 md:p-10 rounded-[32px] border border-border/50 bg-white hover:border-primary/20 hover:shadow-premium transition-all duration-700"
             >
-              <div className="w-14 h-14 rounded-[22px] bg-muted border border-border flex items-center justify-center mb-8 group-hover:bg-foreground group-hover:scale-110 transition-all duration-700">
-                <p.icon className="h-6 w-6 text-slate-900 group-hover:text-white transition-colors duration-700" />
+              <div className="w-12 h-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-white transition-all duration-700">
+                <p.icon className="h-5 w-5 transition-colors duration-700" />
               </div>
               <h3 className="text-h3 mb-4">{p.title}</h3>
               <p className="text-body">{p.desc}</p>

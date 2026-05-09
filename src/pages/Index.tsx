@@ -1,5 +1,4 @@
 import Navbar from "@/components/Navbar";
-import { LandingAccordionItem } from "@/components/ui/interactive-image-accordion";
 import StatsSection from "@/components/StatsSection";
 import ProblemSection from "@/components/ProblemSection";
 import HowItWorksSection from "@/components/HowItWorksSection";
@@ -13,23 +12,26 @@ import FAQSection from "@/components/FAQSection";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 import FloatingChatButton from "@/components/FloatingChatButton";
+import { HeroV2 } from "@/components/HeroV2";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20">
       <Navbar />
-      <UseCasesSection />
-      <StatsSection />
-      <ProblemSection />
-      <HowItWorksSection />
-      <UseCasesSection />
-      <AudienceSection />
-      <BenefitsSection />
-      <TestimonialsSection />
-      <PartnersSection />
-      <FutureSection />
-      <FAQSection />
-      <CTASection />
+      <HeroV2 />
+      <div className="space-y-0">
+        <StatsSection />
+        <ProblemSection />
+        <HowItWorksSection />
+        <UseCasesSection />
+        <AudienceSection />
+        <BenefitsSection />
+        <TestimonialsSection />
+        <PartnersSection />
+        <FutureSection />
+        <FAQSection />
+        <CTASection />
+      </div>
       <Footer />
       <FloatingChatButton />
     </div>

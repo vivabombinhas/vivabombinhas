@@ -1,4 +1,4 @@
-import { UtensilsCrossed, Palmtree, Wrench, Sparkles } from "lucide-react";
+import { UtensilsCrossed, Palmtree, Wrench, Sparkles, Rocket } from "lucide-react";
 import { motion } from "framer-motion";
 
 const items = [
@@ -10,28 +10,35 @@ const items = [
 
 const FutureSection = () => {
   return (
-    <section className="py-24 bg-background">
-      <div className="container max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="relative rounded-[48px] bg-muted border border-border p-12 md:p-24 overflow-hidden flex flex-col items-center text-center">
+    <section className="section-padding bg-background">
+      <div className="container-wide">
+        <div className="relative rounded-[56px] bg-muted/30 border border-border/40 p-12 md:p-24 overflow-hidden flex flex-col items-center text-center">
           
           <div className="relative z-10 max-w-3xl">
-            <p className="text-badge text-primary mb-6">Em breve</p>
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 mb-8"
+            >
+              <Rocket className="h-4 w-4 text-primary" />
+              <span className="text-badge text-primary">Próximos passos</span>
+            </motion.div>
             <h2 className="text-h2 mb-8">
-              A inteligência de Bombinhas<br /><span className="text-muted-foreground/60">além dos imóveis.</span>
+              A inteligência de Bombinhas<br /><span className="text-muted-foreground/40 italic font-serif">além dos imóveis.</span>
             </h2>
             <p className="text-subtitle mb-12">
-              MarIA está evoluindo para se tornar sua assistente completa na cidade, ajudando você a descobrir o melhor de Bombinhas em todos os setores.
+              A MarIA está evoluindo para se tornar sua assistente completa na cidade, conectando você ao que há de melhor em cada setor de Bombinhas.
             </p>
             
             <div className="flex flex-wrap justify-center gap-4">
               {items.map((it, i) => (
                 <motion.div 
                   key={i} 
-                  initial={{ opacity: 0, scale: 0.98 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.1 }}
                   viewport={{ once: true }}
-                  className="flex items-center gap-3 bg-background border border-border rounded-2xl px-6 py-4 text-sm font-bold text-foreground shadow-sm"
+                  className="flex items-center gap-3 bg-white border border-border/50 rounded-2xl px-8 py-5 text-sm font-bold text-foreground shadow-sm hover:shadow-premium transition-all duration-500"
                 >
                   <it.icon className="h-4 w-4 text-primary" />
                   {it.label}

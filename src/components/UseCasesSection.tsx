@@ -1,168 +1,161 @@
 import React from "react";
 import { InteractiveChatBox } from "@/components/InteractiveChatBox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sun, Home, Key, MessageSquare } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Sun, Home, Key, MessageSquare, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 
 const UseCasesSection = () => {
   return (
-    <section id="casos-de-uso" className="py-24 bg-background">
-      <div className="container max-w-7xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">Casos de Uso</h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Explore como a MarIA pode ajudar você a encontrar o imóvel ideal em Bombinhas através de diferentes fluxos de conversação.
-          </p>
+    <section id="casos-de-uso" className="section-padding bg-background relative overflow-hidden">
+      <div className="container-wide">
+        <div className="text-center mb-20 max-w-3xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 mb-6"
+          >
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="text-badge text-primary">Versatilidade MarIA</span>
+          </motion.div>
+          <motion.h2 
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-h2 mb-6"
+          >
+            Um assistente, <span className="text-muted-foreground/60 italic font-serif">múltiplas descobertas.</span>
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-subtitle"
+          >
+            Diferentes fluxos desenhados para cada necessidade, garantindo que você encontre exatamente o que busca em Bombinhas.
+          </motion.p>
         </div>
 
         <Tabs defaultValue="temporada" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-12 h-auto p-1.5 bg-muted/50 rounded-2xl border border-border/50">
-            <TabsTrigger 
-              value="temporada" 
-              className="py-4 flex flex-col gap-2 rounded-xl transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
-            >
-              <Sun className="h-5 w-5" />
-              <span className="font-bold">Temporada</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="anual" 
-              className="py-4 flex flex-col gap-2 rounded-xl transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
-            >
-              <Key className="h-5 w-5" />
-              <span className="font-bold">Aluguel Anual</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="compra" 
-              className="py-4 flex flex-col gap-2 rounded-xl transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
-            >
-              <Home className="h-5 w-5" />
-              <span className="font-bold">Compra</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="interacao" 
-              className="py-4 flex flex-col gap-2 rounded-xl transition-all duration-300 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20"
-            >
-              <MessageSquare className="h-5 w-5" />
-              <span className="font-bold">Interação</span>
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex justify-center mb-16">
+            <TabsList className="h-auto p-2 bg-muted/30 backdrop-blur-md rounded-full border border-border/50 flex flex-wrap justify-center gap-1 md:gap-2">
+              <TabsTrigger 
+                value="temporada" 
+                className="px-6 py-3 rounded-full transition-all duration-500 data-[state=active]:bg-foreground data-[state=active]:text-white data-[state=active]:shadow-xl font-bold text-xs uppercase tracking-widest gap-2"
+              >
+                <Sun className="h-4 w-4" />
+                Temporada
+              </TabsTrigger>
+              <TabsTrigger 
+                value="anual" 
+                className="px-6 py-3 rounded-full transition-all duration-500 data-[state=active]:bg-foreground data-[state=active]:text-white data-[state=active]:shadow-xl font-bold text-xs uppercase tracking-widest gap-2"
+              >
+                <Key className="h-4 w-4" />
+                Aluguel Anual
+              </TabsTrigger>
+              <TabsTrigger 
+                value="compra" 
+                className="px-6 py-3 rounded-full transition-all duration-500 data-[state=active]:bg-foreground data-[state=active]:text-white data-[state=active]:shadow-xl font-bold text-xs uppercase tracking-widest gap-2"
+              >
+                <Home className="h-4 w-4" />
+                Compra
+              </TabsTrigger>
+              <TabsTrigger 
+                value="interacao" 
+                className="px-6 py-3 rounded-full transition-all duration-500 data-[state=active]:bg-foreground data-[state=active]:text-white data-[state=active]:shadow-xl font-bold text-xs uppercase tracking-widest gap-2"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Interação
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            <div className="space-y-8">
-              <TabsContent value="temporada" className="mt-0 space-y-6">
-                <div>
-                  <h3 className="text-3xl font-bold mb-4">Aluguel de Temporada</h3>
-                  <p className="text-muted-foreground text-lg leading-relaxed">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr,1.2fr] gap-12 lg:gap-20 items-center">
+            <div className="order-2 lg:order-1">
+              <TabsContent value="temporada" className="mt-0 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
+                <div className="space-y-6">
+                  <h3 className="text-h2">Aluguel de Temporada</h3>
+                  <p className="text-subtitle">
                     Planeje suas férias perfeitas em Bombinhas. A MarIA ajuda você a encontrar casas e apartamentos disponíveis para datas específicas, filtrando por proximidade da praia e comodidades.
                   </p>
                 </div>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-xl">O que você pode perguntar:</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Quero uma casa para o Réveillon perto da Praia do Mariscal."
-                    </p>
-                    <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Procuro apartamento com 3 quartos para 6 pessoas em janeiro."
-                    </p>
-                    <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Tem alguma opção que aceite pet na Praia da Lagoinha?"
-                    </p>
-                  </CardContent>
-                </Card>
+                <div className="grid gap-4">
+                  {["Quero uma casa para o Réveillon em Mariscal.", "Apartamento com 3 quartos para janeiro.", "Tem alguma opção que aceite pet na Lagoinha?"].map((q, i) => (
+                    <div key={i} className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-body font-medium flex items-center gap-4 group hover:bg-white hover:shadow-premium transition-all duration-500">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-bold">0{i+1}</div>
+                      "{q}"
+                    </div>
+                  ))}
+                </div>
               </TabsContent>
 
-              <TabsContent value="anual" className="mt-0 space-y-6">
-                <div>
-                  <h3 className="text-3xl font-bold mb-4">Aluguel Anual</h3>
-                  <p className="text-muted-foreground text-lg leading-relaxed">
+              <TabsContent value="anual" className="mt-0 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
+                <div className="space-y-6">
+                  <h3 className="text-h2">Aluguel Anual</h3>
+                  <p className="text-subtitle">
                     Buscando morar em Bombinhas? Encontre opções de locação fixa com toda a assistência para entender requisitos, localização e valores médios.
                   </p>
                 </div>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-xl">O que você pode perguntar:</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Preciso de uma casa para aluguel anual no Centro ou Bombas."
-                    </p>
-                    <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Quais os documentos necessários para aluguel anual na cidade?"
-                    </p>
-                    <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Procuro kitnet mobiliada para morar sozinho."
-                    </p>
-                  </CardContent>
-                </Card>
+                <div className="grid gap-4">
+                  {["Preciso de uma casa para aluguel anual no Centro.", "Quais os documentos necessários para alugar?", "Procuro kitnet mobiliada para morar."].map((q, i) => (
+                    <div key={i} className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-body font-medium flex items-center gap-4 group hover:bg-white hover:shadow-premium transition-all duration-500">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-bold">0{i+1}</div>
+                      "{q}"
+                    </div>
+                  ))}
+                </div>
               </TabsContent>
 
-              <TabsContent value="compra" className="mt-0 space-y-6">
-                <div>
-                  <h3 className="text-3xl font-bold mb-4">Compra de Imóveis</h3>
-                  <p className="text-muted-foreground text-lg leading-relaxed">
+              <TabsContent value="compra" className="mt-0 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
+                <div className="space-y-6">
+                  <h3 className="text-h2">Compra de Imóveis</h3>
+                  <p className="text-subtitle">
                     Invista no paraíso. A MarIA filtra as melhores oportunidades de investimento ou moradia própria, conectando você aos melhores corretores e proprietários.
                   </p>
                 </div>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-xl">O que você pode perguntar:</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Quero ver apartamentos à venda na planta em Bombas."
-                    </p>
-                    <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Procuro cobertura de frente para o mar para investimento."
-                    </p>
-                    <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Quais bairros têm maior valorização em Bombinhas?"
-                    </p>
-                  </CardContent>
-                </Card>
+                <div className="grid gap-4">
+                  {["Quero ver apartamentos à venda na planta em Bombas.", "Procuro cobertura frente mar para investimento.", "Quais bairros têm maior valorização?"].map((q, i) => (
+                    <div key={i} className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-body font-medium flex items-center gap-4 group hover:bg-white hover:shadow-premium transition-all duration-500">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-bold">0{i+1}</div>
+                      "{q}"
+                    </div>
+                  ))}
+                </div>
               </TabsContent>
 
-              <TabsContent value="interacao" className="mt-0 space-y-6">
-                <div>
-                  <h3 className="text-3xl font-bold mb-4">Interação Amigável</h3>
-                  <p className="text-muted-foreground text-lg leading-relaxed">
+              <TabsContent value="interacao" className="mt-0 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
+                <div className="space-y-6">
+                  <h3 className="text-h2">Interação Amigável</h3>
+                  <p className="text-subtitle">
                     Tire dúvidas gerais sobre a cidade, melhores épocas para visita, custo de vida ou como funciona a nossa plataforma.
                   </p>
                 </div>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-xl">O que você pode perguntar:</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Qual a melhor época para evitar filas em Bombinhas?"
-                    </p>
-                    <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Como funciona a Taxa de Preservação Ambiental (TPA)?"
-                    </p>
-                    <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Quais as melhores praias para ir com crianças?"
-                    </p>
-                  </CardContent>
-                </Card>
+                <div className="grid gap-4">
+                  {["Qual a melhor época para evitar filas?", "Como funciona a Taxa de Preservação (TPA)?", "Quais as melhores praias para ir com crianças?"].map((q, i) => (
+                    <div key={i} className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-body font-medium flex items-center gap-4 group hover:bg-white hover:shadow-premium transition-all duration-500">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-bold">0{i+1}</div>
+                      "{q}"
+                    </div>
+                  ))}
+                </div>
               </TabsContent>
             </div>
 
-            <div className="sticky top-32 bg-background border rounded-3xl overflow-hidden shadow-2xl h-[600px]">
-              <TabsContent value="temporada" className="m-0 h-full">
-                <InteractiveChatBox forcedConvIndex={0} />
-              </TabsContent>
-              <TabsContent value="anual" className="m-0 h-full">
-                <InteractiveChatBox forcedConvIndex={1} />
-              </TabsContent>
-              <TabsContent value="compra" className="m-0 h-full">
-                <InteractiveChatBox forcedConvIndex={2} />
-              </TabsContent>
-              <TabsContent value="interacao" className="m-0 h-full">
-                <InteractiveChatBox forcedConvIndex={3} />
-              </TabsContent>
+            <div className="order-1 lg:order-2">
+              <div className="relative aspect-square md:aspect-[4/3] lg:aspect-square bg-muted/10 rounded-[40px] border border-border/50 overflow-hidden premium-shadow">
+                <TabsContent value="temporada" className="m-0 h-full">
+                  <InteractiveChatBox forcedConvIndex={0} />
+                </TabsContent>
+                <TabsContent value="anual" className="m-0 h-full">
+                  <InteractiveChatBox forcedConvIndex={1} />
+                </TabsContent>
+                <TabsContent value="compra" className="m-0 h-full">
+                  <InteractiveChatBox forcedConvIndex={2} />
+                </TabsContent>
+                <TabsContent value="interacao" className="m-0 h-full">
+                  <InteractiveChatBox forcedConvIndex={3} />
+                </TabsContent>
+              </div>
             </div>
           </div>
         </Tabs>
