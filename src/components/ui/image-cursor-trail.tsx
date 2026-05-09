@@ -65,9 +65,19 @@ function ImageCursorTrail({
   }
 
   useEffect(() => {
-    const handleMove = (e: MouseEvent | Touch) => {
-      const x = 'clientX' in e ? e.clientX : e.touches[0].clientX
-      const y = 'clientY' in e ? e.clientY : e.touches[0].clientY
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      let x = 0
+      let y = 0
+      
+      if (e instanceof MouseEvent) {
+        x = e.clientX
+        y = e.clientY
+      } else if (e instanceof TouchEvent && e.touches.length > 0) {
+        x = e.touches[0].clientX
+        y = e.touches[0].clientY
+      } else {
+        return
+      }
 
       if (!containerRef.current) return
       
@@ -87,12 +97,12 @@ function ImageCursorTrail({
       }
     }
 
-    window.addEventListener('mousemove', handleMove)
-    window.addEventListener('touchmove', handleMove)
+    window.addEventListener('mousemove', handleMove as EventListener)
+    window.addEventListener('touchmove', handleMove as EventListener)
 
     return () => {
-      window.removeEventListener('mousemove', handleMove)
-      window.removeEventListener('touchmove', handleMove)
+      window.removeEventListener('mousemove', handleMove as EventListener)
+      window.removeEventListener('touchmove', handleMove as EventListener)
     }
   }, [distance, maxNumberOfImages, fadeAnimation])
 
