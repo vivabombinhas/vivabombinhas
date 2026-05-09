@@ -31,9 +31,9 @@ const AccordionItem = ({ item, isActive, onMouseEnter }: { item: any; isActive: 
   return (
     <div
       className={`
-        relative h-[480px] rounded-2xl overflow-hidden cursor-pointer
+        relative h-[120px] md:h-[480px] rounded-2xl overflow-hidden cursor-pointer
         transition-all duration-700 ease-in-out border border-border/50
-        ${isActive ? 'w-full md:w-[450px] ring-2 ring-primary/20' : 'w-[60px] md:w-[70px] bg-muted/30'}
+        ${isActive ? 'w-full md:w-[450px] ring-2 ring-primary/20' : 'h-[60px] md:h-auto w-full md:w-[70px] bg-muted/30'}
       `}
       onMouseEnter={onMouseEnter}
       onClick={onMouseEnter}
@@ -119,7 +119,7 @@ export function LandingAccordionItem() {
           </div>
 
           <div className="w-full lg:w-3/5">
-            <div className="flex flex-row items-stretch justify-center lg:justify-end gap-2 md:gap-4 p-2 min-h-[500px]">
+            <div className="flex flex-col md:flex-row items-stretch justify-center lg:justify-end gap-2 md:gap-4 p-2 min-h-[500px]">
               {accordionItems.map((item, index) => (
                 <div key={item.id} className="relative">
                   <AccordionItem
