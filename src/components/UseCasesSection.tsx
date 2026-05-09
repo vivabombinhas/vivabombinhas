@@ -146,8 +146,8 @@ const UseCasesSection = () => {
               </TabsContent>
             </div>
 
-            <div className="order-1 lg:order-2">
-              <div className="relative aspect-[4/5] md:aspect-[3/4] max-w-[380px] mx-auto lg:mr-0 bg-white/50 rounded-[32px] border border-border/40 overflow-hidden shadow-2xl">
+            <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
+              <div className="relative w-full aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5] max-w-[400px] bg-white/50 rounded-[32px] border border-border/40 overflow-hidden shadow-2xl">
                 <TabsContent value="temporada" className="m-0 h-full">
                   <InteractiveChatBox forcedConvIndex={0} />
                 </TabsContent>
