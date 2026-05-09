@@ -8,19 +8,19 @@ const CONVERSATIONS = [
     id: "temporada",
     messages: [
       { type: "user", text: "Quero uma casa para temporada em Mariscal perto da praia." },
-      { type: "ai", text: "Claro 😊 Procura algo para família ou casal?" },
-      { type: "user", text: "Família." },
-      { type: "ai", text: "Perfeito. Encontrei estas opções em Mariscal 👇",
+      { type: "ai", text: "Oi! Sou a MarIA 🌊 Tenho ótimas opções no Mariscal. Procura algo para família ou casal?" },
+      { type: "user", text: "Família, somos 6 pessoas." },
+      { type: "ai", text: "Perfeito. Uma casa espaçosa seria ideal. Encontrei esta opção incrível pé na areia 👇",
         properties: [
           {
             id: "temp-1",
             titulo: "Casa Mariscal - 100m da Praia",
-            preco_temporada_diaria: 550,
+            preco_temporada_diaria: 850,
             bairro: "Mariscal",
             tipo: "casa",
             finalidade: "temporada",
             quartos: 3,
-            capacidade_pessoas: 6,
+            capacidade_pessoas: 8,
             fotos: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80"],
             anunciante_telefone: "47999999999"
           }
@@ -32,9 +32,9 @@ const CONVERSATIONS = [
     id: "aluguel",
     messages: [
       { type: "user", text: "Tem apartamentos para aluguel anual em Bombas?" },
-      { type: "ai", text: "Sim! Qual sua faixa de valor pretendida?" },
-      { type: "user", text: "Até R$ 3.500." },
-      { type: "ai", text: "Excelente. Veja este em Bombas 👇",
+      { type: "ai", text: "Olá! Bombas é excelente para morar. Qual sua faixa de valor pretendida?" },
+      { type: "user", text: "Até R$ 3.500 com condomínio." },
+      { type: "ai", text: "Excelente. Tenho um apartamento mobiliado muito bem localizado 👇",
         properties: [
           {
             id: "anual-1",
@@ -55,9 +55,9 @@ const CONVERSATIONS = [
     id: "compra",
     messages: [
       { type: "user", text: "Quero investir em um imóvel em Bombinhas." },
-      { type: "ai", text: "Ótima escolha! Busca valorização ou rentabilidade imediata?" },
-      { type: "user", text: "Valorização." },
-      { type: "ai", text: "Recomendo este lançamento no Mariscal 👇",
+      { type: "ai", text: "Bombinhas está em plena valorização! Busca algo pronto ou lançamento?" },
+      { type: "user", text: "Lançamento para valorização futura." },
+      { type: "ai", text: "Entendi. Este lançamento no Mariscal é a melhor oportunidade hoje 👇",
         properties: [
           {
             id: "compra-1",
@@ -72,6 +72,16 @@ const CONVERSATIONS = [
           }
         ]
       }
+    ]
+  },
+  {
+    id: "duvidas",
+    messages: [
+      { type: "user", text: "Qual a melhor época para visitar Bombinhas?" },
+      { type: "ai", text: "Depende do seu objetivo! Dezembro a Março é o auge do calor e agito ☀️" },
+      { type: "user", text: "E os preços? Quero algo mais tranquilo e barato." },
+      { type: "ai", text: "Nesse caso, recomendo Abril ou Outubro. As águas continuam mornas e os preços caem até 50%!" },
+      { type: "ai", text: "Deseja ver opções de hospedagem para esses meses?" }
     ]
   }
 ];
