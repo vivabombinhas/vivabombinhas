@@ -15,6 +15,7 @@ const Navbar = () => {
 
   const links = [
     { label: "Como Funciona", href: "#como-funciona" },
+    { label: "Casos de Uso", href: "/casos-de-uso" },
     { label: "FAQ", href: "#faq" },
   ];
 
@@ -41,13 +42,23 @@ const Navbar = () => {
 
         <nav className="hidden md:flex items-center gap-10">
           {links.map((l) => (
-            <a 
-              key={l.href} 
-              href={l.href} 
-              className="text-badge text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {l.label}
-            </a>
+            l.href.startsWith("/") ? (
+              <Link 
+                key={l.href} 
+                to={l.href} 
+                className="text-badge text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {l.label}
+              </Link>
+            ) : (
+              <a 
+                key={l.href} 
+                href={l.href} 
+                className="text-badge text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {l.label}
+              </a>
+            )
           ))}
           <Link 
             to="/anuncie" 
@@ -78,14 +89,25 @@ const Navbar = () => {
         <div className="absolute top-full left-0 right-0 p-4 bg-background/95 backdrop-blur-2xl border-b border-border animate-in fade-in slide-in-from-top-4 duration-300">
           <nav className="flex flex-col gap-2">
             {links.map((l) => (
-              <a 
-                key={l.href} 
-                href={l.href} 
-                onClick={() => setOpen(false)} 
-                className="text-sm font-bold text-muted-foreground p-4 rounded-2xl hover:bg-muted transition-colors"
-              >
-                {l.label}
-              </a>
+              l.href.startsWith("/") ? (
+                <Link 
+                  key={l.href} 
+                  to={l.href} 
+                  onClick={() => setOpen(false)} 
+                  className="text-sm font-bold text-muted-foreground p-4 rounded-2xl hover:bg-muted transition-colors"
+                >
+                  {l.label}
+                </Link>
+              ) : (
+                <a 
+                  key={l.href} 
+                  href={l.href} 
+                  onClick={() => setOpen(false)} 
+                  className="text-sm font-bold text-muted-foreground p-4 rounded-2xl hover:bg-muted transition-colors"
+                >
+                  {l.label}
+                </a>
+              )
             ))}
             <Link 
               to="/anuncie" 
