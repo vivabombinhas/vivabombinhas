@@ -44,7 +44,7 @@ const Navbar = () => {
             <a 
               key={l.href} 
               href={l.href} 
-              className="text-[12px] font-bold text-muted-foreground hover:text-foreground transition-colors tracking-[0.1em] uppercase"
+              className="text-badge text-muted-foreground hover:text-foreground transition-colors"
             >
               {l.label}
             </a>
