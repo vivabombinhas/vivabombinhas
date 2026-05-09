@@ -12,6 +12,12 @@ const benefits = [
 const BenefitsSection = () => {
   return (
     <section className="section-padding bg-muted/20 relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+        <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 left-0 w-[300px] h-[300px] bg-accent/10 rounded-full blur-[100px]" />
+      </div>
+
       <div className="container-wide relative z-10">
         <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start">
           
