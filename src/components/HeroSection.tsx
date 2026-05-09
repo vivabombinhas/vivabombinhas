@@ -35,7 +35,7 @@ export default function HeroSection() {
               className="inline-flex items-center gap-2.5 mb-8 lg:mb-10 px-4 py-2 rounded-full border border-border bg-background/50 backdrop-blur-sm shadow-sm max-w-full overflow-hidden"
             >
               <div className="flex h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(37,99,235,0.5)] animate-pulse shrink-0" />
-              <span className="text-[10px] md:text-[11px] font-bold text-muted-foreground uppercase tracking-[0.15em] whitespace-nowrap overflow-hidden text-ellipsis">
+              <span className="text-badge whitespace-nowrap overflow-hidden text-ellipsis">
                 Assistente Imobiliária • Bombinhas
               </span>
             </motion.div>
