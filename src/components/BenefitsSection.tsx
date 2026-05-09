@@ -11,7 +11,7 @@ const benefits = [
 
 const BenefitsSection = () => {
   return (
-    <section className="section-padding bg-muted/20 relative overflow-hidden">
+    <section className="section-padding bg-muted/20 relative">
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
       <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
         <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px]" />
@@ -19,9 +19,9 @@ const BenefitsSection = () => {
       </div>
 
       <div className="container-wide relative z-10">
-        <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[400px,1fr] gap-16 lg:gap-24 items-start">
           
-          <div className="lg:sticky lg:top-32 max-w-xl">
+          <div className="lg:sticky lg:top-32 w-full">
             <motion.div 
               initial={{ opacity: 0, x: -10 }}
               whileInView={{ opacity: 1, x: 0 }}
