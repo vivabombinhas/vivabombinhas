@@ -16,12 +16,14 @@ const CTASection = () => {
   };
 
   const images = [
-    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=600&auto=format", // Modern Beach House
-    "https://images.unsplash.com/photo-1600585154340-be6199f7a096?q=80&w=600&auto=format", // Luxury Interior
-    "https://images.unsplash.com/photo-1600607687940-c52fb0729a5c?q=80&w=600&auto=format", // Contemporary Villa
-    "https://images.unsplash.com/photo-1600566752355-3979ff69a3bc?q=80&w=600&auto=format", // Modern Living Room
-    "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?q=80&w=600&auto=format", // Beach Apartment
-    "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=600&auto=format", // Coastal View
+    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=800&auto=format",
+    "https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?q=80&w=800&auto=format",
   ];
 
   return (
