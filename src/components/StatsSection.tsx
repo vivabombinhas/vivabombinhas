@@ -34,7 +34,7 @@ export default function StatsSection() {
   ];
 
   return (
-    <section className="py-12 lg:py-20 bg-white relative">
+    <section className="py-12 lg:py-20 bg-background relative">
       <div className="container max-w-7xl mx-auto px-6 lg:px-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-8 lg:gap-12">
           {stats.map((stat, i) => (
@@ -46,15 +46,15 @@ export default function StatsSection() {
               viewport={{ once: true }}
               className="relative flex flex-col items-center md:items-start text-center md:text-left group"
             >
-              <div className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-950 tracking-[-0.04em] mb-2 md:mb-4 tabular-nums">
+              <div className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground tracking-[-0.04em] mb-2 md:mb-4 tabular-nums">
                 <Counter value={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
               </div>
-              <div className="text-[11px] lg:text-[12px] text-slate-400 font-bold uppercase tracking-[0.2em] max-w-full md:max-w-[140px] leading-relaxed">
+              <div className="text-[11px] lg:text-[12px] text-muted-foreground/60 font-bold uppercase tracking-[0.2em] max-w-full md:max-w-[140px] leading-relaxed">
                 {stat.label}
               </div>
               
               {/* Subtle accent line on hover */}
-              <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-0 bg-blue-600 rounded-full transition-all duration-500 group-hover:h-12 hidden md:block" />
+              <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-0 bg-primary rounded-full transition-all duration-500 group-hover:h-12 hidden md:block" />
             </motion.div>
           ))}
         </div>

@@ -14,7 +14,7 @@ export default function HeroSection() {
   ];
 
   return (
-    <section className="relative min-h-[85vh] lg:min-h-[75vh] flex flex-col justify-center overflow-hidden pt-32 pb-12 lg:pt-24 lg:pb-16 bg-white">
+    <section className="relative min-h-[85vh] lg:min-h-[75vh] flex flex-col justify-center overflow-hidden pt-32 pb-12 lg:pt-24 lg:pb-16 bg-background">
       
       {/* ── Background: Subtle Gradient & Pattern ── */}
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -32,10 +32,10 @@ export default function HeroSection() {
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2.5 mb-8 lg:mb-10 px-4 py-2 rounded-full border border-slate-100 bg-white/50 backdrop-blur-sm shadow-sm max-w-full overflow-hidden"
+              className="inline-flex items-center gap-2.5 mb-8 lg:mb-10 px-4 py-2 rounded-full border border-border bg-background/50 backdrop-blur-sm shadow-sm max-w-full overflow-hidden"
             >
-              <div className="flex h-2 w-2 rounded-full bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.5)] animate-pulse shrink-0" />
-              <span className="text-[10px] md:text-[11px] font-bold text-slate-500 uppercase tracking-[0.15em] whitespace-nowrap overflow-hidden text-ellipsis">
+              <div className="flex h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(37,99,235,0.5)] animate-pulse shrink-0" />
+              <span className="text-[10px] md:text-[11px] font-bold text-muted-foreground uppercase tracking-[0.15em] whitespace-nowrap overflow-hidden text-ellipsis">
                 Assistente Imobiliária • Bombinhas
               </span>
             </motion.div>
@@ -45,11 +45,11 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="text-slate-950 font-extrabold tracking-[-0.03em] leading-[1.05] mb-6 lg:mb-8" 
+              className="text-foreground font-extrabold tracking-[-0.03em] leading-[1.05] mb-6 lg:mb-8" 
               style={{ fontSize: "clamp(38px, 6vw, 72px)" }}
             >
               Encontre o imóvel<br />
-              certo em <span className="text-blue-600">Bombinhas</span><br />
+              certo em <span className="text-primary">Bombinhas</span><br />
               sem complicação.
             </motion.h1>
 
@@ -58,7 +58,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="text-slate-500 text-base md:text-xl leading-relaxed font-medium max-w-[520px] mb-10 lg:mb-12"
+              className="text-muted-foreground text-base md:text-xl leading-relaxed font-medium max-w-[520px] mb-10 lg:mb-12"
             >
               A MarIA centraliza anúncios de toda a cidade e filtra o que realmente importa. Converse, explore e conecte-se direto com o anunciante.
             </motion.p>
@@ -72,22 +72,22 @@ export default function HeroSection() {
             >
               <Button
                 size="lg"
-                className="h-14 lg:h-16 px-8 lg:px-10 rounded-2xl bg-slate-950 text-white font-bold hover:bg-slate-800 transition-all duration-500 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] group"
+                className="h-14 lg:h-16 px-8 lg:px-10 rounded-2xl bg-foreground text-white font-bold hover:bg-slate-800 transition-all duration-500 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] group"
                 onClick={() => window.open('https://wa.me/5547999999999', '_blank')}
               >
                 Começar agora
                 <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-1.5 transition-transform duration-500" />
               </Button>
 
-              <div className="flex bg-slate-50 p-1 rounded-[18px] lg:rounded-[20px] border border-slate-100/80 shadow-inner overflow-x-auto scrollbar-hide">
+              <div className="flex bg-muted p-1 rounded-[18px] lg:rounded-[20px] border border-border/80 shadow-inner overflow-x-auto scrollbar-hide">
                 {flows.map((flow) => (
                   <button
                     key={flow.label}
                     onClick={() => setActiveFlow(flow.index)}
                     className={`px-4 lg:px-5 py-2.5 lg:py-3 rounded-[12px] lg:rounded-[14px] text-[10px] lg:text-[11px] font-bold uppercase tracking-wider transition-all duration-500 whitespace-nowrap ${
                       activeFlow === flow.index
-                        ? "bg-white text-slate-950 shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-slate-100"
-                        : "text-slate-400 hover:text-slate-600"
+                        ? "bg-background text-foreground shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-border"
+                        : "text-muted-foreground/60 hover:text-muted-foreground"
                     }`}
                   >
                     {flow.label}
