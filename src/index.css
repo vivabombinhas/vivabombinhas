@@ -63,7 +63,8 @@
     font-family: 'Open Sans', sans-serif;
   }
   ::selection {
-    @apply bg-primary/10 text-primary;
+    background-color: oklch(0.6723 0.1606 244.9955 / 0.1);
+    color: oklch(0.6723 0.1606 244.9955);
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Plus Jakarta Sans', sans-serif;
