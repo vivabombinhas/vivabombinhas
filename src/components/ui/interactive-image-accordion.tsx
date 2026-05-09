@@ -31,9 +31,9 @@ const AccordionItem = ({ item, isActive, onMouseEnter }: { item: any; isActive: 
   return (
     <div
       className={`
-        relative h-[120px] md:h-[480px] rounded-2xl overflow-hidden cursor-pointer
+        relative rounded-2xl overflow-hidden cursor-pointer
         transition-all duration-700 ease-in-out border border-border/50
-        ${isActive ? 'w-full md:w-[450px] ring-2 ring-primary/20' : 'h-[60px] md:h-auto w-full md:w-[70px] bg-muted/30'}
+        ${isActive ? 'w-full md:w-[450px] h-[500px] md:h-[480px] ring-2 ring-primary/20' : 'w-full md:w-[70px] h-[60px] md:h-[480px] bg-muted/30'}
       `}
       onMouseEnter={onMouseEnter}
       onClick={onMouseEnter}
