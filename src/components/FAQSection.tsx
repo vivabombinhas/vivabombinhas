@@ -1,5 +1,6 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { motion } from "framer-motion";
+import { TypingText } from "@/components/ui/TypingText";
 import { HelpCircle } from "lucide-react";
 
 const faqs = [
