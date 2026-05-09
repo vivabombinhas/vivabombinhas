@@ -49,11 +49,9 @@ function ImageCursorTrail({
     image.dataset.status = "active"
 
     if (fadeAnimation) {
-      // Clear any existing timeout if we're reusing the image index
-      // But we use a ring buffer, so it's unlikely to clash within 2s
       setTimeout(() => {
         image.dataset.status = "inactive"
-      }, 2000)
+      }, 3000)
     }
 
     lastRef.current = { x, y }
