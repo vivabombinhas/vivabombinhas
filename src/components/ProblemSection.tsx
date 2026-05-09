@@ -1,5 +1,6 @@
 import { LayoutGrid, Users, Copy, EyeOff, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { TypingText } from "@/components/ui/TypingText";
 
 const problems = [
   { 
