@@ -8,19 +8,19 @@ const CONVERSATIONS = [
     id: "temporada",
     messages: [
       { type: "user", text: "Quero uma casa para temporada em Mariscal perto da praia." },
-      { type: "ai", text: "Claro 😊 Procura algo para família ou casal?" },
-      { type: "user", text: "Família." },
-      { type: "ai", text: "Perfeito. Encontrei estas opções em Mariscal 👇",
+      { type: "ai", text: "Oi! Sou a MarIA 🌊 Tenho ótimas opções no Mariscal. Procura algo para família ou casal?" },
+      { type: "user", text: "Família, somos 6 pessoas." },
+      { type: "ai", text: "Perfeito. Uma casa espaçosa seria ideal. Encontrei esta opção incrível pé na areia 👇",
         properties: [
           {
             id: "temp-1",
             titulo: "Casa Mariscal - 100m da Praia",
-            preco_temporada_diaria: 550,
+            preco_temporada_diaria: 850,
             bairro: "Mariscal",
             tipo: "casa",
             finalidade: "temporada",
             quartos: 3,
-            capacidade_pessoas: 6,
+            capacidade_pessoas: 8,
             fotos: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80"],
             anunciante_telefone: "47999999999"
           }
@@ -32,9 +32,9 @@ const CONVERSATIONS = [
     id: "aluguel",
     messages: [
       { type: "user", text: "Tem apartamentos para aluguel anual em Bombas?" },
-      { type: "ai", text: "Sim! Qual sua faixa de valor pretendida?" },
-      { type: "user", text: "Até R$ 3.500." },
-      { type: "ai", text: "Excelente. Veja este em Bombas 👇",
+      { type: "ai", text: "Olá! Bombas é excelente para morar. Qual sua faixa de valor pretendida?" },
+      { type: "user", text: "Até R$ 3.500 com condomínio." },
+      { type: "ai", text: "Excelente. Tenho um apartamento mobiliado muito bem localizado 👇",
         properties: [
           {
             id: "anual-1",
@@ -55,9 +55,9 @@ const CONVERSATIONS = [
     id: "compra",
     messages: [
       { type: "user", text: "Quero investir em um imóvel em Bombinhas." },
-      { type: "ai", text: "Ótima escolha! Busca valorização ou rentabilidade imediata?" },
-      { type: "user", text: "Valorização." },
-      { type: "ai", text: "Recomendo este lançamento no Mariscal 👇",
+      { type: "ai", text: "Bombinhas está em plena valorização! Busca algo pronto ou lançamento?" },
+      { type: "user", text: "Lançamento para valorização futura." },
+      { type: "ai", text: "Entendi. Este lançamento no Mariscal é a melhor oportunidade hoje 👇",
         properties: [
           {
             id: "compra-1",
@@ -72,6 +72,16 @@ const CONVERSATIONS = [
           }
         ]
       }
+    ]
+  },
+  {
+    id: "duvidas",
+    messages: [
+      { type: "user", text: "Qual a melhor época para visitar Bombinhas?" },
+      { type: "ai", text: "Depende do seu objetivo! Dezembro a Março é o auge do calor e agito ☀️" },
+      { type: "user", text: "E os preços? Quero algo mais tranquilo e barato." },
+      { type: "ai", text: "Nesse caso, recomendo Abril ou Outubro. As águas continuam mornas e os preços caem até 50%!" },
+      { type: "ai", text: "Deseja ver opções de hospedagem para esses meses?" }
     ]
   }
 ];
@@ -139,15 +149,15 @@ export const InteractiveChatBox = ({
   }, [currentIndex, currentConvIndex]);
 
   return (
-    <div className="w-full relative">
+    <div className="w-full h-full relative flex flex-col">
       <motion.div 
-        className="relative rounded-[40px] border border-border bg-background shadow-[0_30px_70px_-20px_rgba(0,0,0,0.12)] overflow-hidden"
+        className="relative flex-1 flex flex-col rounded-[32px] border border-white/20 bg-background/90 backdrop-blur-xl shadow-2xl overflow-hidden"
       >
         {/* Header: More refined and application-like */}
-        <div className="bg-muted/50 backdrop-blur-md p-5 border-b border-border flex items-center justify-between">
+        <div className="bg-muted/30 backdrop-blur-md p-4 border-b border-border/50 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-[18px] bg-primary flex items-center justify-center shadow-lg shadow-blue-100">
-              <Sparkles className="h-6 w-6 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div>
               <h4 className="font-bold text-[15px] tracking-tight text-foreground leading-none mb-2">MarIA</h4>
@@ -164,7 +174,7 @@ export const InteractiveChatBox = ({
         {/* Chat Body */}
         <div 
           ref={scrollContainerRef}
-          className="h-[300px] xs:h-[340px] md:h-[420px] overflow-y-auto p-5 md:p-8 space-y-5 md:space-y-6 scrollbar-hide bg-background/50"
+          className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide bg-transparent"
         >
           <AnimatePresence initial={false}>
             {messages.map((msg, idx) => (
@@ -212,7 +222,7 @@ export const InteractiveChatBox = ({
         </div>
 
         {/* Fake Input Area: Clean & Professional */}
-        <div className="p-5 bg-background border-t border-border">
+        <div className="p-4 bg-background/50 border-t border-border/50">
           <div className="flex gap-4">
             <div className="flex-1 bg-muted/50 border border-slate-200 rounded-2xl px-5 py-3.5 text-[13px] text-muted-foreground/60 font-medium flex items-center">
               Como posso ajudar hoje?
