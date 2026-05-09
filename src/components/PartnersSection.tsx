@@ -78,7 +78,7 @@ const PartnersSection = () => {
               <div className="w-20 h-20 rounded-[28px] bg-background/10 backdrop-blur-md flex items-center justify-center mb-10 border border-white/10 shadow-xl">
                 <Sparkles className="h-10 w-10 text-blue-400" />
               </div>
-              <h3 className="text-3xl md:text-4xl font-extrabold mb-6 tracking-tight">Anuncie seus imóveis.</h3>
+              <h3 className="text-h3 mb-6">Anuncie seus imóveis.</h3>
               <p className="text-white/50 text-[15px] md:text-[17px] mb-12 max-w-sm font-medium leading-relaxed">
                 Integre seu portfólio e apareça para quem busca o perfil exato do seu imóvel.
               </p>
