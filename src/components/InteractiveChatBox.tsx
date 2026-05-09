@@ -221,18 +221,14 @@ export const InteractiveChatBox = ({
           )}
         </div>
 
-        {/* Functional Input Area: Redirects to Search */}
-        <div className="px-6 py-5 bg-white/50 border-t border-border/40">
+        {/* Functional CTA: Clearer purpose */}
+        <div className="px-6 py-6 bg-white/80 backdrop-blur-md border-t border-border/40">
           <a 
             href="/search" 
-            className="flex gap-4 group transition-all duration-300 active:scale-[0.98]"
+            className="flex items-center justify-center gap-3 w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/20 active:scale-[0.98] group"
           >
-            <div className="flex-1 bg-white border border-border/60 rounded-2xl px-5 py-4 text-[13px] text-muted-foreground/40 font-bold flex items-center italic group-hover:border-primary/40 transition-colors">
-              O que você busca hoje?
-            </div>
-            <div className="w-14 h-14 rounded-2xl bg-foreground flex items-center justify-center text-white shadow-lg group-hover:bg-primary transition-all duration-500">
-              <Send className="h-5 w-5" />
-            </div>
+            Começar minha busca
+            <Sparkles className="h-4 w-4 group-hover:animate-pulse" />
           </a>
         </div>
       </motion.div>
