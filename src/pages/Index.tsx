@@ -20,7 +20,6 @@ const Index = () => {
       <Navbar />
       <HeroV2 />
       <div className="space-y-0">
-        <StatsSection />
         <ProblemSection />
         <HowItWorksSection />
         <UseCasesSection />
