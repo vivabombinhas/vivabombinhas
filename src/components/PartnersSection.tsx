@@ -38,7 +38,7 @@ const PartnersSection = () => {
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-muted-foreground text-lg md:text-xl font-medium mb-12 leading-relaxed"
+              className="text-subtitle mb-12"
             >
               A MarIA qualifica a intenção do usuário antes mesmo do primeiro contato, garantindo leads mais maduros e poupando seu tempo.
             </motion.p>
