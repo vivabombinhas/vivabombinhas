@@ -221,16 +221,19 @@ export const InteractiveChatBox = ({
           )}
         </div>
 
-        {/* Fake Input Area: Clean & Professional */}
+        {/* Functional Input Area: Redirects to Search */}
         <div className="px-6 py-5 bg-white/50 border-t border-border/40">
-          <div className="flex gap-4">
-            <div className="flex-1 bg-white border border-border/60 rounded-2xl px-5 py-4 text-[13px] text-muted-foreground/40 font-bold flex items-center italic">
+          <a 
+            href="/search" 
+            className="flex gap-4 group transition-all duration-300 active:scale-[0.98]"
+          >
+            <div className="flex-1 bg-white border border-border/60 rounded-2xl px-5 py-4 text-[13px] text-muted-foreground/40 font-bold flex items-center italic group-hover:border-primary/40 transition-colors">
               O que você busca hoje?
             </div>
-            <div className="w-14 h-14 rounded-2xl bg-foreground flex items-center justify-center text-white shadow-lg transition-transform hover:scale-105">
+            <div className="w-14 h-14 rounded-2xl bg-foreground flex items-center justify-center text-white shadow-lg group-hover:bg-primary transition-all duration-500">
               <Send className="h-5 w-5" />
             </div>
-          </div>
+          </a>
         </div>
       </motion.div>
     </div>
