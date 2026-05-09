@@ -41,7 +41,7 @@ function ImageCursorTrail({
     image.style.left = `${relativeX}px`
     image.style.top = `${relativeY}px`
 
-    if (currentZIndexRef.current > 40) {
+    if (currentZIndexRef.current > 100) {
       currentZIndexRef.current = 1
     }
     image.style.zIndex = String(currentZIndexRef.current)
@@ -66,7 +66,8 @@ function ImageCursorTrail({
   }
 
   const handleOnMove = (e: { clientX: number; clientY: number }) => {
-    if (distanceFromLast(e.clientX, e.clientY) > window.innerWidth / distance) {
+    // Check distance in pixels directly for better control
+    if (distanceFromLast(e.clientX, e.clientY) > distance) {
       const lead = refs.current[globalIndex % refs.current.length].current
       const tail =
         refs.current[(globalIndex - maxNumberOfImages) % refs.current.length]
@@ -85,7 +86,7 @@ function ImageCursorTrail({
       onTouchMove={(e) => handleOnMove(e.touches[0])}
       ref={containerRef}
       className={cn(
-        "relative grid h-[600px] w-full place-content-center overflow-hidden rounded-lg",
+        "relative grid h-[600px] w-full place-content-center overflow-hidden",
         className
       )}
     >
@@ -93,7 +94,7 @@ function ImageCursorTrail({
         <img
           key={index}
           className={cn(
-            "opacity-0 data-[status='active']:ease-out-expo absolute -translate-x-[50%] -translate-y-[50%] scale-0 rounded-3xl object-cover transition-transform duration-300 data-[status='active']:scale-100 data-[status='active']:opacity-100 data-[status='active']:duration-500",
+            "pointer-events-none opacity-0 absolute -translate-x-[50%] -translate-y-[50%] scale-0 rounded-2xl object-cover transition-all duration-300 data-[status='active']:scale-100 data-[status='active']:opacity-100 data-[status='active']:duration-500 shadow-xl border-2 border-white",
             imgClass
           )}
           data-index={index}
@@ -127,7 +128,7 @@ export default function CursorTrailDemo() {
         <ImageCursorTrail
           items={images}
           maxNumberOfImages={5}
-          distance={25}
+          distance={50}
           imgClass="sm:w-40 w-28 sm:h-48 h-36"
           className="max-w-4xl rounded-3xl"
         />
