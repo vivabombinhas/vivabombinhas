@@ -32,7 +32,7 @@ const AudienceSection = () => {
           <motion.h2 
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.03em] text-foreground"
+            className="text-h2"
           >
             Foco em <span className="text-primary italic font-medium">Bombinhas.</span>
           </motion.h2>
@@ -40,7 +40,7 @@ const AudienceSection = () => {
           <motion.p 
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            className="text-muted-foreground/60 font-bold uppercase tracking-[0.2em] text-[11px]"
+            className="text-badge"
           >
             Utilidade Real
           </motion.p>
@@ -59,10 +59,10 @@ const AudienceSection = () => {
               <div className="w-14 h-14 rounded-[18px] bg-background flex items-center justify-center mb-10 shadow-sm border border-border group-hover:scale-110 transition-transform duration-700">
                 <a.icon className="h-6 w-6 text-foreground" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3 tracking-tight">
+              <h3 className="text-h3 mb-3">
                 {a.title}
               </h3>
-              <p className="text-muted-foreground text-[15px] leading-relaxed font-medium">
+              <p className="text-body">
                 {a.desc}
               </p>
             </motion.div>

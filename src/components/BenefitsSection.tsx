@@ -16,7 +16,7 @@ const BenefitsSection = () => {
           <motion.h2 
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.03em] text-foreground mb-8 leading-[1.05]"
+            className="text-h2 mb-8"
           >
             A busca imobiliária,<br /><span className="text-muted-foreground/60 italic font-medium">totalmente simplificada.</span>
           </motion.h2>
@@ -24,7 +24,7 @@ const BenefitsSection = () => {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-muted-foreground text-lg md:text-xl font-medium leading-relaxed"
+            className="text-subtitle"
           >
             Menos tempo procurando. Mais tempo visitando e aproveitando Bombinhas.
           </motion.p>
@@ -44,12 +44,12 @@ const BenefitsSection = () => {
                 <b.icon className="h-8 w-8 text-foreground group-hover:text-white transition-colors duration-700" />
               </div>
               <div className="flex-1 text-center md:text-left">
-                <h3 className="text-2xl font-bold text-foreground mb-3 tracking-tight">{b.title}</h3>
-                <p className="text-muted-foreground text-[15px] leading-relaxed font-medium">{b.desc}</p>
+                <h3 className="text-h3 mb-3">{b.title}</h3>
+                <p className="text-body">{b.desc}</p>
               </div>
               <div className="text-center shrink-0 min-w-[120px] pt-6 md:pt-0 border-t md:border-t-0 md:border-l border-border md:pl-10">
-                <div className="text-4xl font-extrabold text-foreground tracking-tighter mb-1 tabular-nums">{b.stat}</div>
-                <div className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">{b.label}</div>
+                <div className="text-h3 mb-1 tabular-nums">{b.stat}</div>
+                <div className="text-badge">{b.label}</div>
               </div>
             </motion.div>
           ))}

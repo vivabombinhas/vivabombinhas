@@ -20,7 +20,7 @@ const PartnersSection = () => {
             <motion.div 
               initial={{ opacity: 0, x: -10 }}
               whileInView={{ opacity: 1, x: 0 }}
-              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-muted border border-border text-muted-foreground/60 text-[11px] font-bold uppercase tracking-[0.15em] mb-10"
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-muted border border-border text-badge mb-10"
             >
               <Building2 className="h-4 w-4 text-primary" />
               Parceiros e Corretores
@@ -29,7 +29,7 @@ const PartnersSection = () => {
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.03em] text-foreground mb-10 leading-[1.05]"
+              className="text-h2 mb-10"
             >
               Sua nova aliada na <br className="hidden md:block" />
               <span className="text-muted-foreground/60 italic font-medium">prospecção local.</span>
@@ -38,7 +38,7 @@ const PartnersSection = () => {
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-muted-foreground text-lg md:text-xl font-medium mb-12 leading-relaxed"
+              className="text-subtitle mb-12"
             >
               A MarIA qualifica a intenção do usuário antes mesmo do primeiro contato, garantindo leads mais maduros e poupando seu tempo.
             </motion.p>
@@ -56,7 +56,7 @@ const PartnersSection = () => {
                     <b.icon className="h-6 w-6 text-slate-900" />
                   </div>
                   <div>
-                    <h4 className="text-[15px] font-bold text-foreground mb-1.5">{b.title}</h4>
+                    <h4 className="text-body font-bold mb-1.5">{b.title}</h4>
                     <p className="text-[13px] text-muted-foreground leading-relaxed font-medium">{b.desc}</p>
                   </div>
                 </motion.div>
@@ -78,7 +78,7 @@ const PartnersSection = () => {
               <div className="w-20 h-20 rounded-[28px] bg-background/10 backdrop-blur-md flex items-center justify-center mb-10 border border-white/10 shadow-xl">
                 <Sparkles className="h-10 w-10 text-blue-400" />
               </div>
-              <h3 className="text-3xl md:text-4xl font-extrabold mb-6 tracking-tight">Anuncie seus imóveis.</h3>
+              <h3 className="text-h3 mb-6">Anuncie seus imóveis.</h3>
               <p className="text-white/50 text-[15px] md:text-[17px] mb-12 max-w-sm font-medium leading-relaxed">
                 Integre seu portfólio e apareça para quem busca o perfil exato do seu imóvel.
               </p>
@@ -92,7 +92,7 @@ const PartnersSection = () => {
                   <ArrowRight className="h-5 w-5" />
                 </Link>
               </Button>
-              <p className="mt-8 text-[11px] font-bold text-white/20 uppercase tracking-[0.25em]">
+              <p className="mt-8 text-badge text-white/40">
                 Cadastro em segundos • Sem custos iniciais
               </p>
             </div>

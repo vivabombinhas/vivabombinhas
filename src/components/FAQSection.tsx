@@ -28,14 +28,14 @@ const FAQSection = () => {
           <motion.p 
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            className="text-[11px] font-bold text-primary uppercase tracking-[0.4em] mb-6"
+            className="text-badge text-primary mb-6"
           >
             FAQ
           </motion.p>
           <motion.h2 
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.03em] text-foreground"
+            className="text-h2"
           >
             Dúvidas Frequentes
           </motion.h2>
@@ -50,10 +50,10 @@ const FAQSection = () => {
           <Accordion type="single" collapsible className="space-y-6">
             {faqs.map((f, i) => (
               <AccordionItem key={i} value={`faq-${i}`} className="border border-border rounded-[32px] px-10 bg-muted/50 overflow-hidden transition-all duration-500 data-[state=open]:bg-background data-[state=open]:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]">
-                <AccordionTrigger className="text-left font-bold text-[16px] md:text-[18px] text-foreground hover:no-underline py-8">
+                <AccordionTrigger className="text-left text-body font-bold text-foreground hover:no-underline py-8">
                   {f.q}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground text-[15px] font-medium leading-relaxed pb-8">
+                <AccordionContent className="text-body pb-8">
                   {f.a}
                 </AccordionContent>
               </AccordionItem>

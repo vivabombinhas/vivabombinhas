@@ -34,7 +34,7 @@ const CTASection = () => {
           <motion.h2 
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-[-0.04em] text-foreground mb-10 leading-[0.95]"
+            className="text-display mb-10"
           >
             Pronto para encontrar<br /><span className="text-primary italic font-medium">seu lugar?</span>
           </motion.h2>
@@ -43,7 +43,7 @@ const CTASection = () => {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-muted-foreground text-xl md:text-2xl font-medium mb-16 max-w-2xl leading-relaxed"
+            className="text-subtitle mb-16 max-w-2xl"
           >
             Experimente a forma mais inteligente de buscar em Bombinhas. Sem formulários, apenas conversa.
           </motion.p>
@@ -87,7 +87,7 @@ const CTASection = () => {
             {['Gratuito', 'Instantâneo', 'Sem Cadastro'].map((item) => (
               <div key={item} className="flex items-center gap-2">
                 <div className="w-1 h-1 rounded-full bg-primary" />
-                <span className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-[0.25em]">{item}</span>
+                <span className="text-badge">{item}</span>
               </div>
             ))}
           </motion.div>

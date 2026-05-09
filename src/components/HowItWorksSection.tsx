@@ -33,7 +33,7 @@ const HowItWorksSection = () => {
           <motion.p 
             initial={{ opacity: 0, x: -10 }}
             whileInView={{ opacity: 1, x: 0 }}
-            className="text-[11px] font-bold text-primary uppercase tracking-[0.3em] mb-6"
+            className="text-badge text-primary mb-6"
           >
             Processo Inteligente
           </motion.p>
@@ -41,7 +41,7 @@ const HowItWorksSection = () => {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.03em] text-foreground leading-[1.1]"
+            className="text-h2"
           >
             Três passos para encontrar seu <br className="hidden md:block" />
             <span className="text-muted-foreground/60 italic font-medium">lugar no paraíso.</span>
@@ -64,8 +64,8 @@ const HowItWorksSection = () => {
               <div className="w-16 h-16 rounded-[22px] bg-muted flex items-center justify-center mb-10 shadow-sm group-hover:bg-primary group-hover:scale-110 transition-all duration-700">
                 <s.icon className="h-7 w-7 text-foreground group-hover:text-white transition-colors duration-700" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-5 tracking-tight">{s.title}</h3>
-              <p className="text-muted-foreground text-[15px] leading-relaxed font-medium">{s.desc}</p>
+              <h3 className="text-h3 mb-5">{s.title}</h3>
+              <p className="text-body">{s.desc}</p>
             </motion.div>
           ))}
         </div>

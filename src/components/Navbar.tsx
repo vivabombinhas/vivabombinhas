@@ -35,7 +35,7 @@ const Navbar = () => {
             <span className="text-2xl font-black tracking-[-0.05em] leading-none text-foreground">
               Mar<span className="text-primary">IA</span>
             </span>
-            <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] leading-none mt-1.5">Bombinhas • SC</span>
+            <span className="text-badge leading-none mt-1.5">Bombinhas • SC</span>
           </div>
         </a>
 
@@ -44,14 +44,14 @@ const Navbar = () => {
             <a 
               key={l.href} 
               href={l.href} 
-              className="text-[12px] font-bold text-muted-foreground hover:text-foreground transition-colors tracking-[0.1em] uppercase"
+              className="text-badge text-muted-foreground hover:text-foreground transition-colors"
             >
               {l.label}
             </a>
           ))}
           <Link 
             to="/anuncie" 
-            className="text-[12px] font-bold text-muted-foreground hover:text-foreground transition-colors tracking-[0.1em] uppercase"
+            className="text-badge text-muted-foreground hover:text-foreground transition-colors"
           >
             Anunciar
           </Link>
@@ -59,7 +59,7 @@ const Navbar = () => {
           <Button 
             asChild 
             size="sm" 
-            className="rounded-full bg-foreground hover:bg-slate-800 text-white font-bold text-[11px] uppercase tracking-widest px-8 h-11 shadow-xl shadow-slate-100 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200"
+            className="rounded-full bg-foreground hover:bg-slate-800 text-white text-badge px-8 h-11 shadow-xl shadow-slate-100 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200"
           >
             <a href="#experimentar">Entrar</a>
           </Button>

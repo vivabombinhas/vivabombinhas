@@ -34,7 +34,7 @@ const ProblemSection = () => {
             <motion.div 
               initial={{ opacity: 0, x: -10 }}
               whileInView={{ opacity: 1, x: 0 }}
-              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-muted border border-border text-muted-foreground/60 text-[11px] font-bold uppercase tracking-[0.15em] mb-8"
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-muted border border-border text-badge mb-8"
             >
               <AlertCircle className="h-4 w-4 text-primary" />
               O cenário atual
@@ -43,7 +43,7 @@ const ProblemSection = () => {
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.03em] text-foreground leading-[1.05]"
+              className="text-h2"
             >
               Buscar um imóvel em Bombinhas <br className="hidden lg:block" />
               não precisa ser <span className="text-muted-foreground/60 italic font-medium">um desafio.</span>
@@ -53,7 +53,7 @@ const ProblemSection = () => {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-muted-foreground text-lg md:text-xl font-medium max-w-md leading-relaxed lg:pt-16"
+            className="text-subtitle max-w-md lg:pt-16"
           >
             Centralizamos o mercado local para que você encontre o que busca com clareza e agilidade.
           </motion.p>
@@ -72,8 +72,8 @@ const ProblemSection = () => {
               <div className="w-14 h-14 rounded-[22px] bg-muted border border-border flex items-center justify-center mb-8 group-hover:bg-foreground group-hover:scale-110 transition-all duration-700">
                 <p.icon className="h-6 w-6 text-slate-900 group-hover:text-white transition-colors duration-700" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-4 tracking-tight">{p.title}</h3>
-              <p className="text-muted-foreground text-[15px] leading-relaxed font-medium">{p.desc}</p>
+              <h3 className="text-h3 mb-4">{p.title}</h3>
+              <p className="text-body">{p.desc}</p>
             </motion.div>
           ))}
         </div>

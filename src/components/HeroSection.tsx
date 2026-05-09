@@ -35,7 +35,7 @@ export default function HeroSection() {
               className="inline-flex items-center gap-2.5 mb-8 lg:mb-10 px-4 py-2 rounded-full border border-border bg-background/50 backdrop-blur-sm shadow-sm max-w-full overflow-hidden"
             >
               <div className="flex h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(37,99,235,0.5)] animate-pulse shrink-0" />
-              <span className="text-[10px] md:text-[11px] font-bold text-muted-foreground uppercase tracking-[0.15em] whitespace-nowrap overflow-hidden text-ellipsis">
+              <span className="text-badge whitespace-nowrap overflow-hidden text-ellipsis">
                 Assistente Imobiliária • Bombinhas
               </span>
             </motion.div>
@@ -45,8 +45,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="text-foreground font-extrabold tracking-[-0.03em] leading-[1.05] mb-6 lg:mb-8" 
-              style={{ fontSize: "clamp(38px, 6vw, 72px)" }}
+              className="text-foreground text-h1 mb-6 lg:mb-8" 
             >
               Encontre o imóvel<br />
               certo em <span className="text-primary">Bombinhas</span><br />
@@ -58,7 +57,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="text-muted-foreground text-base md:text-xl leading-relaxed font-medium max-w-[520px] mb-10 lg:mb-12"
+              className="text-subtitle max-w-[520px] mb-10 lg:mb-12"
             >
               A MarIA centraliza anúncios de toda a cidade e filtra o que realmente importa. Converse, explore e conecte-se direto com o anunciante.
             </motion.p>

@@ -23,8 +23,8 @@ const TestimonialsSection = () => {
     <section className="py-32 bg-background relative overflow-hidden">
       <div className="container max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
         <div className="flex flex-col items-center text-center mb-20">
-          <p className="text-[11px] font-bold text-primary uppercase tracking-[0.4em] mb-6">Social Proof</p>
-          <h2 className="text-4xl md:text-5xl font-extrabold tracking-[-0.03em] text-foreground mb-6">
+          <p className="text-badge text-primary mb-6">Social Proof</p>
+          <h2 className="text-h2 mb-6">
             O que dizem sobre a <span className="text-muted-foreground/60">MarIA</span>
           </h2>
         </div>
@@ -39,7 +39,7 @@ const TestimonialsSection = () => {
               viewport={{ once: true }}
               className="p-10 rounded-[40px] border border-border bg-muted/30 hover:bg-background hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] transition-all duration-700 group"
             >
-              <p className="text-muted-foreground text-[15px] leading-relaxed font-medium mb-10 italic">
+              <p className="text-body mb-10 italic">
                 "{t.text}"
               </p>
               <div className="flex items-center gap-4">
@@ -47,8 +47,8 @@ const TestimonialsSection = () => {
                   {t.author.charAt(0)}
                 </div>
                 <div className="text-left">
-                  <h4 className="text-[13px] font-bold text-foreground leading-none mb-1.5">{t.author}</h4>
-                  <p className="text-[11px] text-muted-foreground/60 font-bold uppercase tracking-wider leading-none">{t.role}</p>
+                   <h4 className="text-body font-bold text-foreground leading-none mb-1.5">{t.author}</h4>
+                  <p className="text-badge leading-none">{t.role}</p>
                 </div>
               </div>
             </motion.div>

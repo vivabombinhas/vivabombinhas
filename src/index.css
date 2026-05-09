@@ -59,12 +59,43 @@
     @apply scroll-smooth;
   }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/10 selection:text-primary;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Open Sans', sans-serif;
+  }
+  ::selection {
+    background-color: oklch(0.6723 0.1606 244.9955 / 0.1);
+    color: oklch(0.6723 0.1606 244.9955);
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    @apply tracking-[-0.02em] leading-[1.15];
+  }
+
+  .text-display {
+    @apply text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-[-0.04em] leading-[0.95];
+  }
+
+  .text-h1 {
+    @apply text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-[-0.03em] leading-[1.05];
+  }
+
+  .text-h2 {
+    @apply text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.02em] leading-[1.1];
+  }
+
+  .text-h3 {
+    @apply text-xl md:text-2xl lg:text-3xl font-bold tracking-tight leading-[1.2];
+  }
+
+  .text-subtitle {
+    @apply text-lg md:text-xl lg:text-2xl font-medium text-muted-foreground leading-relaxed;
+  }
+
+  .text-body {
+    @apply text-base md:text-lg font-medium text-muted-foreground leading-relaxed;
+  }
+
+  .text-badge {
+    @apply text-[10px] md:text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground/70;
   }
 }
 
