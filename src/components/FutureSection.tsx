@@ -1,5 +1,6 @@
 import { UtensilsCrossed, Palmtree, Wrench, Sparkles, Rocket } from "lucide-react";
 import { motion } from "framer-motion";
+import { TypingText } from "@/components/ui/TypingText";
 
 const items = [
   { icon: UtensilsCrossed, label: "Gastronomia" },
