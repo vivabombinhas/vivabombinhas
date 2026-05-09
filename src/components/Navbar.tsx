@@ -28,7 +28,7 @@ const Navbar = () => {
       }`}
     >
       <div className="container max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-3.5 group">
+        <Link to="/" className="flex items-center gap-3.5 group">
           <div className="w-11 h-11 rounded-[14px] bg-foreground flex items-center justify-center shadow-lg shadow-slate-200 group-hover:scale-105 transition-all duration-500">
             <Bot className="h-6 w-6 text-white" />
           </div>
@@ -38,7 +38,7 @@ const Navbar = () => {
             </span>
             <span className="text-badge leading-none mt-1.5">Bombinhas • SC</span>
           </div>
-        </a>
+        </Link>
 
         <nav className="hidden md:flex items-center gap-10">
           {links.map((l) => (
