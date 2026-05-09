@@ -1,59 +1,61 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { motion } from "framer-motion";
+import { HelpCircle } from "lucide-react";
 
 const faqs = [
   {
     q: "A MarIA é gratuita?",
-    a: "Sim! O uso da MarIA para encontrar imóveis é totalmente gratuito para o usuário final.",
+    a: "Sim. O uso da MarIA para encontrar imóveis é totalmente gratuito para quem busca seu lugar em Bombinhas.",
   },
   {
     q: "Como os imóveis são selecionados?",
-    a: "Nossa IA analisa bases de dados locais, sites parceiros e anúncios verificados para garantir que você receba apenas opções reais e atualizadas.",
+    a: "Nossa tecnologia analisa bases de dados locais e anúncios verificados para garantir que você receba apenas opções reais.",
   },
   {
     q: "Preciso de cadastro?",
-    a: "Não é necessário criar conta para iniciar uma conversa. Você pode descrever o que busca e receber sugestões instantaneamente.",
+    a: "Não é necessário criar conta. Você pode iniciar uma conversa agora mesmo e receber sugestões instantâneas.",
   },
   {
     q: "Como falo com o anunciante?",
-    a: "Após a curadoria da MarIA, se você se interessar por um imóvel, nós conectamos você diretamente ao WhatsApp do corretor ou imobiliária responsável.",
+    a: "Nós conectamos você diretamente ao link original ou ao contato do responsável pelo imóvel de forma fluida.",
   },
 ];
 
 const FAQSection = () => {
   return (
-    <section id="faq" className="py-32 bg-background">
-      <div className="container max-w-3xl mx-auto px-6 lg:px-12">
-        <div className="text-center mb-24">
-          <motion.p 
+    <section id="faq" className="section-padding bg-background">
+      <div className="container-wide max-w-4xl mx-auto">
+        <div className="text-center mb-20">
+          <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            className="text-badge text-primary mb-6"
+            className="inline-flex items-center gap-2 mb-6"
           >
-            FAQ
-          </motion.p>
+            <HelpCircle className="w-4 h-4 text-primary" />
+            <span className="text-badge text-primary">Dúvidas</span>
+          </motion.div>
           <motion.h2 
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             className="text-h2"
           >
-            Dúvidas Frequentes
+            Perguntas Frequentes
           </motion.h2>
         </div>
         
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.7 }}
           viewport={{ once: true }}
         >
-          <Accordion type="single" collapsible className="space-y-6">
+          <Accordion type="single" collapsible className="space-y-4">
             {faqs.map((f, i) => (
-              <AccordionItem key={i} value={`faq-${i}`} className="border border-border rounded-[32px] px-10 bg-muted/50 overflow-hidden transition-all duration-500 data-[state=open]:bg-background data-[state=open]:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]">
-                <AccordionTrigger className="text-left text-body font-bold text-foreground hover:no-underline py-8">
+              <AccordionItem key={i} value={`faq-${i}`} className="border border-border/50 rounded-3xl px-8 bg-muted/20 overflow-hidden transition-all duration-500 data-[state=open]:bg-white data-[state=open]:shadow-premium">
+                <AccordionTrigger className="text-left text-lg font-bold text-foreground hover:no-underline py-6">
                   {f.q}
                 </AccordionTrigger>
-                <AccordionContent className="text-body pb-8">
+                <AccordionContent className="text-subtitle pb-6">
                   {f.a}
                 </AccordionContent>
               </AccordionItem>
