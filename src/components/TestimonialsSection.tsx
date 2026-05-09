@@ -23,8 +23,8 @@ const TestimonialsSection = () => {
     <section className="py-32 bg-background relative overflow-hidden">
       <div className="container max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
         <div className="flex flex-col items-center text-center mb-20">
-          <p className="text-[11px] font-bold text-primary uppercase tracking-[0.4em] mb-6">Social Proof</p>
-          <h2 className="text-4xl md:text-5xl font-extrabold tracking-[-0.03em] text-foreground mb-6">
+          <p className="text-badge text-primary mb-6">Social Proof</p>
+          <h2 className="text-h2 mb-6">
             O que dizem sobre a <span className="text-muted-foreground/60">MarIA</span>
           </h2>
         </div>
