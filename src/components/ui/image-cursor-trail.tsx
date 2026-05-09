@@ -1,6 +1,5 @@
 "use client"
 import React, { createRef, useRef, type ReactNode } from "react"
-import { SparklesIcon } from "lucide-react"
 
 function cn(...classes: (string | undefined | null | false)[]) {
   return classes.filter(Boolean).join(" ")
@@ -66,7 +65,7 @@ function ImageCursorTrail({
     image.dataset.status = "inactive"
   }
 
-  const handleOnMove = (e: MouseEvent | Touch) => {
+  const handleOnMove = (e: { clientX: number; clientY: number }) => {
     if (distanceFromLast(e.clientX, e.clientY) > window.innerWidth / distance) {
       const lead = refs.current[globalIndex % refs.current.length].current
       const tail =
@@ -82,7 +81,7 @@ function ImageCursorTrail({
 
   return (
     <section
-      onMouseMove={(e) => handleOnMove(e as unknown as MouseEvent)}
+      onMouseMove={(e) => handleOnMove(e)}
       onTouchMove={(e) => handleOnMove(e.touches[0])}
       ref={containerRef}
       className={cn(
