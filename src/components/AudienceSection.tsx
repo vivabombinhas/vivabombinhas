@@ -1,48 +1,58 @@
-import { Home, Umbrella, Key, Search } from "lucide-react";
+import { Home, Umbrella, Key, Search, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 
 const audiences = [
   {
     icon: Home,
     title: "Aluguel Anual",
-    desc: "Encontre sua nova moradia permanente ou profissional em Bombinhas.",
+    desc: "Encontre sua nova moradia permanente ou base profissional em Bombinhas.",
   },
   {
     icon: Umbrella,
     title: "Temporada",
-    desc: "A casa ou apartamento ideal para suas próximas férias na praia.",
+    desc: "A casa ou apartamento ideal para suas próximas férias inesquecíveis.",
   },
   {
     icon: Key,
     title: "Compra",
-    desc: "Explore opções residenciais ou comerciais para adquirir na região.",
+    desc: "Explore as melhores oportunidades para adquirir seu imóvel na região.",
   },
   {
     icon: Search,
     title: "Descoberta",
-    desc: "Para quem quer explorar o mercado local e entender as opções disponíveis.",
+    desc: "Explore o mercado e entenda as opções antes de tomar sua decisão.",
   },
 ];
 
 const AudienceSection = () => {
   return (
-    <section id="para-quem" className="py-32 bg-background">
-      <div className="container max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="flex flex-col md:flex-row items-baseline gap-6 mb-24">
-          <motion.h2 
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="text-h2"
-          >
-            Foco em <span className="text-primary italic font-medium">Bombinhas.</span>
-          </motion.h2>
-          <div className="h-px flex-1 bg-muted hidden md:block" />
+    <section id="para-quem" className="section-padding bg-background">
+      <div className="container-wide">
+        <div className="flex flex-col lg:flex-row items-end justify-between gap-12 mb-24">
+          <div className="max-w-2xl">
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              className="inline-flex items-center gap-2 mb-6"
+            >
+              <MapPin className="h-4 w-4 text-primary" />
+              <span className="text-badge text-primary">Bombinhas em foco</span>
+            </motion.div>
+            <motion.h2 
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="text-h2"
+            >
+              Soluções reais para <br className="hidden md:block" />
+              <span className="text-muted-foreground/40 italic font-serif">diferentes perfis.</span>
+            </motion.h2>
+          </div>
           <motion.p 
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            className="text-badge"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            className="text-subtitle max-w-sm"
           >
-            Utilidade Real
+            Centralizamos a inteligência local para entregar utilidade imediata.
           </motion.p>
         </div>
 
@@ -54,17 +64,13 @@ const AudienceSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.7 }}
               viewport={{ once: true }}
-              className="group p-10 rounded-[40px] bg-muted/50 hover:bg-background border border-transparent hover:border-border hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] transition-all duration-700"
+              className="group p-10 rounded-[32px] bg-muted/20 hover:bg-white border border-transparent hover:border-border/50 hover:shadow-premium transition-all duration-700"
             >
-              <div className="w-14 h-14 rounded-[18px] bg-background flex items-center justify-center mb-10 shadow-sm border border-border group-hover:scale-110 transition-transform duration-700">
-                <a.icon className="h-6 w-6 text-foreground" />
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-10 shadow-sm border border-border group-hover:scale-105 transition-transform duration-700">
+                <a.icon className="h-5 w-5 text-foreground" />
               </div>
-              <h3 className="text-h3 mb-3">
-                {a.title}
-              </h3>
-              <p className="text-body">
-                {a.desc}
-              </p>
+              <h3 className="text-h3 mb-3">{a.title}</h3>
+              <p className="text-body">{a.desc}</p>
             </motion.div>
           ))}
         </div>
