@@ -72,8 +72,8 @@ const ProblemSection = () => {
               <div className="w-14 h-14 rounded-[22px] bg-muted border border-border flex items-center justify-center mb-8 group-hover:bg-foreground group-hover:scale-110 transition-all duration-700">
                 <p.icon className="h-6 w-6 text-slate-900 group-hover:text-white transition-colors duration-700" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-4 tracking-tight">{p.title}</h3>
-              <p className="text-muted-foreground text-[15px] leading-relaxed font-medium">{p.desc}</p>
+              <h3 className="text-h3 mb-4">{p.title}</h3>
+              <p className="text-body">{p.desc}</p>
             </motion.div>
           ))}
         </div>
