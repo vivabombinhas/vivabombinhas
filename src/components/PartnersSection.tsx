@@ -92,7 +92,7 @@ const PartnersSection = () => {
                   <ArrowRight className="h-5 w-5" />
                 </Link>
               </Button>
-              <p className="mt-8 text-[11px] font-bold text-white/20 uppercase tracking-[0.25em]">
+              <p className="mt-8 text-badge text-white/40">
                 Cadastro em segundos • Sem custos iniciais
               </p>
             </div>
