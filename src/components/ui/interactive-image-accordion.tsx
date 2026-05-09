@@ -31,28 +31,25 @@ const AccordionItem = ({ item, isActive, onMouseEnter }: { item: any; isActive: 
   return (
     <div
       className={`
-        relative h-[450px] rounded-2xl overflow-hidden cursor-pointer
-        transition-all duration-700 ease-in-out
-        ${isActive ? 'w-[400px]' : 'w-[60px]'}
+        relative h-[480px] rounded-2xl overflow-hidden cursor-pointer
+        transition-all duration-700 ease-in-out border border-border/50
+        ${isActive ? 'w-full md:w-[450px] ring-2 ring-primary/20' : 'w-[60px] md:w-[70px] bg-muted/30'}
       `}
       onMouseEnter={onMouseEnter}
+      onClick={onMouseEnter}
     >
-      <img
-        src={item.imageUrl}
-        alt={item.title}
-        className="absolute inset-0 w-full h-full object-cover"
-        onError={(e: any) => { e.target.onerror = null; e.target.src = 'https://placehold.co/400x450/2d3748/ffffff?text=Image+Error'; }}
-      />
-      <div className="absolute inset-0 bg-black/40"></div>
+      {/* Remove heavy background image, use subtle gradient instead */}
+      <div className={`absolute inset-0 transition-opacity duration-700 ${isActive ? 'bg-background' : 'bg-muted/50'}`} />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(37,99,235,0.05),transparent)]" />
 
       <span
         className={`
-          absolute text-white text-lg font-semibold whitespace-nowrap
-          transition-all duration-300 ease-in-out
+          absolute font-bold whitespace-nowrap
+          transition-all duration-500 ease-in-out
           ${
             isActive
-              ? 'bottom-6 left-1/2 -translate-x-1/2 rotate-0'
-              : 'bottom-24 left-1/2 -translate-x-1/2 rotate-90 w-auto text-left'
+              ? 'top-4 left-6 text-foreground text-sm uppercase tracking-widest opacity-40'
+              : 'bottom-24 left-1/2 -translate-x-1/2 rotate-90 text-muted-foreground text-sm'
           }
         `}
       >
@@ -73,7 +70,7 @@ export function LandingAccordionItem() {
       </div>
 
       <div className="relative z-10 container max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr,1.1fr] items-center gap-12 lg:gap-20">
+        <div className="grid grid-cols-1 lg:grid-cols-[0.8fr,1.2fr] items-center gap-12 lg:gap-16">
           
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
             <motion.div 
@@ -121,8 +118,8 @@ export function LandingAccordionItem() {
             </motion.div>
           </div>
 
-          <div className="w-full">
-            <div className="flex flex-row items-center justify-center lg:justify-end gap-3 p-2">
+          <div className="w-full lg:w-3/5">
+            <div className="flex flex-row items-stretch justify-center lg:justify-end gap-2 md:gap-4 p-2 min-h-[500px]">
               {accordionItems.map((item, index) => (
                 <div key={item.id} className="relative">
                   <AccordionItem
@@ -132,12 +129,12 @@ export function LandingAccordionItem() {
                   />
                   {index === activeIndex && (
                     <motion.div 
-                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.2 }}
-                      className="absolute inset-0 p-4 pt-12 pb-24 pointer-events-none"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4 }}
+                      className="absolute inset-0 p-0 pointer-events-none"
                     >
-                      <div className="w-full h-full pointer-events-auto overflow-hidden">
+                      <div className="w-full h-full pointer-events-auto">
                         <InteractiveChatBox 
                           forcedConvIndex={activeIndex} 
                         />
