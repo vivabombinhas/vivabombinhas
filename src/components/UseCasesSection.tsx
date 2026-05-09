@@ -8,7 +8,11 @@ import { TypingText } from "@/components/ui/TypingText";
 
 const UseCasesSection = () => {
   return (
-    <section id="casos-de-uso" className="section-padding bg-background relative overflow-hidden">
+    <section id="casos-de-uso" className="section-padding bg-muted/20 relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
+      </div>
       <div className="container-wide">
         <div className="text-center mb-20 max-w-3xl mx-auto">
           <motion.div 
