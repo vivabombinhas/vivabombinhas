@@ -32,7 +32,7 @@ const AudienceSection = () => {
           <motion.h2 
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.03em] text-foreground"
+            className="text-h2"
           >
             Foco em <span className="text-primary italic font-medium">Bombinhas.</span>
           </motion.h2>
