@@ -1,5 +1,6 @@
 import { Home, Umbrella, Key, Search, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
+import { TypingText } from "@/components/ui/TypingText";
 
 const audiences = [
   {
