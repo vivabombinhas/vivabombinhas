@@ -14,7 +14,7 @@ export const HeroV2 = () => {
       </div>
 
       <div className="container-wide relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr,1.1fr] gap-16 lg:gap-24 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.15fr,0.85fr] gap-12 lg:gap-20 items-center">
           
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
             <motion.div 
