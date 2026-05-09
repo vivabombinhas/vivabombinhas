@@ -136,7 +136,7 @@
   }
 
   .text-badge {
-    @apply text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground;
+    @apply text-[11px] md:text-[12px] font-extrabold uppercase tracking-[0.2em] text-muted-foreground/80;
   }
 }
 
@@ -148,7 +148,7 @@
     @apply bg-black/40 backdrop-blur-md border border-white/10 shadow-xl;
   }
   .section-padding {
-    @apply py-20 md:py-32;
+    @apply py-16 md:py-24;
   }
   .container-wide {
     @apply max-w-[1400px] mx-auto px-6 md:px-12;
