@@ -20,7 +20,7 @@ const PartnersSection = () => {
             <motion.div 
               initial={{ opacity: 0, x: -10 }}
               whileInView={{ opacity: 1, x: 0 }}
-              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-muted border border-border text-muted-foreground/60 text-[11px] font-bold uppercase tracking-[0.15em] mb-10"
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-muted border border-border text-badge mb-10"
             >
               <Building2 className="h-4 w-4 text-primary" />
               Parceiros e Corretores
