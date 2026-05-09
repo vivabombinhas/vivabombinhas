@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import Index from "./pages/Index.tsx";
 import MariaChat from "./pages/MariaChat.tsx";
 import Anunciar from "./pages/Anunciar.tsx";
@@ -29,38 +30,42 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/maria" element={<MariaChat />} />
-          <Route path="/anuncie" element={<Anunciar />} />
-          <Route path="/casos-de-uso" element={<UseCases />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/destacar/:submissionId" element={<CheckoutSimulado />} />
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
-            <Route path="leads" element={<AdminLeads />} />
-            <Route path="followups" element={<AdminFollowups />} />
-            <Route path="alerts" element={<AdminAlerts />} />
-            <Route path="receita" element={<AdminRevenue />} />
-            <Route path="submissions" element={<AdminSubmissions />} />
-            <Route path="imoveis" element={<AdminImoveis />} />
-            <Route path="curadoria" element={<AdminCuradoria />} />
-            <Route path="importar" element={<AdminImportar />} />
-            <Route path="importar-link" element={<AdminImportarLink />} />
-            <Route path="matches" element={<AdminMatches />} />
-            <Route path="ai-config" element={<AdminAIConfig />} />
-          </Route>
-          <Route path="/reset-password" element={<ResetPassword />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/maria" element={<MariaChat />} />
+            <Route path="/anuncie" element={<Anunciar />} />
+            <Route path="/casos-de-uso" element={<UseCases />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/destacar/:submissionId" element={<CheckoutSimulado />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="leads" element={<AdminLeads />} />
+              <Route path="followups" element={<AdminFollowups />} />
+              <Route path="alerts" element={<AdminAlerts />} />
+              <Route path="receita" element={<AdminRevenue />} />
+              <Route path="submissions" element={<AdminSubmissions />} />
+              <Route path="imoveis" element={<AdminImoveis />} />
+              <Route path="curadoria" element={<AdminCuradoria />} />
+              <Route path="importar" element={<AdminImportar />} />
+              <Route path="importar-link" element={<AdminImportarLink />} />
+              <Route path="matches" element={<AdminMatches />} />
+              <Route path="ai-config" element={<AdminAIConfig />} />
+            </Route>
+            <Route path="/reset-password" element={<ResetPassword />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
+
+export default App;
 
 export default App;
