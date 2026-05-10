@@ -178,6 +178,11 @@ export function useMariaChat() {
           finalidade_hint: finalidade ?? undefined,
         },
       });
+      
+      if (data?.debug) {
+        console.log('[MarIA Debug]', data.debug);
+      }
+
 
       if (error) {
         console.error("Invoke error:", error);
