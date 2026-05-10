@@ -179,8 +179,12 @@ export function useMariaChat() {
         },
       });
       
+      if (data) {
+        console.log('[MarIA Debug] Data recebida:', JSON.stringify(data, null, 2));
+      }
+
       if (data?.debug) {
-        console.log('[MarIA Debug]', data.debug);
+        console.log('[MarIA Debug Context]', data.debug);
       }
 
 

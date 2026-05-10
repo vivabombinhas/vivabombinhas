@@ -350,6 +350,7 @@ serve(async (req) => {
       model: aiConfigData?.model || "anthropic/claude-3.5-sonnet",
       temperature: aiConfigData?.temperature ?? 0.3,
       systemPrompt: aiConfigData?.system_prompt || SYSTEM_PROMPT,
+      force_show_results: aiConfigData?.force_show_results ?? false,
       maxTokens: aiConfigData?.max_tokens || 1000
     };
 
@@ -418,7 +419,9 @@ serve(async (req) => {
     let filters: SearchFilters & { intent?: string } = {};
     try { 
       filters = JSON.parse(filterText); 
+      console.log('Filtros extraídos:', JSON.stringify(filters, null, 2));
     } catch (e) { 
+      console.error('Erro ao parsear filtros:', filterText);
       filters = {}; 
     }
 
@@ -511,12 +514,19 @@ serve(async (req) => {
       }
     }
 
+    console.log('Executando query no Supabase...');
     const { data: properties, error: dbError } = await query
       .order("destaque_pago", { ascending: false })
       .order("destaque", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(20);
-    if (dbError) throw dbError;
+    
+    if (dbError) {
+      console.error('Erro na query do Supabase:', dbError);
+      throw dbError;
+    }
+    
+    console.log(`Resultados encontrados: ${properties?.length || 0}`);
 
     const resultsToUse = properties || [];
     const noResults = resultsToUse.length === 0;
@@ -536,7 +546,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: aiConfig.model,
         messages: [
-          { role: "system", content: aiConfig.systemPrompt + propertyContext },
+          { role: "system", content: aiConfig.systemPrompt + (aiConfig.force_show_results ? "\n\nIMPORTANTE: Use sempre [SHOW_RESULTS] nesta resposta." : "") + propertyContext },
           ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
         ],
         temperature: aiConfig.temperature,
@@ -556,7 +566,7 @@ serve(async (req) => {
       throw new Error(`AI Gateway Search Error: ${aiData.error.message || "Unknown error"}`);
     }
     let assistantMessage = aiData.choices?.[0]?.message?.content || "Olá! Como posso te ajudar a encontrar seu imóvel em Bombinhas hoje?";
-    let showResults = assistantMessage.includes("[SHOW_RESULTS]");
+    let showResults = assistantMessage.includes("[SHOW_RESULTS]") || (aiConfig.force_show_results && resultsToUse.length > 0);
     assistantMessage = assistantMessage.replace(/^\[(SHOW_RESULTS|NO_RESULTS_YET)\]\s*/g, "");
 
     // Save conversation turn
