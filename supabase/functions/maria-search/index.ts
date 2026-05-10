@@ -260,7 +260,7 @@ function extractNameFromText(text: string): string | null {
 }
 
 async function upsertLeadBySession(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   sessionId: string,
   patch: Record<string, unknown>,
 ): Promise<string | null> {
@@ -278,7 +278,7 @@ async function upsertLeadBySession(
         .update({ ...patch, last_contact_at: new Date().toISOString() })
         .eq("id", existing.id);
       if (error) console.error("Lead update error:", error);
-      return existing.id;
+      return existing.id as string;
     }
 
     const { data: inserted, error } = await supabase
@@ -293,7 +293,7 @@ async function upsertLeadBySession(
       .select("id")
       .single();
     if (error) { console.error("Lead insert error:", error); return null; }
-    return inserted?.id ?? null;
+    return (inserted?.id as string) ?? null;
   } catch (e) {
     console.error("upsertLeadBySession failed:", e);
     return null;
@@ -301,7 +301,7 @@ async function upsertLeadBySession(
 }
 
 async function saveLastConversationTurn(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   leadId: string,
   userMsg: string,
   assistantMsg: string,
@@ -323,8 +323,11 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  console.log("Maria-search function triggered");
+
   try {
     const body = await req.json();
+    console.log("Request body received:", JSON.stringify(body).slice(0, 200) + "...");
     const { messages, session_id, action, nome, telefone, lead_captured: clientLeadCaptured } = body || {};
     const sessionId: string = session_id || "";
 
@@ -394,7 +397,18 @@ serve(async (req) => {
       }),
     });
 
+    if (!filterResponse.ok) {
+      const errorText = await filterResponse.text();
+      console.error("Filter Gateway Error:", filterResponse.status, errorText);
+      throw new Error(`AI Gateway Filter Error: ${filterResponse.status}`);
+    }
+
     const filterData = await filterResponse.json();
+    if (filterData.error) {
+      console.error("AI Gateway Filter Error Data:", filterData.error);
+      throw new Error(`AI Gateway Filter Error: ${filterData.error.message || "Unknown error"}`);
+    }
+
     let filterText = filterData.choices?.[0]?.message?.content || "{}";
     filterText = filterText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
@@ -420,7 +434,17 @@ serve(async (req) => {
           max_tokens: aiConfig.maxTokens
         }),
       });
+    if (!aiResponse.ok) {
+        const errorText = await aiResponse.text();
+        console.error("AI Gateway Conv Error:", aiResponse.status, errorText);
+        throw new Error(`AI Gateway Conv Error: ${aiResponse.status}`);
+      }
+
       const aiData = await aiResponse.json();
+      if (aiData.error) {
+        console.error("AI Gateway Conv Error Data:", aiData.error);
+        throw new Error(`AI Gateway Conv Error: ${aiData.error.message || "Unknown error"}`);
+      }
       let assistantMessage = aiData.choices?.[0]?.message?.content || "Desculpe, tive um problema.";
       assistantMessage = assistantMessage.replace(/^\[(SHOW_RESULTS|NO_RESULTS_YET)\]\s*/g, "");
       
@@ -508,10 +532,16 @@ serve(async (req) => {
       }),
     });
 
+    if (!aiResponse.ok) {
+      const errorText = await aiResponse.text();
+      console.error("AI Gateway Search Error:", aiResponse.status, errorText);
+      throw new Error(`AI Gateway Search Error: ${aiResponse.status}`);
+    }
+
     const aiData = await aiResponse.json();
     if (aiData.error) {
-      console.error("AI Gateway Error:", aiData.error);
-      throw new Error(`AI Gateway error: ${aiData.error.message || "Unknown error"}`);
+      console.error("AI Gateway Search Error Data:", aiData.error);
+      throw new Error(`AI Gateway Search Error: ${aiData.error.message || "Unknown error"}`);
     }
     let assistantMessage = aiData.choices?.[0]?.message?.content || "Olá! Como posso te ajudar a encontrar seu imóvel em Bombinhas hoje?";
     let showResults = assistantMessage.includes("[SHOW_RESULTS]");
@@ -539,7 +569,15 @@ serve(async (req) => {
       debug_config: aiConfig
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-  } catch (error) {
-    return new Response(JSON.stringify({ reply: "Erro no servidor." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  } catch (error: any) {
+    console.error("CRITICAL FUNCTION ERROR:", error);
+    return new Response(JSON.stringify({ 
+      reply: "Desculpe, tive um problema ao processar sua busca. Pode tentar novamente? 😊",
+      error: error.message,
+      stack: error.stack
+    }), { 
+      status: 200, // Returning 200 so the frontend can see the error message
+      headers: { ...corsHeaders, "Content-Type": "application/json" } 
+    });
   }
 });

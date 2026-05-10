@@ -179,7 +179,15 @@ export function useMariaChat() {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Invoke error:", error);
+        throw error;
+      }
+      
+      if (data?.error) {
+        console.error("Edge Function internal error:", data.error, data.stack);
+        // We don't throw here so we can still use data.reply if present
+      }
 
       const showResults = data.show_results === true;
       const clearResults = data.clear_results === true;
@@ -219,8 +227,8 @@ export function useMariaChat() {
 
       setMessages((prev) => [...prev, assistantMsg]);
       updateHasMore();
-    } catch (err) {
-      console.error("MarIA error:", err);
+    } catch (err: any) {
+      console.error("Erro completo da Edge Function MarIA:", err);
       const errorMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
