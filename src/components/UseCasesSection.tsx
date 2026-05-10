@@ -2,7 +2,7 @@ import React from "react";
 import { InteractiveChatBox } from "@/components/InteractiveChatBox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sun, Home, Key, MessageSquare, Sparkles } from "lucide-react";
+import { Sun, Home, Key, MessageSquare, Sparkles, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { TypingText } from "@/components/ui/TypingText";
 
@@ -66,11 +66,11 @@ const UseCasesSection = () => {
                 Compra
               </TabsTrigger>
               <TabsTrigger 
-                value="interacao" 
+                value="investimento" 
                 className="px-5 md:px-8 py-3 md:py-4 rounded-full transition-all duration-500 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 font-bold text-[10px] md:text-xs uppercase tracking-widest gap-2 md:gap-3 group"
               >
-                <MessageSquare className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                Interação
+                <TrendingUp className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                Investimento
               </TabsTrigger>
             </TabsList>
           </div>
@@ -128,15 +128,15 @@ const UseCasesSection = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="interacao" className="mt-0 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
+              <TabsContent value="investimento" className="mt-0 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
                 <div className="space-y-6">
-                  <h3 className="text-h2">Interação Amigável</h3>
+                  <h3 className="text-h2">Investimento Imobiliário</h3>
                   <p className="text-subtitle">
-                    Tire dúvidas gerais sobre a cidade, melhores épocas para visita, custo de vida ou como funciona a nossa plataforma.
+                    Encontre oportunidades com alto potencial de retorno em temporada ou valorização patrimonial em Bombinhas.
                   </p>
                 </div>
                 <div className="grid gap-4">
-                  {["Qual a melhor época para evitar filas?", "Como funciona a Taxa de Preservação (TPA)?", "Quais as melhores praias para ir com crianças?"].map((q, i) => (
+                  {["Quero investir em um imóvel em Bombinhas", "Quais as áreas com maior ROI para locação?", "Procuro terrenos com potencial construtivo."].map((q, i) => (
                     <div key={i} className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-body font-medium flex items-center gap-4 group hover:bg-white hover:shadow-premium transition-all duration-500">
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-bold">0{i+1}</div>
                       "{q}"
@@ -157,7 +157,7 @@ const UseCasesSection = () => {
                 <TabsContent value="compra" className="m-0 h-full">
                   <InteractiveChatBox forcedConvIndex={2} />
                 </TabsContent>
-                <TabsContent value="interacao" className="m-0 h-full">
+                <TabsContent value="investimento" className="m-0 h-full">
                   <InteractiveChatBox forcedConvIndex={3} />
                 </TabsContent>
               </div>

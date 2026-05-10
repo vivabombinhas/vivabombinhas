@@ -19,7 +19,7 @@ const BenefitsSection = () => {
       </div>
 
       <div className="container-wide relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[400px,1fr] gap-16 lg:gap-24 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[400px,1fr] gap-12 lg:gap-16 items-start">
           
           <div className="sticky top-0 lg:top-32 w-full z-20 bg-background/90 lg:bg-transparent backdrop-blur-md lg:backdrop-blur-none py-10 lg:py-0 -mx-6 px-6 lg:mx-0 lg:px-0 mb-4 lg:mb-0">
             <motion.div 

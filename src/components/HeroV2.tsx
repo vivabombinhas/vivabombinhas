@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 
 export const HeroV2 = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+    <section className="relative min-h-[85vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden pt-16">
       {/* Atmosphere & Background */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #04111f 0%, #062340 45%, #083660 70%, #0a4a7a 100%)" }} />
@@ -22,7 +22,7 @@ export const HeroV2 = () => {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2.5 mb-8 px-4 py-2 rounded-full border border-white/20 bg-white/8 text-white/80 backdrop-blur-sm"
+              className="inline-flex items-center gap-2.5 mb-5 px-4 py-2 rounded-full border border-white/20 bg-white/8 text-white/80 backdrop-blur-sm"
             >
               <div className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
               <TypingText text="Inteligência Imobiliária • Bombinhas" className="text-badge text-white/80" />
@@ -32,7 +32,7 @@ export const HeroV2 = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-display mb-8 text-white"
+              className="text-display mb-5 text-white"
             >
               A concierge imobiliária inteligente de <span className="text-primary italic font-serif">Bombinhas</span>
             </motion.h1>
@@ -41,7 +41,7 @@ export const HeroV2 = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-subtitle max-w-[540px] mb-12 text-white/75"
+              className="text-subtitle max-w-[540px] mb-8 text-white/75"
             >
               Aluguel de temporada, anual, compra ou investimento — a MarIA entende seu perfil e mostra apenas os imóveis certos para você.
             </motion.p>
@@ -77,7 +77,7 @@ export const HeroV2 = () => {
             initial={{ opacity: 0, scale: 0.95, x: 20 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5] max-w-[400px] lg:max-w-[480px] mx-auto lg:mr-0 h-[400px] lg:h-auto"
+            className="relative w-full aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5] max-w-[400px] lg:max-w-[480px] mx-auto lg:mr-0 h-[400px] lg:h-auto max-h-[400px] lg:max-h-none"
           >
             {/* Elegant chat window frame */}
             <div className="absolute inset-0 rounded-[40px] border border-white/20 bg-white shadow-2xl overflow-hidden z-10">
@@ -88,21 +88,7 @@ export const HeroV2 = () => {
             <div className="absolute -top-6 -right-6 w-24 h-24 bg-accent/20 rounded-3xl blur-2xl z-0" />
             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl z-0" />
             
-            <motion.div 
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -right-8 top-1/4 p-4 rounded-2xl glass shadow-xl z-20 hidden md:block"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <div className="text-[11px] font-bold text-foreground">Curadoria IA</div>
-                  <div className="text-[10px] text-muted-foreground">Match perfeito</div>
-                </div>
-              </div>
-            </motion.div>
+            {/* Decorative badge removed as requested */}
           </motion.div>
 
         </div>
