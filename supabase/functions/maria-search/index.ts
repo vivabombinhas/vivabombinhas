@@ -418,7 +418,9 @@ serve(async (req) => {
     let filters: SearchFilters & { intent?: string } = {};
     try { 
       filters = JSON.parse(filterText); 
+      console.log('Filtros extraídos:', JSON.stringify(filters, null, 2));
     } catch (e) { 
+      console.error('Erro ao parsear filtros:', filterText);
       filters = {}; 
     }
 
@@ -511,12 +513,19 @@ serve(async (req) => {
       }
     }
 
+    console.log('Executando query no Supabase...');
     const { data: properties, error: dbError } = await query
       .order("destaque_pago", { ascending: false })
       .order("destaque", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(20);
-    if (dbError) throw dbError;
+    
+    if (dbError) {
+      console.error('Erro na query do Supabase:', dbError);
+      throw dbError;
+    }
+    
+    console.log(`Resultados encontrados: ${properties?.length || 0}`);
 
     const resultsToUse = properties || [];
     const noResults = resultsToUse.length === 0;
