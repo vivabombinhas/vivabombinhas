@@ -26,15 +26,15 @@ const Footer = () => {
               <div className="flex flex-col gap-4">
                 <a href="#como-funciona" className="text-body !text-[13px] hover:text-primary transition-colors">Como Funciona</a>
                 <a href="/anuncie" className="text-body !text-[13px] hover:text-primary transition-colors">Anunciar</a>
-                <a href="#demo" className="text-body !text-[13px] hover:text-primary transition-colors">Demonstração</a>
+                <a href="/maria" className="text-body !text-[13px] hover:text-primary transition-colors">Demonstração</a>
               </div>
             </div>
             <div className="flex flex-col gap-6">
               <span className="text-badge">Suporte</span>
               <div className="flex flex-col gap-4">
                 <a href="#faq" className="text-body !text-[13px] hover:text-primary transition-colors">FAQ</a>
-                <a href="#" className="text-body !text-[13px] hover:text-primary transition-colors">Privacidade</a>
-                <a href="#" className="text-body !text-[13px] hover:text-primary transition-colors">Contato</a>
+                <a href="#" className="text-body !text-[13px] hover:text-primary transition-colors pointer-events-none opacity-50">Privacidade</a>
+                <a href="#" className="text-body !text-[13px] hover:text-primary transition-colors pointer-events-none opacity-50">Contato</a>
               </div>
             </div>
             <div className="hidden md:flex flex-col gap-6">

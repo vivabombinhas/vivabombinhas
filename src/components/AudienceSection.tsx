@@ -32,7 +32,7 @@ const AudienceSection = () => {
         <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
       </div>
       <div className="container-wide">
-        <div className="flex flex-col lg:flex-row items-end justify-between gap-12 mb-24">
+        <div className="flex flex-col lg:flex-row items-end justify-between gap-12 mb-14">
           <div className="max-w-2xl">
             <motion.div 
               initial={{ opacity: 0, x: -10 }}
@@ -60,7 +60,7 @@ const AudienceSection = () => {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {audiences.map((a, i) => (
             <motion.div 
               key={i}
