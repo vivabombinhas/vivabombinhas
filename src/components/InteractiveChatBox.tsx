@@ -75,13 +75,26 @@ const CONVERSATIONS = [
     ]
   },
   {
-    id: "duvidas",
+    id: "investimento",
     messages: [
-      { type: "user", text: "Qual a melhor época para visitar Bombinhas?" },
-      { type: "ai", text: "Depende do seu objetivo! Dezembro a Março é o auge do calor e agito ☀️" },
-      { type: "user", text: "E os preços? Quero algo mais tranquilo e barato." },
-      { type: "ai", text: "Nesse caso, recomendo Abril ou Outubro. As águas continuam mornas e os preços caem até 50%!" },
-      { type: "ai", text: "Deseja ver opções de hospedagem para esses meses?" }
+      { type: "user", text: "Quero investir em imóvel em Bombinhas para renda de temporada." },
+      { type: "ai", text: "Ótima escolha! Mariscal e Quatro Ilhas têm altíssima ocupação no verão. Qual sua faixa de investimento?" },
+      { type: "user", text: "Entre R$ 600 mil e R$ 900 mil." },
+      { type: "ai", text: "Encontrei uma oportunidade com excelente potencial de retorno 👇",
+        properties: [
+          {
+            id: "invest-1",
+            titulo: "Casa Alto Retorno - Mariscal",
+            preco: 780000,
+            bairro: "Mariscal",
+            tipo: "casa",
+            finalidade: "compra",
+            quartos: 3,
+            fotos: ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80"],
+            anunciante_telefone: "47999999999"
+          }
+        ]
+      }
     ]
   }
 ];
@@ -151,7 +164,7 @@ export const InteractiveChatBox = ({
   return (
     <div className="w-full h-full relative flex flex-col">
       <motion.div 
-        className="relative flex-1 flex flex-col rounded-[32px] border border-border/40 bg-white/40 backdrop-blur-md shadow-none overflow-hidden"
+        className="relative flex-1 flex flex-col rounded-[32px] border border-border/40 bg-white shadow-none overflow-hidden"
       >
         {/* Header: More refined and application-like */}
         <div className="bg-white/50 backdrop-blur-md px-6 py-5 border-b border-border/40 flex items-center justify-between">

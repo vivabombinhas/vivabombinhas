@@ -19,7 +19,7 @@ const steps = [
     icon: ExternalLink,
     num: "03",
     title: "Conexão Direta",
-    desc: "Conectamos você diretamente à página original ou ao anunciante para fechar o negócio.",
+    desc: "Fale diretamente com o anunciante via WhatsApp — sem intermediários, sem burocracia.",
   },
 ];
 

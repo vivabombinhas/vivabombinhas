@@ -20,6 +20,18 @@ const faqs = [
     q: "Como falo com o anunciante?",
     a: "Nós conectamos você diretamente ao link original ou ao contato do responsável pelo imóvel de forma fluida.",
   },
+  {
+    q: "Os imóveis mostrados são reais e disponíveis?",
+    a: "Sim. Todos os imóveis são verificados e cadastrados por imobiliárias e proprietários em Bombinhas. A MarIA só mostra o que está disponível."
+  },
+  {
+    q: "Recebo alertas quando entrar imóvel novo no meu perfil?",
+    a: "Sim! Ao compartilhar seu perfil de busca, a MarIA te notifica pelo WhatsApp sempre que um imóvel compatível for cadastrado na plataforma."
+  },
+  {
+    q: "Como anuncio meu imóvel na plataforma?",
+    a: "Acesse a seção 'Anunciar', preencha as informações básicas do seu imóvel e nossa equipe ativa o anúncio em até 24 horas."
+  }
 ];
 
 const FAQSection = () => {

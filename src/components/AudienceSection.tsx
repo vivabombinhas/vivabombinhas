@@ -19,9 +19,9 @@ const audiences = [
     desc: "Explore as melhores oportunidades para adquirir seu imóvel na região.",
   },
   {
-    icon: Search,
-    title: "Descoberta",
-    desc: "Explore o mercado e entenda as opções antes de tomar sua decisão.",
+    icon: TrendingUp,
+    title: "Investimento",
+    desc: "Encontre oportunidades com alto potencial de retorno em temporada ou valorização.",
   },
 ];
 
