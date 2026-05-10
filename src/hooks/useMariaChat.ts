@@ -201,22 +201,15 @@ export function useMariaChat() {
       const showResults = data.show_results === true;
       const clearResults = data.clear_results === true;
       
-      // Conta quantas mensagens com propriedades (cards) já existem no histórico
-      const messagesWithProperties = messages.filter(m => m.properties && m.properties.length > 0).length;
-      const alreadyShownCards = messagesWithProperties > 0;
-
-      // O lead gate só pode ativar se o usuário já recebeu pelo menos uma mensagem com imóveis antes.
-      const canActivateGate = alreadyShownCards;
-
-      const gateActive = data.gate_active === true && !leadCapturedRef.current && canActivateGate;
-      const noResultsGate = data.no_results_gate === true && !leadCapturedRef.current && canActivateGate;
+      const gateActive = data.gate_active === true && !leadCapturedRef.current;
+      const noResultsGate = data.no_results_gate === true && !leadCapturedRef.current;
 
       if (showResults) {
         const allProps: Property[] = data.all_properties || [];
         allPropertiesRef.current = allProps;
         gateActiveRef.current = gateActive;
         // Se o gate está ativo, mostramos apenas 1 para "forçar" o interesse, caso contrário 3.
-        const initial = gateActive ? 1 : 3;
+        const initial = gateActive ? 2 : 3;
         shownCountRef.current = Math.min(initial, allProps.length);
       } else if (clearResults) {
         clearPropertyState();

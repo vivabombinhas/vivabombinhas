@@ -17,6 +17,7 @@ export type Database = {
       ai_config: {
         Row: {
           created_at: string | null
+          force_show_results: boolean | null
           id: string
           max_tokens: number | null
           model: string
@@ -26,6 +27,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          force_show_results?: boolean | null
           id?: string
           max_tokens?: number | null
           model?: string
@@ -35,6 +37,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          force_show_results?: boolean | null
           id?: string
           max_tokens?: number | null
           model?: string

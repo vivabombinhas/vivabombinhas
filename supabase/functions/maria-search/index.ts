@@ -165,6 +165,7 @@ const FILTER_EXTRACTION_PROMPT = `Analise a CONVERSA COMPLETA do usuário e extr
 REGRA CRÍTICA - CLASSIFICAÇÃO DE INTENÇÃO:
 Primeiro, determine a INTENÇÃO da última mensagem do usuário. Classifique como:
 - "search": O usuário quer buscar/ver imóveis (nova busca ou refinamento). Se ele estiver respondendo a uma pergunta sobre o perfil do imóvel (ex: "quero morar", "2 quartos", "até 800k"), isso é INTENÇÃO DE BUSCA/REFINAMENTO.
+- "qualifying": O usuário demonstrou intenção de busca mas ainda não forneceu filtros suficientes para uma busca relevante. Use SOMENTE quando tem apenas finalidade mas falta bairro, preço, tipo ou capacidade. Se o usuário já deu finalidade + pelo menos 2 filtros concretos, use "search", não "qualifying".
 - "conversation": Qualquer outra coisa (saudação, perguntas gerais, dados de contato, reclamação, anunciar imóvel, conversa casual).
 
 Se a intenção for "conversation", retorne APENAS: {"intent":"conversation"}
@@ -425,7 +426,7 @@ serve(async (req) => {
       filters = {}; 
     }
 
-    const isConversation = filters.intent === "conversation";
+    const isConversation = filters.intent === "conversation" || filters.intent === "qualifying";
     if (isConversation) {
       const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -538,7 +539,19 @@ serve(async (req) => {
     }
 
     const gateActive = !leadAlreadyCaptured && resultsToUse.length >= 1;
-    const propertyContext = `\n\nResultados (${resultsToUse.length}):\n${JSON.stringify(resultsToUse, null, 2)}${gateActive ? "\n\nGATE_ATIVO: Peça nome+whats para liberar o resto." : ""}`;
+    const summaryProps = resultsToUse.map(p => ({
+      titulo: p.titulo,
+      tipo: p.tipo,
+      bairro: p.bairro,
+      preco: p.preco,
+      preco_temporada_diaria: p.preco_temporada_diaria,
+      quartos: p.quartos,
+      capacidade_pessoas: p.capacidade_pessoas,
+      area_m2: p.area_m2,
+    }));
+    const propertyContext = resultsToUse.length > 0
+      ? `\n\nResultados encontrados (${resultsToUse.length}):\n${JSON.stringify(summaryProps, null, 2)}${gateActive ? "\n\nGATE_ATIVO: Peça nome+whats para liberar o resto." : ""}`
+      : "";
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -546,7 +559,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: aiConfig.model,
         messages: [
-          { role: "system", content: aiConfig.systemPrompt + (aiConfig.force_show_results ? "\n\nIMPORTANTE: Use sempre [SHOW_RESULTS] nesta resposta." : "") + propertyContext },
+          { role: "system", content: aiConfig.systemPrompt + propertyContext },
           ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
         ],
         temperature: aiConfig.temperature,
@@ -566,7 +579,7 @@ serve(async (req) => {
       throw new Error(`AI Gateway Search Error: ${aiData.error.message || "Unknown error"}`);
     }
     let assistantMessage = aiData.choices?.[0]?.message?.content || "Olá! Como posso te ajudar a encontrar seu imóvel em Bombinhas hoje?";
-    let showResults = assistantMessage.includes("[SHOW_RESULTS]") || (aiConfig.force_show_results && resultsToUse.length > 0);
+    let showResults = assistantMessage.includes("[SHOW_RESULTS]");
     assistantMessage = assistantMessage.replace(/^\[(SHOW_RESULTS|NO_RESULTS_YET)\]\s*/g, "");
 
     // Save conversation turn
