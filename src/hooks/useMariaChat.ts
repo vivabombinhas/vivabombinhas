@@ -179,7 +179,15 @@ export function useMariaChat() {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Invoke error:", error);
+        throw error;
+      }
+      
+      if (data?.error) {
+        console.error("Edge Function internal error:", data.error, data.stack);
+        // We don't throw here so we can still use data.reply if present
+      }
 
       const showResults = data.show_results === true;
       const clearResults = data.clear_results === true;
