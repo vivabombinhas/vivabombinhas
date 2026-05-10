@@ -463,7 +463,16 @@ serve(async (req) => {
         reply: assistantMessage, properties: [], all_properties: [], filters_used: {},
         results_count: 0, broader_search: false, lead_saved: false,
         show_results: false, clear_results: true,
-        debug_config: aiConfig
+        debug_config: aiConfig,
+        debug: {
+          model: aiConfig.model,
+          filters_extracted: filters,
+          query_sql: "No SQL executed (conversation)",
+          results_count: 0,
+          results_shown: 0,
+          timestamp: new Date().toISOString(),
+          processing_time_ms: Date.now() - startTime
+        }
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
