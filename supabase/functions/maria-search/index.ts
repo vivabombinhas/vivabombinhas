@@ -342,7 +342,7 @@ serve(async (req) => {
 
     const aiConfig = {
       model: aiConfigData?.model || "google/gemini-2.0-flash-exp",
-      temperature: aiConfigData?.temperature ?? 0.7,
+      temperature: aiConfigData?.temperature ?? 0.3,
       systemPrompt: aiConfigData?.system_prompt || SYSTEM_PROMPT,
       maxTokens: aiConfigData?.max_tokens || 1000
     };
