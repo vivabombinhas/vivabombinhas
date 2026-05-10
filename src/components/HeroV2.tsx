@@ -1,97 +1,157 @@
-import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, ArrowRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { InteractiveChatBox } from "@/components/InteractiveChatBox";
-import { TypingText } from "@/components/ui/TypingText";
-import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+
+const CHIPS = [
+  { emoji: "🏖", label: "Temporada", query: "Quero alugar para temporada em Bombinhas" },
+  { emoji: "🏠", label: "Aluguel anual", query: "Procuro aluguel anual em Bombinhas" },
+  { emoji: "🔑", label: "Compra", query: "Quero comprar imóvel em Bombinhas" },
+  { emoji: "📈", label: "Investimento", query: "Quero investir em imóvel em Bombinhas" },
+];
+
+const STATS = [
+  { value: "+20", label: "Imobiliárias" },
+  { value: "+580", label: "Imóveis ativos" },
+  { value: "100%", label: "Foco em Bombinhas" },
+];
 
 export const HeroV2 = () => {
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (text?: string) => {
+    const msg = text || query.trim();
+    if (!msg) return;
+    navigate("/maria", { state: { initialMessage: msg } });
+  };
+
   return (
-    <section className="relative min-h-[85vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden pt-16">
-      {/* Atmosphere & Background */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #04111f 0%, #062340 45%, #083660 70%, #0a4a7a 100%)" }} />
-        <div className="absolute inset-0 opacity-15" style={{ background: "radial-gradient(ellipse 70% 55% at 65% 35%, rgba(12,127,212,0.6) 0%, transparent 60%)" }} />
+    <section className="relative min-h-[92vh] flex flex-col justify-center overflow-hidden">
+
+      {/* ── Background: foto aérea de Bombinhas com overlay ── */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80"
+          alt="Vista aérea de Bombinhas"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(to bottom, rgba(4,17,31,0.55) 0%, rgba(4,17,31,0.75) 50%, rgba(4,17,31,0.92) 100%)"
+          }}
+        />
       </div>
 
-      <div className="container-wide relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          
-          <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2.5 mb-5 px-4 py-2 rounded-full border border-white/20 bg-white/8 text-white/80 backdrop-blur-sm"
-            >
-              <div className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-              <TypingText text="Inteligência Imobiliária • Bombinhas" className="text-badge text-white/80" />
-            </motion.div>
+      {/* ── Content ── */}
+      <div className="relative z-10 max-w-4xl mx-auto w-full px-6 text-center pt-28 pb-12">
 
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-display mb-5 text-white"
-            >
-              A concierge imobiliária inteligente de <span className="text-primary italic font-serif">Bombinhas</span>
-            </motion.h1>
+        {/* Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full border border-white/15 bg-white/8 backdrop-blur-md"
+        >
+          <MapPin className="w-3.5 h-3.5 text-primary" />
+          <span className="text-[12px] font-medium tracking-wide text-white/80">
+            Inteligência imobiliária em Bombinhas
+          </span>
+        </motion.div>
 
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-subtitle max-w-[540px] mb-8 text-white/75"
-            >
-              Aluguel de temporada, anual, compra ou investimento — a MarIA entende seu perfil e mostra apenas os imóveis certos para você.
-            </motion.p>
+        {/* Headline */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+          className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] mb-6"
+        >
+          Encontre o imóvel certo<br />
+          <span className="italic font-serif text-primary">em Bombinhas.</span>
+        </motion.h1>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 w-full sm:w-auto"
-            >
-              <Button
-                size="lg"
-                className="h-16 px-10 rounded-full bg-primary text-white font-bold hover:opacity-90 transition-all duration-500 shadow-2xl group"
-                asChild
-              >
-                <Link to="/maria">
-                  Conversar com a MarIA
-                  <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-1.5 transition-transform duration-500" />
-                </Link>
-              </Button>
-            </motion.div>
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-base md:text-lg text-white/65 font-light max-w-xl mx-auto mb-10 leading-relaxed"
+        >
+          Diga o que você procura — a MarIA entende seu perfil e mostra apenas
+          imóveis que fazem sentido para você.
+        </motion.p>
 
-            <div className="flex flex-wrap gap-2 mt-6 justify-center lg:justify-start">
-              {['🏖 Temporada', '🏠 Aluguel anual', '🔑 Compra', '📈 Investimento'].map((chip) => (
-                <span key={chip} className="px-4 py-2 rounded-full border border-white/20 bg-white/8 text-white/80 text-sm backdrop-blur-sm hover:bg-white/15 transition-all cursor-pointer">
-                  {chip}
-                </span>
-              ))}
+        {/* ── Search bar ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="w-full max-w-2xl mx-auto mb-8"
+        >
+          <div className="relative flex items-center bg-white rounded-full shadow-2xl shadow-black/20 overflow-hidden p-1.5">
+            <div className="flex items-center gap-3 flex-1 pl-5">
+              <Search className="w-5 h-5 text-slate-400 shrink-0" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                placeholder="Ex: Casa com piscina no Mariscal para 8 pessoas..."
+                className="w-full bg-transparent text-slate-800 text-[15px] font-medium outline-none placeholder:text-slate-400"
+              />
             </div>
+            <Button
+              onClick={() => handleSearch()}
+              className="h-12 px-6 rounded-full bg-primary hover:brightness-110 text-white text-sm font-semibold shrink-0 shadow-lg shadow-primary/25 transition-all"
+            >
+              <span className="hidden sm:inline mr-2">Perguntar à MarIA</span>
+              <ArrowRight className="w-4 h-4" />
+            </Button>
           </div>
+        </motion.div>
 
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95, x: 20 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5] max-w-[400px] lg:max-w-[480px] mx-auto lg:mr-0 h-[400px] lg:h-auto max-h-[400px] lg:max-h-none"
-          >
-            {/* Elegant chat window frame */}
-            <div className="absolute inset-0 rounded-[40px] border border-white/20 bg-white shadow-2xl overflow-hidden z-10">
-              <InteractiveChatBox forcedConvIndex={0} />
+        {/* ── Chips de modalidade ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="flex flex-wrap justify-center gap-2 mb-16"
+        >
+          {CHIPS.map((chip) => (
+            <button
+              key={chip.label}
+              onClick={() => handleSearch(chip.query)}
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/15 bg-white/8 backdrop-blur-md text-white/80 text-sm hover:bg-white/15 hover:border-white/30 hover:text-white transition-all duration-300 cursor-pointer"
+            >
+              <span>{chip.emoji}</span>
+              <span>{chip.label}</span>
+            </button>
+          ))}
+        </motion.div>
+
+        {/* ── Stats ── */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="flex items-center justify-center gap-0"
+        >
+          {STATS.map((stat, i) => (
+            <div
+              key={stat.label}
+              className={`px-8 ${i < STATS.length - 1 ? "border-r border-white/15" : ""}`}
+            >
+              <p className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+                {stat.value}
+              </p>
+              <p className="text-[10px] uppercase tracking-[0.15em] text-white/45 mt-1">
+                {stat.label}
+              </p>
             </div>
-            
-            {/* Decorative elements */}
-            <div className="absolute -top-6 -right-6 w-24 h-24 bg-accent/20 rounded-3xl blur-2xl z-0" />
-            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl z-0" />
-            
-            {/* Decorative badge removed as requested */}
-          </motion.div>
-
-        </div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );
