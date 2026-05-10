@@ -345,7 +345,7 @@ serve(async (req) => {
       .maybeSingle();
 
     const aiConfig = {
-      model: aiConfigData?.model || "google/gemini-2.0-flash-exp",
+      model: aiConfigData?.model || "anthropic/claude-3.5-sonnet",
       temperature: aiConfigData?.temperature ?? 0.3,
       systemPrompt: aiConfigData?.system_prompt || SYSTEM_PROMPT,
       maxTokens: aiConfigData?.max_tokens || 1000
