@@ -269,8 +269,8 @@ export function useMariaChat() {
           id: crypto.randomUUID(),
           role: "assistant",
           content: remaining.length > 0
-            ? `Pronto, ${firstName}! 🎉 Liberei tudo pra você. Aqui ${remaining.length === 1 ? "está a outra opção" : `estão as outras ${remaining.length} opções`} que separei 👇`
-            : `Pronto, ${firstName}! 🎉 Já te aviso pelo WhatsApp assim que aparecer algo novo no seu perfil.`,
+            ? `Pronto, ${firstName}! 🚀 Aqui estão as outras ${remaining.length} opções que separei. Alguma te interessou?`
+            : `Anotado, ${firstName}! Seu radar está ativo — quando entrar um imóvel no seu perfil, te aviso no WhatsApp. 🤝`,
           timestamp: new Date(),
           properties: remaining.length > 0 ? remaining : undefined,
         };
