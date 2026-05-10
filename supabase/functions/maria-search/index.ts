@@ -165,6 +165,7 @@ const FILTER_EXTRACTION_PROMPT = `Analise a CONVERSA COMPLETA do usuário e extr
 REGRA CRÍTICA - CLASSIFICAÇÃO DE INTENÇÃO:
 Primeiro, determine a INTENÇÃO da última mensagem do usuário. Classifique como:
 - "search": O usuário quer buscar/ver imóveis (nova busca ou refinamento). Se ele estiver respondendo a uma pergunta sobre o perfil do imóvel (ex: "quero morar", "2 quartos", "até 800k"), isso é INTENÇÃO DE BUSCA/REFINAMENTO.
+- "qualifying": O usuário demonstrou intenção de busca mas ainda não forneceu filtros suficientes para uma busca relevante. Use SOMENTE quando tem apenas finalidade mas falta bairro, preço, tipo ou capacidade. Se o usuário já deu finalidade + pelo menos 2 filtros concretos, use "search", não "qualifying".
 - "conversation": Qualquer outra coisa (saudação, perguntas gerais, dados de contato, reclamação, anunciar imóvel, conversa casual).
 
 Se a intenção for "conversation", retorne APENAS: {"intent":"conversation"}
