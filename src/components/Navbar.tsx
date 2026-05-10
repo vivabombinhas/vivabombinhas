@@ -86,15 +86,15 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {open && (
-        <div className="absolute top-full left-0 right-0 p-4 bg-background/95 backdrop-blur-2xl border-b border-border animate-in fade-in slide-in-from-top-4 duration-300">
-          <nav className="flex flex-col gap-2">
+        <div className="absolute top-full left-0 right-0 p-0 bg-background/95 backdrop-blur-2xl border-b border-border animate-in fade-in slide-in-from-top-4 duration-300">
+          <nav className="flex flex-col">
             {links.map((l) => (
               l.href.startsWith("/") ? (
                 <Link 
                   key={l.href} 
                   to={l.href} 
                   onClick={() => setOpen(false)} 
-                  className="text-sm font-bold text-muted-foreground p-4 rounded-2xl hover:bg-muted transition-colors"
+                  className="text-sm font-bold text-muted-foreground p-4 border-b border-border/10 hover:bg-muted transition-colors min-h-[44px] flex items-center"
                 >
                   {l.label}
                 </Link>
@@ -103,7 +103,7 @@ const Navbar = () => {
                   key={l.href} 
                   href={l.href} 
                   onClick={() => setOpen(false)} 
-                  className="text-sm font-bold text-muted-foreground p-4 rounded-2xl hover:bg-muted transition-colors"
+                  className="text-sm font-bold text-muted-foreground p-4 border-b border-border/10 hover:bg-muted transition-colors min-h-[44px] flex items-center"
                 >
                   {l.label}
                 </a>
@@ -112,13 +112,15 @@ const Navbar = () => {
             <Link 
               to="/anuncie" 
               onClick={() => setOpen(false)} 
-              className="text-sm font-bold text-muted-foreground p-4 rounded-2xl hover:bg-muted transition-colors"
+              className="text-sm font-bold text-muted-foreground p-4 border-b border-border/10 hover:bg-muted transition-colors min-h-[44px] flex items-center"
             >
               Anunciar
             </Link>
-            <Button asChild className="w-full rounded-2xl h-14 text-sm font-bold mt-2 bg-primary text-primary-foreground hover:brightness-110">
-              <a href="#experimentar" onClick={() => setOpen(false)}>Experimentar Grátis</a>
-            </Button>
+            <div className="p-4">
+              <Button asChild className="w-full rounded-2xl h-14 text-sm font-bold bg-primary text-primary-foreground hover:brightness-110">
+                <a href="#experimentar" onClick={() => setOpen(false)}>Experimentar Grátis</a>
+              </Button>
+            </div>
           </nav>
         </div>
       )}
