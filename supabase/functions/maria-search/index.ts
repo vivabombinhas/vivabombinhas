@@ -323,8 +323,11 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  console.log("Maria-search function triggered");
+
   try {
     const body = await req.json();
+    console.log("Request body received:", JSON.stringify(body).slice(0, 200) + "...");
     const { messages, session_id, action, nome, telefone, lead_captured: clientLeadCaptured } = body || {};
     const sessionId: string = session_id || "";
 
@@ -566,7 +569,15 @@ serve(async (req) => {
       debug_config: aiConfig
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-  } catch (error) {
-    return new Response(JSON.stringify({ reply: "Erro no servidor." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  } catch (error: any) {
+    console.error("CRITICAL FUNCTION ERROR:", error);
+    return new Response(JSON.stringify({ 
+      reply: "Desculpe, tive um problema ao processar sua busca. Pode tentar novamente? 😊",
+      error: error.message,
+      stack: error.stack
+    }), { 
+      status: 200, // Returning 200 so the frontend can see the error message
+      headers: { ...corsHeaders, "Content-Type": "application/json" } 
+    });
   }
 });
