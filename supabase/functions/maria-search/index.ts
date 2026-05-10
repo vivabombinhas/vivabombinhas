@@ -320,6 +320,8 @@ async function saveLastConversationTurn(
 }
 
 serve(async (req) => {
+  const startTime = Date.now();
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
