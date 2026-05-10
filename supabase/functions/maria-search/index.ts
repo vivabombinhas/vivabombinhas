@@ -352,7 +352,7 @@ serve(async (req) => {
       temperature: aiConfigData?.temperature ?? 0.3,
       systemPrompt: aiConfigData?.system_prompt || SYSTEM_PROMPT,
       force_show_results: aiConfigData?.force_show_results ?? false,
-      maxTokens: aiConfigData?.max_tokens || 1000
+      maxTokens: aiConfigData?.max_tokens || 2000
     };
 
     if (action === "submit_lead") {
