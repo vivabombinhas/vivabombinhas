@@ -5,7 +5,7 @@ import { TypingText } from "@/components/ui/TypingText";
 const benefits = [
   { icon: Zap, title: "Velocidade", desc: "Encontre em segundos o que levaria horas pesquisando manualmente.", stat: "10x", label: "mais rápido" },
   { icon: LayoutList, title: "Curadoria", desc: "Anúncios centralizados e filtrados pela nossa inteligência local.", stat: "100%", label: "foco local" },
-  { icon: Link2, title: "Direto", desc: "Acesse o link original e fale sem intermediários desnecessários.", stat: "0", label: "taxas extras" },
+  { icon: Link2, title: "Transparente", desc: "Veja preço, fotos, bairro e contato antes do primeiro clique. Sem surpresas.", stat: "100%", label: "transparência" },
   { icon: MessageCircle, title: "Fluidez", desc: "Busque imóveis como se estivesse conversando com um amigo.", stat: "24/7", label: "ativo" },
 ];
 

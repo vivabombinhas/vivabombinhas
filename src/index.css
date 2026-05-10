@@ -6,40 +6,34 @@
 
 @layer base {
   :root {
+    --primary: #0c7fd4;
+    --primary-foreground: #ffffff;
+    --accent: #e8f4fd;
+    --accent-foreground: #0a5a96;
+    --background: #fafbfd;
+    --foreground: #0c1b2e;
+    --muted: #f0f4f8;
+    --muted-foreground: #5a6b7d;
+    --border: #dde4ed;
+    --ring: #0c7fd4;
+    --secondary: #f0f7fd;
+    --secondary-foreground: #3a5068;
     --card: #ffffff;
-    --ring: #22c55e;
-    --input: #e5e7eb;
-    --muted: #f3f4f6;
-    --accent: #d1fae5;
-    --border: #e5e7eb;
-    --radius: 0.5rem;
-    --chart-1: #22c55e;
-    --chart-2: #10b981;
-    --chart-3: #059669;
-    --chart-4: #047857;
-    --chart-5: #065f46;
+    --card-foreground: #0c1b2e;
+    --input: #dde4ed;
+    --destructive: #e53e3e;
+    --destructive-foreground: #ffffff;
     --popover: #ffffff;
-    --primary: #22c55e;
-    --sidebar: #e0f2fe;
+    --popover-foreground: #0c1b2e;
+    --chart-1: #0c7fd4;
+    --chart-2: #0ea5b7;
+    --chart-3: #0891b2;
+    --chart-4: #0e7490;
+    --chart-5: #155e75;
+    --radius: 0.5rem;
     --font-mono: IBM Plex Mono, monospace;
     --font-sans: DM Sans, sans-serif;
-    --secondary: #e0f2fe;
-    --background: #fcfdfe;
     --font-serif: Lora, serif;
-    --foreground: #1a1f2c;
-    --destructive: #ef4444;
-    --sidebar-ring: #22c55e;
-    --card-foreground: #1a1f2c;
-    --sidebar-primary: #22c55e;
-    --muted-foreground: #64748b;
-    --accent-foreground: #1a1f2c;
-    --popover-foreground: #1a1f2c;
-    --primary-foreground: #ffffff;
-    --sidebar-foreground: #1a1f2c;
-    --secondary-foreground: #475569;
-    --destructive-foreground: #ffffff;
-    --sidebar-accent-foreground: #1a1f2c;
-    --sidebar-primary-foreground: #ffffff;
   }
 
   .dark {

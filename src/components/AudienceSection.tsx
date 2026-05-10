@@ -1,4 +1,4 @@
-import { Home, Umbrella, Key, Search, MapPin } from "lucide-react";
+import { Home, Umbrella, Key, TrendingUp, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 import { TypingText } from "@/components/ui/TypingText";
 
