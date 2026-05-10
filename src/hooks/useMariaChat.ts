@@ -219,8 +219,8 @@ export function useMariaChat() {
 
       setMessages((prev) => [...prev, assistantMsg]);
       updateHasMore();
-    } catch (err) {
-      console.error("MarIA error:", err);
+    } catch (err: any) {
+      console.error("Erro completo da Edge Function MarIA:", err);
       const errorMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
