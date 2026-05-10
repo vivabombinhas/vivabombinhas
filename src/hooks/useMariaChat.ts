@@ -223,10 +223,16 @@ export function useMariaChat() {
 
       const showLeadForm = gateActive || noResultsGate;
 
+      const rawReply = data.reply || "";
+      const cleanContent = rawReply
+        .replace(/\[FILTERS\][\s\S]*?\[\/FILTERS\]/g, "")
+        .replace(/\[SHOW_RESULTS\]/g, "")
+        .trim();
+
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: data.reply,
+        content: cleanContent,
         timestamp: new Date(),
         properties: showResults && data.properties?.length > 0 ? data.properties : undefined,
         showLeadForm,
