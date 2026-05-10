@@ -578,7 +578,16 @@ serve(async (req) => {
       results_count: resultsToUse.length,
       gate_active: gateActive,
       show_results: showResults,
-      debug_config: aiConfig
+      debug_config: aiConfig,
+      debug: {
+        model: aiConfig.model,
+        filters_extracted: filters,
+        query_sql: "SELECT * FROM imoveis WHERE status = 'ativo' ...",
+        results_count: resultsToUse.length,
+        results_shown: showResults ? (gateActive ? 2 : 10) : 0,
+        timestamp: new Date().toISOString(),
+        processing_time_ms: Date.now() - startTime
+      }
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (error: any) {
