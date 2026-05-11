@@ -621,7 +621,13 @@ serve(async (req) => {
     }
     let assistantMessage = aiData.choices?.[0]?.message?.content || "Olá! Como posso te ajudar a encontrar seu imóvel em Bombinhas hoje?";
     let showResults = assistantMessage.includes("[SHOW_RESULTS]");
-    assistantMessage = assistantMessage.replace(/^\[(SHOW_RESULTS|NO_RESULTS_YET)\]\s*/g, "");
+
+    assistantMessage = assistantMessage
+      .replace(/\[SHOW_RESULTS\]/g, "")
+      .replace(/\[NO_RESULTS_YET\]/g, "")
+      .replace(/\[FILTERS\][\s\S]*?\[\/FILTERS\]/g, "")
+      .replace(/\[FILTERS\][\s\S]*/g, "")
+      .trim();
 
     // Save conversation turn
     const leadId = await upsertLeadBySession(supabase, sessionId, {
@@ -634,9 +640,12 @@ serve(async (req) => {
       await saveLastConversationTurn(supabase, leadId, userMessage, assistantMessage);
     }
 
+    const initialCount = gateActive ? 2 : 3;
+    const visibleProperties = resultsToUse.slice(0, initialCount);
+
     return new Response(JSON.stringify({
       reply: assistantMessage,
-      properties: showResults ? resultsToUse.slice(0, gateActive ? 2 : 10) : [],
+      properties: showResults ? visibleProperties : [],
       all_properties: showResults ? resultsToUse : [],
       filters_used: filters,
       results_count: resultsToUse.length,
@@ -648,7 +657,7 @@ serve(async (req) => {
         filters_extracted: filters,
         query_sql: "SELECT * FROM imoveis WHERE status = 'ativo' ...",
         results_count: resultsToUse.length,
-        results_shown: showResults ? (gateActive ? 2 : 10) : 0,
+        results_shown: showResults ? (gateActive ? 2 : 3) : 0,
         timestamp: new Date().toISOString(),
         processing_time_ms: Date.now() - startTime
       }
