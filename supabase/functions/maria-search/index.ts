@@ -620,14 +620,31 @@ serve(async (req) => {
       throw new Error(`AI Gateway Search Error: ${aiData.error.message || "Unknown error"}`);
     }
     let assistantMessage = aiData.choices?.[0]?.message?.content || "Olá! Como posso te ajudar a encontrar seu imóvel em Bombinhas hoje?";
-    let showResults = assistantMessage.includes("[SHOW_RESULTS]");
+    
+    // DETERMINISTIC RESULTS: If results were found and it's a search intent, we show them
+    // unless the AI explicitly says [NO_RESULTS_YET] (which it shouldn't if we found results)
+    let showResults = resultsToUse.length > 0 && filters.intent === "search";
+    if (assistantMessage.includes("[NO_RESULTS_YET]")) {
+      showResults = false;
+    }
 
+    // Force showResults if the AI included the tag
+    if (assistantMessage.includes("[SHOW_RESULTS]")) {
+      showResults = true;
+    }
+
+    // CLEANUP: Remove technical tags
     assistantMessage = assistantMessage
       .replace(/\[SHOW_RESULTS\]/g, "")
       .replace(/\[NO_RESULTS_YET\]/g, "")
       .replace(/\[FILTERS\][\s\S]*?\[\/FILTERS\]/g, "")
       .replace(/\[FILTERS\][\s\S]*/g, "")
       .trim();
+
+    // If we have no results, ensure the AI doesn't say it found some
+    if (resultsToUse.length === 0 && (assistantMessage.toLowerCase().includes("separei") || assistantMessage.toLowerCase().includes("olhada"))) {
+       assistantMessage = "Não encontrei opções exatas com esse perfil agora. Quer que eu amplie a busca para regiões próximas ou deixe um alerta para quando entrar algo parecido?";
+    }
 
     // Save conversation turn
     const leadId = await upsertLeadBySession(supabase, sessionId, {
@@ -643,6 +660,16 @@ serve(async (req) => {
     const initialCount = gateActive ? 2 : 3;
     const visibleProperties = resultsToUse.slice(0, initialCount);
 
+    console.log("[MarIA SEARCH DEBUG]", {
+      filters,
+      results_count: resultsToUse.length,
+      gateActive,
+      leadAlreadyCaptured,
+      showResults,
+      visible_properties_count: visibleProperties?.length,
+      assistantMessage: assistantMessage.slice(0, 50) + "..."
+    });
+
     return new Response(JSON.stringify({
       reply: assistantMessage,
       properties: showResults ? visibleProperties : [],
@@ -657,7 +684,9 @@ serve(async (req) => {
         filters_extracted: filters,
         query_sql: "SELECT * FROM imoveis WHERE status = 'ativo' ...",
         results_count: resultsToUse.length,
-        results_shown: showResults ? (gateActive ? 2 : 3) : 0,
+        results_shown: showResults ? visibleProperties.length : 0,
+        gateActive,
+        showResults,
         timestamp: new Date().toISOString(),
         processing_time_ms: Date.now() - startTime
       }
