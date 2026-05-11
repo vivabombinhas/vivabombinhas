@@ -205,12 +205,17 @@ export function useMariaChat() {
       const noResultsGate = data.no_results_gate === true && !leadCapturedRef.current;
 
       if (showResults) {
-        const allProps: Property[] = data.all_properties || [];
+        const allProps: Property[] = data.all_properties || data.properties || [];
         allPropertiesRef.current = allProps;
         gateActiveRef.current = gateActive;
-        // Se o gate está ativo, mostramos apenas 1 para "forçar" o interesse, caso contrário 3.
         const initial = gateActive ? 2 : 3;
         shownCountRef.current = Math.min(initial, allProps.length);
+        
+        console.log("[MarIA FRONT DEBUG] Results mapped:", {
+          allPropsCount: allProps.length,
+          shownCount: shownCountRef.current,
+          gateActive
+        });
       } else if (clearResults) {
         clearPropertyState();
       } else if (noResultsGate) {
@@ -219,8 +224,12 @@ export function useMariaChat() {
         gateActiveRef.current = true;
       }
 
+      const visibleProps = showResults 
+        ? (data.properties?.length > 0 ? data.properties : allPropertiesRef.current.slice(0, shownCountRef.current))
+        : undefined;
+
       const remainingForGate = gateActive
-        ? Math.max(0, allPropertiesRef.current.length - shownCountRef.current)
+        ? Math.max(0, allPropertiesRef.current.length - (visibleProps?.length || 0))
         : 0;
 
       const showLeadForm = gateActive || noResultsGate;
@@ -238,7 +247,7 @@ export function useMariaChat() {
         role: "assistant",
         content: cleanContent,
         timestamp: new Date(),
-        properties: showResults && data.properties?.length > 0 ? data.properties : undefined,
+        properties: visibleProps,
         showLeadForm,
         remainingForGate: noResultsGate ? 0 : remainingForGate,
         isAlertMode: noResultsGate,
