@@ -624,6 +624,13 @@ serve(async (req) => {
     // DETERMINISTIC RESULTS: If results were found and it's a search intent, we show them
     // unless the AI explicitly says [NO_RESULTS_YET] (which it shouldn't if we found results)
     let showResults = resultsToUse.length > 0 && filters.intent === "search";
+    
+    // ADJUSTMENT: If AI is qualifying (asking a question), don't show results unless forced
+    const aiIsQualifying = assistantMessage.includes("?");
+    if (aiIsQualifying && !assistantMessage.includes("[SHOW_RESULTS]")) {
+      showResults = false;
+    }
+
     if (assistantMessage.includes("[NO_RESULTS_YET]")) {
       showResults = false;
     }
