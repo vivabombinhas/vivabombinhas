@@ -92,10 +92,21 @@ Ao apresentar resultados:
 
 ## CAPTURA DE LEAD (LEAD GATE)
 
-Quando o sistema ativar o gate de leads:
-- Seja natural: \"Para ver as outras [X] opções e receber aviso quando entrar algo novo no seu perfil, me passa seu nome e WhatsApp?\"
-- Se o usuário der o contato no meio da conversa, agradeça brevemente e CONTINUE: \"Anotado, [Nome]! Voltando aos imóveis...\"
-- NUNCA diga \"vou salvar seu contato\", \"dados armazenados\" ou qualquer coisa que soe robótico
+O sistema controla automaticamente quando pedir dados do usuário através de um formulário visual.
+
+Você NÃO deve pedir nome ou WhatsApp por texto na conversa.
+
+Quando houver resultados e o contexto incluir GATE_ATIVO, apenas apresente os imóveis de forma natural.
+
+Exemplo:
+"Separei algumas opções que combinam com o que você procura 👇"
+
+[SHOW_RESULTS]
+
+O sistema exibirá automaticamente os cards e o formulário visual de contato.
+
+Se o usuário enviar nome e telefone como texto no chat, agradeça brevemente e continue normalmente:
+"Anotado, [Nome]! Voltando aos imóveis..."
 
 ## O QUE NUNCA FAZER
 - Nunca mostrar imóveis sem filtros mínimos
@@ -171,6 +182,10 @@ const FILTER_EXTRACTION_PROMPT = `Analise a CONVERSA COMPLETA do usuário e extr
 REGRA CRÍTICA - CLASSIFICAÇÃO DE INTENÇÃO:
 Primeiro, determine a INTENÇÃO da última mensagem do usuário. Classifique como:
 - "search": O usuário quer buscar/ver imóveis (nova busca ou refinamento). Se ele estiver respondendo a uma pergunta sobre o perfil do imóvel (ex: "quero morar", "2 quartos", "até 800k"), isso é INTENÇÃO DE BUSCA/REFINAMENTO.
+
+REGRA DE OVERRIDE:
+Se o usuário pedir explicitamente para ver resultados, como: "me mostre", "mostra opções", "quero ver", "pode mostrar", "manda", "exibe", "ver imóveis", "quero opções", classifique como "search" SOMENTE se o histórico da conversa já tiver pelo menos: finalidade definida e pelo menos 1 filtro relevante (preço, bairro, capacidade, tipo ou quartos). Caso contrário, classifique como "qualifying".
+
 - "qualifying": O usuário demonstrou intenção de busca mas ainda não forneceu filtros suficientes para uma busca relevante. Use SOMENTE quando tem apenas finalidade mas falta bairro, preço, tipo ou capacidade. Se o usuário já deu finalidade + pelo menos 2 filtros concretos, use "search", não "qualifying".
 - "conversation": Qualquer outra coisa (saudação, perguntas gerais, dados de contato, reclamação, anunciar imóvel, conversa casual).
 
@@ -390,6 +405,26 @@ serve(async (req) => {
     }
 
     const userMessage = messages?.[messages.length - 1]?.content || "";
+
+    // Auto-capturar lead enviado por texto
+    if (!clientLeadCaptured && sessionId) {
+      const { normalized: detectedPhone } = extractPhoneFromText(userMessage);
+      const detectedName = extractNameFromText(userMessage);
+
+      if (detectedPhone && detectedName) {
+        await upsertLeadBySession(supabase, sessionId, {
+          nome: detectedName,
+          telefone: detectedPhone,
+          status: "novo",
+        });
+        console.log("[AUTO-LEAD] Captured:", detectedName, detectedPhone);
+      } else if (detectedPhone) {
+        await upsertLeadBySession(supabase, sessionId, { telefone: detectedPhone });
+      } else if (detectedName && userMessage.length < 40) {
+        await upsertLeadBySession(supabase, sessionId, { nome: detectedName });
+      }
+    }
+
     const recentMessages = messages.slice(-6);
     const conversationContext = recentMessages
       .map((m: { role: string; content: string }) => `${m.role === "user" ? "Usuário" : "Assistente"}: ${m.content}`)
@@ -586,7 +621,13 @@ serve(async (req) => {
     }
     let assistantMessage = aiData.choices?.[0]?.message?.content || "Olá! Como posso te ajudar a encontrar seu imóvel em Bombinhas hoje?";
     let showResults = assistantMessage.includes("[SHOW_RESULTS]");
-    assistantMessage = assistantMessage.replace(/^\[(SHOW_RESULTS|NO_RESULTS_YET)\]\s*/g, "");
+
+    assistantMessage = assistantMessage
+      .replace(/\[SHOW_RESULTS\]/g, "")
+      .replace(/\[NO_RESULTS_YET\]/g, "")
+      .replace(/\[FILTERS\][\s\S]*?\[\/FILTERS\]/g, "")
+      .replace(/\[FILTERS\][\s\S]*/g, "")
+      .trim();
 
     // Save conversation turn
     const leadId = await upsertLeadBySession(supabase, sessionId, {
@@ -599,9 +640,12 @@ serve(async (req) => {
       await saveLastConversationTurn(supabase, leadId, userMessage, assistantMessage);
     }
 
+    const initialCount = gateActive ? 2 : 3;
+    const visibleProperties = resultsToUse.slice(0, initialCount);
+
     return new Response(JSON.stringify({
       reply: assistantMessage,
-      properties: showResults ? resultsToUse.slice(0, gateActive ? 2 : 10) : [],
+      properties: showResults ? visibleProperties : [],
       all_properties: showResults ? resultsToUse : [],
       filters_used: filters,
       results_count: resultsToUse.length,
@@ -613,7 +657,7 @@ serve(async (req) => {
         filters_extracted: filters,
         query_sql: "SELECT * FROM imoveis WHERE status = 'ativo' ...",
         results_count: resultsToUse.length,
-        results_shown: showResults ? (gateActive ? 2 : 10) : 0,
+        results_shown: showResults ? (gateActive ? 2 : 3) : 0,
         timestamp: new Date().toISOString(),
         processing_time_ms: Date.now() - startTime
       }
