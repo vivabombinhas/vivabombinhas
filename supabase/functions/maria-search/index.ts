@@ -613,6 +613,7 @@ serve(async (req) => {
     }
 
     const gateActive = !leadAlreadyCaptured && resultsToUse.length >= 1;
+    const noResultsGate = !leadAlreadyCaptured && resultsToUse.length === 0 && filters.intent === "search";
     const summaryProps = resultsToUse.map(p => ({
       titulo: p.titulo,
       tipo: p.tipo,
