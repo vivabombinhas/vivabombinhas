@@ -37,12 +37,15 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
 
   return (
     <div className="flex items-end gap-2 p-3 border-t border-border bg-card">
+      <label htmlFor="maria-chat-input" className="sr-only">Mensagem para a MarIA</label>
       <textarea
+        id="maria-chat-input"
         ref={inputRef}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Ex: apartamento para alugar em Bombas até R$3.000..."
+        aria-label="Mensagem para a MarIA"
         className="flex-1 resize-none rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring min-h-[44px] max-h-[120px]"
         rows={1}
         disabled={isLoading}
@@ -51,6 +54,7 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
         onClick={handleSend}
         disabled={!input.trim() || isLoading}
         size="icon"
+        aria-label="Enviar mensagem"
         className="rounded-xl h-[44px] w-[44px] bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
       >
         <Send className="w-4 h-4" />

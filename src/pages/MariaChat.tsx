@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Helmet } from "react-helmet-async";
 import { Bot, Trash2, ArrowLeft, ChevronDown } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useMariaChat } from "@/hooks/useMariaChat";
@@ -34,10 +35,20 @@ const MariaChat = () => {
 
   return (
     <div className="flex flex-col h-[100dvh] bg-background">
+      <Helmet>
+        <title>MarIA — Assistente de imóveis em Bombinhas</title>
+        <meta name="description" content="Converse com a MarIA, a assistente de IA que encontra imóveis em Bombinhas para temporada, aluguel anual, compra ou investimento." />
+        <link rel="canonical" href="https://vivabombinhas.lovable.app/maria" />
+        <meta property="og:title" content="MarIA — Assistente de imóveis em Bombinhas" />
+        <meta property="og:description" content="Encontre imóveis reais e disponíveis em Bombinhas conversando com a MarIA." />
+        <meta property="og:url" content="https://vivabombinhas.lovable.app/maria" />
+        <meta property="og:type" content="website" />
+        <meta name="robots" content="noindex" />
+      </Helmet>
       {/* Header */}
       <header className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card/80 backdrop-blur-md">
-        <Link to="/">
-          <Button variant="ghost" size="icon" className="rounded-full">
+        <Link to="/" aria-label="Voltar para a página inicial">
+          <Button variant="ghost" size="icon" className="rounded-full" aria-label="Voltar">
             <ArrowLeft className="w-5 h-5" />
           </Button>
         </Link>
@@ -49,12 +60,13 @@ const MariaChat = () => {
             <h1 className="text-sm font-bold font-display leading-tight">
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Mar</span>
               <span className="text-foreground">IA</span>
+              <span className="sr-only"> — Assistente de imóveis em Bombinhas</span>
             </h1>
             <p className="text-xs text-muted-foreground">Assistente de imóveis • Bombinhas</p>
           </div>
         </div>
         {messages.length > 0 && (
-          <Button variant="ghost" size="icon" onClick={clearChat} className="rounded-full text-muted-foreground">
+          <Button variant="ghost" size="icon" onClick={clearChat} aria-label="Limpar conversa" className="rounded-full text-muted-foreground">
             <Trash2 className="w-4 h-4" />
           </Button>
         )}

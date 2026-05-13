@@ -35,6 +35,10 @@ export const HeroV2 = () => {
         <img
           src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80"
           alt="Vista aérea de Bombinhas"
+          width={1920}
+          height={1280}
+          fetchPriority="high"
+          decoding="async"
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div
@@ -92,13 +96,16 @@ export const HeroV2 = () => {
         >
           <div className="relative flex items-center bg-white rounded-full shadow-2xl shadow-black/20 overflow-hidden p-1.5">
             <div className="flex items-center gap-3 flex-1 pl-5">
-              <Search className="w-5 h-5 text-slate-500 shrink-0" />
+              <Search className="w-5 h-5 text-slate-500 shrink-0" aria-hidden="true" />
+              <label htmlFor="hero-search" className="sr-only">Buscar imóveis em Bombinhas</label>
               <input
+                id="hero-search"
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Ex: Casa com piscina no Mariscal para 8 pessoas..."
+                aria-label="Buscar imóveis em Bombinhas"
                 className="w-full bg-transparent text-slate-800 text-[15px] font-medium outline-none placeholder:text-slate-500"
               />
             </div>

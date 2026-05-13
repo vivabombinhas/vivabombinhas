@@ -12,5 +12,11 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /dashboard
+Disallow: /destacar/
+Disallow: /reset-password
+Disallow: /maria
 
 Sitemap: https://vivabombinhas.lovable.app/sitemap.xml
