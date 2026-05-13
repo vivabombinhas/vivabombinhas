@@ -343,6 +343,9 @@ async function saveLastConversationTurn(
 
 serve(async (req) => {
   const startTime = Date.now();
+  let filterExtractionTime = 0;
+  let dbQueryTime = 0;
+  let responseGenTime = 0;
 
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
