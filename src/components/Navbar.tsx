@@ -79,6 +79,8 @@ const Navbar = () => {
         <button 
           className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-muted text-slate-900" 
           onClick={() => setOpen(!open)}
+          aria-label={open ? "Fechar menu" : "Abrir menu"}
+          aria-expanded={open}
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>

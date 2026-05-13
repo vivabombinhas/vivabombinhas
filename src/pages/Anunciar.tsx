@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Sparkles, Link2, FileText, Check, Loader2, ArrowRight, BedDouble, Bath, Car, Ruler, Phone, Flame, TrendingUp, Star, X, ChevronLeft, ChevronRight, Plus, ImagePlus, LayoutDashboard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -130,7 +131,7 @@ const PhotosManager = ({ fotos, onChange }: PhotosManagerProps) => {
             <div key={`${f}-${i}`} className="relative group rounded-md overflow-hidden border border-border bg-muted">
               <img 
                 src={f} 
-                alt={`Foto ${i + 1}`} 
+                alt={`Foto ${i + 1} do imóvel anunciado em Bombinhas${i === 0 ? " (capa do anúncio)" : ""}`} 
                 className="aspect-square object-cover w-full transition-opacity" 
                 loading="lazy"
                 referrerPolicy="no-referrer"
@@ -150,7 +151,7 @@ const PhotosManager = ({ fotos, onChange }: PhotosManagerProps) => {
               <button
                 type="button"
                 onClick={() => remove(i)}
-                title="Excluir foto"
+                aria-label={`Excluir foto ${i + 1}`}
                 className="absolute top-1 right-1 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow opacity-90 hover:opacity-100"
               >
                 <X className="h-3.5 w-3.5" />
@@ -162,7 +163,7 @@ const PhotosManager = ({ fotos, onChange }: PhotosManagerProps) => {
                     type="button"
                     onClick={() => move(i, -1)}
                     disabled={i === 0}
-                    title="Mover para trás"
+                    aria-label={`Mover foto ${i + 1} para trás`}
                     className="h-6 w-6 rounded bg-background/90 text-foreground flex items-center justify-center disabled:opacity-30 hover:bg-background"
                   >
                     <ChevronLeft className="h-3.5 w-3.5" />
@@ -171,7 +172,7 @@ const PhotosManager = ({ fotos, onChange }: PhotosManagerProps) => {
                     type="button"
                     onClick={() => move(i, 1)}
                     disabled={i === fotos.length - 1}
-                    title="Mover para frente"
+                    aria-label={`Mover foto ${i + 1} para frente`}
                     className="h-6 w-6 rounded bg-background/90 text-foreground flex items-center justify-center disabled:opacity-30 hover:bg-background"
                   >
                     <ChevronRight className="h-3.5 w-3.5" />
@@ -181,7 +182,7 @@ const PhotosManager = ({ fotos, onChange }: PhotosManagerProps) => {
                   <button
                     type="button"
                     onClick={() => setCover(i)}
-                    title="Definir como capa"
+                    aria-label={`Definir foto ${i + 1} como capa`}
                     className="h-6 px-1.5 rounded bg-background/90 text-foreground text-[10px] font-semibold flex items-center gap-1 hover:bg-background"
                   >
                     <Star className="h-3 w-3" /> Capa
@@ -369,6 +370,15 @@ const Anunciar = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Anuncie seu imóvel em Bombinhas — MarIA</title>
+        <meta name="description" content="Anuncie casa, apartamento ou pousada em Bombinhas com cadastro assistido por IA. Cole o link do anúncio e a MarIA preenche os detalhes para você." />
+        <link rel="canonical" href="https://vivabombinhas.lovable.app/anuncie" />
+        <meta property="og:title" content="Anuncie seu imóvel em Bombinhas — MarIA" />
+        <meta property="og:description" content="Cadastro de imóveis com IA: cole o link e a MarIA extrai todas as informações automaticamente." />
+        <meta property="og:url" content="https://vivabombinhas.lovable.app/anuncie" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="container flex h-16 items-center justify-between">

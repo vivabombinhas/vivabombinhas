@@ -1,4 +1,5 @@
 import React from "react";
+import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { InteractiveChatBox } from "@/components/InteractiveChatBox";
@@ -9,6 +10,15 @@ import { Sun, Home, Key, MessageSquare } from "lucide-react";
 const UseCases = () => {
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20">
+      <Helmet>
+        <title>Casos de Uso — MarIA em Bombinhas</title>
+        <meta name="description" content="Veja como a MarIA ajuda em diferentes cenários: aluguel de temporada, aluguel anual, compra e investimento em imóveis em Bombinhas." />
+        <link rel="canonical" href="https://vivabombinhas.lovable.app/casos-de-uso" />
+        <meta property="og:title" content="Casos de Uso — MarIA em Bombinhas" />
+        <meta property="og:description" content="Exemplos reais de uso: temporada, aluguel anual, compra e interação com a MarIA." />
+        <meta property="og:url" content="https://vivabombinhas.lovable.app/casos-de-uso" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Navbar />
       
       <main className="pt-32 pb-20 container max-w-7xl mx-auto px-6">
