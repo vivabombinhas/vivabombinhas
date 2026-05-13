@@ -79,6 +79,8 @@ REGRA OBRIGATÓRIA: Quando você decidir mostrar imóveis ao usuário, você DEV
 
 Sem essa tag, os cards de imóveis NÃO serão exibidos.
 
+NUNCA inclua [SHOW_RESULTS] se a sua mensagem contiver uma pergunta (?) ou se você ainda estiver qualificando o usuário. Os cards só devem aparecer quando você já tiver informações suficientes e quiser apresentar os resultados como resposta final daquele turno.
+
 Formato correto:
 Separei as melhores opções pra você 👇
 
