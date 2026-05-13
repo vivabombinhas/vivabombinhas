@@ -234,7 +234,13 @@ export function PropertyCard({ property }: PropertyCardProps) {
           )}
           {property.anunciante_telefone && (
             <a
-              href={`https://wa.me/55${property.anunciante_telefone.replace(/\D/g, "")}?text=${encodeURIComponent(
+              href={`https://wa.me/${(() => {
+                const digits = property.anunciante_telefone.replace(/\D/g, "");
+                // Se já começa com 55 e tem 12-13 dígitos, já tem DDI
+                if (digits.startsWith("55") && digits.length >= 12) return digits;
+                // Senão, adiciona 55
+                return "55" + digits;
+              })()}?text=${encodeURIComponent(
                 property.gestao_propria
                   ? `Olá! Tenho interesse no imóvel "${property.titulo}" anunciado na MarIA. Pode me passar mais informações?`
                   : `Olá! Vi o imóvel "${property.titulo}" na MarIA Bombinhas e gostaria de mais informações.`
