@@ -626,6 +626,11 @@ serve(async (req) => {
       ? `\n\nResultados encontrados (${resultsToUse.length}):\n${JSON.stringify(summaryProps, null, 2)}${gateActive ? "\n\nO sistema vai exibir um formulário visual de contato automaticamente. Apresente os imóveis de forma natural." : ""}\n\nREGRAS DE RESPOSTA:\n1. Se você fizer uma pergunta (?), NUNCA use a tag [SHOW_RESULTS].\n2. Se você decidir mostrar os imóveis, use a tag [SHOW_RESULTS] no final da mensagem e NÃO faça perguntas.`
       : "";
 
+    const willShowResults = resultsToUse.length > 0;
+    const resultsInstruction = willShowResults
+      ? "\n\nINSTRUÇÃO DO SISTEMA: Os cards de imóveis estão sendo exibidos ao usuário AGORA, logo abaixo da sua mensagem. Apresente os resultados de forma natural e curta. NÃO faça perguntas de qualificação — os imóveis já estão aparecendo. Exemplo: 'Separei as melhores opções pra você 👇' ou 'Encontrei X opções que combinam com o seu perfil 👇'"
+      : "";
+
     const searchGenStartTime = Date.now();
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -633,7 +638,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: aiConfig.model,
         messages: [
-          { role: "system", content: aiConfig.systemPrompt + propertyContext },
+          { role: "system", content: aiConfig.systemPrompt + propertyContext + resultsInstruction },
           ...recentMessages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
         ],
         temperature: aiConfig.temperature,
