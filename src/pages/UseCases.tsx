@@ -172,6 +172,7 @@ const UseCases = () => {
       </main>
 
       <Footer />
+      <FloatingChatButton />
     </div>
   );
 };
