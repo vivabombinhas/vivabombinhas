@@ -753,6 +753,7 @@ const Anunciar = () => {
           </div>
         )}
       </main>
+      <FloatingChatButton />
     </div>
   );
 };
