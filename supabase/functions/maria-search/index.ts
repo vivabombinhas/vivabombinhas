@@ -656,13 +656,9 @@ serve(async (req) => {
     }
     let assistantMessage = aiData.choices?.[0]?.message?.content || "Olá! Como posso te ajudar a encontrar seu imóvel em Bombinhas hoje?";
     
-    // Decisão de mostrar cards:
-    // 1. Se a IA incluiu [SHOW_RESULTS] → mostra sempre
-    // 2. Se a IA incluiu [NO_RESULTS_YET] → não mostra
-    // 3. Se é intent=search E tem resultados → mostra (modo determinístico)
-    // Cards SÓ aparecem quando a IA incluir [SHOW_RESULTS].
-    // Se não incluiu, ela está qualificando — respeitar.
-    const showResults = assistantMessage.includes("[SHOW_RESULTS]");
+    // Modo determinístico: se chegou aqui, tem filtros suficientes.
+    // Sempre mostra cards, independente da tag [SHOW_RESULTS].
+    const showResults = resultsToUse.length > 0;
 
     // CLEANUP: Remove technical tags
     assistantMessage = assistantMessage
