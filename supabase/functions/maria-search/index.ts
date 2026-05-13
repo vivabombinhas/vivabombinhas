@@ -286,6 +286,17 @@ function extractNameFromText(text: string): string | null {
   return cleaned.split(/\s+/).slice(0, 4).join(" ");
 }
 
+function hasMinimumFilters(filters: SearchFilters & { intent?: string }): boolean {
+  if (!filters.finalidade) return false;
+  let count = 0;
+  if (filters.bairro) count++;
+  if (filters.preco_max || filters.preco_min) count++;
+  if (filters.quartos) count++;
+  if (filters.capacidade_pessoas) count++;
+  if (filters.tipo || filters.tipo_included?.length) count++;
+  return count >= 2;
+}
+
 async function upsertLeadBySession(
   supabase: any,
   sessionId: string,
