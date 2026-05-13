@@ -2,7 +2,7 @@ import { Bot } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="py-24 bg-background border-t border-border/50">
+    <footer className="py-12 md:py-16 bg-background border-t border-border/50">
       <div className="container-wide">
         <div className="flex flex-col lg:flex-row items-start justify-between gap-16">
           
