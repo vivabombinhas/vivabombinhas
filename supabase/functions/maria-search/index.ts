@@ -438,7 +438,7 @@ serve(async (req) => {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash", // Use Flash for faster extraction
+        model: "google/gemini-3-flash-preview", // Use Flash for faster extraction
         messages: [
           { role: "system", content: FILTER_EXTRACTION_PROMPT },
           { role: "user", content: `Histórico:\n${conversationContext}\n\nMsg: ${userMessage}` },
