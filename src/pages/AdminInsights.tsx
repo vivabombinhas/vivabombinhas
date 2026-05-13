@@ -141,7 +141,7 @@ export default function AdminInsights() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
       <header className="flex items-center gap-3 mb-2">
         <div className="p-2 bg-primary/10 rounded-lg">
           <Brain className="w-6 h-6 text-primary" />
