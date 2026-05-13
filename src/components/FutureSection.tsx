@@ -27,7 +27,7 @@ const FutureSection = () => {
               <TypingText text="Próximos passos" className="text-badge text-primary" />
             </motion.div>
             <h2 className="text-h2 mb-8">
-              A inteligência de Bombinhas<br /><span className="text-white/40 italic font-serif">além dos imóveis.</span>
+              A inteligência de Bombinhas<br /><span className="text-white/70 italic font-serif">além dos imóveis.</span>
             </h2>
             <p className="text-subtitle mb-12">
               A MarIA está evoluindo para se tornar sua assistente completa na cidade, conectando você ao que há de melhor em cada setor de Bombinhas.

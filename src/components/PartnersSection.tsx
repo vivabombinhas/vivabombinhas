@@ -33,7 +33,7 @@ const PartnersSection = () => {
               className="text-h2 mb-10"
             >
               Sua nova aliada na <br className="hidden md:block" />
-              <span className="text-muted-foreground/70 italic font-serif">prospecção local.</span>
+              <span className="text-muted-foreground/80 italic font-serif">prospecção local.</span>
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, y: 15 }}

@@ -32,7 +32,7 @@ const TestimonialsSection = () => {
             <Quote className="w-5 h-5 text-primary fill-primary" />
           </motion.div>
           <h2 className="text-h2 mb-6">
-            Experiências que <span className="text-muted-foreground/70 italic font-serif">fazem a diferença.</span>
+            Experiências que <span className="text-muted-foreground/80 italic font-serif">fazem a diferença.</span>
           </h2>
         </div>
 

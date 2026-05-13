@@ -56,7 +56,7 @@ export const HeroV2 = () => {
           className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full border border-white/15 bg-white/8 backdrop-blur-md"
         >
           <MapPin className="w-3.5 h-3.5 text-primary" />
-          <span className="text-[12px] font-medium tracking-wide text-white/80">
+          <span className="text-[12px] font-medium tracking-wide text-white/90">
             Inteligência imobiliária em Bombinhas
           </span>
         </motion.div>
@@ -77,7 +77,7 @@ export const HeroV2 = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-base md:text-lg text-white/80 font-light max-w-xl mx-auto mb-10 leading-relaxed"
+          className="text-base md:text-lg text-white/90 font-light max-w-xl mx-auto mb-10 leading-relaxed"
         >
           Diga o que você procura — a MarIA entende seu perfil e mostra apenas
           imóveis que fazem sentido para você.
@@ -92,7 +92,7 @@ export const HeroV2 = () => {
         >
           <div className="relative flex items-center bg-white rounded-full shadow-2xl shadow-black/20 overflow-hidden p-1.5">
             <div className="flex items-center gap-3 flex-1 pl-5">
-              <Search className="w-5 h-5 text-slate-400 shrink-0" />
+              <Search className="w-5 h-5 text-slate-500 shrink-0" />
               <input
                 type="text"
                 value={query}
@@ -123,7 +123,7 @@ export const HeroV2 = () => {
             <button
               key={chip.label}
               onClick={() => handleSearch(chip.query)}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/15 bg-white/8 backdrop-blur-md text-white/80 text-sm hover:bg-white/15 hover:border-white/30 hover:text-white transition-all duration-300 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-white/90 text-sm hover:bg-white/20 hover:border-white/40 hover:text-white transition-all duration-300 cursor-pointer"
             >
               <span>{chip.emoji}</span>
               <span>{chip.label}</span>
@@ -146,7 +146,7 @@ export const HeroV2 = () => {
               <p className="text-2xl md:text-3xl font-bold text-white tracking-tight">
                 {stat.value}
               </p>
-              <p className="text-[10px] uppercase tracking-[0.15em] text-white/70 mt-1">
+              <p className="text-[10px] uppercase tracking-[0.15em] text-white/80 mt-1">
                 {stat.label}
               </p>
             </div>
