@@ -176,7 +176,7 @@ export const InteractiveChatBox = ({
               <h4 className="font-bold text-base tracking-tight text-foreground leading-none mb-2">MarIA</h4>
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(34,197,94,0.4)] animate-pulse" />
-                <span className="text-[10px] text-muted-foreground/60 font-bold uppercase tracking-[0.1em] leading-none">
+                <span className="text-[10px] text-muted-foreground/80 font-bold uppercase tracking-[0.1em] leading-none">
                   Online agora
                 </span>
               </div>

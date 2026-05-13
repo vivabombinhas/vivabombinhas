@@ -33,7 +33,7 @@ const PartnersSection = () => {
               className="text-h2 mb-10"
             >
               Sua nova aliada na <br className="hidden md:block" />
-              <span className="text-muted-foreground/40 italic font-serif">prospecção local.</span>
+              <span className="text-muted-foreground/70 italic font-serif">prospecção local.</span>
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, y: 15 }}
@@ -79,7 +79,7 @@ const PartnersSection = () => {
                 <Sparkles className="h-8 w-8 text-primary" />
               </div>
               <h3 className="text-h2 mb-6">Anuncie seus imóveis.</h3>
-              <p className="text-white/60 text-lg mb-12 max-w-sm font-medium leading-relaxed">
+              <p className="text-white/80 text-lg mb-12 max-w-sm font-medium leading-relaxed">
                 Apareça para quem busca o perfil exato do seu imóvel em Bombinhas.
               </p>
               <Button

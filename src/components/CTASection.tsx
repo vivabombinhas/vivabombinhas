@@ -65,7 +65,7 @@ const CTASection = () => {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Ex: Cobertura em Bombas até R$ 2M..."
-                  className="w-full bg-transparent text-foreground font-bold text-lg outline-none placeholder:text-muted-foreground/30"
+                  className="w-full bg-transparent text-foreground font-bold text-lg outline-none placeholder:text-muted-foreground/60"
                 />
               </div>
               <Button 
