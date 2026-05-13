@@ -475,6 +475,7 @@ serve(async (req) => {
 
     const isConversation = filters.intent === "conversation" || filters.intent === "qualifying";
     if (isConversation) {
+      const convStartTime = Date.now();
       const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
@@ -488,6 +489,8 @@ serve(async (req) => {
           max_tokens: aiConfig.maxTokens
         }),
       });
+      responseGenTime = Date.now() - convStartTime;
+      console.log(`[PERF] Conversation response generation took ${responseGenTime}ms`);
     if (!aiResponse.ok) {
         const errorText = await aiResponse.text();
         console.error("AI Gateway Conv Error:", aiResponse.status, errorText);
