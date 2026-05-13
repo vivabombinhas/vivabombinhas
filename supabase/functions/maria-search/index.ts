@@ -343,6 +343,9 @@ async function saveLastConversationTurn(
 
 serve(async (req) => {
   const startTime = Date.now();
+  let filterExtractionTime = 0;
+  let dbQueryTime = 0;
+  let responseGenTime = 0;
 
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -425,16 +428,17 @@ serve(async (req) => {
       }
     }
 
-    const recentMessages = messages.slice(-6);
+    const recentMessages = messages.slice(-10);
     const conversationContext = recentMessages
       .map((m: { role: string; content: string }) => `${m.role === "user" ? "Usuário" : "Assistente"}: ${m.content}`)
       .join("\n");
 
+    const filterStartTime = Date.now();
     const filterResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
-        model: aiConfig.model,
+        model: "google/gemini-3-flash-preview", // Use Flash for faster extraction
         messages: [
           { role: "system", content: FILTER_EXTRACTION_PROMPT },
           { role: "user", content: `Histórico:\n${conversationContext}\n\nMsg: ${userMessage}` },
@@ -442,6 +446,8 @@ serve(async (req) => {
         temperature: 0.1,
       }),
     });
+    filterExtractionTime = Date.now() - filterStartTime;
+    console.log(`[PERF] Filter extraction took ${filterExtractionTime}ms`);
 
     if (!filterResponse.ok) {
       const errorText = await filterResponse.text();
@@ -469,6 +475,7 @@ serve(async (req) => {
 
     const isConversation = filters.intent === "conversation" || filters.intent === "qualifying";
     if (isConversation) {
+      const convStartTime = Date.now();
       const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
@@ -476,12 +483,14 @@ serve(async (req) => {
           model: aiConfig.model,
           messages: [
             { role: "system", content: aiConfig.systemPrompt + "\n\nEsta mensagem NÃO é uma busca por imóveis. Use [NO_RESULTS_YET]. Responda de forma natural e amigável, seguindo as diretrizes do system prompt." },
-            ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
+            ...recentMessages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
           ],
           temperature: aiConfig.temperature,
           max_tokens: aiConfig.maxTokens
         }),
       });
+      responseGenTime = Date.now() - convStartTime;
+      console.log(`[PERF] Conversation response generation took ${responseGenTime}ms`);
     if (!aiResponse.ok) {
         const errorText = await aiResponse.text();
         console.error("AI Gateway Conv Error:", aiResponse.status, errorText);
@@ -557,11 +566,14 @@ serve(async (req) => {
     }
 
     console.log('Executando query no Supabase...');
+    const dbStartTime = Date.now();
     const { data: properties, error: dbError } = await query
       .order("destaque_pago", { ascending: false })
       .order("destaque", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(20);
+    dbQueryTime = Date.now() - dbStartTime;
+    console.log(`[PERF] DB query took ${dbQueryTime}ms`);
     
     if (dbError) {
       console.error('Erro na query do Supabase:', dbError);
@@ -594,6 +606,7 @@ serve(async (req) => {
       ? `\n\nResultados encontrados (${resultsToUse.length}):\n${JSON.stringify(summaryProps, null, 2)}${gateActive ? "\n\nGATE_ATIVO: Peça nome+whats para liberar o resto." : ""}`
       : "";
 
+    const searchGenStartTime = Date.now();
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
@@ -601,12 +614,14 @@ serve(async (req) => {
         model: aiConfig.model,
         messages: [
           { role: "system", content: aiConfig.systemPrompt + propertyContext },
-          ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
+          ...recentMessages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
         ],
         temperature: aiConfig.temperature,
         max_tokens: aiConfig.maxTokens
       }),
     });
+    responseGenTime = Date.now() - searchGenStartTime;
+    console.log(`[PERF] Search response generation took ${responseGenTime}ms`);
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
@@ -695,7 +710,12 @@ serve(async (req) => {
         gateActive,
         showResults,
         timestamp: new Date().toISOString(),
-        processing_time_ms: Date.now() - startTime
+        processing_time_ms: Date.now() - startTime,
+        timings: {
+          filter_extraction: filterExtractionTime,
+          db_query: dbQueryTime,
+          response_generation: responseGenTime
+        }
       }
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
