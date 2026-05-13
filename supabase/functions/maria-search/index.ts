@@ -707,6 +707,7 @@ serve(async (req) => {
     const responseData = {
       reply: assistantMessage,
       gate_active: gateActive,
+      no_results_gate: noResultsGate,
       show_results: showResults,
       results_count: resultsToUse.length,
       filters_used: filters,
@@ -720,6 +721,7 @@ serve(async (req) => {
         results_count: resultsToUse.length,
         results_shown: showResults ? visibleProperties.length : 0,
         gateActive,
+        noResultsGate,
         showResults,
         timestamp: new Date().toISOString(),
         processing_time_ms: Date.now() - startTime,
@@ -730,8 +732,6 @@ serve(async (req) => {
         }
       }
     };
-
-    console.log("Final response keys:", Object.keys(responseData));
 
     return new Response(JSON.stringify(responseData), { 
       headers: { ...corsHeaders, "Content-Type": "application/json" } 
