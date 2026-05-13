@@ -389,7 +389,7 @@ serve(async (req) => {
     const aiConfig = {
       model: aiConfigData?.model || "anthropic/claude-3.5-sonnet",
       temperature: aiConfigData?.temperature ?? 0.3,
-      systemPrompt: aiConfigData?.system_prompt || SYSTEM_PROMPT,
+      systemPrompt: SYSTEM_PROMPT, // Sempre usar o do código, nunca do banco
       force_show_results: aiConfigData?.force_show_results ?? false,
       maxTokens: aiConfigData?.max_tokens || 2000
     };
