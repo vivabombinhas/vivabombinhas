@@ -606,6 +606,7 @@ serve(async (req) => {
       ? `\n\nResultados encontrados (${resultsToUse.length}):\n${JSON.stringify(summaryProps, null, 2)}${gateActive ? "\n\nGATE_ATIVO: Peça nome+whats para liberar o resto." : ""}`
       : "";
 
+    const searchGenStartTime = Date.now();
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
@@ -619,6 +620,8 @@ serve(async (req) => {
         max_tokens: aiConfig.maxTokens
       }),
     });
+    responseGenTime = Date.now() - searchGenStartTime;
+    console.log(`[PERF] Search response generation took ${responseGenTime}ms`);
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
