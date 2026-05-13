@@ -433,11 +433,12 @@ serve(async (req) => {
       .map((m: { role: string; content: string }) => `${m.role === "user" ? "Usuário" : "Assistente"}: ${m.content}`)
       .join("\n");
 
+    const filterStartTime = Date.now();
     const filterResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
-        model: aiConfig.model,
+        model: "google/gemini-2.0-flash", // Use Flash for faster extraction
         messages: [
           { role: "system", content: FILTER_EXTRACTION_PROMPT },
           { role: "user", content: `Histórico:\n${conversationContext}\n\nMsg: ${userMessage}` },
@@ -445,6 +446,8 @@ serve(async (req) => {
         temperature: 0.1,
       }),
     });
+    filterExtractionTime = Date.now() - filterStartTime;
+    console.log(`[PERF] Filter extraction took ${filterExtractionTime}ms`);
 
     if (!filterResponse.ok) {
       const errorText = await filterResponse.text();
