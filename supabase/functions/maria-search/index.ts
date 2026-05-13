@@ -294,7 +294,7 @@ function hasMinimumFilters(filters: SearchFilters & { intent?: string }): boolea
   if (filters.quartos) count++;
   if (filters.capacidade_pessoas) count++;
   if (filters.tipo || filters.tipo_included?.length) count++;
-  return count >= 2;
+  return count >= 3;
 }
 
 async function upsertLeadBySession(
