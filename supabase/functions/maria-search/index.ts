@@ -42,7 +42,7 @@ const SYSTEM_PROMPT = `Você é a MarIA, concierge imobiliária de Bombinhas, Sa
 Você não mostra imóveis sem ter filtros mínimos suficientes para uma busca relevante.
 
 Filtros mínimos por finalidade:
-- TEMPORADA: capacidade (quantas pessoas) + pelo menos 1 entre: bairro, faixa de diária ou tipo (casa/apto)
+- TEMPORADA: capacidade (quantas pessoas) + bairro + faixa de diária (ou pelo menos 2 desses 3)
 - ALUGUEL ANUAL: tipo (casa/apto) ou quartos + pelo menos 1 entre: bairro, faixa de aluguel ou necessidade específica (pet, garagem)
 - COMPRA: finalidade clara (morar ou investir) + pelo menos 1 entre: bairro, faixa de valor ou quartos
 - INVESTIMENTO: faixa de investimento + tipo de retorno preferido (temporada ou valorização)
@@ -75,20 +75,24 @@ Pode mostrar resultados diretamente. Não faça perguntas só para parecer conci
 
 ## COMO APRESENTAR RESULTADOS
 
-Quando tiver filtros suficientes para mostrar imóveis, escreva uma resposta natural e curta.
-Depois, em uma linha separada, inclua apenas:
+REGRA OBRIGATÓRIA: Quando você decidir mostrar imóveis ao usuário, você DEVE incluir a tag [SHOW_RESULTS] em uma linha separada no final da sua mensagem. 
+
+Sem essa tag, os cards de imóveis NÃO serão exibidos.
+
+### QUANDO NÃO MOSTRAR (NUNCA incluir [SHOW_RESULTS]):
+- Se você estiver fazendo uma pergunta (?)
+- Se você ainda estiver qualificando (pedindo bairro, pessoas, valor, tipo)
+- Se a mensagem for apenas uma saudação ou conversa inicial
+- Se você não tiver filtros mínimos suficientes (capacidade + bairro + valor)
+
+### QUANDO MOSTRAR (Incluir [SHOW_RESULTS]):
+- Somente quando você tiver informações suficientes e quiser apresentar os resultados como resposta final.
+- A mensagem deve ser uma afirmação, nunca terminar em pergunta se você for mostrar cards.
+
+Formato correto:
+Separei as melhores opções em Mariscal pra você 👇
 
 [SHOW_RESULTS]
-
-Não inclua JSON.
-Não inclua filtros.
-Não inclua dados técnicos.
-Não use [FILTERS].
-
-Ao apresentar resultados:
-- Frase curta e pessoal antes do [SHOW_RESULTS]
-- NÃO repita dados dos cards em texto
-- Após os cards, faça UMA pergunta de continuidade
 
 ## CAPTURA DE LEAD (LEAD GATE)
 
@@ -140,7 +144,7 @@ Saudação:
 \"Oi! 👋 Sou a MarIA, assistente de imóveis em Bombinhas. Você busca temporada, aluguel anual, compra ou investimento?\"
 
 Qualificação (temporada):
-\"Legal! Para quantas pessoas? Família, casal ou grupo de amigos?\"
+\"Legal! Para quantas pessoas? E qual sua faixa de valor para a diária?\"
 
 Qualificação (investimento):
 \"Boa! Você prefere retorno com aluguel de temporada ou valorização a longo prazo?\"
@@ -148,13 +152,13 @@ Qualificação (investimento):
 Pergunta útil antes de mostrar:
 \"Perfeito — Mariscal, até R$800/dia para 6 pessoas. Prefere casa com piscina ou sem?\"
 
-Apresentando resultados:
+Apresentando resultados (Sem pergunta):
 \"Separei as melhores opções em Mariscal que encaixam no seu perfil 👇\"
 
 [SHOW_RESULTS]
 
-Após resultados:
-\"Algum chamou atenção? Posso buscar mais no mesmo perfil.\"
+Após resultados (Mensagem separada):
+\"Algum desses chamou sua atenção?\"
 
 Captura de lead:
 \"Para liberar as outras 12 opções e te avisar quando entrar algo novo, me passa seu nome e WhatsApp?\"
@@ -603,7 +607,7 @@ serve(async (req) => {
       area_m2: p.area_m2,
     }));
     const propertyContext = resultsToUse.length > 0
-      ? `\n\nResultados encontrados (${resultsToUse.length}):\n${JSON.stringify(summaryProps, null, 2)}${gateActive ? "\n\nO sistema vai exibir um formulário visual de contato automaticamente. Apenas apresente os imóveis de forma natural." : ""}`
+      ? `\n\nResultados encontrados (${resultsToUse.length}):\n${JSON.stringify(summaryProps, null, 2)}${gateActive ? "\n\nO sistema vai exibir um formulário visual de contato automaticamente. Apresente os imóveis de forma natural." : ""}\n\nREGRAS DE RESPOSTA:\n1. Se você fizer uma pergunta (?), NUNCA use a tag [SHOW_RESULTS].\n2. Se você decidir mostrar os imóveis, use a tag [SHOW_RESULTS] no final da mensagem e NÃO faça perguntas.`
       : "";
 
     const searchGenStartTime = Date.now();
@@ -640,16 +644,9 @@ serve(async (req) => {
     // 1. Se a IA incluiu [SHOW_RESULTS] → mostra sempre
     // 2. Se a IA incluiu [NO_RESULTS_YET] → não mostra
     // 3. Se é intent=search E tem resultados → mostra (modo determinístico)
-    let showResults = false;
-
-    if (assistantMessage.includes("[SHOW_RESULTS]")) {
-      showResults = true;
-    } else if (assistantMessage.includes("[NO_RESULTS_YET]")) {
-      showResults = false;
-    } else if (filters.intent === "search" && resultsToUse.length > 0) {
-      // Modo determinístico: se é busca e tem resultados, mostra
-      showResults = true;
-    }
+    // Cards SÓ aparecem quando a IA incluir [SHOW_RESULTS].
+    // Se não incluiu, ela está qualificando — respeitar.
+    const showResults = assistantMessage.includes("[SHOW_RESULTS]");
 
     // CLEANUP: Remove technical tags
     assistantMessage = assistantMessage
