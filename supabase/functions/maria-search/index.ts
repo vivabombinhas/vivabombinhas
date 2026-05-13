@@ -614,7 +614,7 @@ serve(async (req) => {
         model: aiConfig.model,
         messages: [
           { role: "system", content: aiConfig.systemPrompt + propertyContext },
-          ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
+          ...recentMessages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
         ],
         temperature: aiConfig.temperature,
         max_tokens: aiConfig.maxTokens
