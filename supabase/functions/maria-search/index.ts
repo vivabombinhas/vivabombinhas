@@ -538,6 +538,8 @@ serve(async (req) => {
         reply: assistantMessage, properties: [], all_properties: [], filters_used: {},
         results_count: 0, broader_search: false, lead_saved: false,
         show_results: false, clear_results: true,
+        gate_active: false,
+        no_results_gate: false,
         debug_config: aiConfig,
         debug: {
           model: aiConfig.model,
