@@ -50,7 +50,7 @@ export const HeroV2 = () => {
       </div>
 
       {/* ── Content ── */}
-      <div className="relative z-10 max-w-4xl mx-auto w-full px-4 md:px-6 text-center pt-20 md:pt-28 pb-8 md:pb-12">
+      <div className="relative z-10 max-w-4xl mx-auto w-full px-4 md:px-6 text-center pt-20 md:pt-24 pb-6 md:pb-8">
 
         {/* Badge */}
         <motion.div
