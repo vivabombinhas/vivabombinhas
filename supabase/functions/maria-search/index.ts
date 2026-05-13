@@ -603,7 +603,7 @@ serve(async (req) => {
       area_m2: p.area_m2,
     }));
     const propertyContext = resultsToUse.length > 0
-      ? `\n\nResultados encontrados (${resultsToUse.length}):\n${JSON.stringify(summaryProps, null, 2)}${gateActive ? "\n\nGATE_ATIVO: Peça nome+whats para liberar o resto." : ""}`
+      ? `\n\nResultados encontrados (${resultsToUse.length}):\n${JSON.stringify(summaryProps, null, 2)}${gateActive ? "\n\nO sistema vai exibir um formulário visual de contato automaticamente. Apenas apresente os imóveis de forma natural." : ""}`
       : "";
 
     const searchGenStartTime = Date.now();
@@ -636,22 +636,18 @@ serve(async (req) => {
     }
     let assistantMessage = aiData.choices?.[0]?.message?.content || "Olá! Como posso te ajudar a encontrar seu imóvel em Bombinhas hoje?";
     
-    // DETERMINISTIC RESULTS: If results were found and it's a search intent, we show them
-    // unless the AI explicitly says [NO_RESULTS_YET] (which it shouldn't if we found results)
-    let showResults = resultsToUse.length > 0 && filters.intent === "search";
-    
-    // ADJUSTMENT: If AI is qualifying (asking a question), don't show results unless forced
-    const aiIsQualifying = assistantMessage.includes("?");
-    if (aiIsQualifying && !assistantMessage.includes("[SHOW_RESULTS]")) {
-      showResults = false;
-    }
+    // Decisão de mostrar cards:
+    // 1. Se a IA incluiu [SHOW_RESULTS] → mostra sempre
+    // 2. Se a IA incluiu [NO_RESULTS_YET] → não mostra
+    // 3. Se é intent=search E tem resultados → mostra (modo determinístico)
+    let showResults = false;
 
-    if (assistantMessage.includes("[NO_RESULTS_YET]")) {
-      showResults = false;
-    }
-
-    // Force showResults if the AI included the tag
     if (assistantMessage.includes("[SHOW_RESULTS]")) {
+      showResults = true;
+    } else if (assistantMessage.includes("[NO_RESULTS_YET]")) {
+      showResults = false;
+    } else if (filters.intent === "search" && resultsToUse.length > 0) {
+      // Modo determinístico: se é busca e tem resultados, mostra
       showResults = true;
     }
 
