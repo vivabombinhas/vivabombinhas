@@ -703,14 +703,14 @@ serve(async (req) => {
       assistantMessage: assistantMessage.slice(0, 50) + "..."
     });
 
-    return new Response(JSON.stringify({
-      reply: "TEST_REPLY_" + assistantMessage,
-      properties: showResults ? visibleProperties : [],
-      all_properties: showResults ? resultsToUse : [],
-      filters_used: filters,
-      results_count: resultsToUse.length,
+    const responseData = {
+      reply: assistantMessage,
       gate_active: gateActive,
       show_results: showResults,
+      results_count: resultsToUse.length,
+      filters_used: filters,
+      properties: showResults ? visibleProperties : [],
+      all_properties: showResults ? resultsToUse : [],
       debug_config: aiConfig,
       debug: {
         model: aiConfig.model,
@@ -728,7 +728,13 @@ serve(async (req) => {
           response_generation: responseGenTime
         }
       }
-    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    };
+
+    console.log("Final response keys:", Object.keys(responseData));
+
+    return new Response(JSON.stringify(responseData), { 
+      headers: { ...corsHeaders, "Content-Type": "application/json" } 
+    });
 
   } catch (error: any) {
     console.error("CRITICAL FUNCTION ERROR:", error);
