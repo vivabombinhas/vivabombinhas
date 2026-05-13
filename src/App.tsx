@@ -21,6 +21,7 @@ import AdminAIConfig from "./pages/AdminAIConfig.tsx";
 import AdminImoveis from "./pages/AdminImoveis.tsx";
 import AdminCuradoria from "./pages/AdminCuradoria.tsx";
 import AdminLayout from "./components/admin/AdminLayout.tsx";
+import AdminInsights from "./pages/AdminInsights.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import UseCases from "./pages/UseCases.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/destacar/:submissionId" element={<CheckoutSimulado />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
+            <Route path="insights" element={<AdminInsights />} />
             <Route path="leads" element={<AdminLeads />} />
             <Route path="followups" element={<AdminFollowups />} />
             <Route path="alerts" element={<AdminAlerts />} />
