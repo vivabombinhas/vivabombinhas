@@ -286,6 +286,17 @@ function extractNameFromText(text: string): string | null {
   return cleaned.split(/\s+/).slice(0, 4).join(" ");
 }
 
+function hasMinimumFilters(filters: SearchFilters & { intent?: string }): boolean {
+  if (!filters.finalidade) return false;
+  let count = 0;
+  if (filters.bairro) count++;
+  if (filters.preco_max || filters.preco_min) count++;
+  if (filters.quartos) count++;
+  if (filters.capacidade_pessoas) count++;
+  if (filters.tipo || filters.tipo_included?.length) count++;
+  return count >= 2;
+}
+
 async function upsertLeadBySession(
   supabase: any,
   sessionId: string,
@@ -378,7 +389,7 @@ serve(async (req) => {
     const aiConfig = {
       model: aiConfigData?.model || "anthropic/claude-3.5-sonnet",
       temperature: aiConfigData?.temperature ?? 0.3,
-      systemPrompt: aiConfigData?.system_prompt || SYSTEM_PROMPT,
+      systemPrompt: SYSTEM_PROMPT, // Sempre usar o do código, nunca do banco
       force_show_results: aiConfigData?.force_show_results ?? false,
       maxTokens: aiConfigData?.max_tokens || 2000
     };
@@ -475,6 +486,11 @@ serve(async (req) => {
     } catch (e) { 
       console.error('Erro ao parsear filtros:', filterText);
       filters = {}; 
+    }
+
+    if (filters.intent === "search" && !hasMinimumFilters(filters)) {
+      console.log("[FILTER OVERRIDE] Filters insufficient, treating as qualifying");
+      filters.intent = "qualifying";
     }
 
     const isConversation = filters.intent === "conversation" || filters.intent === "qualifying";
@@ -640,13 +656,9 @@ serve(async (req) => {
     }
     let assistantMessage = aiData.choices?.[0]?.message?.content || "Olá! Como posso te ajudar a encontrar seu imóvel em Bombinhas hoje?";
     
-    // Decisão de mostrar cards:
-    // 1. Se a IA incluiu [SHOW_RESULTS] → mostra sempre
-    // 2. Se a IA incluiu [NO_RESULTS_YET] → não mostra
-    // 3. Se é intent=search E tem resultados → mostra (modo determinístico)
-    // Cards SÓ aparecem quando a IA incluir [SHOW_RESULTS].
-    // Se não incluiu, ela está qualificando — respeitar.
-    const showResults = assistantMessage.includes("[SHOW_RESULTS]");
+    // Modo determinístico: se chegou aqui, tem filtros suficientes.
+    // Sempre mostra cards, independente da tag [SHOW_RESULTS].
+    const showResults = resultsToUse.length > 0;
 
     // CLEANUP: Remove technical tags
     assistantMessage = assistantMessage
