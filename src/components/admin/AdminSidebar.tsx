@@ -12,6 +12,7 @@ import {
   Bell,
   DollarSign,
   Settings,
+  LineChart as ChartIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -30,6 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const mainItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true },
+  { title: "Insights", url: "/admin/insights", icon: ChartIcon },
   { title: "Central de Avisos", url: "/admin/alerts", icon: Bell, badgeKey: "alerts" as const },
   { title: "Follow-ups", url: "/admin/followups", icon: CalendarClock, badgeKey: "followups" as const },
   { title: "Leads", url: "/admin/leads", icon: Users },
