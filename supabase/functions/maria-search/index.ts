@@ -607,7 +607,7 @@ serve(async (req) => {
       area_m2: p.area_m2,
     }));
     const propertyContext = resultsToUse.length > 0
-      ? `\n\nResultados encontrados (${resultsToUse.length}):\n${JSON.stringify(summaryProps, null, 2)}${gateActive ? "\n\nO sistema vai exibir um formulário visual de contato automaticamente. Apenas apresente os imóveis de forma natural." : ""}`
+      ? `\n\nResultados encontrados (${resultsToUse.length}):\n${JSON.stringify(summaryProps, null, 2)}${gateActive ? "\n\nO sistema vai exibir um formulário visual de contato automaticamente. Apresente os imóveis de forma natural." : ""}\n\nREGRAS DE RESPOSTA:\n1. Se você fizer uma pergunta (?), NUNCA use a tag [SHOW_RESULTS].\n2. Se você decidir mostrar os imóveis, use a tag [SHOW_RESULTS] no final da mensagem e NÃO faça perguntas.`
       : "";
 
     const searchGenStartTime = Date.now();
