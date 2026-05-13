@@ -48,7 +48,7 @@ const AudienceSection = () => {
               className="text-h2"
             >
               Soluções reais para <br className="hidden md:block" />
-              <span className="text-muted-foreground/40 italic font-serif">diferentes perfis.</span>
+              <span className="text-muted-foreground/70 italic font-serif">diferentes perfis.</span>
             </motion.h2>
           </div>
           <motion.p 

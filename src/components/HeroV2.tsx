@@ -77,7 +77,7 @@ export const HeroV2 = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-base md:text-lg text-white/65 font-light max-w-xl mx-auto mb-10 leading-relaxed"
+          className="text-base md:text-lg text-white/80 font-light max-w-xl mx-auto mb-10 leading-relaxed"
         >
           Diga o que você procura — a MarIA entende seu perfil e mostra apenas
           imóveis que fazem sentido para você.
@@ -99,7 +99,7 @@ export const HeroV2 = () => {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Ex: Casa com piscina no Mariscal para 8 pessoas..."
-                className="w-full bg-transparent text-slate-800 text-[15px] font-medium outline-none placeholder:text-slate-400"
+                className="w-full bg-transparent text-slate-800 text-[15px] font-medium outline-none placeholder:text-slate-500"
               />
             </div>
             <Button
@@ -146,7 +146,7 @@ export const HeroV2 = () => {
               <p className="text-2xl md:text-3xl font-bold text-white tracking-tight">
                 {stat.value}
               </p>
-              <p className="text-[10px] uppercase tracking-[0.15em] text-white/45 mt-1">
+              <p className="text-[10px] uppercase tracking-[0.15em] text-white/70 mt-1">
                 {stat.label}
               </p>
             </div>

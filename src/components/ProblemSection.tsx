@@ -48,7 +48,7 @@ const ProblemSection = () => {
             className="text-h2"
           >
             Buscar um imóvel em Bombinhas <br className="hidden lg:block" />
-            não precisa ser <span className="text-muted-foreground/40 italic font-serif">exaustivo.</span>
+            não precisa ser <span className="text-muted-foreground/70 italic font-serif">exaustivo.</span>
           </motion.h2>
         </div>
 

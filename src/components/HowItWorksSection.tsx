@@ -43,7 +43,7 @@ const HowItWorksSection = () => {
             className="text-h2 mb-6"
           >
             Três passos para encontrar seu <br className="hidden md:block" />
-            <span className="text-muted-foreground/40 italic font-serif">lugar no paraíso.</span>
+            <span className="text-muted-foreground/70 italic font-serif">lugar no paraíso.</span>
           </motion.h2>
         </div>
 

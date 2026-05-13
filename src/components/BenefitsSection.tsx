@@ -35,7 +35,7 @@ const BenefitsSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               className="text-h2 mb-10"
             >
-              A busca imobiliária,<br /><span className="text-muted-foreground/40 italic font-serif">totalmente simplificada.</span>
+              A busca imobiliária,<br /><span className="text-muted-foreground/70 italic font-serif">totalmente simplificada.</span>
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, y: 15 }}
