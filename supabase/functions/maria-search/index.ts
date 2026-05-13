@@ -488,6 +488,11 @@ serve(async (req) => {
       filters = {}; 
     }
 
+    if (filters.intent === "search" && !hasMinimumFilters(filters)) {
+      console.log("[FILTER OVERRIDE] Filters insufficient, treating as qualifying");
+      filters.intent = "qualifying";
+    }
+
     const isConversation = filters.intent === "conversation" || filters.intent === "qualifying";
     if (isConversation) {
       const convStartTime = Date.now();
