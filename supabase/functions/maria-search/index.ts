@@ -483,7 +483,7 @@ serve(async (req) => {
           model: aiConfig.model,
           messages: [
             { role: "system", content: aiConfig.systemPrompt + "\n\nEsta mensagem NÃO é uma busca por imóveis. Use [NO_RESULTS_YET]. Responda de forma natural e amigável, seguindo as diretrizes do system prompt." },
-            ...messages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
+            ...recentMessages.map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })),
           ],
           temperature: aiConfig.temperature,
           max_tokens: aiConfig.maxTokens
