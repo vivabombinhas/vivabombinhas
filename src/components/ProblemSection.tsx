@@ -32,7 +32,7 @@ const ProblemSection = () => {
       <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px]" />
       <div className="container-wide">
         
-        <div className="max-w-4xl mb-10 md:mb-12">
+        <div className="max-w-4xl mb-8 md:mb-10">
           <motion.div 
             initial={{ opacity: 0, x: -10 }}
             whileInView={{ opacity: 1, x: 0 }}

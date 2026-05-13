@@ -21,22 +21,22 @@ const Navbar = () => {
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 ${
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
         scrolled 
-          ? "py-3 bg-white/80 backdrop-blur-md border-b border-border/40 shadow-sm" 
-          : "py-6 bg-transparent"
+          ? "py-3 bg-white/95 backdrop-blur-md border-b border-border/40 shadow-sm" 
+          : "py-4 bg-[#04111f]/60 backdrop-blur-xl border-b border-white/5"
       }`}
     >
       <div className="container-wide flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center group-hover:scale-105 transition-all duration-500">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors group-hover:scale-105 duration-500 ${scrolled ? "bg-foreground" : "bg-white/15 backdrop-blur-sm"}`}>
             <Bot className="h-5 w-5 text-white" />
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-bold tracking-tight text-foreground">
+            <span className={`text-xl font-bold tracking-tight transition-colors ${scrolled ? "text-foreground" : "text-white"}`}>
               Mar<span className="text-primary italic">IA</span>
             </span>
-            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/80 leading-none">Bombinhas • SC</span>
+            <span className={`text-[9px] font-bold uppercase tracking-wider leading-none transition-colors ${scrolled ? "text-muted-foreground/80" : "text-white/60"}`}>Bombinhas • SC</span>
           </div>
         </Link>
 
@@ -46,7 +46,11 @@ const Navbar = () => {
               <Link 
                 key={l.href} 
                 to={l.href} 
-                className="text-badge text-muted-foreground hover:text-foreground transition-colors"
+                className={`text-badge transition-colors ${
+                  scrolled 
+                    ? "text-muted-foreground hover:text-foreground" 
+                    : "text-white/80 hover:text-white"
+                }`}
               >
                 {l.label}
               </Link>
@@ -54,7 +58,11 @@ const Navbar = () => {
               <a 
                 key={l.href} 
                 href={l.href} 
-                className="text-badge text-muted-foreground hover:text-foreground transition-colors"
+                className={`text-badge transition-colors ${
+                  scrolled 
+                    ? "text-muted-foreground hover:text-foreground" 
+                    : "text-white/80 hover:text-white"
+                }`}
               >
                 {l.label}
               </a>
@@ -62,11 +70,15 @@ const Navbar = () => {
           ))}
           <Link 
             to="/anuncie" 
-            className="text-badge text-muted-foreground hover:text-foreground transition-colors"
+            className={`text-badge transition-colors ${
+              scrolled 
+                ? "text-muted-foreground hover:text-foreground" 
+                : "text-white/80 hover:text-white"
+            }`}
           >
             Anunciar
           </Link>
-          <div className="w-px h-4 bg-slate-200" />
+          <div className={`w-px h-4 transition-colors ${scrolled ? "bg-slate-200" : "bg-white/20"}`} />
           <Button 
             asChild 
             size="sm" 
@@ -120,7 +132,7 @@ const Navbar = () => {
             </Link>
             <div className="p-4">
               <Button asChild className="w-full rounded-2xl h-14 text-sm font-bold bg-primary text-primary-foreground hover:brightness-110">
-                <a href="#experimentar" onClick={() => setOpen(false)}>Experimentar Grátis</a>
+                <a href="/maria" onClick={() => setOpen(false)}>Experimentar Grátis</a>
               </Button>
             </div>
           </nav>
