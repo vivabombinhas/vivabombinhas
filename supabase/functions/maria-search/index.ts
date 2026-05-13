@@ -710,7 +710,12 @@ serve(async (req) => {
         gateActive,
         showResults,
         timestamp: new Date().toISOString(),
-        processing_time_ms: Date.now() - startTime
+        processing_time_ms: Date.now() - startTime,
+        timings: {
+          filter_extraction: filterExtractionTime,
+          db_query: dbQueryTime,
+          response_generation: responseGenTime
+        }
       }
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
