@@ -566,11 +566,14 @@ serve(async (req) => {
     }
 
     console.log('Executando query no Supabase...');
+    const dbStartTime = Date.now();
     const { data: properties, error: dbError } = await query
       .order("destaque_pago", { ascending: false })
       .order("destaque", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(20);
+    dbQueryTime = Date.now() - dbStartTime;
+    console.log(`[PERF] DB query took ${dbQueryTime}ms`);
     
     if (dbError) {
       console.error('Erro na query do Supabase:', dbError);
