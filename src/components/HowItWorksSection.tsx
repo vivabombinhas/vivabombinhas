@@ -43,7 +43,7 @@ const HowItWorksSection = () => {
             className="text-h2 mb-6"
           >
             Três passos para encontrar seu <br className="hidden md:block" />
-            <span className="text-muted-foreground/70 italic font-serif">lugar no paraíso.</span>
+            <span className="text-muted-foreground/80 italic font-serif">lugar no paraíso.</span>
           </motion.h2>
         </div>
 
@@ -57,7 +57,7 @@ const HowItWorksSection = () => {
               viewport={{ once: true }}
               className="relative p-10 md:p-12 rounded-[40px] bg-background border border-border/40 group hover:shadow-premium transition-all duration-700 overflow-hidden"
             >
-              <div className="absolute -top-4 -right-4 text-8xl font-bold text-muted/50 opacity-20 group-hover:opacity-10 transition-opacity duration-700">
+              <div className="absolute -top-4 -right-4 text-8xl font-bold text-muted/60 opacity-30 group-hover:opacity-20 transition-opacity duration-700">
                 {s.num}
               </div>
               <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-10 group-hover:bg-primary group-hover:text-white transition-all duration-700">

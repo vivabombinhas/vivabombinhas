@@ -59,7 +59,7 @@ const CTASection = () => {
           >
             <div className="relative p-2 rounded-full bg-background border border-border/60 flex flex-col sm:flex-row gap-2 shadow-premium focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-700">
               <div className="flex-1 flex items-center gap-4 px-8 py-4">
-                <Search className="h-5 w-5 text-muted-foreground/50 shrink-0" />
+                <Search className="h-5 w-5 text-muted-foreground/70 shrink-0" />
                 <input
                   type="text"
                   value={query}

@@ -16,6 +16,7 @@
     --muted-foreground: #475569;
     --border: #dde4ed;
     --ring: #0c7fd4;
+    --focus-ring: #0c7fd4;
     --secondary: #f0f7fd;
     --secondary-foreground: #3a5068;
     --card: #ffffff;
@@ -92,7 +93,11 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+  
+  a, button {
+    @apply focus-visible:ring-ring;
   }
   html {
     @apply scroll-smooth;
