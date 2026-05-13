@@ -35,7 +35,7 @@ const SYSTEM_PROMPT = `Você é a MarIA, concierge imobiliária de Bombinhas, Sa
 - Tom: acolhedor, profissional, local. Como uma moradora de Bombinhas que trabalha com imóveis há anos.
 - Linguagem: informal mas competente. Use emojis com moderação (máximo 1-2 por mensagem).
 - Extensão: respostas CURTAS. Máximo 3-4 linhas por mensagem. Nada de parágrafos longos.
-- Estilo: faça UMA pergunta por vez. Nunca duas na mesma mensagem.
+- Estilo: faça UMA pergunta por vez. Nunca duas na mesma mensagem. Se você precisa de 3 informações e não tem nenhuma, peça a primeira. Quando o usuário responder, peça a segunda. E assim por diante.
 
 ## REGRA PRINCIPAL — QUALIFICAR ANTES DE MOSTRAR
 
@@ -145,7 +145,7 @@ Saudação:
 \"Oi! 👋 Sou a MarIA, assistente de imóveis em Bombinhas. Você busca temporada, aluguel anual, compra ou investimento?\"
 
 Qualificação (temporada):
-\"Legal! Para quantas pessoas? E qual sua faixa de valor para a diária?\"
+\"Legal! Para quantas pessoas?\"
 
 Qualificação (investimento):
 \"Boa! Você prefere retorno com aluguel de temporada ou valorização a longo prazo?\"
@@ -538,6 +538,8 @@ serve(async (req) => {
         reply: assistantMessage, properties: [], all_properties: [], filters_used: {},
         results_count: 0, broader_search: false, lead_saved: false,
         show_results: false, clear_results: true,
+        gate_active: false,
+        no_results_gate: false,
         debug_config: aiConfig,
         debug: {
           model: aiConfig.model,
@@ -613,6 +615,7 @@ serve(async (req) => {
     }
 
     const gateActive = !leadAlreadyCaptured && resultsToUse.length >= 1;
+    const noResultsGate = !leadAlreadyCaptured && resultsToUse.length === 0 && filters.intent === "search";
     const summaryProps = resultsToUse.map(p => ({
       titulo: p.titulo,
       tipo: p.tipo,
@@ -624,7 +627,7 @@ serve(async (req) => {
       area_m2: p.area_m2,
     }));
     const propertyContext = resultsToUse.length > 0
-      ? `\n\nResultados encontrados (${resultsToUse.length}):\n${JSON.stringify(summaryProps, null, 2)}${gateActive ? "\n\nO sistema vai exibir um formulário visual de contato automaticamente. Apresente os imóveis de forma natural." : ""}\n\nREGRAS DE RESPOSTA:\n1. Se você fizer uma pergunta (?), NUNCA use a tag [SHOW_RESULTS].\n2. Se você decidir mostrar os imóveis, use a tag [SHOW_RESULTS] no final da mensagem e NÃO faça perguntas.`
+      ? `\n\nResultados encontrados (${resultsToUse.length}):\n${JSON.stringify(summaryProps, null, 2)}${gateActive ? "\n\nO sistema vai exibir um formulário visual de contato automaticamente. Apresente os imóveis de forma natural." : ""}\n\nREGRAS DE RESPOSTA:\n1. Se você fizer uma pergunta (?), NUNCA use a tag [SHOW_RESULTS].\n2. Se você decidir mostrar os imóveis, use a tag [SHOW_RESULTS] no final da mensagem e NÃO faça perguntas.\n3. FAÇA APENAS UMA PERGUNTA POR VEZ. NUNCA DUAS.`
       : "";
 
     const willShowResults = resultsToUse.length > 0;
@@ -703,14 +706,15 @@ serve(async (req) => {
       assistantMessage: assistantMessage.slice(0, 50) + "..."
     });
 
-    return new Response(JSON.stringify({
+    const responseData = {
       reply: assistantMessage,
+      gate_active: gateActive,
+      no_results_gate: noResultsGate,
+      show_results: showResults,
+      results_count: resultsToUse.length,
+      filters_used: filters,
       properties: showResults ? visibleProperties : [],
       all_properties: showResults ? resultsToUse : [],
-      filters_used: filters,
-      results_count: resultsToUse.length,
-      gate_active: gateActive,
-      show_results: showResults,
       debug_config: aiConfig,
       debug: {
         model: aiConfig.model,
@@ -719,6 +723,7 @@ serve(async (req) => {
         results_count: resultsToUse.length,
         results_shown: showResults ? visibleProperties.length : 0,
         gateActive,
+        noResultsGate,
         showResults,
         timestamp: new Date().toISOString(),
         processing_time_ms: Date.now() - startTime,
@@ -728,7 +733,11 @@ serve(async (req) => {
           response_generation: responseGenTime
         }
       }
-    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    };
+
+    return new Response(JSON.stringify(responseData), { 
+      headers: { ...corsHeaders, "Content-Type": "application/json" } 
+    });
 
   } catch (error: any) {
     console.error("CRITICAL FUNCTION ERROR:", error);
