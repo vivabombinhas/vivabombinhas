@@ -638,16 +638,9 @@ serve(async (req) => {
     // 1. Se a IA incluiu [SHOW_RESULTS] → mostra sempre
     // 2. Se a IA incluiu [NO_RESULTS_YET] → não mostra
     // 3. Se é intent=search E tem resultados → mostra (modo determinístico)
-    let showResults = false;
-
-    if (assistantMessage.includes("[SHOW_RESULTS]")) {
-      showResults = true;
-    } else if (assistantMessage.includes("[NO_RESULTS_YET]")) {
-      showResults = false;
-    } else if (filters.intent === "search" && resultsToUse.length > 0) {
-      // Modo determinístico: se é busca e tem resultados, mostra
-      showResults = true;
-    }
+    // Cards SÓ aparecem quando a IA incluir [SHOW_RESULTS].
+    // Se não incluiu, ela está qualificando — respeitar.
+    const showResults = assistantMessage.includes("[SHOW_RESULTS]");
 
     // CLEANUP: Remove technical tags
     assistantMessage = assistantMessage
