@@ -674,8 +674,8 @@ serve(async (req) => {
       .trim();
 
     // If we have no results, ensure the AI doesn't say it found some
-    if (resultsToUse.length === 0 && (assistantMessage.toLowerCase().includes("separei") || assistantMessage.toLowerCase().includes("olhada"))) {
-       assistantMessage = "Não encontrei opções exatas com esse perfil agora. Quer que eu amplie a busca para regiões próximas ou deixe um alerta para quando entrar algo parecido?";
+    if (resultsToUse.length === 0) {
+      assistantMessage = "Não encontrei opções exatas com esse perfil agora. Quer que eu amplie o orçamento, tente outro bairro ou deixe um alerta para quando entrar algo parecido?";
     }
 
     // Save conversation turn
