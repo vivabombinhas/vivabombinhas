@@ -1,0 +1,10 @@
+# MarIA
+
+> Inteligência imobiliária para Bombinhas (SC, Brasil): assistente de IA que entende o perfil do usuário e mostra apenas imóveis reais e disponíveis para temporada, aluguel anual, compra e investimento.
+
+## Pages
+
+- [Home](/): Visão geral da MarIA, como funciona, casos de uso e FAQ.
+- [Conversar com a MarIA](/maria): Chat com a assistente de IA para buscar imóveis em Bombinhas.
+- [Anunciar imóvel](/anuncie): Cadastro de imóveis por proprietários e imobiliárias.
+- [Casos de uso](/casos-de-uso): Cenários de busca atendidos pela MarIA.
