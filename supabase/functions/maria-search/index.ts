@@ -704,7 +704,7 @@ serve(async (req) => {
     });
 
     return new Response(JSON.stringify({
-      reply: assistantMessage,
+      reply: "TEST_REPLY_" + assistantMessage,
       properties: showResults ? visibleProperties : [],
       all_properties: showResults ? resultsToUse : [],
       filters_used: filters,
