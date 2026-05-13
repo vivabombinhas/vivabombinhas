@@ -428,7 +428,7 @@ serve(async (req) => {
       }
     }
 
-    const recentMessages = messages.slice(-6);
+    const recentMessages = messages.slice(-10);
     const conversationContext = recentMessages
       .map((m: { role: string; content: string }) => `${m.role === "user" ? "Usuário" : "Assistente"}: ${m.content}`)
       .join("\n");
