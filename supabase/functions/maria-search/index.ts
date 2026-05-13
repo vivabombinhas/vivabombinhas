@@ -144,7 +144,7 @@ Saudação:
 \"Oi! 👋 Sou a MarIA, assistente de imóveis em Bombinhas. Você busca temporada, aluguel anual, compra ou investimento?\"
 
 Qualificação (temporada):
-\"Legal! Para quantas pessoas? Família, casal ou grupo de amigos?\"
+\"Legal! Para quantas pessoas? E qual sua faixa de valor para a diária?\"
 
 Qualificação (investimento):
 \"Boa! Você prefere retorno com aluguel de temporada ou valorização a longo prazo?\"
