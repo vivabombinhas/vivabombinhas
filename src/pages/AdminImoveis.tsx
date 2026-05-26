@@ -28,8 +28,19 @@ import {
   ExternalLink,
   Plus,
   RefreshCw,
-  Loader2
+  Loader2,
+  Filter,
+  CheckCircle2,
+  XCircle,
+  AlertCircle
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,6 +56,8 @@ import { PropertyPhotoGallery } from "@/components/admin/PropertyPhotoGallery";
 
 export default function AdminImoveis() {
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [qualityFilter, setQualityFilter] = useState<string>("all");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editProperty, setEditProperty] = useState<any | null>(null);
   const [galleryProperty, setGalleryProperty] = useState<any | null>(null);
@@ -124,11 +137,25 @@ export default function AdminImoveis() {
     }
   };
 
-  const filteredImoveis = imoveis?.filter(i => 
-    i.titulo?.toLowerCase().includes(search.toLowerCase()) ||
-    i.bairro?.toLowerCase().includes(search.toLowerCase()) ||
-    i.codigo?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredImoveis = imoveis?.filter(i => {
+    const matchesSearch = 
+      i.titulo?.toLowerCase().includes(search.toLowerCase()) ||
+      i.bairro?.toLowerCase().includes(search.toLowerCase()) ||
+      i.codigo?.toLowerCase().includes(search.toLowerCase());
+    
+    const matchesStatus = statusFilter === "all" || i.status === statusFilter;
+    
+    const hasPhotos = i.fotos && i.fotos.length > 0 && !i.fotos[0].includes("unsplash.com") && !i.fotos[0].includes("placeholder");
+    const hasPhone = i.anunciante_telefone && i.anunciante_telefone.trim() !== "";
+    const hasPrice = i.preco !== null || i.preco_temporada_diaria !== null;
+    const isQuality = hasPhotos && hasPhone && hasPrice;
+
+    const matchesQuality = qualityFilter === "all" || 
+      (qualityFilter === "quality" && isQuality) ||
+      (qualityFilter === "incomplete" && !isQuality);
+
+    return matchesSearch && matchesStatus && matchesQuality;
+  });
 
   return (
     <div className="container py-6 space-y-6">
@@ -142,8 +169,8 @@ export default function AdminImoveis() {
         </Button>
       </div>
 
-      <div className="flex items-center gap-2 max-w-sm">
-        <div className="relative flex-1">
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+        <div className="relative flex-1 w-full max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por título, bairro ou código..."
@@ -151,6 +178,47 @@ export default function AdminImoveis() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+        </div>
+        
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full md:w-[150px]">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-muted-foreground" />
+                <SelectValue placeholder="Status" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos Status</SelectItem>
+              <SelectItem value="ativo">Ativos</SelectItem>
+              <SelectItem value="pausado">Pausados</SelectItem>
+              <SelectItem value="removido">Removidos</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={qualityFilter} onValueChange={setQualityFilter}>
+            <SelectTrigger className="w-full md:w-[180px]">
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-muted-foreground" />
+                <SelectValue placeholder="Qualidade" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Qualquer Qualidade</SelectItem>
+              <SelectItem value="quality">
+                <div className="flex items-center gap-2 text-green-600">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Alta Qualidade
+                </div>
+              </SelectItem>
+              <SelectItem value="incomplete">
+                <div className="flex items-center gap-2 text-amber-600">
+                  <XCircle className="w-4 h-4" />
+                  Incompletos
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
