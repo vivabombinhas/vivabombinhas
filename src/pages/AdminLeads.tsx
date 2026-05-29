@@ -454,6 +454,16 @@ export default function AdminLeads() {
                         </TableCell>
 
                         <TableCell className="align-top py-3">
+                          {lead.lead_score ? (
+                            <Badge className={`text-[10px] font-bold ${SCORE_CONFIG[lead.lead_score]?.className || ""}`}>
+                              {lead.lead_score}
+                            </Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+
+                        <TableCell className="align-top py-3">
                           <div className="text-sm truncate">{lead.bairro_interesse || <span className="text-muted-foreground">—</span>}</div>
                           {lead.tipo_imovel && (
                             <div className="text-xs text-muted-foreground truncate">{lead.tipo_imovel}</div>
