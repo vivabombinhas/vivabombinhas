@@ -22,7 +22,7 @@ const SUGGESTIONS_BY_FINALIDADE: Record<Finalidade, string[]> = {
     "Oportunidades para investimento",
     "Lançamentos em Bombinhas",
     "Imóvel para renda com temporada",
-    "Áreas de grande valorização",
+    "Bairros mais procurados",
   ],
   anunciante: [
     "Como anunciar meu imóvel?",

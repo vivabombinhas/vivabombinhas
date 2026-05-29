@@ -36,13 +36,13 @@ const UseCases = () => {
               <Sun className="h-5 w-5" />
               <span>Temporada</span>
             </TabsTrigger>
-            <TabsTrigger value="anual" className="py-4 flex flex-col gap-2">
-              <Key className="h-5 w-5" />
-              <span>Aluguel Anual</span>
-            </TabsTrigger>
             <TabsTrigger value="compra" className="py-4 flex flex-col gap-2">
               <Home className="h-5 w-5" />
               <span>Compra</span>
+            </TabsTrigger>
+            <TabsTrigger value="investimento" className="py-4 flex flex-col gap-2">
+              <Key className="h-5 w-5" />
+              <span>Investimento</span>
             </TabsTrigger>
             <TabsTrigger value="interacao" className="py-4 flex flex-col gap-2">
               <MessageSquare className="h-5 w-5" />
@@ -77,11 +77,11 @@ const UseCases = () => {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="anual" className="mt-0 space-y-6">
+              <TabsContent value="investimento" className="mt-0 space-y-6">
                 <div>
-                  <h2 className="text-3xl font-bold mb-4">Aluguel Anual</h2>
+                  <h2 className="text-3xl font-bold mb-4">Investimento</h2>
                   <p className="text-muted-foreground text-lg leading-relaxed">
-                    Buscando morar em Bombinhas? Encontre opções de locação fixa com toda a assistência para entender requisitos, localização e valores médios.
+                    Encontre imóveis com perfil para locação ou patrimônio em Bombinhas. A MarIA ajuda você a analisar as melhores regiões e tipos de imóveis.
                   </p>
                 </div>
                 <Card>
@@ -90,13 +90,13 @@ const UseCases = () => {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Preciso de uma casa para aluguel anual no Centro ou Bombas."
+                      "Quero investir em um imóvel no Mariscal."
                     </p>
                     <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Quais os documentos necessários para aluguel anual na cidade?"
+                      "Quais as áreas com maior procura para locação?"
                     </p>
                     <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Procuro kitnet mobiliada para morar sozinho."
+                      "Procuro terrenos com potencial construtivo."
                     </p>
                   </CardContent>
                 </Card>
@@ -106,7 +106,7 @@ const UseCases = () => {
                 <div>
                   <h2 className="text-3xl font-bold mb-4">Compra de Imóveis</h2>
                   <p className="text-muted-foreground text-lg leading-relaxed">
-                    Invista no paraíso. A MarIA filtra as melhores oportunidades de investimento ou moradia própria, conectando você aos melhores corretores e proprietários.
+                    A MarIA ajuda você a encontrar as melhores opções de investimento ou moradia própria, conectando você aos melhores corretores e proprietários.
                   </p>
                 </div>
                 <Card>
@@ -121,7 +121,7 @@ const UseCases = () => {
                       "Procuro cobertura de frente para o mar para investimento."
                     </p>
                     <p className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/10">
-                      "Quais bairros têm maior valorização em Bombinhas?"
+                      "Quais as melhores opções em Mariscal?"
                     </p>
                   </CardContent>
                 </Card>
@@ -157,10 +157,10 @@ const UseCases = () => {
               <TabsContent value="temporada" className="m-0 h-full">
                 <InteractiveChatBox forcedConvIndex={0} />
               </TabsContent>
-              <TabsContent value="anual" className="m-0 h-full">
+              <TabsContent value="compra" className="m-0 h-full">
                 <InteractiveChatBox forcedConvIndex={1} />
               </TabsContent>
-              <TabsContent value="compra" className="m-0 h-full">
+              <TabsContent value="investimento" className="m-0 h-full">
                 <InteractiveChatBox forcedConvIndex={2} />
               </TabsContent>
               <TabsContent value="interacao" className="m-0 h-full">

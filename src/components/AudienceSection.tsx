@@ -4,24 +4,19 @@ import { TypingText } from "@/components/ui/TypingText";
 
 const audiences = [
   {
-    icon: Home,
-    title: "Aluguel Anual",
-    desc: "Encontre sua nova moradia permanente ou base profissional em Bombinhas.",
-  },
-  {
     icon: Umbrella,
     title: "Temporada",
-    desc: "A casa ou apartamento ideal para suas próximas férias inesquecíveis.",
+    desc: "A casa ou apartamento ideal para suas próximas férias em família.",
   },
   {
     icon: Key,
     title: "Compra",
-    desc: "Explore as melhores oportunidades para adquirir seu imóvel na região.",
+    desc: "Explore as melhores opções para adquirir seu imóvel na região.",
   },
   {
     icon: TrendingUp,
     title: "Investimento",
-    desc: "Encontre oportunidades com alto potencial de retorno em temporada ou valorização.",
+    desc: "Encontre imóveis com perfil para locação ou patrimônio.",
   },
 ];
 

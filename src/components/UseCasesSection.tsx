@@ -52,13 +52,6 @@ const UseCasesSection = () => {
                 Temporada
               </TabsTrigger>
               <TabsTrigger 
-                value="anual" 
-                className="px-5 md:px-8 py-3 md:py-4 rounded-full transition-all duration-500 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 font-bold text-[10px] md:text-xs uppercase tracking-widest gap-2 md:gap-3 group"
-              >
-                <Key className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                Aluguel Anual
-              </TabsTrigger>
-              <TabsTrigger 
                 value="compra" 
                 className="px-5 md:px-8 py-3 md:py-4 rounded-full transition-all duration-500 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 font-bold text-[10px] md:text-xs uppercase tracking-widest gap-2 md:gap-3 group"
               >
@@ -94,32 +87,16 @@ const UseCasesSection = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="anual" className="mt-0 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
-                <div className="space-y-6">
-                  <h3 className="text-h2">Aluguel Anual</h3>
-                  <p className="text-subtitle">
-                    Buscando morar em Bombinhas? Encontre opções de locação fixa com toda a assistência para entender requisitos, localização e valores médios.
-                  </p>
-                </div>
-                <div className="grid gap-4">
-                  {["Preciso de uma casa para aluguel anual no Centro.", "Quais os documentos necessários para alugar?", "Procuro kitnet mobiliada para morar."].map((q, i) => (
-                    <div key={i} className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-body font-medium flex items-center gap-4 group hover:bg-white hover:shadow-premium transition-all duration-500">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-bold">0{i+1}</div>
-                      "{q}"
-                    </div>
-                  ))}
-                </div>
-              </TabsContent>
 
               <TabsContent value="compra" className="mt-0 space-y-8 animate-in fade-in slide-in-from-left-4 duration-700">
                 <div className="space-y-6">
                   <h3 className="text-h2">Compra de Imóveis</h3>
                   <p className="text-subtitle">
-                    Invista no paraíso. A MarIA filtra as melhores oportunidades de investimento ou moradia própria, conectando você aos melhores corretores e proprietários.
+                    A MarIA ajuda você a encontrar as melhores opções de investimento ou moradia própria, conectando você aos melhores corretores e proprietários.
                   </p>
                 </div>
                 <div className="grid gap-4">
-                  {["Quero ver apartamentos à venda na planta em Bombas.", "Procuro cobertura frente mar para investimento.", "Quais bairros têm maior valorização?"].map((q, i) => (
+                  {["Quero ver apartamentos à venda na planta em Bombas.", "Procuro cobertura frente mar no Centro.", "Quais as melhores opções em Mariscal?"].map((q, i) => (
                     <div key={i} className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-body font-medium flex items-center gap-4 group hover:bg-white hover:shadow-premium transition-all duration-500">
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-bold">0{i+1}</div>
                       "{q}"
@@ -132,11 +109,11 @@ const UseCasesSection = () => {
                 <div className="space-y-6">
                   <h3 className="text-h2">Investimento Imobiliário</h3>
                   <p className="text-subtitle">
-                    Encontre oportunidades com alto potencial de retorno em temporada ou valorização patrimonial em Bombinhas.
+                    Encontre imóveis com perfil para locação ou patrimônio em Bombinhas.
                   </p>
                 </div>
                 <div className="grid gap-4">
-                  {["Quero investir em um imóvel em Bombinhas", "Quais as áreas com maior ROI para locação?", "Procuro terrenos com potencial construtivo."].map((q, i) => (
+                  {["Quero investir em um imóvel em Bombinhas", "Quais as áreas com maior procura para locação?", "Procuro terrenos com potencial construtivo."].map((q, i) => (
                     <div key={i} className="p-4 rounded-2xl bg-muted/20 border border-border/50 text-body font-medium flex items-center gap-4 group hover:bg-white hover:shadow-premium transition-all duration-500">
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-bold">0{i+1}</div>
                       "{q}"
@@ -151,14 +128,11 @@ const UseCasesSection = () => {
                 <TabsContent value="temporada" className="m-0 h-full">
                   <InteractiveChatBox forcedConvIndex={0} />
                 </TabsContent>
-                <TabsContent value="anual" className="m-0 h-full">
+                <TabsContent value="compra" className="m-0 h-full">
                   <InteractiveChatBox forcedConvIndex={1} />
                 </TabsContent>
-                <TabsContent value="compra" className="m-0 h-full">
-                  <InteractiveChatBox forcedConvIndex={2} />
-                </TabsContent>
                 <TabsContent value="investimento" className="m-0 h-full">
-                  <InteractiveChatBox forcedConvIndex={3} />
+                  <InteractiveChatBox forcedConvIndex={2} />
                 </TabsContent>
               </div>
             </div>

@@ -15,29 +15,29 @@ const OPTIONS: Array<{
 }> = [
   {
     id: "temporada",
-    label: "Temporada",
-    description: "Aluguel para lazer",
+    label: "Passar férias",
+    description: "Lazer e família",
     icon: Calendar,
     emoji: "🏖️",
   },
   {
     id: "compra",
-    label: "Comprar para morar",
-    description: "Sua residência em Bombinhas",
+    label: "Comprar imóvel",
+    description: "Morar ou ter casa de praia",
     icon: Home,
     emoji: "🏠",
   },
   {
     id: "investimento",
     label: "Comprar para investir",
-    description: "Foco em retorno e valorização",
+    description: "Análise e perfil de busca",
     icon: Tag,
     emoji: "📈",
   },
   {
     id: "anunciante",
-    label: "Quero anunciar imóvel",
-    description: "Sou proprietário ou corretor",
+    label: "Quero anunciar",
+    description: "Sou proprietário ou anunciante",
     icon: UserPlus,
     emoji: "🤝",
   },
@@ -47,7 +47,7 @@ export function FinalidadeQualifier({ onSelect }: FinalidadeQualifierProps) {
   return (
     <div className="w-full max-w-md mx-auto px-4 space-y-3">
       <p className="text-sm text-muted-foreground text-center">
-        Pra eu te ajudar melhor, me conta: o que você procura?
+        O que você busca hoje?
       </p>
       <div className="grid gap-2">
         {OPTIONS.map((opt) => {
