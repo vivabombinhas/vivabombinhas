@@ -52,6 +52,10 @@ Turismo, restaurantes, passeios e guia da cidade NÃO fazem parte do escopo.
 - Use o bairro/região (Bombas, Centro, Mariscal, Zimbros, Canto Grande, Morrinhos, Quatro Ilhas) quando o usuário citar.
 - Antes de mostrar imóveis, confirme finalidade e pelo menos 3 filtros concretos.
 
+# CONFIRMAÇÕES E HERANÇA DE CONTEXTO
+- Se o usuário der uma confirmação curta (ex: "sim", "isso", "correto", "pode ser", "ok") após você ter resumido os critérios de busca, isso significa que você deve emitir IMEDIATAMENTE o bloco [FILTERS] com todos os dados confirmados para que o sistema busque os imóveis.
+- Nunca responda apenas "Ótimo, vou buscar" sem o bloco [FILTERS] se os critérios já foram confirmados.
+
 # ABERTURA PADRÃO
 Se for a primeira mensagem e o usuário não declarou intenção:
 "Oi! Sou a MarIA, assistente do VIV Bombinhas. Posso te ajudar a encontrar imóvel para temporada, compra ou investimento em Bombinhas. O que você está buscando hoje?"
@@ -71,7 +75,7 @@ Daniel é o especialista do portal para compra e investimento. Você PODE oferec
 Nunca prometa que ele responde rápido, nem que tem oportunidade exclusiva.
 
 # QUANDO MOSTRAR IMÓVEIS
-Quando tiver finalidade + ao menos 3 filtros concretos (bairro, tipo, faixa, quartos, capacidade, extras), e SOMENTE então, emita ao final da sua resposta um bloco no formato exato:
+Quando tiver finalidade + ao menos 3 filtros concretos (bairro, tipo, faixa, quartos, capacidade, extras), e SOMENTE então (ou após confirmação do resumo), emita uma resposta textual positiva (ex: "Com certeza! Vou buscar agora...") e ao final emita o bloco no formato exato:
 
 [FILTERS]{"finalidade":"temporada|compra|investimento","bairro":"...","tipo":"casa|apartamento|terreno|cobertura","preco_max":000,"preco_min":000,"quartos_min":0,"capacidade_min":0,"piscina":true,"vista_mar":true,"frente_mar":true,"aceita_pet":true,"churrasqueira":true,"mobiliado":true}[/FILTERS]
 
@@ -175,7 +179,10 @@ async function searchProperties(supabase: any, filters: any): Promise<any[]> {
       .or("oculta_para_maria.is.null,oculta_para_maria.eq.false")
       .limit(20);
 
-    if (filters.finalidade) q = q.eq("finalidade", filters.finalidade);
+    if (filters.finalidade) {
+      const dbFinalidade = filters.finalidade === "investimento" ? "compra" : filters.finalidade;
+      q = q.eq("finalidade", dbFinalidade);
+    }
     if (filters.tipo) q = q.eq("tipo", filters.tipo);
     if (filters.bairro) q = q.ilike("bairro", `%${filters.bairro}%`);
     if (filters.quartos_min) q = q.gte("quartos", filters.quartos_min);
@@ -224,9 +231,16 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    console.log("[maria-search] Request body keys:", Object.keys(body));
     const { messages, session_id, action, nome, telefone, lead_captured } = body;
     const sessionId: string = session_id || "";
+    const lastUserMsg = messages?.filter((m: any) => m.role === "user").pop()?.content || "";
+
+    console.log("[maria-search] Request:", {
+      sessionId,
+      lastUserMsg,
+      lead_captured,
+      action
+    });
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -242,7 +256,7 @@ serve(async (req) => {
     }
 
     // --- Main AI call ---
-    console.log("[maria-search] Calling AI Gateway (Main)...");
+    console.log("[maria-search] Calling AI Gateway (Main) with model google/gemini-2.0-flash...");
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
@@ -259,33 +273,17 @@ serve(async (req) => {
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error("[maria-search] AI Gateway error (Main):", aiResponse.status, errorText);
-      if (aiResponse.status === 429) {
-        return new Response(
-          JSON.stringify({
-            reply: "Estou com muitos pedidos agora. Pode tentar novamente em alguns segundos? 🙏",
-            error: "rate_limited",
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-      if (aiResponse.status === 402) {
-        return new Response(
-          JSON.stringify({
-            reply: "Estou momentaneamente indisponível. Tente novamente em instantes.",
-            error: "credits_exhausted",
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
       throw new Error(`AI Gateway error (Main): ${aiResponse.status}`);
     }
 
     const aiData = await aiResponse.json();
     const rawReply: string = aiData.choices?.[0]?.message?.content || "";
-    console.log("[maria-search] AI reply length:", rawReply.length);
+    console.log("[maria-search] AI raw reply:", rawReply);
 
     // --- Parse [FILTERS] and optionally search ---
     const { filters, cleaned } = parseFiltersBlock(rawReply);
+    console.log("[maria-search] Extracted filters:", filters);
+
     let showResults = false;
     let noResultsGate = false;
     let gateActive = false;
@@ -295,7 +293,7 @@ serve(async (req) => {
     if (filters && filters.finalidade && filters.finalidade !== "anunciante") {
       const found = await searchProperties(supabase, filters);
       allProperties = found;
-      console.log("[maria-search] properties found:", found.length);
+      console.log("[maria-search] Properties found count:", found.length);
 
       if (found.length === 0) {
         noResultsGate = !lead_captured;
@@ -309,6 +307,22 @@ serve(async (req) => {
         }
       }
     }
+
+    // --- Handle reply logic and fallback ---
+    let finalReply = cleaned;
+    
+    // Se não encontrou nada, a resposta deve ser clara sobre isso (conforme regra v3)
+    if (!showResults && filters) {
+      finalReply = "Ainda não encontrei opções exatas com esse perfil no portal agora. Quer que eu amplie a busca para bairros próximos ou prefere salvar um alerta para receber novidades?";
+    } else if (!finalReply || finalReply.length < 5) {
+      if (showResults) {
+        finalReply = "Encontrei estas opções que combinam com o que você busca! O que acha?";
+      } else {
+        finalReply = "Entendido! Como posso te ajudar agora?";
+      }
+    }
+
+
 
     // --- Extraction + scoring (best-effort, never blocks reply) ---
     try {
@@ -363,7 +377,7 @@ serve(async (req) => {
     // --- Final response (contract expected by useMariaChat) ---
     return new Response(
       JSON.stringify({
-        reply: cleaned,
+        reply: finalReply,
         show_results: showResults,
         properties: visibleProperties,
         all_properties: allProperties,
