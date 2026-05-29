@@ -255,6 +255,19 @@ export default function AdminLeads() {
               </Select>
             </div>
 
+            <Select value={scoreFilter} onValueChange={setScoreFilter}>
+              <SelectTrigger className="w-32 h-9 text-sm">
+                <SelectValue placeholder="Temperatura" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas temp.</SelectItem>
+                <SelectItem value="Premium">Premium</SelectItem>
+                <SelectItem value="Quente">Quente</SelectItem>
+                <SelectItem value="Morno">Morno</SelectItem>
+                <SelectItem value="Frio">Frio</SelectItem>
+              </SelectContent>
+            </Select>
+
             <Select value={interesseFilter} onValueChange={setInteresseFilter}>
               <SelectTrigger className="w-36 h-9 text-sm">
                 <SelectValue placeholder="Interesse" />
