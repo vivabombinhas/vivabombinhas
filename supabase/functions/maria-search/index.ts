@@ -107,6 +107,7 @@ serve(async (req) => {
   
   try {
     const body = await req.json();
+    console.log("[maria-search] Request body:", JSON.stringify(body));
     const { messages, session_id, action, nome, telefone } = body;
     const sessionId = session_id || "";
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -119,24 +120,34 @@ serve(async (req) => {
       return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    console.log("[maria-search] Calling AI Gateway (Main)...");
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
-        model: "anthropic/claude-3.5-sonnet",
+        model: "google/gemini-3-flash-preview",
         messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages.map((m: any) => ({ role: m.role, content: m.content }))],
         temperature: 0.3,
       }),
     });
+
+    if (!aiResponse.ok) {
+      const errorText = await aiResponse.text();
+      console.error("[maria-search] AI Gateway error (Main):", aiResponse.status, errorText);
+      throw new Error(`AI Gateway error (Main): ${aiResponse.status}`);
+    }
+
     const aiData = await aiResponse.json();
+    console.log("[maria-search] AI Response (Main) received");
     const assistantMessage = aiData.choices?.[0]?.message?.content || "";
 
     try {
+      console.log("[maria-search] Calling AI Gateway (Extraction)...");
       const extractionResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
         body: JSON.stringify({
-          model: "google/gemini-2.0-flash-001",
+          model: "google/gemini-3-flash-preview",
           messages: [
             { role: "system", content: EXTRACTION_PROMPT },
             { role: "user", content: messages.concat({ role: "assistant", content: assistantMessage }).map((m: any) => `${m.role}: ${m.content}`).join("\n") }
@@ -144,9 +155,24 @@ serve(async (req) => {
           temperature: 0,
         }),
       });
+
+      if (!extractionResponse.ok) {
+        const errorText = await extractionResponse.text();
+        console.error("[maria-search] AI Gateway error (Extraction):", extractionResponse.status, errorText);
+        throw new Error(`AI Gateway error (Extraction): ${extractionResponse.status}`);
+      }
+
       const extractionData = await extractionResponse.json();
+      console.log("[maria-search] Extraction Response received");
       const rawJson = extractionData.choices?.[0]?.message?.content?.replace(/```json|```/g, "").trim();
+      
+      if (!rawJson) {
+        console.warn("[maria-search] Empty extraction content");
+        throw new Error("Empty extraction content");
+      }
+
       const extracted = JSON.parse(rawJson);
+      console.log("[maria-search] Extracted data:", JSON.stringify(extracted));
       
       if (extracted) {
         const score = await calculateScore(extracted);
