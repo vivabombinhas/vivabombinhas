@@ -305,17 +305,20 @@ serve(async (req) => {
       }
     }
 
-    // --- Handle empty reply fallback ---
+    // --- Handle reply logic and fallback ---
     let finalReply = cleaned;
-    if (!finalReply || finalReply.length < 5) {
+    
+    // Se não encontrou nada, a resposta deve ser clara sobre isso (conforme regra v3)
+    if (!showResults && filters) {
+      finalReply = "Ainda não encontrei opções exatas com esse perfil no portal agora. Quer que eu amplie a busca para bairros próximos ou prefere salvar um alerta para receber novidades?";
+    } else if (!finalReply || finalReply.length < 5) {
       if (showResults) {
         finalReply = "Encontrei estas opções que combinam com o que você busca! O que acha?";
-      } else if (noResultsGate || filters) {
-        finalReply = "Ainda não encontrei imóveis com esse perfil exato no portal. Gostaria de ver em bairros próximos ou prefere que eu salve um alerta para você?";
       } else {
-        finalReply = "Entendido! Posso te ajudar com mais algum detalhe?";
+        finalReply = "Entendido! Como posso te ajudar agora?";
       }
     }
+
 
 
     // --- Extraction + scoring (best-effort, never blocks reply) ---
