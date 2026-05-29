@@ -494,6 +494,15 @@ export default function AdminLeads() {
                           </span>
                         </TableCell>
 
+                        <TableCell className="align-top py-3">
+                          {lead.feedback_corretor === "valido" && (
+                            <Badge className="bg-emerald-500 hover:bg-emerald-600 text-[9px] h-4">Válido</Badge>
+                          )}
+                          {lead.feedback_corretor === "invalido" && (
+                            <Badge variant="destructive" className="text-[9px] h-4">Inválido</Badge>
+                          )}
+                        </TableCell>
+
                         <TableCell className="align-top py-3 text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1">
                             <Button
