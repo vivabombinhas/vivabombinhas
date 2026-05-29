@@ -125,7 +125,7 @@ serve(async (req) => {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash",
+        model: "google/gemini-3-flash-preview",
         messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages.map((m: any) => ({ role: m.role, content: m.content }))],
         temperature: 0.3,
       }),
@@ -147,7 +147,7 @@ serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
         body: JSON.stringify({
-          model: "google/gemini-2.0-flash",
+          model: "google/gemini-3-flash-preview",
           messages: [
             { role: "system", content: EXTRACTION_PROMPT },
             { role: "user", content: messages.concat({ role: "assistant", content: assistantMessage }).map((m: any) => `${m.role}: ${m.content}`).join("\n") }
