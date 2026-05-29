@@ -634,6 +634,7 @@ export type Database = {
           created_at: string
           email: string | null
           faixa_preco: string | null
+          feedback_corretor: string | null
           id: string
           interesse: string | null
           last_contact_at: string | null
@@ -642,6 +643,7 @@ export type Database = {
           next_followup_at: string | null
           nome: string | null
           objetivo: string | null
+          observacao_interna: string | null
           orcamento_max: number | null
           origem: string
           prazo_compra: string | null
@@ -656,6 +658,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           faixa_preco?: string | null
+          feedback_corretor?: string | null
           id?: string
           interesse?: string | null
           last_contact_at?: string | null
@@ -664,6 +667,7 @@ export type Database = {
           next_followup_at?: string | null
           nome?: string | null
           objetivo?: string | null
+          observacao_interna?: string | null
           orcamento_max?: number | null
           origem?: string
           prazo_compra?: string | null
@@ -678,6 +682,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           faixa_preco?: string | null
+          feedback_corretor?: string | null
           id?: string
           interesse?: string | null
           last_contact_at?: string | null
@@ -686,6 +691,7 @@ export type Database = {
           next_followup_at?: string | null
           nome?: string | null
           objetivo?: string | null
+          observacao_interna?: string | null
           orcamento_max?: number | null
           origem?: string
           prazo_compra?: string | null

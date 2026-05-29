@@ -401,6 +401,7 @@ export default function AdminLeads() {
                     <TableHead className="w-[10%]">Score</TableHead>
                     <TableHead className="w-[18%]">Bairro / Tipo</TableHead>
                     <TableHead className="w-[10%]">Data</TableHead>
+                    <TableHead className="w-[10%]">Valid.</TableHead>
                     <TableHead className="w-[18%] text-right">Status / Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -491,6 +492,15 @@ export default function AdminLeads() {
                           <span className="text-xs text-muted-foreground whitespace-nowrap">
                             {formatDate(lead.created_at)}
                           </span>
+                        </TableCell>
+
+                        <TableCell className="align-top py-3">
+                          {lead.feedback_corretor === "valido" && (
+                            <Badge className="bg-emerald-500 hover:bg-emerald-600 text-[9px] h-4">Válido</Badge>
+                          )}
+                          {lead.feedback_corretor === "invalido" && (
+                            <Badge variant="destructive" className="text-[9px] h-4">Inválido</Badge>
+                          )}
                         </TableCell>
 
                         <TableCell className="align-top py-3 text-right" onClick={(e) => e.stopPropagation()}>
