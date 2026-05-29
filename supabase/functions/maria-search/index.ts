@@ -319,7 +319,7 @@ serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "openai/gpt-4o-mini",
           messages: [
             { role: "system", content: EXTRACTION_PROMPT },
             {
