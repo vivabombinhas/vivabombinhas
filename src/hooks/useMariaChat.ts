@@ -184,13 +184,15 @@ export function useMariaChat() {
       console.log("[MarIA Debug] Resposta da edge function:", { data, error });
       
       if (data) {
-        console.log('[MarIA Debug] Data recebida:', JSON.stringify(data, null, 2));
+        console.log('[MarIA Debug] Contract data:', {
+          reply_length: data.reply?.length,
+          show_results: data.show_results,
+          properties_count: data.properties?.length,
+          all_properties_count: data.all_properties?.length,
+          gate_active: data.gate_active,
+          no_results_gate: data.no_results_gate
+        });
       }
-
-      if (data?.debug) {
-        console.log('[MarIA Debug Context]', data.debug);
-      }
-
 
       if (error) {
         console.error("Invoke error:", error);
@@ -198,8 +200,7 @@ export function useMariaChat() {
       }
       
       if (data?.error) {
-        console.error("Edge Function internal error:", data.error, data.stack);
-        // We don't throw here so we can still use data.reply if present
+        console.error("Edge Function internal error:", data.error);
       }
 
       const showResults = data.show_results === true;
