@@ -12,25 +12,31 @@ const SUGGESTIONS_BY_FINALIDADE: Record<Finalidade, string[]> = {
     "Imóvel com vista para o mar",
     "Casa com piscina para 8 pessoas",
   ],
-  aluguel_anual: [
-    "Aluguel anual em Bombas até R$3.000",
-    "Apartamento mobiliado pra morar",
-    "Casa com 3 quartos em Bombinhas",
-    "Aceita pet em Mariscal",
-  ],
-  venda: [
-    "Apartamento para compra até 800 mil",
+  compra: [
+    "Apartamento para morar até 1 milhão",
     "Casa à venda com vista mar",
     "Terreno em Bombinhas",
-    "Cobertura frente mar",
+    "Cobertura em Bombas",
+  ],
+  investimento: [
+    "Oportunidades para investimento",
+    "Lançamentos em Bombinhas",
+    "Imóvel para renda com temporada",
+    "Áreas de grande valorização",
+  ],
+  anunciante: [
+    "Como anunciar meu imóvel?",
+    "Quero destacar meu anúncio",
+    "Quanto custa anunciar?",
+    "Falar com um consultor",
   ],
 };
 
 const DEFAULT_SUGGESTIONS = [
-  "Aluguel anual em Bombas até R$3.000",
+  "Quero comprar para investir",
   "Casa para temporada em Mariscal",
-  "Apartamento para compra até 800 mil",
-  "Imóvel com vista para o mar",
+  "Apartamento para morar até 1 milhão",
+  "Quero anunciar meu imóvel",
 ];
 
 export function SuggestionChips({ onSelect, finalidade }: SuggestionChipsProps) {

@@ -37,7 +37,7 @@ const MariaChat = () => {
     <div className="flex flex-col h-[100dvh] bg-background">
       <Helmet>
         <title>MarIA — Assistente de imóveis em Bombinhas</title>
-        <meta name="description" content="Converse com a MarIA, a assistente de IA que encontra imóveis em Bombinhas para temporada, aluguel anual, compra ou investimento." />
+        <meta name="description" content="Converse com a MarIA, a assistente de IA que encontra imóveis em Bombinhas para temporada, compra ou investimento." />
         <link rel="canonical" href="https://vivabombinhas.lovable.app/maria" />
         <meta property="og:title" content="MarIA — Assistente de imóveis em Bombinhas" />
         <meta property="og:description" content="Encontre imóveis reais e disponíveis em Bombinhas conversando com a MarIA." />
@@ -96,7 +96,7 @@ const MariaChat = () => {
                 <p className="text-xs text-center text-muted-foreground">
                   Buscando para{" "}
                   <span className="font-semibold text-accent">
-                    {finalidade === "temporada" ? "🏖️ Temporada" : finalidade === "aluguel_anual" ? "🏠 Aluguel anual" : "💰 Comprar"}
+                    {finalidade === "temporada" ? "🏖️ Temporada" : finalidade === "compra" ? "🏠 Morar" : finalidade === "investimento" ? "📈 Investir" : "🤝 Anunciar"}
                   </span>
                   {" · "}
                   <button onClick={clearFinalidade} className="underline hover:text-foreground">
