@@ -49,8 +49,16 @@ const STATUS_CONFIG: Record<LeadStatus, { label: string; className: string }> = 
 
 const INTERESSE_MAP: Record<string, string> = {
   compra: "Compra",
-  aluguel_anual: "Aluguel anual",
+  investimento: "Investimento",
   temporada: "Temporada",
+  anunciante: "Captação",
+};
+
+const SCORE_CONFIG: Record<string, { label: string; className: string }> = {
+  Premium: { label: "Premium", className: "bg-amber-500 text-white border-amber-600 shadow-sm" },
+  Quente: { label: "Quente", className: "bg-orange-500 text-white border-orange-600 shadow-sm" },
+  Morno: { label: "Morno", className: "bg-blue-400 text-white border-blue-500 shadow-sm" },
+  Frio: { label: "Frio", className: "bg-slate-400 text-white border-slate-500 shadow-sm" },
 };
 
 function formatDate(d: string) {
