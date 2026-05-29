@@ -54,6 +54,11 @@ interface Lead {
   created_at: string;
   next_followup_at?: string | null;
   last_contact_at?: string | null;
+  lead_score?: string | null;
+  objetivo?: string | null;
+  prazo_compra?: string | null;
+  orcamento_max?: number | null;
+  resumo_ia?: string | null;
 }
 
 interface Props {
