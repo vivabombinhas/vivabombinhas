@@ -67,27 +67,23 @@ export function LeadCaptureForm({ remainingCount, isAlertMode: isAlertModeProp, 
         <div className="flex-1">
           <h3 className="text-sm font-bold text-foreground leading-tight">
             {isAlertMode
-              ? "🔔 Te aviso em primeira mão!"
+              ? "🔔 Te aviso quando houver novidades"
               : isContactUnlock
               ? "🔓 Libere o contato direto do anunciante"
-              : `🔥 Tenho mais ${remainingCount} ${remainingCount === 1 ? "imóvel" : "imóveis"} no seu perfil!`}
+              : `🏠 Encontrei ${remainingCount} ${remainingCount === 1 ? "imóvel" : "imóveis"} no seu perfil`}
           </h3>
           <p className="text-xs text-muted-foreground mt-1 leading-snug">
             {isAlertMode ? (
               <>
-                Imóvel desse perfil em Bombinhas some <strong className="text-foreground">muito rápido</strong>.
-                Me deixa seu contato que te aviso <strong className="text-foreground">antes de virar anúncio público</strong>.
+                Posso te avisar quando entrar um imóvel <strong className="text-foreground">parecido com esse perfil</strong> no portal.
               </>
             ) : isContactUnlock ? (
               <>
-                Me passa seu nome e WhatsApp pra eu liberar o <strong className="text-foreground">link e o contato direto</strong> desse imóvel
-                — e te aviso assim que entrar algo parecido.
+                Me informe seu nome e WhatsApp para eu liberar o <strong className="text-foreground">link e o contato direto</strong> desse imóvel.
               </>
             ) : (
               <>
-                Os melhores somem rápido na temporada. Me passa seu contato que eu libero{" "}
-                <strong className="text-foreground">agora</strong> e ainda te aviso em primeira mão quando entrar
-                algo novo.
+                Me informe seu contato para eu liberar os <strong className="text-foreground">outros imóveis</strong> agora e te avisar se entrar algo novo.
               </>
             )}
           </p>
