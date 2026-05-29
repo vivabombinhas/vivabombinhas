@@ -59,6 +59,8 @@ interface Lead {
   prazo_compra?: string | null;
   orcamento_max?: number | null;
   resumo_ia?: string | null;
+  feedback_corretor?: string | null;
+  observacao_interna?: string | null;
 }
 
 interface Props {
@@ -158,7 +160,12 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
   });
 
   const updateLead = useMutation({
-    mutationFn: async (patch: { next_followup_at?: string | null; last_contact_at?: string | null }) => {
+    mutationFn: async (patch: { 
+      next_followup_at?: string | null; 
+      last_contact_at?: string | null;
+      feedback_corretor?: string | null;
+      observacao_interna?: string | null;
+    }) => {
       const { error } = await supabase.from("leads_maria").update(patch).eq("id", lead!.id);
       if (error) throw error;
     },
@@ -323,6 +330,23 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
                 <p className="text-[9px] text-muted-foreground uppercase font-bold">Lead Score</p>
                 <Badge variant="outline" className="mt-0.5 text-[10px] font-bold border-primary/30">{lead.lead_score || "—"}</Badge>
              </div>
+          </div>
+
+          <div className="flex gap-2 mt-2">
+            <Button 
+              variant={lead.feedback_corretor === "valido" ? "default" : "outline"}
+              className={`flex-1 h-8 text-xs ${lead.feedback_corretor === "valido" ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
+              onClick={() => updateLead.mutate({ feedback_corretor: "valido" })}
+            >
+              <CheckCircle2 className="w-3 h-3 mr-1" /> Lead Válido
+            </Button>
+            <Button 
+              variant={lead.feedback_corretor === "invalido" ? "destructive" : "outline"}
+              className="flex-1 h-8 text-xs"
+              onClick={() => updateLead.mutate({ feedback_corretor: "invalido" })}
+            >
+              <Trash2 className="w-3 h-3 mr-1" /> Lead Inválido
+            </Button>
           </div>
 
 
