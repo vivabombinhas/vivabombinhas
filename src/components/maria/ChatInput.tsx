@@ -44,7 +44,7 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Ex: apartamento para alugar em Bombas até R$3.000..."
+        placeholder="Escreva aqui sua busca..."
         aria-label="Mensagem para a MarIA"
         className="flex-1 resize-none rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring min-h-[44px] max-h-[120px]"
         rows={1}

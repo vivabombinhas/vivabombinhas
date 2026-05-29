@@ -7,14 +7,14 @@ const CONVERSATIONS = [
   {
     id: "temporada",
     messages: [
-      { type: "user", text: "Quero uma casa para temporada em Mariscal perto da praia." },
-      { type: "ai", text: "Oi! Sou a MarIA 🌊 Tenho ótimas opções no Mariscal. Procura algo para família ou casal?" },
-      { type: "user", text: "Família, somos 6 pessoas." },
-      { type: "ai", text: "Perfeito. Uma casa espaçosa seria ideal. Encontrei esta opção incrível pé na areia 👇",
+      { type: "user", text: "Busco uma casa no Mariscal para passar as férias em família." },
+      { type: "ai", text: "Olá! Sou a MarIA. 😊 Encontrei uma excelente opção para o seu perfil no Mariscal." },
+      { type: "user", text: "Legal, somos 6 pessoas." },
+      { type: "ai", text: "Perfeito. Esta casa acomoda bem o seu grupo e fica pertinho da praia. 👇",
         properties: [
           {
             id: "temp-1",
-            titulo: "Casa Mariscal - 100m da Praia",
+            titulo: "Casa Mariscal - Familiar",
             preco_temporada_diaria: 850,
             bairro: "Mariscal",
             tipo: "casa",
@@ -29,41 +29,18 @@ const CONVERSATIONS = [
     ]
   },
   {
-    id: "aluguel",
-    messages: [
-      { type: "user", text: "Tem apartamentos para aluguel anual em Bombas?" },
-      { type: "ai", text: "Olá! Bombas é excelente para morar. Qual sua faixa de valor pretendida?" },
-      { type: "user", text: "Até R$ 3.500 com condomínio." },
-      { type: "ai", text: "Excelente. Tenho um apartamento mobiliado muito bem localizado 👇",
-        properties: [
-          {
-            id: "anual-1",
-            titulo: "Apartamento Solar das Bombas",
-            preco: 3200,
-            bairro: "Bombas",
-            tipo: "apartamento",
-            finalidade: "aluguel_anual",
-            quartos: 2,
-            fotos: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80"],
-            anunciante_telefone: "47999999999"
-          }
-        ]
-      }
-    ]
-  },
-  {
     id: "compra",
     messages: [
-      { type: "user", text: "Quero investir em um imóvel em Bombinhas." },
-      { type: "ai", text: "Bombinhas está em plena valorização! Busca algo pronto ou lançamento?" },
-      { type: "user", text: "Lançamento para valorização futura." },
-      { type: "ai", text: "Entendi. Este lançamento no Mariscal é a melhor oportunidade hoje 👇",
+      { type: "user", text: "Gostaria de ver apartamentos para morar em Bombinhas." },
+      { type: "ai", text: "Olá! Bombinhas é um ótimo lugar para viver. Qual região você prefere?" },
+      { type: "user", text: "Pode ser em Bombas ou no Centro." },
+      { type: "ai", text: "Entendi. Selecionei este apartamento pronto para morar que pode te interessar. 👇",
         properties: [
           {
             id: "compra-1",
-            titulo: "Lançamento Premium Mariscal",
+            titulo: "Residencial Bombas",
             preco: 1250000,
-            bairro: "Mariscal",
+            bairro: "Bombas",
             tipo: "apartamento",
             finalidade: "compra",
             quartos: 3,
@@ -77,19 +54,19 @@ const CONVERSATIONS = [
   {
     id: "investimento",
     messages: [
-      { type: "user", text: "Quero investir em imóvel em Bombinhas para renda de temporada." },
-      { type: "ai", text: "Ótima escolha! Mariscal e Quatro Ilhas têm altíssima ocupação no verão. Qual sua faixa de investimento?" },
-      { type: "user", text: "Entre R$ 600 mil e R$ 900 mil." },
-      { type: "ai", text: "Encontrei uma oportunidade com excelente potencial de retorno 👇",
+      { type: "user", text: "Busco opções de investimento em imóveis aqui em Bombinhas." },
+      { type: "ai", text: "Olá! Posso ajudar com a sua análise de mercado. Você prefere imóveis prontos ou em construção?" },
+      { type: "user", text: "Prefiro lançamentos no Mariscal." },
+      { type: "ai", text: "Excelente escolha. Tenho este lançamento que se encaixa bem no perfil de busca. 👇",
         properties: [
           {
             id: "invest-1",
-            titulo: "Casa Alto Retorno - Mariscal",
+            titulo: "Lançamento Mariscal",
             preco: 780000,
             bairro: "Mariscal",
-            tipo: "casa",
+            tipo: "apartamento",
             finalidade: "compra",
-            quartos: 3,
+            quartos: 2,
             fotos: ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80"],
             anunciante_telefone: "47999999999"
           }

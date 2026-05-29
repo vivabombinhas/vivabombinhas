@@ -81,12 +81,12 @@ const MariaChat = () => {
             </div>
             <div>
               <h2 className="text-lg font-bold font-display text-foreground">
-                Olá! Eu sou a{" "}
+                Olá! Sou a{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Mar</span>
-                <span>IA</span> 👋
+                <span>IA</span>, sua assistente aqui no VIV Bombinhas. 😊
               </h2>
               <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
-                Sua assistente inteligente de imóveis em Bombinhas.
+                Como posso ajudar você hoje em Bombinhas?
               </p>
             </div>
             {!finalidade ? (
@@ -96,7 +96,7 @@ const MariaChat = () => {
                 <p className="text-xs text-center text-muted-foreground">
                   Buscando para{" "}
                   <span className="font-semibold text-accent">
-                    {finalidade === "temporada" ? "🏖️ Temporada" : finalidade === "compra" ? "🏠 Morar" : finalidade === "investimento" ? "📈 Investir" : "🤝 Anunciar"}
+                    {finalidade === "temporada" ? "🏖️ Passar férias" : finalidade === "compra" ? "🏠 Comprar imóvel" : finalidade === "investimento" ? "📈 Comprar para investir" : "🤝 Anunciar imóvel"}
                   </span>
                   {" · "}
                   <button onClick={clearFinalidade} className="underline hover:text-foreground">

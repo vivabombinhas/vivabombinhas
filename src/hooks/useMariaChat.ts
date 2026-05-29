@@ -5,10 +5,10 @@ import type { Finalidade } from "@/components/maria/FinalidadeQualifier";
 
 const FINALIDADE_KEY = "maria_finalidade";
 const FINALIDADE_LABEL: Record<Finalidade, string> = {
-  temporada: "aluguel de temporada",
-  investimento: "compra para investimento",
-  compra: "compra para morar",
-  anunciante: "anunciar um imóvel",
+  temporada: "passar férias",
+  investimento: "comprar para investir",
+  compra: "comprar imóvel",
+  anunciante: "anunciar imóvel",
 };
 
 export interface ChatMessage {
@@ -310,8 +310,8 @@ export function useMariaChat() {
           id: crypto.randomUUID(),
           role: "assistant",
           content: remaining.length > 0
-            ? `Pronto, ${firstName}! 🚀 Aqui estão as outras ${remaining.length} opções que separei. Alguma te interessou?`
-            : `Anotado, ${firstName}! Seu radar está ativo — quando entrar um imóvel no seu perfil, te aviso no WhatsApp. 🤝`,
+            ? `Pronto, ${firstName}! Aqui estão as outras opções que separei para o seu perfil.`
+            : `Anotado, ${firstName}! Assim que surgir algo no seu perfil, aviso você.`,
           timestamp: new Date(),
           properties: remaining.length > 0 ? remaining : undefined,
         };
