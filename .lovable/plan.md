@@ -1,82 +1,79 @@
-# Plano de Remodelagem Estratégica: MarIA v3
+# Plano Operacional: Validação e Lançamento MarIA v3
 
-Este plano detalha a transição da MarIA de um assistente de busca para um motor de inteligência comercial focado em captação, segmentação e geração de leads qualificados.
+Este plano visa transformar a estrutura técnica da MarIA v3 em um motor de receita validado em 7 dias.
 
-## 1. Auditoria de Arquivos e Estruturas
+## 1. Hipótese Principal do Negócio
+"A MarIA v3 consegue identificar e qualificar leads 'Premium' em Bombinhas com uma taxa de conversão em contato real superior a 15%, gerando um Custo por Lead Qualificado (CPLQ) que justifica a operação comercial para corretores parceiros."
 
-### Arquivos a serem alterados:
-- `supabase/functions/maria-search/index.ts`: O "cérebro" da MarIA. Onde a lógica de qualificação, intenção e lead score será implementada.
-- `src/hooks/useMariaChat.ts`: Ajuste no estado inicial e tratativa de novas categorias (investimento, proprietário).
-- `src/components/maria/FinalidadeQualifier.tsx`: Atualização dos botões iniciais para refletir o novo posicionamento (Remover Aluguel Anual, Adicionar Investimento e Anunciante).
+## 2. MVP (Produto Mínimo Viável)
+O MVP deve focar na **Qualificação Assistida**:
+- **Obrigatório**: Fluxos de conversa por pilar, Lógica de Lead Scoring (0-100), Persistência de dados comerciais no banco, Dashboard para Daniel.
+- **Descartável (para depois)**: Integração direta com CRMs externos, Pagamento in-app, Dashboard para múltiplos corretores, IA de voz.
 
-### Arquivos preservados (Segurança):
-- `src/components/maria/PropertyCard.tsx`: Mantém a exibição visual de imóveis.
-- `src/components/maria/LeadCaptureForm.tsx`: Mantém a funcionalidade de "Lead Gate".
-- `supabase/functions/notify-broker/index.ts`: Mantém o envio de alertas para corretores.
+## 3. Fluxo Ideal do Usuário
+1. **Entrada**: Anúncio focado ("Oportunidades em Bombinhas") ou Botão no site.
+2. **Pilar**: Usuário escolhe uma das 4 portas (Temporada, Compra, Investimento, Captação).
+3. **Engajamento**: MarIA entrega 2-3 imóveis/info rápidas e faz uma pergunta de qualificação.
+4. **Lead Gate**: Solicitação de contato para "liberar análise completa" ou "receber alerta no WhatsApp".
+5. **Score**: Sistema calcula o score em tempo real baseado nas respostas.
+6. **Handover**: Daniel recebe notificação via WhatsApp com o resumo "mastigado".
 
-### Tabelas/Campos necessários:
-- **Tabela `leads_maria`**: 
-    - `lead_score`: text (frio, morno, quente, premium)
-    - `perfil_investidor`: boolean
-    - `objetivo`: text (morar, investir, anunciar, temporada)
-    - `orcamento_max`: numeric
-    - `prazo_compra`: text
-- **Tabela `conversas_maria`**: Já existe para histórico, mas precisamos garantir que armazene a classificação da intenção em cada turno.
+## 4. Classificação de Leads
+- **Premium (80-100 pts)**: Telefone válido, orçamento > R$ 1M, prazo < 3 meses, objetivo claro (investimento/moradia).
+- **Quente (60-79 pts)**: Telefone válido, orçamento definido, bairro de preferência, interesse real.
+- **Morno (30-59 pts)**: Telefone válido, mas sem orçamento ou prazo definido (apenas "olhando").
+- **Frio (< 30 pts)**: Sem telefone ou apenas perguntas genéricas sem filtros.
 
-## 2. Novo Fluxo Conversacional
+## 5. Inteligência de Dados (Campos no Banco)
+- **Comerciais**: `orcamento_max`, `prazo_compra`, `objetivo`, `perfil_investidor`.
+- **Comportamentais**: `bairro_interesse`, `tipo_imovel`, `score_total`.
+- **Handover**: `resumo_ia` (string curta para o WhatsApp do Daniel).
 
-### Fase 1: Descoberta de Intenção
-A MarIA iniciará com:
-"Oi, eu sou a MarIA, assistente do VIV Bombinhas. Você está procurando imóvel para temporada ou para compra em Bombinhas?"
-*   **Opções:** [Temporada] [Compra] [Anunciar meu Imóvel]
+## 6. Roteiro de Conversa Estratégico
+- **Investimento**: "Para te enviar as melhores taxas de retorno, você busca ganho de capital (revenda) ou renda passiva (aluguel)?" -> Entrega exemplo -> "Qual o teto de investimento que você planeja?"
+- **Compra**: "Bombinhas tem perfis muito diferentes. Você prefere a agitação do Centro ou o sossego de Zimbros?" -> "Já tem uma ideia de quantos quartos precisa?"
+- **Captação**: "Queremos garantir que seu imóvel se destaque. Qual o ponto mais forte dele hoje (localização, vista, acabamento)?"
 
-### Fase 2: Ramificação (Branching)
-- **Se Compra:** "Você está comprando para morar, investir ou ainda entender melhor o mercado?"
-- **Se Investimento:** Focar em faixa de investimento e prazo.
-- **Se Anunciante:** Encaminhar para a rota de cadastro ou explicar o processo de destaque premium.
+## 7. Lógica de Lead Scoring (0-100)
+- **+20 pts**: Telefone e Nome confirmados.
+- **+20 pts**: Orçamento informado (numeric).
+- **+20 pts**: Prazo de compra definido (ex: "até 3 meses").
+- **+20 pts**: Objetivo validado (Investimento/Moradia).
+- **+10 pts**: Bairro ou Condomínio específico mencionado.
+- **+10 pts**: Usuário aceita falar com Daniel.
 
-## 3. Lógica de Lead Score e Encaminhamento
+## 8. Teste com Tráfego Real
+- **Canais**: Facebook/Instagram Ads.
+- **Público**: Interesses em "Bombinhas", "Investimento Imobiliário", "Second Home".
+- **Orçamento**: R$ 50/dia por 7 dias (R$ 350 total).
+- **Oferta**: "Deixe a MarIA encontrar sua próxima oportunidade em Bombinhas - Análise gratuita de mercado."
 
-A classificação será processada no final de cada qualificação dentro da Edge Function:
+## 9. Métricas de Sucesso (KPIs)
+- **Início de Conversa**: > 20% dos cliques.
+- **Lead Capturado**: > 10% das conversas.
+- **Lead Quente/Premium**: > 30% dos leads capturados.
+- **CPL Qualificado**: < R$ 25,00.
 
-| Score | Critérios | Ação |
-| :--- | :--- | :--- |
-| **Frio** | Navegação básica, filtros genéricos, sem telefone. | Alerta de novos imóveis. |
-| **Morno** | Telefone capturado + filtros de interesse definidos. | CRM padrão. |
-| **Quente** | Intenção clara + orçamento + bairro definido. | CRM + Alerta Corretor. |
-| **Premium** | Investimento/Compra + Prazo imediato + Perfil qualificado. | **Direcionamento para Daniel.** |
+## 10. Modelo de Monetização (Veredito: Híbrido)
+Começar com **Pay per Lead Qualificado (PPL)** para validar o valor, evoluindo para **Comissão** no fechamento. O corretor paga uma taxa pequena pelo lead filtrado e uma fatia da comissão se vender.
 
-## 4. Plano de Implementação em Fases
+## 11. Dashboard do Daniel (Prioridade 1)
+Uma visão simples em `AdminLeads`:
+- Cards coloridos por Score (Ouro para Premium).
+- Botão "Ver Resumo IA" que abre o histórico mastigado.
+- Botão "Chamar no WhatsApp" com template: "Oi [Nome], vi que a MarIA te ajudou com [Objetivo] em [Bairro]..."
 
-### Fase 1: Mudança Estrutural no Backend (Seguro)
-- Atualizar a Edge Function `maria-search` para reconhecer as novas finalidades (`investimento`, `anunciante`).
-- Implementar a extração de novos campos no prompt de extração de filtros (prazo, perfil investidor).
-- Adicionar os novos campos na tabela `leads_maria` via migração SQL.
+## 12. Plano de 7 Dias (Ação Objetiva)
+- **Dia 1**: Implementar lógica de Lead Scoring automática no `maria-search`.
+- **Dia 2**: Atualizar UI do Admin para exibir Score e novos campos (`objetivo`, `prazo`, etc).
+- **Dia 3**: Refinar Prompt para garantir que a MarIA não "solte" todos os imóveis sem pedir o objetivo.
+- **Dia 4**: Criar 2 campanhas de teste (Temporada vs. Investimento).
+- **Dia 5**: Lançar tráfego (R$ 50/dia).
+- **Dia 6**: Monitorar conversas e ajustar "alucinações" ou pontos de abandono.
+- **Dia 7**: Reunião de veredito: O lead gerado é bom? Daniel conseguiu contato?
 
-### Fase 2: Ajuste de Interface Inicial
-- Modificar o `FinalidadeQualifier.tsx` para mostrar as novas opções.
-- Atualizar o `useMariaChat.ts` para lidar com a nova primeira pergunta.
-
-### Fase 3: Lógica de Lead Score & Daniel
-- Implementar o cálculo de `lead_score` no backend.
-- Adicionar a mensagem de ponte para o Daniel ("Pelo seu perfil, talvez faça sentido uma análise...").
-
-### Fase 4: Limpeza e Otimização
-- Remover o código legado de "Aluguel Anual".
-- Ajustar os prompts de sistema para serem mais rígidos quanto a não prometer retorno financeiro.
-
----
-
-## Detalhes Técnicos para Desenvolvimento
-
-### Mudanças no prompt de Sistema (System Prompt):
-O novo prompt incluirá diretrizes de "Guardrails" para evitar promessas financeiras e garantir que a MarIA não tente agir como corretora humana, mas sim como uma facilitadora técnica.
-
-### Migração de Dados:
-```sql
-ALTER TABLE leads_maria 
-ADD COLUMN IF NOT EXISTS lead_score TEXT DEFAULT 'frio',
-ADD COLUMN IF NOT EXISTS objetivo TEXT,
-ADD COLUMN IF NOT EXISTS prazo_compra TEXT,
-ADD COLUMN IF NOT EXISTS orcamento_max NUMERIC;
-```
+## 13. Veredito Operacional
+- **O que fazer agora**: Implementar o scoring e a visualização no admin. Sem isso, estamos voando cegos.
+- **O que NÃO fazer**: Mudar o design do chat ou site. O visual atual é funcional o suficiente para teste.
+- **Maior Risco**: MarIA ser muito "interrogadora" e o usuário sair antes de deixar o telefone.
+- **Maior Oportunidade**: O pilar de **Investimento** é o que tem o ticket médio mais alto e o lead mais carente de uma "análise" rápida antes de falar com o corretor.

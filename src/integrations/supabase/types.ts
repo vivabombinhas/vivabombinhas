@@ -645,6 +645,7 @@ export type Database = {
           orcamento_max: number | null
           origem: string
           prazo_compra: string | null
+          resumo_ia: string | null
           session_id: string | null
           status: Database["public"]["Enums"]["status_lead"]
           telefone: string | null
@@ -666,6 +667,7 @@ export type Database = {
           orcamento_max?: number | null
           origem?: string
           prazo_compra?: string | null
+          resumo_ia?: string | null
           session_id?: string | null
           status?: Database["public"]["Enums"]["status_lead"]
           telefone?: string | null
@@ -687,6 +689,7 @@ export type Database = {
           orcamento_max?: number | null
           origem?: string
           prazo_compra?: string | null
+          resumo_ia?: string | null
           session_id?: string | null
           status?: Database["public"]["Enums"]["status_lead"]
           telefone?: string | null
