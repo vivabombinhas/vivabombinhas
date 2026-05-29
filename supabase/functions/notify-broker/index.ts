@@ -19,23 +19,22 @@ serve(async (req) => {
 
     const { lead_name, lead_phone, session_id } = await req.json();
 
-    // 1. Encontrar o lead ID
+    // 1. Encontrar o lead e seus dados de qualificação
     const { data: lead } = await supabase
       .from("leads_maria")
-      .select("id")
+      .select("id, lead_score, objetivo, resumo_ia")
       .eq("session_id", session_id)
-      .single();
+      .maybeSingle();
 
-    if (!lead) {
-      console.error("Lead não encontrado para a sessão:", session_id);
-    }
+    const scorePrefix = lead?.lead_score ? `[${lead.lead_score}] ` : "";
+    const goalInfo = lead?.objetivo ? ` Objetivo: ${lead.objetivo}.` : "";
 
     // 2. Criar notificação na tabela broker_notifications
     const { error: notifError } = await supabase
       .from("broker_notifications")
       .insert({
-        title: "Novo Lead Qualificado! 🔥",
-        message: `${lead_name} acabou de liberar os imóveis no chat.`,
+        title: `${scorePrefix}Novo Lead: ${lead_name}! 🔥`,
+        message: `${lead_name} (${lead_phone}) liberou o contato no chat.${goalInfo} ${lead?.resumo_ia || ""}`,
         lead_id: lead?.id,
         session_id: session_id,
         read: false
@@ -43,8 +42,7 @@ serve(async (req) => {
 
     if (notifError) throw notifError;
 
-    // 3. Simulação de envio de WhatsApp (aqui você integraria com Twilio ou similar)
-    console.log(`[WhatsApp Simulation] Notificando corretores: Novo lead ${lead_name} (${lead_phone})`);
+    console.log(`[WhatsApp Simulation] Notificando Daniel: ${scorePrefix} ${lead_name} - ${lead?.resumo_ia || ""}`);
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

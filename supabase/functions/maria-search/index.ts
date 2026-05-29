@@ -7,37 +7,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-interface SearchFilters {
-  finalidade?: string;
-  tipo?: string;
-  tipo_included?: string[];
-  tipo_excluded?: string[];
-  bairro?: string;
-  preco_min?: number;
-  preco_max?: number;
-  quartos?: number;
-  banheiros?: number;
-  vagas_garagem?: number;
-  capacidade_pessoas?: number;
-  piscina?: boolean;
-  vista_mar?: boolean;
-  frente_mar?: boolean;
-  mobiliado?: boolean;
-  aceita_pet?: boolean;
-  churrasqueira?: boolean;
-  ar_condicionado?: boolean;
-  wifi?: boolean;
-  objetivo?: string;
-  prazo_compra?: string;
-  perfil_investidor?: boolean;
-}
-
 const SYSTEM_PROMPT = `Você é a MarIA, concierge imobiliária de Bombinhas, Santa Catarina. Versão 3.0.
 
 ## SUA PERSONALIDADE
 - Tom: acolhedor, profissional, local.
 - Linguagem: informal mas competente. Respostas CURTAS (máximo 3-4 linhas).
-- Estilo: faça UMA pergunta por vez.
+- Estilo: faça UMA pergunta por vez. Alterne perguntas com valor (ex: citar um bairro, uma vantagem local).
 
 ## SEU FOCO (MarIA v3)
 Você foca exclusivamente em:
@@ -49,7 +24,10 @@ Você foca exclusivamente em:
 ### REMOVIDO: Aluguel anual. Não ofereça, não busque.
 
 ## REGRA PRINCIPAL — QUALIFICAR E CLASSIFICAR
-Você deve identificar a intenção, o valor comercial do lead e o próximo melhor passo.
+Seu objetivo é extrair:
+- Objetivo (Morar, Investir, Renda, Patrimônio, Anunciar)
+- Prazo (Imediato, 3 meses, 6 meses, Futuro)
+- Orçamento (Qual o teto de investimento/valor?)
 
 ### Saudação Inicial (se vago):
 "Oi! 👋 Sou a MarIA, assistente do VIV Bombinhas. Você busca imóvel para temporada ou para compra em Bombinhas?"
@@ -57,113 +35,64 @@ Você deve identificar a intenção, o valor comercial do lead e o próximo melh
 ### Fluxo Compra/Investimento:
 Se o usuário escolher compra, pergunte:
 "Você está comprando para morar, investir ou ainda entender melhor o mercado?"
-Essa pergunta é ESSENCIAL para separar o comprador comum do investidor.
-
-### Lógica de Lead Score (Interna):
-- Lead Premium: Compra/Investimento, orçamento definido, prazo claro.
-- Lead Quente: Intenção clara, bairro e orçamento definidos.
-- Lead Morno: Deixou contato e filtros básicos.
-- Lead Frio: Apenas pesquisa genérica.
 
 ## DANIEL / MARIA INVEST
-Daniel deve receber apenas leads Premium ou Quentes que pedem análise estratégica:
-"Pelo seu perfil, talvez faça sentido uma análise mais estratégica. Posso encaminhar seu interesse para o Daniel avaliar com você?"
+Daniel é o especialista. Encaminhe para ele apenas se o lead demonstrar alto interesse ou pedir análise estratégica.
 
 ## O QUE NUNCA FAZER
-- NUNCA prometa valorização ou retorno financeiro.
-- NUNCA aja como corretora humana (você é assistente).
-- NUNCA fale de turismo geral, restaurantes ou passeios.
-- NUNCA invente imóveis ou dados.
+- NUNCA aja como corretora humana.
 - NUNCA peça WhatsApp por texto (o sistema tem formulário visual).
 
 ## CAPTURA DE LEAD (LEAD GATE)
 O sistema controla o formulário visual. Quando houver resultados, use [SHOW_RESULTS].`;
 
-const FILTER_EXTRACTION_PROMPT = `Analise a CONVERSA COMPLETA e extraia os filtros de busca acumulados e dados de qualificação.
+const EXTRACTION_PROMPT = `Você é um analista de dados especializado em CRM imobiliário.
+Analise a conversa abaixo e extraia os dados de qualificação do lead no formato JSON.
 
-Campos v3 para extrair:
-- intent: "search", "qualifying" ou "conversation"
-- finalidade: "compra", "investimento", "temporada" ou "anunciante"
+Campos:
+- finalidade: "compra", "investimento", "temporada", "anunciante"
 - objetivo: "morar", "investir", "renda_temporada", "patrimonio", "anunciar"
 - prazo_compra: "imediato", "3_meses", "6_meses", "12_meses", "futuro"
-- orcamento_max: valor numérico
-- perfil_investidor: true/false
-- filtros padrão: tipo, bairro, preco_min, preco_max, quartos, capacidade_pessoas, etc.
+- orcamento_max: (número)
+- bairro_preferencia: (texto)
+- nome: (se citado)
+- telefone: (se citado)
+- resumo_ia: (uma frase curta resumindo o perfil do lead para o corretor)
 
-Retorne APENAS o JSON válido.`;
+Retorne APENAS o JSON. Se não souber um campo, deixe null.`;
 
-function normalizePhone(raw: string | null | undefined): string | null {
-  if (!raw) return null;
-  const original = String(raw).trim();
-  let digits = original.replace(/\D/g, "");
-  if (!digits) return null;
-  if (digits.length < 10 || digits.length > 11) return null;
-  return "55" + digits;
+async function calculateScore(data: any): Promise<number> {
+  let score = 0;
+  if (data.nome && data.telefone) score += 20;
+  if (data.orcamento_max) score += 20;
+  if (data.prazo_compra && (data.prazo_compra === 'imediato' || data.prazo_compra === '3_meses')) score += 20;
+  if (data.objetivo && (data.objetivo === 'investir' || data.objetivo === 'morar')) score += 20;
+  if (data.bairro_preferencia) score += 20;
+  return score;
 }
 
-function extractPhoneFromText(text: string): { normalized: string | null; hasShortPhone: boolean } {
-  if (!text) return { normalized: null, hasShortPhone: false };
-  const patterns = [/\(?\s*\d{2,3}\s*\)?\s*9?\s*\d{4}[-\s.]?\d{4}/g, /\d{10,13}/g];
-  for (const re of patterns) {
-    const matches = text.match(re) || [];
-    for (const m of matches) {
-      const normalized = normalizePhone(m);
-      if (normalized) return { normalized, hasShortPhone: false };
-    }
-  }
-  const allDigits = text.replace(/\D/g, "");
-  const normalized = normalizePhone(allDigits);
-  if (normalized) return { normalized, hasShortPhone: false };
-  return { normalized: null, hasShortPhone: allDigits.length >= 8 && allDigits.length <= 9 };
-}
-
-function extractNameFromText(text: string): string | null {
-  if (!text) return null;
-  const cleaned = text
-    .replace(/\+?\d[\d\s().-]{6,}/g, " ")
-    .replace(/\d+/g, " ")
-    .replace(/\b(meu nome é|me chamo|eu sou|aqui é|nome|whats(?:app)?|telefone|celular|n[uú]mero|sou o|sou a|me\s+llamo|mi\s+nombre)\b/gi, " ")
-    .replace(/[,:;\-_/\\|()]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (!cleaned || cleaned.length < 2 || cleaned.length > 80) return null;
-  if (!/[A-Za-zÀ-ÿ]/.test(cleaned)) return null;
-  if (/^(sim|quero|ok|beleza|pode|manda|avisar|salvar|topo|claro|tá|ta|si|s[ií])$/i.test(cleaned)) return null;
-  return cleaned.split(/\s+/).slice(0, 4).join(" ");
+function getScoreLabel(score: number): string {
+  if (score >= 80) return "Premium";
+  if (score >= 60) return "Quente";
+  if (score >= 30) return "Morno";
+  return "Frio";
 }
 
 async function upsertLeadBySession(supabase: any, sessionId: string, patch: Record<string, unknown>): Promise<string | null> {
   if (!sessionId) return null;
-  try {
-    const { data: existing } = await supabase.from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
-    if (existing?.id) {
-      const { error } = await supabase.from("leads_maria").update({ ...patch, last_contact_at: new Date().toISOString() }).eq("id", existing.id);
-      if (error) console.error("Lead update error:", error);
-      return existing.id as string;
-    }
-    const { data: inserted, error } = await supabase.from("leads_maria").insert({
-      session_id: sessionId,
-      origem: "maria_chat",
-      status: patch.nome && patch.telefone ? "novo" : "anonimo",
-      last_contact_at: new Date().toISOString(),
-      ...patch,
-    }).select("id").single();
-    if (error) { console.error("Lead insert error:", error); return null; }
-    return (inserted?.id as string) ?? null;
-  } catch (e) {
-    console.error("upsertLeadBySession failed:", e);
-    return null;
+  const { data: existing } = await supabase.from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
+  if (existing?.id) {
+    await supabase.from("leads_maria").update({ ...patch, last_contact_at: new Date().toISOString() }).eq("id", existing.id);
+    return existing.id;
   }
-}
-
-async function saveLastConversationTurn(supabase: any, leadId: string, userMsg: string, assistantMsg: string) {
-  try {
-    const rows = [{ lead_id: leadId, role: "user", content: userMsg }, { lead_id: leadId, role: "assistant", content: assistantMsg }].filter(r => r.content);
-    if (rows.length) {
-      const { error } = await supabase.from("lead_conversations").insert(rows);
-      if (error) console.error("Conv insert error:", error);
-    }
-  } catch (e) { console.error("saveLastConversationTurn failed:", e); }
+  const { data: inserted } = await supabase.from("leads_maria").insert({
+    session_id: sessionId,
+    origem: "maria_chat",
+    status: patch.nome && patch.telefone ? "novo" : "anonimo",
+    last_contact_at: new Date().toISOString(),
+    ...patch,
+  }).select("id").single();
+  return inserted?.id ?? null;
 }
 
 serve(async (req) => {
@@ -179,32 +108,61 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     if (action === "submit_lead") {
-      if (!sessionId || !nome || !telefone) return new Response(JSON.stringify({ success: false }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      const leadId = await upsertLeadBySession(supabase, sessionId, { nome, telefone, status: "novo" });
-      return new Response(JSON.stringify({ success: !!leadId }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      await upsertLeadBySession(supabase, sessionId, { nome, telefone, status: "novo" });
+      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const userMessage = messages?.[messages.length - 1]?.content || "";
-    const { normalized: detectedPhone } = extractPhoneFromText(userMessage);
-    const detectedName = extractNameFromText(userMessage);
-    if (detectedPhone && detectedName) await upsertLeadBySession(supabase, sessionId, { nome: detectedName, telefone: detectedPhone, status: "novo" });
-
+    // 1. Geração da resposta da MarIA
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
         model: "anthropic/claude-3.5-sonnet",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          ...messages.map((m: any) => ({ role: m.role, content: m.content })),
-        ],
+        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages.map((m: any) => ({ role: m.role, content: m.content }))],
         temperature: 0.3,
       }),
     });
-
     const aiData = await aiResponse.json();
-    const assistantMessage = aiData.choices?.[0]?.message?.content || "Olá! Como posso te ajudar?";
-    
+    const assistantMessage = aiData.choices?.[0]?.message?.content || "";
+
+    // 2. Extração de dados e Scoring (Background-ish)
+    try {
+      const extractionResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
+        body: JSON.stringify({
+          model: "google/gemini-2.0-flash-001",
+          messages: [
+            { role: "system", content: EXTRACTION_PROMPT },
+            { role: "user", content: messages.concat({ role: "assistant", content: assistantMessage }).map((m: any) => `${m.role}: ${m.content}`).join("\n") }
+          ],
+          temperature: 0,
+        }),
+      });
+      const extractionData = await extractionResponse.json();
+      const rawJson = extractionData.choices?.[0]?.message?.content?.replace(/```json|```/g, "").trim();
+      const extracted = JSON.parse(rawJson);
+      
+      if (extracted) {
+        const score = await calculateScore(extracted);
+        const leadPatch: any = {
+          lead_score: getScoreLabel(score),
+          objetivo: extracted.objetivo,
+          prazo_compra: extracted.prazo_compra,
+          orcamento_max: extracted.orcamento_max,
+          resumo_ia: extracted.resumo_ia,
+          interesse: extracted.finalidade,
+          bairro_interesse: extracted.bairro_preferencia
+        };
+        if (extracted.nome) leadPatch.nome = extracted.nome;
+        if (extracted.telefone) leadPatch.telefone = extracted.telefone;
+        
+        await upsertLeadBySession(supabase, sessionId, leadPatch);
+      }
+    } catch (e) {
+      console.error("Extraction/Scoring error:", e);
+    }
+
     return new Response(JSON.stringify({ reply: assistantMessage }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (err: any) {

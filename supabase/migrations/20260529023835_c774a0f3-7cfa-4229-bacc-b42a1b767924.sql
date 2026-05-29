@@ -1,0 +1,1 @@
+ALTER TABLE public.leads_maria ADD COLUMN IF NOT EXISTS resumo_ia TEXT;

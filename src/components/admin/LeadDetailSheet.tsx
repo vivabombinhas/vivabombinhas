@@ -54,6 +54,11 @@ interface Lead {
   created_at: string;
   next_followup_at?: string | null;
   last_contact_at?: string | null;
+  lead_score?: string | null;
+  objetivo?: string | null;
+  prazo_compra?: string | null;
+  orcamento_max?: number | null;
+  resumo_ia?: string | null;
 }
 
 interface Props {
@@ -287,6 +292,39 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
             {lead.tipo_imovel && <Badge variant="secondary" className="text-[10px]">{lead.tipo_imovel}</Badge>}
             {lead.faixa_preco && <Badge variant="secondary" className="text-[10px]">{lead.faixa_preco}</Badge>}
           </div>
+
+          {lead.resumo_ia && (
+            <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+              <h4 className="text-[10px] font-bold uppercase text-primary mb-1 flex items-center gap-1">
+                <Sparkles className="w-3 h-3" /> Resumo MarIA
+              </h4>
+              <p className="text-sm italic text-foreground">"{lead.resumo_ia}"</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-2 mt-4">
+             <div className="p-2 bg-muted rounded-md">
+                <p className="text-[9px] text-muted-foreground uppercase font-bold">Objetivo</p>
+                <p className="text-sm font-medium capitalize">{lead.objetivo?.replace('_', ' ') || "—"}</p>
+             </div>
+             <div className="p-2 bg-muted rounded-md">
+                <p className="text-[9px] text-muted-foreground uppercase font-bold">Prazo</p>
+                <p className="text-sm font-medium capitalize">{lead.prazo_compra?.replace('_', ' ') || "—"}</p>
+             </div>
+             <div className="p-2 bg-muted rounded-md">
+                <p className="text-[9px] text-muted-foreground uppercase font-bold">Orçamento Máx</p>
+                <p className="text-sm font-medium">
+                  {lead.orcamento_max 
+                    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(lead.orcamento_max) 
+                    : "—"}
+                </p>
+             </div>
+             <div className="p-2 bg-muted rounded-md">
+                <p className="text-[9px] text-muted-foreground uppercase font-bold">Lead Score</p>
+                <Badge variant="outline" className="mt-0.5 text-[10px] font-bold border-primary/30">{lead.lead_score || "—"}</Badge>
+             </div>
+          </div>
+
 
           {lead.telefone && (
             <DropdownMenu>

@@ -49,8 +49,16 @@ const STATUS_CONFIG: Record<LeadStatus, { label: string; className: string }> = 
 
 const INTERESSE_MAP: Record<string, string> = {
   compra: "Compra",
-  aluguel_anual: "Aluguel anual",
+  investimento: "Investimento",
   temporada: "Temporada",
+  anunciante: "Captação",
+};
+
+const SCORE_CONFIG: Record<string, { label: string; className: string }> = {
+  Premium: { label: "Premium", className: "bg-amber-500 text-white border-amber-600 shadow-sm" },
+  Quente: { label: "Quente", className: "bg-orange-500 text-white border-orange-600 shadow-sm" },
+  Morno: { label: "Morno", className: "bg-blue-400 text-white border-blue-500 shadow-sm" },
+  Frio: { label: "Frio", className: "bg-slate-400 text-white border-slate-500 shadow-sm" },
 };
 
 function formatDate(d: string) {
@@ -372,7 +380,8 @@ export default function AdminLeads() {
                     </TableHead>
                     <TableHead className="w-[24%]">Lead</TableHead>
                     <TableHead className="w-[18%]">Contato</TableHead>
-                    <TableHead className="w-[14%]">Interesse</TableHead>
+                    <TableHead className="w-[12%]">Interesse</TableHead>
+                    <TableHead className="w-[10%]">Score</TableHead>
                     <TableHead className="w-[18%]">Bairro / Tipo</TableHead>
                     <TableHead className="w-[10%]">Data</TableHead>
                     <TableHead className="w-[18%] text-right">Status / Ações</TableHead>
@@ -438,6 +447,16 @@ export default function AdminLeads() {
                           {lead.interesse ? (
                             <Badge variant="secondary" className="text-[10px]">
                               {INTERESSE_MAP[lead.interesse] ?? lead.interesse}
+                            </Badge>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+
+                        <TableCell className="align-top py-3">
+                          {lead.lead_score ? (
+                            <Badge className={`text-[10px] font-bold ${SCORE_CONFIG[lead.lead_score]?.className || ""}`}>
+                              {lead.lead_score}
                             </Badge>
                           ) : (
                             <span className="text-xs text-muted-foreground">—</span>
