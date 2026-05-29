@@ -316,7 +316,7 @@ serve(async (req) => {
     
     // Se não encontrou nada, a resposta deve ser clara sobre isso (conforme regra v3)
     if (!showResults && filters) {
-      finalReply = "Ainda não encontrei imóveis exatamente com esse perfil no portal agora. Quer que eu amplie a busca para bairros próximos ou prefere que eu te avise quando entrar algo parecido no portal?";
+      finalReply = "Ainda não encontrei imóveis exatamente com esse perfil no portal agora. Posso te avisar quando entrar um imóvel parecido com esse perfil no portal? Se quiser, também podemos ampliar a busca para bairros próximos.";
     } else if (!finalReply || finalReply.length < 5) {
       if (showResults) {
         finalReply = "Encontrei estas opções que combinam com o que você busca! O que acha?";
