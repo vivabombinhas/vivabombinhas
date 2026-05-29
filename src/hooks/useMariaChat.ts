@@ -6,8 +6,9 @@ import type { Finalidade } from "@/components/maria/FinalidadeQualifier";
 const FINALIDADE_KEY = "maria_finalidade";
 const FINALIDADE_LABEL: Record<Finalidade, string> = {
   temporada: "aluguel de temporada",
-  aluguel_anual: "aluguel anual (pra morar)",
-  venda: "compra (venda)",
+  investimento: "compra para investimento",
+  compra: "compra para morar",
+  anunciante: "anunciar um imóvel",
 };
 
 export interface ChatMessage {
@@ -61,7 +62,7 @@ export function useMariaChat() {
   const [finalidade, setFinalidadeState] = useState<Finalidade | null>(() => {
     try {
       const v = localStorage.getItem(FINALIDADE_KEY);
-      return v === "venda" || v === "aluguel_anual" || v === "temporada" ? v : null;
+      return (v === "compra" || v === "investimento" || v === "temporada" || v === "anunciante") ? (v as Finalidade) : null;
     } catch {
       return null;
     }

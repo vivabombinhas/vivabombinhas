@@ -637,10 +637,14 @@ export type Database = {
           id: string
           interesse: string | null
           last_contact_at: string | null
+          lead_score: string | null
           mensagem_original: string | null
           next_followup_at: string | null
           nome: string | null
+          objetivo: string | null
+          orcamento_max: number | null
           origem: string
+          prazo_compra: string | null
           session_id: string | null
           status: Database["public"]["Enums"]["status_lead"]
           telefone: string | null
@@ -654,10 +658,14 @@ export type Database = {
           id?: string
           interesse?: string | null
           last_contact_at?: string | null
+          lead_score?: string | null
           mensagem_original?: string | null
           next_followup_at?: string | null
           nome?: string | null
+          objetivo?: string | null
+          orcamento_max?: number | null
           origem?: string
+          prazo_compra?: string | null
           session_id?: string | null
           status?: Database["public"]["Enums"]["status_lead"]
           telefone?: string | null
@@ -671,10 +679,14 @@ export type Database = {
           id?: string
           interesse?: string | null
           last_contact_at?: string | null
+          lead_score?: string | null
           mensagem_original?: string | null
           next_followup_at?: string | null
           nome?: string | null
+          objetivo?: string | null
+          orcamento_max?: number | null
           origem?: string
+          prazo_compra?: string | null
           session_id?: string | null
           status?: Database["public"]["Enums"]["status_lead"]
           telefone?: string | null

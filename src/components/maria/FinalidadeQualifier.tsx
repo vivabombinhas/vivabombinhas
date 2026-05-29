@@ -1,6 +1,6 @@
-import { Home, Calendar, Tag } from "lucide-react";
+import { Home, Calendar, Tag, UserPlus } from "lucide-react";
 
-export type Finalidade = "venda" | "aluguel_anual" | "temporada";
+export type Finalidade = "compra" | "investimento" | "temporada" | "anunciante";
 
 interface FinalidadeQualifierProps {
   onSelect: (finalidade: Finalidade) => void;
@@ -16,23 +16,30 @@ const OPTIONS: Array<{
   {
     id: "temporada",
     label: "Temporada",
-    description: "Aluguel por dias ou semanas",
+    description: "Aluguel para lazer",
     icon: Calendar,
     emoji: "🏖️",
   },
   {
-    id: "aluguel_anual",
-    label: "Aluguel anual",
-    description: "Para morar (12 meses+)",
+    id: "compra",
+    label: "Comprar para morar",
+    description: "Sua residência em Bombinhas",
     icon: Home,
     emoji: "🏠",
   },
   {
-    id: "venda",
-    label: "Comprar",
-    description: "Venda de imóvel",
+    id: "investimento",
+    label: "Comprar para investir",
+    description: "Foco em retorno e valorização",
     icon: Tag,
-    emoji: "💰",
+    emoji: "📈",
+  },
+  {
+    id: "anunciante",
+    label: "Quero anunciar imóvel",
+    description: "Sou proprietário ou corretor",
+    icon: UserPlus,
+    emoji: "🤝",
   },
 ];
 
