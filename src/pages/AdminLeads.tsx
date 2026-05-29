@@ -72,6 +72,7 @@ function formatDate(d: string) {
 
 export default function AdminLeads() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [scoreFilter, setScoreFilter] = useState<string>("all");
   const [interesseFilter, setInteresseFilter] = useState<string>("all");
   const [bairroFilter, setBairroFilter] = useState<string>("all");
   const [search, setSearch] = useState<string>("");
@@ -168,6 +169,8 @@ export default function AdminLeads() {
     if (!leads) return [];
     const q = search.trim().toLowerCase();
     return leads.filter((l) => {
+      if (statusFilter !== "all" && l.status !== statusFilter) return false;
+      if (scoreFilter !== "all" && l.lead_score !== scoreFilter) return false;
       if (interesseFilter !== "all" && l.interesse !== interesseFilter) return false;
       if (bairroFilter !== "all" && l.bairro_interesse !== bairroFilter) return false;
       if (!q) return true;
@@ -186,10 +189,11 @@ export default function AdminLeads() {
   };
 
   const hasActiveFilters =
-    statusFilter !== "all" || interesseFilter !== "all" || bairroFilter !== "all" || !!search;
+    statusFilter !== "all" || scoreFilter !== "all" || interesseFilter !== "all" || bairroFilter !== "all" || !!search;
 
   const clearFilters = () => {
     setStatusFilter("all");
+    setScoreFilter("all");
     setInteresseFilter("all");
     setBairroFilter("all");
     setSearch("");
@@ -250,6 +254,19 @@ export default function AdminLeads() {
                 </SelectContent>
               </Select>
             </div>
+
+            <Select value={scoreFilter} onValueChange={setScoreFilter}>
+              <SelectTrigger className="w-32 h-9 text-sm">
+                <SelectValue placeholder="Temperatura" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas temp.</SelectItem>
+                <SelectItem value="Premium">Premium</SelectItem>
+                <SelectItem value="Quente">Quente</SelectItem>
+                <SelectItem value="Morno">Morno</SelectItem>
+                <SelectItem value="Frio">Frio</SelectItem>
+              </SelectContent>
+            </Select>
 
             <Select value={interesseFilter} onValueChange={setInteresseFilter}>
               <SelectTrigger className="w-36 h-9 text-sm">
