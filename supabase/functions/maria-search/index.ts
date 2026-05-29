@@ -107,6 +107,7 @@ serve(async (req) => {
   
   try {
     const body = await req.json();
+    console.log("[maria-search] Request body:", JSON.stringify(body));
     const { messages, session_id, action, nome, telefone } = body;
     const sessionId = session_id || "";
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -119,16 +120,25 @@ serve(async (req) => {
       return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    console.log("[maria-search] Calling AI Gateway...");
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
-        model: "anthropic/claude-3.5-sonnet",
+        model: "anthropic/claude-3-5-sonnet-20240620",
         messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages.map((m: any) => ({ role: m.role, content: m.content }))],
         temperature: 0.3,
       }),
     });
+
+    if (!aiResponse.ok) {
+      const errorText = await aiResponse.text();
+      console.error("[maria-search] AI Gateway error:", aiResponse.status, errorText);
+      throw new Error(`AI Gateway error: ${aiResponse.status}`);
+    }
+
     const aiData = await aiResponse.json();
+    console.log("[maria-search] AI Response received");
     const assistantMessage = aiData.choices?.[0]?.message?.content || "";
 
     try {

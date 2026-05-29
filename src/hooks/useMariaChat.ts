@@ -156,6 +156,7 @@ export function useMariaChat() {
 
     setMessages((prev) => [...prev, userMsg]);
     setIsLoading(true);
+    console.log("[MarIA Debug] sendMessage iniciado para:", content);
 
     try {
       const conversationHistory = [...messages, userMsg].map((m) => ({
@@ -171,6 +172,7 @@ export function useMariaChat() {
         finalidadeHintSentRef.current = true;
       }
 
+      console.log("[MarIA Debug] Invocando edge function 'maria-search' com history:", conversationHistory);
       const { data, error } = await supabase.functions.invoke("maria-search", {
         body: {
           messages: conversationHistory,
@@ -179,6 +181,7 @@ export function useMariaChat() {
           finalidade_hint: finalidade ?? undefined,
         },
       });
+      console.log("[MarIA Debug] Resposta da edge function:", { data, error });
       
       if (data) {
         console.log('[MarIA Debug] Data recebida:', JSON.stringify(data, null, 2));
