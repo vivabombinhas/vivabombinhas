@@ -371,7 +371,7 @@ serve(async (req) => {
     // --- Final response (contract expected by useMariaChat) ---
     return new Response(
       JSON.stringify({
-        reply: cleaned,
+        reply: finalReply,
         show_results: showResults,
         properties: visibleProperties,
         all_properties: allProperties,
