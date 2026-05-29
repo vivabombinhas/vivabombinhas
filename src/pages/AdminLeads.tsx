@@ -380,7 +380,8 @@ export default function AdminLeads() {
                     </TableHead>
                     <TableHead className="w-[24%]">Lead</TableHead>
                     <TableHead className="w-[18%]">Contato</TableHead>
-                    <TableHead className="w-[14%]">Interesse</TableHead>
+                    <TableHead className="w-[12%]">Interesse</TableHead>
+                    <TableHead className="w-[10%]">Score</TableHead>
                     <TableHead className="w-[18%]">Bairro / Tipo</TableHead>
                     <TableHead className="w-[10%]">Data</TableHead>
                     <TableHead className="w-[18%] text-right">Status / Ações</TableHead>
