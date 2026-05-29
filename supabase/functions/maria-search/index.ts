@@ -179,7 +179,10 @@ async function searchProperties(supabase: any, filters: any): Promise<any[]> {
       .or("oculta_para_maria.is.null,oculta_para_maria.eq.false")
       .limit(20);
 
-    if (filters.finalidade) q = q.eq("finalidade", filters.finalidade);
+    if (filters.finalidade) {
+      const dbFinalidade = filters.finalidade === "investimento" ? "compra" : filters.finalidade;
+      q = q.eq("finalidade", dbFinalidade);
+    }
     if (filters.tipo) q = q.eq("tipo", filters.tipo);
     if (filters.bairro) q = q.ilike("bairro", `%${filters.bairro}%`);
     if (filters.quartos_min) q = q.gte("quartos", filters.quartos_min);
