@@ -82,7 +82,10 @@ export async function callAI(lovableApiKey: string, model: string, system: strin
       temperature,
     }),
   });
-  if (!response.ok) throw new Error(`AI Gateway error (${model}): ${response.status}`);
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`AI Gateway error (${model}): ${response.status} - ${errorBody}`);
+  }
   const data = await response.json();
   return data.choices?.[0]?.message?.content || "";
 }
