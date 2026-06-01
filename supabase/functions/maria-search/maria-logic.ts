@@ -87,8 +87,7 @@ export async function callAI(lovableApiKey: string, model: string, system: strin
     }),
   });
   if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`AI Gateway error (${model}): ${response.status} - ${errorBody}`);
+    throw new Error(`AI Gateway error (${model}): ${response.status}`);
   }
   const data = await response.json();
   return data.choices?.[0]?.message?.content || "";
