@@ -80,10 +80,10 @@ const MariaChat = () => {
               <Bot className="w-8 h-8 text-primary-foreground" />
             </div>
             <div>
-              <h2 className="text-lg font-bold font-display text-foreground">
+              <h2 className="text-xl font-bold font-display text-foreground tracking-tight">
                 Olá! Sou a{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Mar</span>
-                <span>IA</span>, sua assistente aqui no VIV Bombinhas. 😊
+                <span className="text-foreground">IA</span>, sua assistente aqui no VIV Bombinhas. 😊
               </h2>
               <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
                 Como posso ajudar você hoje em Bombinhas?
