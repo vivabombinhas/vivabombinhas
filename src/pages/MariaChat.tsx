@@ -46,9 +46,9 @@ const MariaChat = () => {
         <meta name="robots" content="noindex" />
       </Helmet>
       {/* Header */}
-      <header className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card/80 backdrop-blur-md">
+      <header className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-10">
         <Link to="/" aria-label="Voltar para a página inicial">
-          <Button variant="ghost" size="icon" className="rounded-full" aria-label="Voltar">
+          <Button variant="ghost" size="icon" className="rounded-full h-9 w-9" aria-label="Voltar">
             <ArrowLeft className="w-5 h-5" />
           </Button>
         </Link>
@@ -80,10 +80,10 @@ const MariaChat = () => {
               <Bot className="w-8 h-8 text-primary-foreground" />
             </div>
             <div>
-              <h2 className="text-lg font-bold font-display text-foreground">
+              <h2 className="text-xl font-bold font-display text-foreground tracking-tight">
                 Olá! Sou a{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Mar</span>
-                <span>IA</span>, sua assistente aqui no VIV Bombinhas. 😊
+                <span className="text-foreground">IA</span>, sua assistente aqui no VIV Bombinhas. 😊
               </h2>
               <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
                 Como posso ajudar você hoje em Bombinhas?
@@ -92,18 +92,20 @@ const MariaChat = () => {
             {!finalidade ? (
               <FinalidadeQualifier onSelect={setFinalidade} />
             ) : (
-              <div className="w-full space-y-3">
-                <p className="text-xs text-center text-muted-foreground">
-                  Buscando para{" "}
-                  <span className="font-semibold text-accent">
+              <div className="w-full space-y-3 bg-muted/30 p-4 rounded-2xl border border-border/50">
+                <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-2">
+                  <span>Buscando para</span>
+                  <span className="font-bold text-foreground px-2 py-0.5 bg-accent/20 rounded-full border border-accent/20">
                     {finalidade === "temporada" ? "🏖️ Passar férias" : finalidade === "compra" ? "🏠 Comprar imóvel" : finalidade === "investimento" ? "📈 Comprar para investir" : "🤝 Anunciar imóvel"}
                   </span>
                   {" · "}
-                  <button onClick={clearFinalidade} className="underline hover:text-foreground">
+                  <button onClick={clearFinalidade} className="underline text-muted-foreground hover:text-foreground font-medium transition-colors">
                     trocar
                   </button>
                 </p>
-                <SuggestionChips onSelect={sendMessage} finalidade={finalidade} />
+                <div className="pt-2">
+                  <SuggestionChips onSelect={sendMessage} finalidade={finalidade} />
+                </div>
               </div>
             )}
           </div>

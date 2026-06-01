@@ -82,10 +82,10 @@ export function PropertyCard({ property }: PropertyCardProps) {
 
   return (
     <div
-      className={`relative bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
+      className={`relative bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group ${
         isDestaqueAtivo
           ? "border-2 border-transparent bg-gradient-to-br from-amber-400 via-yellow-300 to-amber-500 p-[2px]"
-          : "border border-border"
+          : "border border-border/60"
       }`}
     >
       <div className={isDestaqueAtivo ? "bg-card rounded-[10px] overflow-hidden" : ""}>
