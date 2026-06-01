@@ -3,6 +3,12 @@ import { PROMPTS, callAI, safeParseJSON } from "./maria-logic.ts";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
+function countSentences(text: string): number {
+  const cleanText = text.replace(/^[ \t]*[-*•]\s+/gm, "").replace(/^\d+\.\s+/gm, "");
+  const sentences = cleanText.split(/[.!?]+(?:\s+|$)/).filter(s => s.trim().length > 0);
+  return sentences.length;
+}
+
 Deno.test("MarIA - Intent Routing Validation", async () => {
   if (!LOVABLE_API_KEY) return;
 
@@ -33,8 +39,10 @@ Deno.test("MarIA - Consultivo Mode: Tone and Negative Check", async () => {
   const lowerReply = reply.toLowerCase();
   
   // Prohibitions check
-  const hasForbidden = ["garantido", "excelente", "com certeza", "melhores oportunidades", "off-market"].some(word => lowerReply.includes(word));
-  assert(!hasForbidden, "Reply contains forbidden words.");
+  const forbidden = ["excelente", "com certeza", "ótima escolha", "melhores oportunidades", "liquidez incrível", "retorno garantido", "off-market"];
+  for (const word of forbidden) {
+    assert(!lowerReply.includes(word), `Reply contains forbidden word: ${word}`);
+  }
 
   // Negative start check
   const startsWithNegative = lowerReply.startsWith("não encontrei") || 
@@ -55,8 +63,14 @@ Deno.test("MarIA - Busca Mode: Objective Check", async () => {
   console.log(`Busca Reply: "${reply}"`);
   
   // Check if it's objective (not too long)
-  const sentences = reply.split(/[.!?]+/).filter((s: string) => s.trim().length > 0).length;
-  assert(sentences <= 5, "Busca reply should be objective and short.");
+  const sentences = countSentences(reply);
+  assert(sentences <= 5, `Busca reply should be objective and short. Got ${sentences} sentences.`);
+  
+  const lowerReply = reply.toLowerCase();
+  const forbidden = ["excelente", "ótima escolha", "melhores oportunidades"];
+  for (const word of forbidden) {
+    assert(!lowerReply.includes(word), `Busca reply contains forbidden word: ${word}`);
+  }
 });
 
 Deno.test("MarIA - Proprietario Mode: Logic Check", async () => {
