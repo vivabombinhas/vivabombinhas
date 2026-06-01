@@ -85,7 +85,7 @@ serve(async (req) => {
     let mainPrompt = PROMPTS.BUSCA_CHAT;
 
     if (intent === "consultivo") {
-      mainModel = "google/gemini-2.0-pro-exp-02-05"; // Model mais inteligente para estratégia
+      mainModel = "google/gemini-2.5-pro"; // Model mais inteligente para estratégia
       mainPrompt = PROMPTS.CONSULTIVO_CHAT;
     } else if (intent === "proprietario") {
       mainPrompt = PROMPTS.PROPRIETARIO_CHAT;
