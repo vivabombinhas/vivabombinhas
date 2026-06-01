@@ -327,18 +327,20 @@ serve(async (req) => {
     // --- Handle reply logic and fallback ---
     let finalReply = cleaned;
     
-    // --- Handle reply logic and fallback ---
-    let finalReply = cleaned;
-    
-    // Se não encontrou nada, mas houve tentativa de busca (filters presente)
-    if (!showResults && filters) {
-      finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca por bairro, valor ou tipo de imóvel?";
-    } else if (!finalReply || finalReply.length < 5) {
+    // Se a IA não retornou texto ou texto muito curto e houve busca
+    if (!finalReply || finalReply.length < 10) {
       if (showResults) {
-        finalReply = "Encontrei algumas opções que combinam com o seu perfil. Separei as mais próximas dos critérios que você passou:\n\nQuer que eu refine por melhor preço, localização ou outra característica?";
+        finalReply = "Encontrei algumas opções que combinam com o seu perfil. Separei as mais próximas dos critérios que você passou:";
+      } else if (filters) {
+        finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca por bairro, valor ou tipo de imóvel?";
       } else {
         finalReply = "Como posso ajudar você hoje em Bombinhas?";
       }
+    }
+
+    // Se houve busca com sucesso, garante que a pergunta de refinamento esteja lá
+    if (showResults && !finalReply.includes("refine")) {
+      finalReply += "\n\nQuer que eu refine por melhor preço, localização ou outra característica?";
     }
 
 
