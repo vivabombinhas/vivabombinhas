@@ -231,7 +231,7 @@ serve(async (req) => {
     }
 
     // --- Main AI call ---
-    console.log("[maria-search] Calling AI Gateway (Main) with model google/gemini-2.0-flash...");
+    console.log("[maria-search] Calling AI Gateway (Main) with model anthropic/claude-3.5-sonnet...");
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
