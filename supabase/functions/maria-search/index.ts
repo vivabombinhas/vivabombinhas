@@ -95,6 +95,12 @@ function getScoreLabel(score: number): string {
 function safeParseJSON(text: string) {
   try {
     const cleaned = text.replace(/```json|```/g, "").trim();
+    // Tenta encontrar o bloco JSON caso haja texto ao redor
+    const firstBrace = cleaned.indexOf("{");
+    const lastBrace = cleaned.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      return JSON.parse(cleaned.substring(firstBrace, lastBrace + 1));
+    }
     return JSON.parse(cleaned);
   } catch (e) {
     console.error("JSON parse failed for:", text);
