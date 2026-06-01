@@ -101,7 +101,9 @@ function calculateScore(d: any): number {
   if (d.objetivo) s += 10;
   if (d.orcamento_max) {
     s += 15;
-    if (Number(d.orcamento_max) > 1_000_000) s += 5;
+    if (Number(d.orcamento_max) > 1_000_000) s += 10;
+    if (Number(d.orcamento_max) > 3_000_000) s += 10;
+    if (d.perfil_premium) s += 10;
   }
   switch (d.prazo_compra) {
     case "imediato": s += 20; break;
@@ -250,7 +252,7 @@ serve(async (req) => {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "anthropic/claude-3.5-sonnet",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           ...(messages || []).map((m: any) => ({ role: m.role, content: m.content })),
@@ -342,7 +344,7 @@ serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "google/gemini-2.0-flash",
           messages: [
             { role: "system", content: EXTRACTION_PROMPT },
             {
