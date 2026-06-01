@@ -320,6 +320,7 @@ serve(async (req) => {
       console.log("[maria-search] Properties found count:", found.length);
 
       if (found.length === 0) {
+        showResults = false;
         noResultsGate = !lead_captured;
       } else {
         showResults = true;
@@ -335,21 +336,31 @@ serve(async (req) => {
     // --- Handle reply logic and fallback ---
     let finalReply = cleaned;
     
-    // Se a IA não retornou texto ou texto muito curto e houve busca
-    if (!finalReply || finalReply.length < 10) {
-      if (showResults) {
-        finalReply = "Encontrei opções próximas ao seu perfil considerando " + (filters.finalidade === 'investimento' ? 'investimento' : filters.finalidade) + ", até R$ " + (filters.preco_max || 'seu limite') + " e " + (filters.bairro || filters.tipo || 'imóveis compatíveis') + ".";
-      } else if (filters) {
-        finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca por bairro, valor ou tipo de imóvel?";
-      } else {
-        finalReply = "Como posso ajudar você hoje em Bombinhas?";
+    // REGRA DETERMINÍSTICA DE RESPOSTA
+    if (showResults) {
+      // Se a IA não retornou texto ou texto muito curto, ou se o texto diz que não encontrou
+      if (!finalReply || finalReply.length < 10 || finalReply.toLowerCase().includes("não encontrei") || finalReply.toLowerCase().includes("desculpe")) {
+        finalReply = "Encontrei opções próximas ao seu perfil considerando " + (filters.finalidade === 'investimento' ? 'investimento' : filters.finalidade) + ", até R$ " + (filters.preco_max?.toLocaleString('pt-BR') || 'seu limite') + " e " + (filters.bairro || filters.tipo || 'imóveis compatíveis') + ".";
       }
+      // Garante que a pergunta de refinamento esteja lá
+      if (!finalReply.includes("?")) {
+        finalReply += "\n\nQuer que eu refine por melhor preço, localização ou outra característica?";
+      }
+    } else if (filters && filters.finalidade && filters.finalidade !== "anunciante") {
+      // Se houve busca mas zero resultados
+      finalReply = "Não encontrei opções exatas em " + (filters.bairro || "Bombinhas") + " até R$ " + (filters.preco_max?.toLocaleString('pt-BR') || "esse valor") + " agora. Posso ampliar para bairros próximos ou salvar um alerta para te avisar quando entrar algo parecido?";
+    } else if (!finalReply || finalReply.length < 10) {
+      // Fallback genérico se a IA falhar
+      finalReply = "Como posso ajudar você hoje em Bombinhas?";
     }
 
-    // Se houve busca com sucesso, garante que a pergunta de refinamento esteja lá
-    if (showResults && !finalReply.includes("?")) {
-      finalReply += "\n\nQuer que eu refine por melhor preço, localização ou outra característica?";
-    }
+    // Limpeza de frases proibidas/técnicas se vazarem da IA
+    finalReply = finalReply
+      .replace(/houve um erro/gi, "não encontrei exatamente o que buscava")
+      .replace(/falha do sistema/gi, "estou refinando a busca")
+      .replace(/não foram exibidos/gi, "podemos tentar outros critérios")
+      .replace(/problema técnico/gi, "vamos tentar de outra forma")
+      .replace(/desculpe, minha resposta anterior/gi, "vamos recomeçar a busca");
 
 
 
