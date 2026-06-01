@@ -266,7 +266,11 @@ serve(async (req) => {
       }
     } else if (filters && filters.finalidade && filters.finalidade !== "anunciante") {
       if (!finalReply || finalReply.length < 10) {
-        finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca para outros bairros ou registrar seu perfil para uma análise estratégica com o Daniel. O que prefere?";
+        if (intent === "consultivo") {
+          finalReply = "Este perfil de busca é bem específico e merece uma análise estratégica para entender o melhor encaixe de capital. Em vez de olhar apenas as opções visíveis agora, faz sentido comparar regiões e padrões para encontrar a melhor oportunidade. Quer que eu organize uma análise desse perfil para você?";
+        } else {
+          finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca para outros bairros ou registrar seu perfil para uma busca automatizada. O que prefere?";
+        }
       }
     } else if (!finalReply || finalReply.length < 5) {
       finalReply = "Como posso ajudar você hoje em Bombinhas? Estou aqui para ajudar a encontrar o imóvel ideal ou analisar o mercado.";
