@@ -338,7 +338,7 @@ serve(async (req) => {
     // Se a IA não retornou texto ou texto muito curto e houve busca
     if (!finalReply || finalReply.length < 10) {
       if (showResults) {
-        finalReply = "Encontrei algumas opções que combinam com o seu perfil. Separei as mais próximas dos critérios que você passou:";
+        finalReply = "Encontrei opções próximas ao seu perfil considerando " + (filters.finalidade === 'investimento' ? 'investimento' : filters.finalidade) + ", até R$ " + (filters.preco_max || 'seu limite') + " e " + (filters.bairro || filters.tipo || 'imóveis compatíveis') + ".";
       } else if (filters) {
         finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca por bairro, valor ou tipo de imóvel?";
       } else {
@@ -347,7 +347,7 @@ serve(async (req) => {
     }
 
     // Se houve busca com sucesso, garante que a pergunta de refinamento esteja lá
-    if (showResults && !finalReply.includes("refine")) {
+    if (showResults && !finalReply.includes("?")) {
       finalReply += "\n\nQuer que eu refine por melhor preço, localização ou outra característica?";
     }
 
