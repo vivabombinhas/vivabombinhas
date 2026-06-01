@@ -1,4 +1,4 @@
-import { assertEquals, assertGreaterOrEqual, assertLessOrEqual } from "https://deno.land/std@0.168.0/testing/asserts.ts";
+import { assertEquals, assert } from "https://deno.land/std@0.168.0/testing/asserts.ts";
 
 /**
  * Helper to count sentences in a text.
@@ -95,9 +95,9 @@ Deno.test("Consultive Mode: Short sentence count check (2-4 sentences)", async (
     
     console.log(`Sentences: ${sentences}, Bullets: ${bullets}`);
     
-    assertGreaterOrEqual(sentences, 2, `Should have at least 2 sentences. Got: ${sentences}\nReply: ${reply}`);
-    assertLessOrEqual(sentences, 5, `Should have at most 4-5 sentences (allowing a bit of slack for greetings/signoffs). Got: ${sentences}\nReply: ${reply}`);
-    assertLessOrEqual(bullets, 3, `Should have at most 3 bullets. Got: ${bullets}\nReply: ${reply}`);
+    assert(sentences >= 2, `Should have at least 2 sentences. Got: ${sentences}\nReply: ${reply}`);
+    assert(sentences <= 5, `Should have at most 4-5 sentences (allowing a bit of slack for greetings/signoffs). Got: ${sentences}\nReply: ${reply}`);
+    assert(bullets <= 3, `Should have at most 3 bullets. Got: ${bullets}\nReply: ${reply}`);
   }
 });
 
@@ -110,5 +110,5 @@ Deno.test("Consultive Mode: Max bullets check", async () => {
   console.log(`Reply for 5 reasons: "${reply}"`);
   console.log(`Bullets count: ${bullets}`);
   
-  assertLessOrEqual(bullets, 3, "Even if asked for more, it should strictly follow the 3 bullets limit.");
+  assert(bullets <= 3, "Even if asked for more, it should strictly follow the 3 bullets limit.");
 });
