@@ -203,11 +203,17 @@ export function useMariaChat() {
         console.error("Edge Function internal error:", data.error);
       }
 
-      const showResults = data.show_results === true;
+      let showResults = data.show_results === true;
       const clearResults = data.clear_results === true;
       
       const gateActive = data.gate_active === true && !leadCapturedRef.current;
       const noResultsGate = data.no_results_gate === true && !leadCapturedRef.current;
+
+      // Proteção: Se show_results é true mas não vieram imóveis, forçamos fallback seguro
+      if (showResults && (!data.properties || data.properties.length === 0)) {
+        console.error("[MarIA FRONT ERROR] show_results true mas properties vazio");
+        showResults = false;
+      }
 
       if (showResults) {
         const allProps: Property[] = data.all_properties || data.properties || [];
