@@ -215,25 +215,44 @@ serve(async (req) => {
     (async () => {
       try {
         const extReply = await callAI(lovableApiKey, "google/gemini-2.5-flash-lite", PROMPTS.EXTRACTION, messages.concat({ role: "assistant", content: rawReply }), 0);
-        const extracted = JSON.parse(extReply.replace(/```json|```/g, ""));
-        const score = calculateScore(extracted);
-        await upsertLeadBySession(supabase, sessionId, {
-          lead_score: getScoreLabel(score),
-          objetivo: extracted.objetivo,
-          prazo_compra: extracted.prazo_compra,
-          orcamento_max: extracted.orcamento_max,
-          resumo_ia: extracted.resumo_ia,
-          interesse: extracted.finalidade,
-          bairro_interesse: extracted.bairro_preferencia,
-          tipo_imovel: extracted.tipo_imovel,
-          nome: extracted.nome || undefined,
-          telefone: extracted.telefone || undefined,
-        });
+        const extracted = safeParseJSON(extReply);
+        if (extracted) {
+          const score = calculateScore(extracted);
+          await upsertLeadBySession(supabase, sessionId, {
+            lead_score: getScoreLabel(score),
+            objetivo: extracted.objetivo,
+            prazo_compra: extracted.prazo_compra,
+            orcamento_max: extracted.orcamento_max,
+            resumo_ia: extracted.resumo_ia,
+            interesse: extracted.finalidade,
+            bairro_interesse: extracted.bairro_preferencia,
+            tipo_imovel: extracted.tipo_imovel,
+            nome: extracted.nome || undefined,
+            telefone: extracted.telefone || undefined,
+          });
+        }
       } catch (e) { console.error("Extraction error:", e); }
     })();
 
+    // 5. DETERMINISTIC REPLY FALLBACK
+    let finalReply = cleaned;
+    if (showResults) {
+      if (!finalReply || finalReply.length < 10) {
+        finalReply = "Encontrei opções que fazem sentido para seu perfil considerando " + (filters.finalidade === 'investimento' ? 'investimento' : filters.finalidade) + ", até R$ " + (filters.preco_max?.toLocaleString('pt-BR') || 'seu limite') + ".";
+      }
+      if (!finalReply.includes("?")) {
+        finalReply += "\n\nO que achou dessas opções? Quer refinar por bairro ou outra característica?";
+      }
+    } else if (filters && filters.finalidade && filters.finalidade !== "anunciante") {
+      if (!finalReply || finalReply.length < 10) {
+        finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca para outros bairros ou registrar seu perfil para uma análise estratégica com o Daniel. O que prefere?";
+      }
+    } else if (!finalReply || finalReply.length < 5) {
+      finalReply = "Como posso ajudar você hoje em Bombinhas? Estou aqui para ajudar a encontrar o imóvel ideal ou analisar o mercado.";
+    }
+
     return new Response(JSON.stringify({
-      reply: cleaned,
+      reply: finalReply,
       show_results: showResults,
       properties: visibleProperties,
       all_properties: allProperties,
