@@ -192,6 +192,7 @@ serve(async (req) => {
     }
 
     // 3. FILTERS & SEARCH
+    console.log("[maria-search] Raw AI reply for parsing:", rawReply);
     const { filters, cleaned } = parseFiltersBlock(rawReply);
     let showResults = false, noResultsGate = false, gateActive = false;
     let allProperties: any[] = [], visibleProperties: any[] = [];
