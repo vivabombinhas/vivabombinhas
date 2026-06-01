@@ -12,7 +12,7 @@ const corsHeaders = {
 // MarIA v5.0 — Assistente Estratégica VIV Bombinhas
 // ============================================================
 
-const PROMPTS = {
+export const PROMPTS = {
   ROUTER: `Você é o roteador de intenções da MarIA, assistente premium do VIV Bombinhas.
 Classifique a última mensagem do usuário e o histórico com base no significado REAL, não apenas palavras-chave.
 
@@ -85,7 +85,7 @@ Regras:
 };
 
 // ---------- Helpers ----------
-async function callAI(lovableApiKey: string, model: string, system: string, messages: any[], temperature = 0.4) {
+export async function callAI(lovableApiKey: string, model: string, system: string, messages: any[], temperature = 0.4) {
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
@@ -100,7 +100,7 @@ async function callAI(lovableApiKey: string, model: string, system: string, mess
   return data.choices?.[0]?.message?.content || "";
 }
 
-function safeParseJSON(text: string) {
+export function safeParseJSON(text: string) {
   try {
     const cleaned = text.replace(/```json|```/g, "").trim();
     const firstBrace = cleaned.indexOf("{");
