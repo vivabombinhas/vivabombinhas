@@ -9,46 +9,62 @@ const corsHeaders = {
 };
 
 // ============================================================
-// MarIA v4.6 — Multi-Agent Architecture (Refined Prompts)
+// MarIA v5.0 — Assistente Estratégica VIV Bombinhas
 // ============================================================
 
 const PROMPTS = {
-  ROUTER: `Você é o roteador de intenções da MarIA. Analise a última mensagem do usuário e o histórico para classificar a intenção predominante.
+  ROUTER: `Você é o roteador de intenções da MarIA, assistente premium do VIV Bombinhas.
+Classifique a última mensagem do usuário e o histórico com base no significado REAL, não apenas palavras-chave.
+
 Categorias:
-- "busca": Quando o usuário quer ver imóveis, opções, fotos, cards, ou informou filtros objetivos como bairro, valor, tipo. Ex: "Quero comprar apartamento em Bombas até 900 mil".
-- "consultivo": Quando o usuário pergunta sobre m², riscos, valorização, comparação de bairros, investimento, liquidez, estratégia ou decisão. Ex: "Quero comprar em Bombinhas, vale mais Mariscal ou Bombas?".
-- "proprietario": Anunciar, cadastrar ou vender imóvel próprio.
-- "comum": Saudação, agradecimento ou conversa sem intenção clara de busca ou investimento.
+- "busca": Usuário quer ver imóveis, opções, fotos, cards, preços ou informou filtros objetivos (bairro, valor, tipo, temporada). Ex: "quero casa em Mariscal até 900 mil", "me mostre apartamentos", "tem imóveis em Bombas?".
+- "consultivo": Perguntas de decisão, estratégia ou investimento. Ex: "onde é melhor investir?", "qual o m² de Mariscal?", "vale comprar na planta?", "tenho R$2 milhões".
+- "proprietario": Usuário quer anunciar, vender, cadastrar ou divulgar imóvel próprio. Ex: "quero anunciar meu imóvel", "tenho uma casa para vender".
+- "comum": Saudação, dúvidas sobre a MarIA ou conversa sem intenção clara de busca/venda. Ex: "oi", "quem é você?".
 
-Retorne APENAS um JSON puro, sem blocos de markdown: {"intent": "busca" | "consultivo" | "proprietario" | "comum"}`,
+Regra Especial: Se o usuário quer imóveis E entender mercado, priorize "consultivo" para perguntar: "Você prefere que eu te mostre opções agora ou que eu organize primeiro uma análise mais estratégica?".
 
-  BUSCA_CHAT: `Você é a MarIA (Modo Busca). Seja rápida e objetiva.
-Ajude o usuário a filtrar imóveis: finalidade, bairro, tipo, valor.
-Quando tiver filtros suficientes, você DEVE emitir o bloco [FILTERS]{"finalidade":"...", "bairro":"...", "tipo":"...", "preco_max":...}[/FILTERS] na mesma resposta.
-Regra: Se o usuário pedir para ver imóveis, você DEVE emitir o bloco [FILTERS].`,
+Retorne APENAS um JSON puro: {"intent": "busca" | "consultivo" | "proprietario" | "comum"}`,
 
-  CONSULTIVO_CHAT: `Você é a MarIA, pré-consultora estratégica em Bombinhas (Mariscal, Bombas, Canto Grande, Quatro Ilhas). Seja premium, direta e estratégica.
+  BUSCA_CHAT: `Você é a MarIA (Modo Busca). Seja rápida, útil e objetiva.
+OBJETIVO: Levar o usuário aos cards de imóveis com o mínimo de fricção.
+- Pergunte apenas o que falta para filtrar.
+- Não faça análises longas.
+- Quando tiver filtros suficientes, emita o bloco [FILTERS]{"finalidade":"...", "bairro":"...", "tipo":"...", "preco_max":...}[/FILTERS].
+- Se não houver resultado, ofereça ajuste da busca ou alerta.`,
 
-REGRAS DE CONTEÚDO:
-- EXTENSÃO: Normalmente responda em 2 a 4 frases curtas. Só ultrapasse isso se o usuário pedir uma explicação mais detalhada.
-- TOM: Local, inteligente e objetivo. Evite saudações ou elogios ("Excelente", "Com certeza"). Sem hype. Use "opções compatíveis", "patrimônio no longo prazo", "costuma ter boa procura", "precisa ser comparado caso a caso".
-- PROIBIÇÕES: Não use "melhores oportunidades", "valorização" como promessa, "liquidez excelente", "ocupação garantida".
-- METRO QUADRADO: Não invente valores. Explique que o valor m² varia drasticamente por distância do mar, padrão e idade do imóvel.
-- CONDUÇÃO: Responda de forma útil e faça 1 pergunta estratégica (ex: busca renda, valorização ou uso próprio?).
+  CONSULTIVO_CHAT: `Você é a MarIA, assistente premium e estratégica do VIV Bombinhas. 
+OBJETIVO: Triagem estratégica e autoridade. Você não é corretora, é uma consultora local.
 
-REGRAS PARA "SEM RESULTADOS":
-- Em fluxos de investimento/compra, JAMAIS comece com "não encontrei", "não temos" ou frases negativas.
-- Comece com uma leitura estratégica da região/perfil. Explique que limitar a decisão ao que está visível agora no portal pode não ser o melhor caminho.
-- Ofereça comparação de regiões ou análise estratégica com o Daniel.
+REGRAS DE OURO:
+- TOM: Premium, seguro, estratégico, curto (2 a 4 frases).
+- PROIBIÇÕES: Jamais use "Excelente", "Com certeza", "Ótima escolha", "melhores oportunidades", "liquidez incrível", "retorno garantido", "off-market".
+- PREFERIR: "faz sentido analisar", "depende do objetivo", "precisa ser comparado", "pode ser interessante", "costuma ter boa procura".
+- M²: Não invente números. Explique que varia por distância do mar, padrão e idade. Pergunte se busca para compra agora ou estudo.
+- RISCO: Fale de riscos de forma responsável (localização média, baixa liquidez em nichos, desalinhamento com objetivo).
 
-DANIEL E LEAD:
-- Ofereça análise com o Daniel quando houver pelo menos 2 sinais: orçamento > 1.5M, intenção de investimento, dúvida estratégica, comparação de bairros, dúvida m²/risco/liquidez, ou prazo de compra definido.
-- Venda o valor da análise antes de oferecer o Daniel: "comparar região, perfil do imóvel, liquidez, risco e coerência da compra."
-- Em seguida diga: "Essa leitura pode ser conduzida pelo Daniel...".
-- Se aceito, peça Nome e WhatsApp: "Para organizar seu perfil para análise, me informe seu nome e WhatsApp."
-- Não diga "registrar interesse" ou "Daniel vai te chamar" sem ter o contato.`,
+REGRAS PARA "SEM RESULTADO":
+- JAMAIS comece com "não encontrei" ou frases negativas.
+- Comece com leitura estratégica. Ex: "Para esse perfil, faz sentido comparar Mariscal com Bombas para entender onde seu capital tem melhor encaixe. Quer que eu organize uma análise desse perfil?".
 
-  EXTRACTION: `Você é um analista de CRM estratégico. Analise a conversa e devolva APENAS um JSON puro, sem blocos de markdown.
+DANIEL E ANÁLISE:
+- Não jogue o nome Daniel sem contexto. 
+- 1º Venda o valor: "comparar região, perfil, liquidez, risco e coerência da compra."
+- 2º Ofereça: "Essa leitura pode ser conduzida pelo Daniel...".
+- SINAIS PARA OFERECER: Mínimo 2 sinais (Investimento, >1.5M, dúvida m²/risco, comparação bairros).
+- CAPTURA: Peça nome e WhatsApp antes de dizer que vai encaminhar: "Para organizar seu perfil para análise, me informe seu nome e WhatsApp."`,
+
+  PROPRIETARIO_CHAT: `Você é a MarIA (Modo Proprietário). 
+- Identifique se é proprietário, corretor ou imobiliária.
+- Pergunte se o imóvel é para venda ou temporada.
+- Explique que você recomenda imóveis que combinam com buscas reais no portal.
+- Direcione para o fluxo de cadastro.`,
+
+  COMUM_CHAT: `Você é a MarIA, assistente do VIV Bombinhas.
+- Explique rapidamente que ajuda a encontrar imóveis (temporada/compra), investir ou anunciar.
+- Convide o usuário a escolher um caminho.`,
+
+  EXTRACTION: `Você é um analista de CRM estratégico. Devolva APENAS um JSON puro.
 JSON Schema:
 {
   "finalidade": "temporada" | "compra" | "investimento" | "anunciante" | null,
@@ -61,11 +77,11 @@ JSON Schema:
   "telefone": string | null,
   "perfil_premium": boolean,
   "quer_falar_daniel": boolean,
+  "lead_score": "frio" | "morno" | "quente" | "premium",
   "resumo_ia": string
 }
 Regras:
-- "perfil_premium": true se houver sinais de lead qualificado (orçamento > 1.5M ou dúvidas estratégicas).
-- Retorne apenas o JSON.`
+- "resumo_ia": Útil para o Daniel (ex: "Lead premium. Busca renda em Mariscal, 2mi, aberto a análise comparativa").`
 };
 
 // ---------- Helpers ----------
@@ -84,26 +100,6 @@ async function callAI(lovableApiKey: string, model: string, system: string, mess
   return data.choices?.[0]?.message?.content || "";
 }
 
-// ---------- Lead Scoring ----------
-function calculateScore(d: any): number {
-  let s = 0;
-  if (d.nome && d.telefone) s += 30;
-  if (d.finalidade) s += 10;
-  if (d.orcamento_max) {
-    s += 15;
-    if (Number(d.orcamento_max) > 1_500_000) s += 20;
-    if (d.perfil_premium) s += 10;
-  }
-  return Math.min(s, 100);
-}
-
-function getScoreLabel(score: number): string {
-  if (score >= 80) return "Premium";
-  if (score >= 60) return "Quente";
-  if (score >= 30) return "Morno";
-  return "Frio";
-}
-
 function safeParseJSON(text: string) {
   try {
     const cleaned = text.replace(/```json|```/g, "").trim();
@@ -114,12 +110,10 @@ function safeParseJSON(text: string) {
     }
     return JSON.parse(cleaned);
   } catch (e) {
-    console.error("JSON parse failed for:", text);
     return null;
   }
 }
 
-// ---------- Lead upsert ----------
 async function upsertLeadBySession(supabase: any, sessionId: string, patch: Record<string, unknown>) {
   if (!sessionId) return null;
   const { data: existing } = await supabase.from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
@@ -130,17 +124,16 @@ async function upsertLeadBySession(supabase: any, sessionId: string, patch: Reco
   const { data: inserted } = await supabase.from("leads_maria").insert({
     session_id: sessionId,
     origem: "maria_chat",
-    status: patch.nome && patch.telefone ? "novo" : "anonimo",
+    status: (patch.nome && patch.telefone) ? "novo" : "anonimo",
     last_contact_at: new Date().toISOString(),
     ...patch,
   }).select("id").single();
   return inserted?.id || null;
 }
 
-// ---------- Property search ----------
 async function searchProperties(supabase: any, filters: any): Promise<any[]> {
   try {
-    let q = supabase.from("imoveis").select("id,titulo,bairro,finalidade,tipo,preco,preco_temporada_diaria,quartos,suites,banheiros,vagas_garagem,area_m2,capacidade_pessoas,piscina,vista_mar,frente_mar,mobiliado,churrasqueira,ar_condicionado,wifi,aceita_pet,fotos,link_anuncio,anunciante_telefone,gestao_propria,destaque_pago,destaque_ate").eq("status", "ativo").or("oculta_para_maria.is.null,oculta_para_maria.eq.false").limit(20);
+    let q = supabase.from("imoveis").select("*").eq("status", "ativo").or("oculta_para_maria.is.null,oculta_para_maria.eq.false").limit(20);
     if (filters.finalidade) {
       const dbFinalidade = filters.finalidade === "investimento" ? "compra" : filters.finalidade;
       q = q.eq("finalidade", dbFinalidade);
@@ -183,39 +176,42 @@ serve(async (req) => {
     }
 
     // 1. ROUTER
-    const routerReply = await callAI(lovableApiKey, "google/gemini-2.5-flash-lite", PROMPTS.ROUTER, messages.slice(-5), 0);
-    let intent = "busca";
+    const routerReply = await callAI(lovableApiKey, "google/gemini-2.0-flash-lite-preview-02-05", PROMPTS.ROUTER, messages.slice(-5), 0);
     const routerData = safeParseJSON(routerReply);
-    if (routerData?.intent) {
-      intent = routerData.intent;
-    }
+    const intent = routerData?.intent || "busca";
 
     // 2. MAIN CHAT
-    let mainModel = intent === "consultivo" ? "google/gemini-2.5-pro" : "google/gemini-2.5-flash";
-    let mainPrompt = intent === "consultivo" ? PROMPTS.CONSULTIVO_CHAT : PROMPTS.BUSCA_CHAT;
-    
+    let mainModel = "google/gemini-2.0-flash-lite-preview-02-05";
+    let mainPrompt = PROMPTS.BUSCA_CHAT;
+
+    if (intent === "consultivo") {
+      mainModel = "google/gemini-2.0-pro-exp-02-05"; // Model mais inteligente para estratégia
+      mainPrompt = PROMPTS.CONSULTIVO_CHAT;
+    } else if (intent === "proprietario") {
+      mainPrompt = PROMPTS.PROPRIETARIO_CHAT;
+    } else if (intent === "comum") {
+      mainPrompt = PROMPTS.COMUM_CHAT;
+    }
+
     let rawReply = "";
     try {
       rawReply = await callAI(lovableApiKey, mainModel, mainPrompt, messages);
     } catch (err) {
-      if (mainModel === "google/gemini-2.5-pro") {
-        rawReply = await callAI(lovableApiKey, "google/gemini-2.5-flash", mainPrompt, messages);
-      } else { throw err; }
+      rawReply = await callAI(lovableApiKey, "google/gemini-2.0-flash-lite-preview-02-05", mainPrompt, messages);
     }
 
     // 3. FILTERS, EXTRACTION & SEARCH
     let { filters, cleaned } = parseFiltersBlock(rawReply);
     
-    // EXTRACTION (Parallel/Immediate)
+    // Immediate extraction for context
     let extractedData = null;
     try {
-      const extReply = await callAI(lovableApiKey, "google/gemini-2.5-flash-lite", PROMPTS.EXTRACTION, messages.concat({ role: "assistant", content: rawReply }), 0);
+      const extReply = await callAI(lovableApiKey, "google/gemini-2.0-flash-lite-preview-02-05", PROMPTS.EXTRACTION, messages.concat({ role: "assistant", content: rawReply }), 0);
       extractedData = safeParseJSON(extReply);
     } catch (e) { console.error("Extraction error:", e); }
 
-    // Fallback de Busca: Se a IA não emitiu [FILTERS] mas o extrator pegou dados objetivos
+    // Fallback: IA esqueceu [FILTERS] mas o extrator pegou filtros objetivos
     if (!filters && extractedData && (extractedData.bairro_preferencia || extractedData.orcamento_max || extractedData.tipo_imovel)) {
-      console.log("[maria-search] Fallback: Applying filters from extraction");
       filters = {
         finalidade: extractedData.finalidade || "compra",
         bairro: extractedData.bairro_preferencia,
@@ -246,9 +242,8 @@ serve(async (req) => {
     if (extractedData) {
       (async () => {
         try {
-          const score = calculateScore(extractedData);
           await upsertLeadBySession(supabase, sessionId, {
-            lead_score: getScoreLabel(score),
+            lead_score: extractedData.lead_score,
             objetivo: extractedData.objetivo,
             prazo_compra: extractedData.prazo_compra,
             orcamento_max: extractedData.orcamento_max,
@@ -263,23 +258,10 @@ serve(async (req) => {
       })();
     }
 
-    // 5. DETERMINISTIC REPLY FALLBACK
-    let finalReply = cleaned;
-    if (showResults) {
-      if (!finalReply || finalReply.length < 10) {
-        finalReply = "Encontrei opções compatíveis com seu perfil em " + (filters.bairro || 'Bombinhas') + ".";
-      }
-      if (!finalReply.includes("?")) {
-        finalReply += "\n\nO que achou dessas opções? Quer refinar por bairro ou outra característica?";
-      }
-    } else if (filters && filters.finalidade && filters.finalidade !== "anunciante") {
-      if (!finalReply || finalReply.length < 10) {
-        if (intent === "consultivo") {
-          finalReply = "Este perfil de busca merece uma análise estratégica para entender o melhor patrimônio no longo prazo. Em vez de olhar apenas as opções visíveis, faz sentido comparar regiões. Quer que eu organize seu perfil para uma análise?";
-        } else {
-          finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca para outros bairros. O que prefere?";
-        }
-      }
+    // 5. DETERMINISTIC REPLY FALLBACK (Para casos de resposta vazia ou erro)
+    let finalReply = cleaned || rawReply;
+    if (showResults && (!finalReply || finalReply.length < 10)) {
+      finalReply = "Encontrei opções compatíveis com seu perfil em " + (filters.bairro || 'Bombinhas') + ".";
     }
 
     return new Response(JSON.stringify({
@@ -292,7 +274,6 @@ serve(async (req) => {
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (err: any) {
-    console.error("Fatal:", err);
     return new Response(JSON.stringify({ reply: "Desculpe, tive um problema agora. 🙏", error: err.message }), { status: 500, headers: corsHeaders });
   }
 });
