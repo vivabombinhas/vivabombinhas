@@ -84,21 +84,29 @@ IMPORTANTE: Nunca ofereça o Daniel ANTES de tentar buscar e mostrar imóveis re
 Nunca prometa que ele responde rápido, nem que tem oportunidade exclusiva.
 
 # QUANDO MOSTRAR IMÓVEIS
-Quando tiver finalidade + ao menos 3 filtros concretos (bairro, tipo, faixa de valor, quartos, etc.), ou após o usuário confirmar o resumo dos critérios, você DEVE emitir a resposta no formato abaixo:
+Quando tiver finalidade + ao menos 3 filtros concretos, ou após confirmação, você DEVE emitir a resposta no formato abaixo:
 
-1. Frase de transição positiva (ex: "Encontrei algumas opções que combinam com o seu perfil. Separei as mais próximas dos critérios que você passou:")
-2. O bloco [FILTERS]{...}[/FILTERS] com os dados técnicos.
-3. Uma pergunta final de refinamento (ex: "Quer que eu refine por melhor preço, localização ou outra característica?")
+1. Frase contextual: "Encontrei opções próximas ao seu perfil considerando [finalidade], [faixa de valor] e [bairro/tipo desejado]."
+   - Se os resultados não forem exatos: "Não encontrei exatamente com todos os critérios, mas separei opções próximas."
+2. O bloco [FILTERS]{...}[/FILTERS].
+3. Pergunta final de refinamento específica (ex: "Como existem muitas opções, quer filtrar por proximidade da praia ou preferência de tamanho?").
+
+Regras de Segurança:
+- NÃO misture terrenos com apartamentos sem avisar.
+- NÃO prometa valorização garantida.
+- NÃO diga "melhor investimento" sem análise.
+- NÃO prometa disponibilidade.
+- Se houver poucos resultados: sugira refinamento.
+- Se houver muitos resultados: peça para filtrar (bairro, preço, tipo, proximidade praia).
+- SEMPRE termine com uma pergunta de refinamento útil, nunca genérica.
 
 Exemplo de saída esperada:
-"Encontrei algumas opções que combinam com o seu perfil. Separei as mais próximas dos critérios que você passou:
+"Encontrei opções próximas ao seu perfil considerando compra, até 1.5M e aptos no Mariscal.
 [FILTERS]{\"finalidade\":\"compra\",\"bairro\":\"Mariscal\",\"preco_max\":1500000}[/FILTERS]
 Quer que eu refine por melhor preço, localização ou outra característica?"
 
-IMPORTANTE: O bloco [FILTERS] deve estar NO MEIO da sua resposta, separando o texto de introdução da pergunta de refinamento. Nunca responda apenas "vou buscar" sem o bloco.
-
 # QUANDO NÃO HOUVER DADOS
-Se você identificar que não existem imóveis compatíveis (ou se o sistema retornar vazio), responda:
+Se o sistema retornar vazio:
 "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca por bairro, valor ou tipo de imóvel?"
 E ofereça sugestões de filtros para ampliar.`;
 
@@ -330,7 +338,7 @@ serve(async (req) => {
     // Se a IA não retornou texto ou texto muito curto e houve busca
     if (!finalReply || finalReply.length < 10) {
       if (showResults) {
-        finalReply = "Encontrei algumas opções que combinam com o seu perfil. Separei as mais próximas dos critérios que você passou:";
+        finalReply = "Encontrei opções próximas ao seu perfil considerando " + (filters.finalidade === 'investimento' ? 'investimento' : filters.finalidade) + ", até R$ " + (filters.preco_max || 'seu limite') + " e " + (filters.bairro || filters.tipo || 'imóveis compatíveis') + ".";
       } else if (filters) {
         finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca por bairro, valor ou tipo de imóvel?";
       } else {
@@ -339,7 +347,7 @@ serve(async (req) => {
     }
 
     // Se houve busca com sucesso, garante que a pergunta de refinamento esteja lá
-    if (showResults && !finalReply.includes("refine")) {
+    if (showResults && !finalReply.includes("?")) {
       finalReply += "\n\nQuer que eu refine por melhor preço, localização ou outra característica?";
     }
 

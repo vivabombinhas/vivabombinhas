@@ -243,8 +243,6 @@ export function useMariaChat() {
       const cleanContent = rawReply
         .replace(/\[FILTERS\][\s\S]*?\[\/FILTERS\]/g, "")
         .replace(/\[FILTERS\][\s\S]*/g, "")
-        .replace(/\[SHOW_RESULTS\]/g, "")
-        .replace(/\[NO_RESULTS_YET\]/g, "")
         .trim();
 
       const assistantMsg: ChatMessage = {
