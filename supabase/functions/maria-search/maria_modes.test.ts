@@ -55,7 +55,7 @@ Deno.test("MarIA - Busca Mode: Objective Check", async () => {
   console.log(`Busca Reply: "${reply}"`);
   
   // Check if it's objective (not too long)
-  const sentences = reply.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+  const sentences = reply.split(/[.!?]+/).filter((s: string) => s.trim().length > 0).length;
   assert(sentences <= 5, "Busca reply should be objective and short.");
 });
 
