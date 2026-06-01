@@ -35,6 +35,12 @@ Nunca, em hipótese alguma, use frases como:
 Nunca peça nome ou WhatsApp por texto — o sistema mostra um formulário visual no momento certo.
 Nunca invente imóveis. Se o sistema não tiver opções compatíveis, diga isso com honestidade.
 
+# COMPORTAMENTO OBRIGATÓRIO DE BUSCA
+Sempre que você identificar critérios suficientes para buscar imóveis (finalidade + 3 filtros) ou o usuário confirmar o resumo, você DEVE emitir os cards na mesma resposta.
+NUNCA responda apenas "vou buscar agora" ou "um momento" sem o bloco [FILTERS].
+A busca deve ser disparada IMEDIATAMENTE no mesmo turno da sua resposta.
+
+
 # 4 INTENÇÕES (PILARES)
 1. Temporada — aluguel de curta estadia.
 2. Compra para morar — uso próprio / casa de praia.
@@ -78,16 +84,23 @@ IMPORTANTE: Nunca ofereça o Daniel ANTES de tentar buscar e mostrar imóveis re
 Nunca prometa que ele responde rápido, nem que tem oportunidade exclusiva.
 
 # QUANDO MOSTRAR IMÓVEIS
-Quando tiver finalidade + ao menos 3 filtros concretos (bairro, tipo, faixa, quartos, capacidade, extras), e SOMENTE então (ou após confirmação do resumo), emita uma resposta textual positiva (ex: "Com certeza! Vou buscar agora...") e ao final emita o bloco no formato exato:
+Quando tiver finalidade + ao menos 3 filtros concretos (bairro, tipo, faixa de valor, quartos, etc.), ou após o usuário confirmar o resumo dos critérios, você DEVE emitir a resposta no formato abaixo:
 
-[FILTERS]{"finalidade":"temporada|compra|investimento","bairro":"...","tipo":"casa|apartamento|terreno|cobertura","preco_max":000,"preco_min":000,"quartos_min":0,"capacidade_min":0,"piscina":true,"vista_mar":true,"frente_mar":true,"aceita_pet":true,"churrasqueira":true,"mobiliado":true}[/FILTERS]
+1. Frase de transição positiva (ex: "Encontrei algumas opções que combinam com o seu perfil. Separei as mais próximas dos critérios que você passou:")
+2. O bloco [FILTERS]{...}[/FILTERS] com os dados técnicos.
+3. Uma pergunta final de refinamento (ex: "Quer que eu refine por melhor preço, localização ou outra característica?")
 
-Use somente as chaves relevantes (omita o que o usuário não disse). Não invente filtros. Seu texto deve permanecer natural ANTES do bloco; o usuário não verá o bloco.
+Exemplo de saída esperada:
+"Encontrei algumas opções que combinam com o seu perfil. Separei as mais próximas dos critérios que você passou:
+[FILTERS]{\"finalidade\":\"compra\",\"bairro\":\"Mariscal\",\"preco_max\":1500000}[/FILTERS]
+Quer que eu refine por melhor preço, localização ou outra característica?"
 
-Se o usuário pedir imóveis mas o tópico for ANUNCIANTE, NÃO emita [FILTERS]; oriente para /anuncie.
+IMPORTANTE: O bloco [FILTERS] deve estar NO MEIO da sua resposta, separando o texto de introdução da pergunta de refinamento. Nunca responda apenas "vou buscar" sem o bloco.
 
 # QUANDO NÃO HOUVER DADOS
-Se o sistema retornar sem imóveis compatíveis, responda com honestidade ("ainda não tenho um imóvel exatamente nesse perfil cadastrado") e ofereça ampliar a busca ou ativar alerta.`;
+Se você identificar que não existem imóveis compatíveis (ou se o sistema retornar vazio), responda:
+"Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca por bairro, valor ou tipo de imóvel?"
+E ofereça sugestões de filtros para ampliar.`;
 
 const EXTRACTION_PROMPT = `Você é um analista de CRM imobiliário. Analise a conversa e devolva APENAS um JSON com:
 {
@@ -314,14 +327,17 @@ serve(async (req) => {
     // --- Handle reply logic and fallback ---
     let finalReply = cleaned;
     
-    // Se não encontrou nada, a resposta deve ser clara sobre isso (conforme regra v3)
+    // --- Handle reply logic and fallback ---
+    let finalReply = cleaned;
+    
+    // Se não encontrou nada, mas houve tentativa de busca (filters presente)
     if (!showResults && filters) {
-      finalReply = "Ainda não encontrei imóveis exatamente com esse perfil no portal agora. Posso te avisar quando entrar um imóvel parecido com esse perfil no portal? Se quiser, também podemos ampliar a busca para bairros próximos.";
+      finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca por bairro, valor ou tipo de imóvel?";
     } else if (!finalReply || finalReply.length < 5) {
       if (showResults) {
-        finalReply = "Encontrei estas opções que combinam com o que você busca! O que acha?";
+        finalReply = "Encontrei algumas opções que combinam com o seu perfil. Separei as mais próximas dos critérios que você passou:\n\nQuer que eu refine por melhor preço, localização ou outra característica?";
       } else {
-        finalReply = "Entendido! Como posso te ajudar agora?";
+        finalReply = "Como posso ajudar você hoje em Bombinhas?";
       }
     }
 
