@@ -20,7 +20,7 @@ Categorias:
 - "proprietario": Anunciar imóvel, vender como proprietário.
 - "comum": Oi, tudo bem, agradecimentos, conversas sem busca.
 
-Retorne APENAS um JSON: {"intent": "busca" | "consultivo" | "proprietario" | "comum"}`,
+Retorne APENAS um JSON puro, sem blocos de markdown: {"intent": "busca" | "consultivo" | "proprietario" | "comum"}`,
 
   BUSCA_CHAT: `Você é a MarIA (Modo Busca). Seja rápida e objetiva.
 Ajude o usuário a filtrar imóveis: finalidade, bairro, tipo, valor.
@@ -90,6 +90,16 @@ function getScoreLabel(score: number): string {
   return "Frio";
 }
 
+function safeParseJSON(text: string) {
+  try {
+    const cleaned = text.replace(/```json|```/g, "").trim();
+    return JSON.parse(cleaned);
+  } catch (e) {
+    console.error("JSON parse failed for:", text);
+    return null;
+  }
+}
+
 // ---------- Lead upsert ----------
 async function upsertLeadBySession(supabase: any, sessionId: string, patch: Record<string, unknown>) {
   if (!sessionId) return null;
@@ -156,9 +166,10 @@ serve(async (req) => {
     // 1. ROUTER
     const routerReply = await callAI(lovableApiKey, "google/gemini-2.5-flash-lite", PROMPTS.ROUTER, messages.slice(-5), 0);
     let intent = "busca";
-    try {
-      intent = JSON.parse(routerReply).intent;
-    } catch {
+    const routerData = safeParseJSON(routerReply);
+    if (routerData?.intent) {
+      intent = routerData.intent;
+    } else {
       console.warn("Router parse failed, defaulting to busca", routerReply);
     }
 
