@@ -76,12 +76,12 @@ serve(async (req) => {
     }
 
     // 1. ROUTER
-    const routerReply = await callAI(lovableApiKey, "google/gemini-2.0-flash-lite-preview-02-05", PROMPTS.ROUTER, messages.slice(-5), 0);
+    const routerReply = await callAI(lovableApiKey, "google/gemini-3-flash-preview", PROMPTS.ROUTER, messages.slice(-5), 0);
     const routerData = safeParseJSON(routerReply);
     const intent = routerData?.intent || "busca";
 
     // 2. MAIN CHAT
-    let mainModel = "google/gemini-2.0-flash-lite-preview-02-05";
+    let mainModel = "google/gemini-3-flash-preview";
     let mainPrompt = PROMPTS.BUSCA_CHAT;
 
     if (intent === "consultivo") {
@@ -97,7 +97,7 @@ serve(async (req) => {
     try {
       rawReply = await callAI(lovableApiKey, mainModel, mainPrompt, messages);
     } catch (err) {
-      rawReply = await callAI(lovableApiKey, "google/gemini-2.0-flash-lite-preview-02-05", mainPrompt, messages);
+      rawReply = await callAI(lovableApiKey, "google/gemini-3-flash-preview", mainPrompt, messages);
     }
 
     // 3. FILTERS, EXTRACTION & SEARCH
@@ -106,7 +106,7 @@ serve(async (req) => {
     // Immediate extraction for context
     let extractedData = null;
     try {
-      const extReply = await callAI(lovableApiKey, "google/gemini-2.0-flash-lite-preview-02-05", PROMPTS.EXTRACTION, messages.concat({ role: "assistant", content: rawReply }), 0);
+      const extReply = await callAI(lovableApiKey, "google/gemini-3-flash-preview", PROMPTS.EXTRACTION, messages.concat({ role: "assistant", content: rawReply }), 0);
       extractedData = safeParseJSON(extReply);
     } catch (e) { console.error("Extraction error:", e); }
 

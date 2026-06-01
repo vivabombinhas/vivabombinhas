@@ -15,7 +15,7 @@ Deno.test("MarIA - Intent Routing Validation", async () => {
   ];
 
   for (const scenario of scenarios) {
-    const reply = await callAI(LOVABLE_API_KEY, "google/gemini-2.0-flash", PROMPTS.ROUTER, [{ role: "user", content: scenario.input }], 0);
+    const reply = await callAI(LOVABLE_API_KEY, "google/gemini-3-flash-preview", PROMPTS.ROUTER, [{ role: "user", content: scenario.input }], 0);
     const data = safeParseJSON(reply);
     console.log(`Input: "${scenario.input}" -> Intent: ${data?.intent}`);
     assertEquals(data?.intent, scenario.expected, `Failed for input: ${scenario.input}`);
@@ -26,7 +26,7 @@ Deno.test("MarIA - Consultivo Mode: Tone and Negative Check", async () => {
   if (!LOVABLE_API_KEY) return;
 
   const input = "Procuro uma oportunidade de investimento em Mariscal com retorno garantido.";
-  const reply = await callAI(LOVABLE_API_KEY, "google/gemini-2.0-flash", PROMPTS.CONSULTIVO_CHAT, [{ role: "user", content: input }], 0);
+  const reply = await callAI(LOVABLE_API_KEY, "google/gemini-3-flash-preview", PROMPTS.CONSULTIVO_CHAT, [{ role: "user", content: input }], 0);
   
   console.log(`Consultivo Reply: "${reply}"`);
   
@@ -50,7 +50,7 @@ Deno.test("MarIA - Busca Mode: Objective Check", async () => {
   if (!LOVABLE_API_KEY) return;
 
   const input = "Quero ver apartamentos de 2 quartos em Bombas.";
-  const reply = await callAI(LOVABLE_API_KEY, "google/gemini-2.0-flash", PROMPTS.BUSCA_CHAT, [{ role: "user", content: input }], 0);
+  const reply = await callAI(LOVABLE_API_KEY, "google/gemini-3-flash-preview", PROMPTS.BUSCA_CHAT, [{ role: "user", content: input }], 0);
   
   console.log(`Busca Reply: "${reply}"`);
   
@@ -63,7 +63,7 @@ Deno.test("MarIA - Proprietario Mode: Logic Check", async () => {
   if (!LOVABLE_API_KEY) return;
 
   const input = "Tenho uma casa para anunciar no portal.";
-  const reply = await callAI(LOVABLE_API_KEY, "google/gemini-2.0-flash", PROMPTS.PROPRIETARIO_CHAT, [{ role: "user", content: input }], 0);
+  const reply = await callAI(LOVABLE_API_KEY, "google/gemini-3-flash-preview", PROMPTS.PROPRIETARIO_CHAT, [{ role: "user", content: input }], 0);
   
   console.log(`Proprietario Reply: "${reply}"`);
   
@@ -79,7 +79,7 @@ Deno.test("MarIA - Comum Mode: Role Explanation", async () => {
   if (!LOVABLE_API_KEY) return;
 
   const input = "O que você faz?";
-  const reply = await callAI(LOVABLE_API_KEY, "google/gemini-2.0-flash", PROMPTS.COMUM_CHAT, [{ role: "user", content: input }], 0);
+  const reply = await callAI(LOVABLE_API_KEY, "google/gemini-3-flash-preview", PROMPTS.COMUM_CHAT, [{ role: "user", content: input }], 0);
   
   console.log(`Comum Reply: "${reply}"`);
   
