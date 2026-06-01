@@ -321,14 +321,17 @@ serve(async (req) => {
     // --- Handle reply logic and fallback ---
     let finalReply = cleaned;
     
-    // Se não encontrou nada, a resposta deve ser clara sobre isso (conforme regra v3)
+    // --- Handle reply logic and fallback ---
+    let finalReply = cleaned;
+    
+    // Se não encontrou nada, mas houve tentativa de busca (filters presente)
     if (!showResults && filters) {
-      finalReply = "Ainda não encontrei imóveis exatamente com esse perfil no portal agora. Posso te avisar quando entrar um imóvel parecido com esse perfil no portal? Se quiser, também podemos ampliar a busca para bairros próximos.";
+      finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca por bairro, valor ou tipo de imóvel?";
     } else if (!finalReply || finalReply.length < 5) {
       if (showResults) {
-        finalReply = "Encontrei estas opções que combinam com o que você busca! O que acha?";
+        finalReply = "Encontrei algumas opções que combinam com o seu perfil. Separei as mais próximas dos critérios que você passou:";
       } else {
-        finalReply = "Entendido! Como posso te ajudar agora?";
+        finalReply = "Como posso ajudar você hoje em Bombinhas?";
       }
     }
 
