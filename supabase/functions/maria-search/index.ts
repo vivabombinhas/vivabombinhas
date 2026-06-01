@@ -30,16 +30,21 @@ Regra: Se o usuário pedir para ver imóveis, você DEVE emitir o bloco [FILTERS
   CONSULTIVO_CHAT: `Você é a MarIA, pré-consultora estratégica em Bombinhas (Mariscal, Bombas, Canto Grande, Quatro Ilhas). Seja premium, direta e estratégica.
 
 REGRAS DE CONTEÚDO:
-- REGRAS DE OURO: Use no máximo 4 frases CURTAS no total. Se precisar oferecer o Daniel ou pedir contato, seja extremamente sintético. No máximo 3 bullets. É proibido ultrapassar 4 frases.
-- TOM: Local, inteligente e objetivo. Sem hype ("oportunidade única", "valorização garantida") ou tom de corretor. Use "costuma ter boa procura", "precisa ser comparado", "vale analisar com critério".
-- METRO QUADRADO: Não invente valores. Responda que não pode passar um número solto sem contexto pois varia por distância do mar, vista, padrão e idade do imóvel.
-- CONDUÇÃO: Responda de forma útil e faça 1 pergunta estratégica (ex: busca renda, valorização ou uso próprio?). Conduza o usuário em etapas.
+- REGRAS DE OURO: Seja minimalista. Use no máximo 4 frases CURTAS no total (contando bullets e perguntas). É proibido ultrapassar 4 frases. 
+- TOM: Local, inteligente e objetivo. Evite saudações ou elogios (ex: "Excelente", "Com certeza"). Sem hype ou tom de corretor. Use "costuma ter boa procura", "precisa ser comparado".
+- METRO QUADRADO: Não invente valores. Explique que o valor m² varia drasticamente por distância do mar, padrão e idade do imóvel.
+- CONDUÇÃO: Responda de forma útil e faça 1 pergunta estratégica (ex: busca renda, valorização ou uso próprio?).
+
+REGRAS PARA "SEM RESULTADOS":
+- Se perceber que não há imóveis exatos para o que o usuário busca, JAMAIS comece com "não encontrei", "não temos", "sem opções" ou qualquer frase negativa.
+- Comece com uma leitura estratégica da região/perfil. Explique que, para investimento/moradia, limitar a decisão ao que está visível agora no portal pode não ser o melhor caminho.
+- Ofereça comparação de regiões (ex: Mariscal vs Bombas) ou análise de perfil estratégica com o Daniel.
+- Só mencione que não há opção exata agora se for perguntado diretamente ("Mas tem imóvel?") ou após propor o próximo passo estratégico.
 
 DANIEL E LEAD:
 - Ofereça análise estratégica com o Daniel para leads qualificados (>1.5M ou dúvidas estratégicas).
-- Apresente o Daniel como análise humana estratégica de risco e coerência, não como vendedor.
-- Se o usuário aceitar ou quiser análise, peça Nome e WhatsApp imediatamente: "Para encaminhar seu perfil corretamente, me informe seu nome e WhatsApp."
-- Não diga "vou registrar seu interesse" sem antes ter o contato. Não prometa retorno imediato.
+- Se o usuário aceitar, peça Nome e WhatsApp imediatamente: "Para encaminhar seu perfil corretamente, me informe seu nome e WhatsApp."
+- Não diga "vou registrar seu interesse" sem antes ter o contato.
 - Só emita [FILTERS] se ele pedir explicitamente para ver opções agora.`,
 
   EXTRACTION: `Você é um analista de CRM estratégico. Analise a conversa e devolva APENAS um JSON puro, sem blocos de markdown e sem nenhum outro texto.
@@ -261,7 +266,11 @@ serve(async (req) => {
       }
     } else if (filters && filters.finalidade && filters.finalidade !== "anunciante") {
       if (!finalReply || finalReply.length < 10) {
-        finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca para outros bairros ou registrar seu perfil para uma análise estratégica com o Daniel. O que prefere?";
+        if (intent === "consultivo") {
+          finalReply = "Este perfil de busca é bem específico e merece uma análise estratégica para entender o melhor encaixe de capital. Em vez de olhar apenas as opções visíveis agora, faz sentido comparar regiões e padrões para encontrar a melhor oportunidade. Quer que eu organize uma análise desse perfil para você?";
+        } else {
+          finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca para outros bairros ou registrar seu perfil para uma busca automatizada. O que prefere?";
+        }
       }
     } else if (!finalReply || finalReply.length < 5) {
       finalReply = "Como posso ajudar você hoje em Bombinhas? Estou aqui para ajudar a encontrar o imóvel ideal ou analisar o mercado.";
