@@ -99,11 +99,13 @@ const MariaChat = () => {
                     {finalidade === "temporada" ? "🏖️ Passar férias" : finalidade === "compra" ? "🏠 Comprar imóvel" : finalidade === "investimento" ? "📈 Comprar para investir" : "🤝 Anunciar imóvel"}
                   </span>
                   {" · "}
-                  <button onClick={clearFinalidade} className="underline hover:text-foreground">
+                  <button onClick={clearFinalidade} className="underline text-muted-foreground hover:text-foreground font-medium transition-colors">
                     trocar
                   </button>
                 </p>
-                <SuggestionChips onSelect={sendMessage} finalidade={finalidade} />
+                <div className="pt-2">
+                  <SuggestionChips onSelect={sendMessage} finalidade={finalidade} />
+                </div>
               </div>
             )}
           </div>

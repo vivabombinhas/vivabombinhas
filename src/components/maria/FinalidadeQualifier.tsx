@@ -56,9 +56,9 @@ export function FinalidadeQualifier({ onSelect }: FinalidadeQualifierProps) {
             <button
               key={opt.id}
               onClick={() => onSelect(opt.id)}
-              className="group flex items-center gap-3 w-full text-left rounded-xl border border-border bg-card hover:border-accent/50 hover:bg-accent/5 transition-all px-4 py-3"
+              className="group flex items-center gap-4 w-full text-left rounded-2xl border border-border bg-card hover:border-accent/40 hover:bg-accent/5 hover:shadow-sm active:scale-[0.98] transition-all px-5 py-4"
             >
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-lg">
+              <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-xl shadow-inner">
                 <span aria-hidden>{opt.emoji}</span>
               </div>
               <div className="flex-1 min-w-0">
