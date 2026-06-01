@@ -82,14 +82,14 @@ export async function callAI(lovableApiKey: string, model: string, system: strin
       temperature,
     }),
   });
-  if (!response.ok) throw new Error(\`AI Gateway error (\${model}): \${response.status}\`);
+  if (!response.ok) throw new Error(`AI Gateway error (${model}): ${response.status}`);
   const data = await response.json();
   return data.choices?.[0]?.message?.content || "";
 }
 
 export function safeParseJSON(text: string) {
   try {
-    const cleaned = text.replace(/\\`\\`\\`json|\\`\\`\\`/g, "").trim();
+    const cleaned = text.replace(/```json|```/g, "").trim();
     const firstBrace = cleaned.indexOf("{");
     const lastBrace = cleaned.lastIndexOf("}");
     if (firstBrace !== -1 && lastBrace !== -1) {
