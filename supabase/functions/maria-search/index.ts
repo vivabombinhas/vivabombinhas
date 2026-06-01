@@ -335,7 +335,7 @@ serve(async (req) => {
       finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca por bairro, valor ou tipo de imóvel?";
     } else if (!finalReply || finalReply.length < 5) {
       if (showResults) {
-        finalReply = "Encontrei algumas opções que combinam com o seu perfil. Separei as mais próximas dos critérios que você passou:";
+        finalReply = "Encontrei algumas opções que combinam com o seu perfil. Separei as mais próximas dos critérios que você passou:\n\nQuer que eu refine por melhor preço, localização ou outra característica?";
       } else {
         finalReply = "Como posso ajudar você hoje em Bombinhas?";
       }
