@@ -46,9 +46,9 @@ const MariaChat = () => {
         <meta name="robots" content="noindex" />
       </Helmet>
       {/* Header */}
-      <header className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card/80 backdrop-blur-md">
+      <header className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-10">
         <Link to="/" aria-label="Voltar para a página inicial">
-          <Button variant="ghost" size="icon" className="rounded-full" aria-label="Voltar">
+          <Button variant="ghost" size="icon" className="rounded-full h-9 w-9" aria-label="Voltar">
             <ArrowLeft className="w-5 h-5" />
           </Button>
         </Link>
@@ -92,10 +92,10 @@ const MariaChat = () => {
             {!finalidade ? (
               <FinalidadeQualifier onSelect={setFinalidade} />
             ) : (
-              <div className="w-full space-y-3">
-                <p className="text-xs text-center text-muted-foreground">
-                  Buscando para{" "}
-                  <span className="font-semibold text-accent">
+              <div className="w-full space-y-3 bg-muted/30 p-4 rounded-2xl border border-border/50">
+                <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-2">
+                  <span>Buscando para</span>
+                  <span className="font-bold text-foreground px-2 py-0.5 bg-accent/20 rounded-full border border-accent/20">
                     {finalidade === "temporada" ? "🏖️ Passar férias" : finalidade === "compra" ? "🏠 Comprar imóvel" : finalidade === "investimento" ? "📈 Comprar para investir" : "🤝 Anunciar imóvel"}
                   </span>
                   {" · "}

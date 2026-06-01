@@ -21,13 +21,13 @@ export function ChatMessage({ message, onSubmitLead }: ChatMessageProps) {
           <Bot className="w-4 h-4 text-primary-foreground" />
         </div>
       )}
-      <div className={`max-w-[85%] space-y-3`}>
+      <div className={`max-w-[88%] sm:max-w-[85%] space-y-2`}>
         {/* Text bubble */}
         <div
-          className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+          className={`rounded-2xl px-4 py-3 text-[15px] sm:text-sm leading-relaxed ${
             isAssistant
               ? "bg-card text-card-foreground border border-border shadow-sm"
-              : "bg-primary text-primary-foreground"
+              : "bg-primary text-primary-foreground shadow-sm font-medium"
           }`}
         >
           {isAssistant ? (

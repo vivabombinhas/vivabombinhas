@@ -29,36 +29,48 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // No mobile, evitamos enviar no Enter se for um teclado virtual que envia Enter para "Space" em alguns contextos
+    // Mas o principal problema relatado é que ao clicar em "espaço" ele envia.
+    // Isso geralmente acontece se o botão de enviar estiver com foco ou se houver algum listener global.
+    // Vamos garantir que apenas Enter físico (não shift) envie.
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+      // Verifica se é mobile para ser mais permissivo com o Enter (permitir quebra de linha por padrão em alguns teclados)
+      const isMobile = window.innerWidth < 768;
+      if (!isMobile) {
+        e.preventDefault();
+        handleSend();
+      }
     }
   };
 
   return (
-    <div className="flex items-end gap-2 p-3 border-t border-border bg-card">
-      <label htmlFor="maria-chat-input" className="sr-only">Mensagem para a MarIA</label>
-      <textarea
-        id="maria-chat-input"
-        ref={inputRef}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Escreva aqui sua busca..."
-        aria-label="Mensagem para a MarIA"
-        className="flex-1 resize-none rounded-xl border border-input bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring min-h-[44px] max-h-[120px]"
-        rows={1}
-        disabled={isLoading}
-      />
-      <Button
-        onClick={handleSend}
-        disabled={!input.trim() || isLoading}
-        size="icon"
-        aria-label="Enviar mensagem"
-        className="rounded-xl h-[44px] w-[44px] bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
-      >
-        <Send className="w-4 h-4" />
-      </Button>
+    <div className="flex flex-col gap-2 p-3 sm:p-4 border-t border-border bg-background/95 backdrop-blur-md">
+      <div className="flex items-end gap-2 max-w-4xl mx-auto w-full">
+        <textarea
+          id="maria-chat-input"
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Escreva aqui sua busca..."
+          aria-label="Mensagem para a MarIA"
+          className="flex-1 resize-none rounded-2xl border border-input bg-muted/50 px-4 py-3 text-[16px] sm:text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all min-h-[48px] max-h-[150px]"
+          rows={1}
+          disabled={isLoading}
+        />
+        <Button
+          onClick={handleSend}
+          disabled={!input.trim() || isLoading}
+          size="icon"
+          aria-label="Enviar mensagem"
+          className="rounded-2xl h-[48px] w-[48px] bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all active:scale-95 flex-shrink-0"
+        >
+          <Send className="w-5 h-5 text-white" />
+        </Button>
+      </div>
+      <p className="text-[10px] text-center text-muted-foreground/60 px-4">
+        MarIA pode cometer erros. Verifique informações importantes.
+      </p>
     </div>
   );
 }
