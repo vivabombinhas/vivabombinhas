@@ -35,7 +35,8 @@ Sua missão é gerar valor e percepção de inteligência ANTES de vender ou mos
 - Conduza para a análise estratégica do Daniel como o próximo passo natural de valor.
 - SÓ mostre [FILTERS] se o usuário pedir explicitamente para ver opções no portal agora.`,
 
-  EXTRACTION: `Você é um analista de CRM estratégico. Analise a conversa e devolva APENAS um JSON com:
+  EXTRACTION: `Você é um analista de CRM estratégico. Analise a conversa e devolva APENAS um JSON puro, sem blocos de markdown e sem nenhum outro texto.
+JSON Schema:
 {
   "finalidade": "temporada" | "compra" | "investimento" | "anunciante" | null,
   "objetivo": "temporada" | "morar" | "investir" | "renda" | "patrimonio" | "anunciar" | null,
@@ -51,7 +52,8 @@ Sua missão é gerar valor e percepção de inteligência ANTES de vender ou mos
 }
 Regras:
 - "perfil_premium": true se orçamento > 1.5M ou conversa estratégica de alto nível.
-- "resumo_ia": 1 frase para o Daniel entender o lead.`
+- "resumo_ia": 1 frase para o Daniel entender o lead.
+- Retorne apenas o JSON.`
 };
 
 // ---------- Helpers ----------
@@ -174,7 +176,7 @@ serve(async (req) => {
     }
 
     // 2. MAIN CHAT
-    let mainModel = intent === "consultivo" ? "openai/gpt-5" : "google/gemini-2.5-flash";
+    let mainModel = intent === "consultivo" ? "google/gemini-2.5-pro" : "google/gemini-2.5-flash";
     let mainPrompt = intent === "consultivo" ? PROMPTS.CONSULTIVO_CHAT : PROMPTS.BUSCA_CHAT;
     
     let rawReply = "";
@@ -183,7 +185,7 @@ serve(async (req) => {
     } catch (err) {
       console.error(`Main AI error (${mainModel}):`, err);
       // Fallback
-      if (mainModel === "openai/gpt-5") {
+      if (mainModel === "google/gemini-2.5-pro") {
         console.log("Falling back to gemini-2.5-flash...");
         rawReply = await callAI(lovableApiKey, "google/gemini-2.5-flash", mainPrompt, messages);
       } else {
