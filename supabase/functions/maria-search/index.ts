@@ -348,7 +348,14 @@ serve(async (req) => {
       }
     } else if (filters && filters.finalidade && filters.finalidade !== "anunciante") {
       // Se houve busca mas zero resultados
-      finalReply = "Não encontrei opções exatas em " + (filters.bairro || "Bombinhas") + " até R$ " + (filters.preco_max?.toLocaleString('pt-BR') || "esse valor") + " agora. Posso ampliar para bairros próximos ou salvar um alerta para te avisar quando entrar algo parecido?";
+      const isHighValue = filters.preco_max && filters.preco_max >= 1000000;
+      const isInvest = filters.finalidade === 'investimento' || filters.finalidade === 'compra';
+      
+      if (isHighValue && isInvest) {
+        finalReply = "Não encontrei opções exatas no portal agora com esse recorte. Posso ampliar a busca ou registrar seu perfil para uma análise mais estratégica com o Daniel. O que prefere?";
+      } else {
+        finalReply = "Não encontrei imóveis exatamente com esses critérios agora. Posso ampliar a busca para outros bairros ou valores, ou até salvar um alerta para te avisar se algo entrar. O que acha?";
+      }
     } else if (!finalReply || finalReply.length < 10) {
       // Fallback genérico se a IA falhar
       finalReply = "Como posso ajudar você hoje em Bombinhas?";
