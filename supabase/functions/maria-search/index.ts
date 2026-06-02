@@ -16,19 +16,39 @@ const corsHeaders = {
 // ---------- Helpers ----------
 async function upsertLeadBySession(supabase: any, sessionId: string, patch: Record<string, unknown>) {
   if (!sessionId) return null;
-  const { data: existing } = await supabase.from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
-  if (existing?.id) {
-    await supabase.from("leads_maria").update({ ...patch, last_contact_at: new Date().toISOString() }).eq("id", existing.id);
-    return existing.id;
+  console.log(`[MarIA Persistence] Upserting lead for session ${sessionId}:`, JSON.stringify(patch));
+  try {
+    const { data: existing, error: findError } = await supabase.from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
+    if (findError) {
+      console.error(`[MarIA Persistence] Error finding lead:`, findError);
+    }
+    
+    if (existing?.id) {
+      const { error: updateError } = await supabase.from("leads_maria").update({ ...patch, last_contact_at: new Date().toISOString() }).eq("id", existing.id);
+      if (updateError) {
+        console.error(`[MarIA Persistence] Error updating lead ${existing.id}:`, updateError);
+        throw updateError;
+      }
+      return existing.id;
+    }
+    
+    const { data: inserted, error: insertError } = await supabase.from("leads_maria").insert({
+      session_id: sessionId,
+      origem: "maria_chat",
+      status: (patch.nome && patch.telefone) ? "novo" : "anonimo",
+      last_contact_at: new Date().toISOString(),
+      ...patch,
+    }).select("id").single();
+    
+    if (insertError) {
+      console.error(`[MarIA Persistence] Error inserting lead:`, insertError);
+      throw insertError;
+    }
+    return inserted?.id || null;
+  } catch (err) {
+    console.error(`[MarIA Persistence] Critical error in upsertLeadBySession:`, err);
+    return null;
   }
-  const { data: inserted } = await supabase.from("leads_maria").insert({
-    session_id: sessionId,
-    origem: "maria_chat",
-    status: (patch.nome && patch.telefone) ? "novo" : "anonimo",
-    last_contact_at: new Date().toISOString(),
-    ...patch,
-  }).select("id").single();
-  return inserted?.id || null;
 }
 
 async function searchProperties(supabase: any, filters: any): Promise<any[]> {
