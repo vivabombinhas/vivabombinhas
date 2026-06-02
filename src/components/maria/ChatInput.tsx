@@ -12,7 +12,12 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const isSendingRef = useRef(false);
 
-  const handleSend = () => {
+  const handleSend = (e?: React.MouseEvent | React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     const trimmed = input.trim();
     if (!trimmed || isLoading || isSendingRef.current) return;
     
@@ -25,7 +30,10 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
       isSendingRef.current = false;
     }, 500);
 
-    inputRef.current?.focus();
+    // No mobile, evitamos forçar o focus se o teclado já foi fechado ou está em transição
+    if (window.innerWidth >= 768) {
+      inputRef.current?.focus();
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -44,13 +52,21 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
   };
 
   return (
-    <div className="flex flex-col gap-2 p-3 sm:p-4 border-t border-border bg-background/95 backdrop-blur-md">
+    <form 
+      onSubmit={(e) => handleSend(e)}
+      className="flex flex-col gap-2 p-3 sm:p-4 border-t border-border bg-background/95 backdrop-blur-md"
+    >
       <div className="flex items-end gap-2 max-w-4xl mx-auto w-full">
         <textarea
           id="maria-chat-input"
           ref={inputRef}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            // Ajuste dinâmico de altura
+            e.target.style.height = 'auto';
+            e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
+          }}
           onKeyDown={handleKeyDown}
           placeholder="Escreva aqui sua busca..."
           aria-label="Mensagem para a MarIA"
@@ -59,7 +75,7 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
           disabled={isLoading}
         />
         <Button
-          onClick={handleSend}
+          type="submit"
           disabled={!input.trim() || isLoading}
           size="icon"
           aria-label="Enviar mensagem"
@@ -71,6 +87,6 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
       <p className="text-[10px] text-center text-muted-foreground/60 px-4">
         MarIA pode cometer erros. Verifique informações importantes.
       </p>
-    </div>
+    </form>
   );
 }
