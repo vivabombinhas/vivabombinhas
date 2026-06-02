@@ -87,13 +87,19 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, session_id, action, nome, telefone, lead_captured } = await req.json();
+    const { messages, session_id, action, nome, telefone, lead_captured, extra_data } = await req.json();
     const sessionId = session_id || "";
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     if (action === "submit_lead") {
-      await upsertLeadBySession(supabase, sessionId, { nome, telefone, status: "novo" });
+      const leadData = { 
+        nome, 
+        telefone, 
+        status: "novo",
+        ...extra_data 
+      };
+      await upsertLeadBySession(supabase, sessionId, leadData);
       return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -139,7 +145,8 @@ serve(async (req) => {
     }));
 
     // 3. FILTERS, EXTRACTION & SEARCH
-    let { filters, cleaned } = parseFiltersBlock(rawReply);
+    const showStrategicForm = rawReply.includes("[STRATEGIC_FORM]");
+    let { filters, cleaned } = parseFiltersBlock(rawReply.replace("[STRATEGIC_FORM]", ""));
     
     // Immediate extraction for context
     let extractedData = null;
@@ -209,6 +216,7 @@ serve(async (req) => {
       all_properties: allProperties,
       gate_active: gateActive,
       no_results_gate: noResultsGate,
+      show_strategic_form: showStrategicForm,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (err: any) {

@@ -20,6 +20,7 @@ export interface ChatMessage {
   showLeadForm?: boolean; // exibe o formulário inline abaixo dessa mensagem
   remainingForGate?: number; // quantos imóveis estão "trancados"
   isAlertMode?: boolean; // true = modo alerta de novidade (sem resultados)
+  isStrategicAnalysis?: boolean; // true = modo análise estratégica (lead premium)
 }
 
 const MORE_PATTERNS = /^(tem mais|mostrar mais|mais op[çc][õo]es|outras op[çc][õo]es|quero ver mais|mais resultados|ver mais|mais im[óo]veis|próximos|next)\??$/i;
@@ -208,6 +209,7 @@ export function useMariaChat() {
       
       const gateActive = data.gate_active === true && !leadCapturedRef.current;
       const noResultsGate = data.no_results_gate === true && !leadCapturedRef.current;
+      const showStrategicForm = data.show_strategic_form === true;
 
       // Proteção: Se show_results é true mas não vieram imóveis, forçamos fallback seguro
       if (showResults && (!data.properties || data.properties.length === 0)) {
@@ -243,7 +245,7 @@ export function useMariaChat() {
         ? Math.max(0, allPropertiesRef.current.length - (visibleProps?.length || 0))
         : 0;
 
-      const showLeadForm = gateActive || noResultsGate;
+      const showLeadForm = gateActive || noResultsGate || showStrategicForm;
 
       const rawReply = data.reply || "";
       const cleanContent = rawReply
@@ -260,6 +262,7 @@ export function useMariaChat() {
         showLeadForm,
         remainingForGate: noResultsGate ? 0 : remainingForGate,
         isAlertMode: noResultsGate,
+        isStrategicAnalysis: showStrategicForm,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
@@ -278,7 +281,7 @@ export function useMariaChat() {
     }
   }, [messages, handleShowMore, updateHasMore, clearPropertyState, finalidade]);
 
-  const submitLead = useCallback(async (nome: string, telefone: string): Promise<boolean> => {
+  const submitLead = useCallback(async (nome: string, telefone: string, extraData?: any): Promise<boolean> => {
     try {
       const { data, error } = await supabase.functions.invoke("maria-search", {
         body: {
@@ -286,6 +289,7 @@ export function useMariaChat() {
           session_id: sessionIdRef.current,
           nome,
           telefone,
+          extra_data: extraData,
         },
       });
       if (error || !data?.success) return false;
