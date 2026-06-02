@@ -33,20 +33,42 @@ async function upsertLeadBySession(supabase: any, sessionId: string, patch: Reco
 
 async function searchProperties(supabase: any, filters: any): Promise<any[]> {
   try {
-    let q = supabase.from("imoveis").select("*").eq("status", "ativo").or("oculta_para_maria.is.null,oculta_para_maria.eq.false").limit(20);
+    let q = supabase.from("imoveis").select("*").eq("status", "ativo").or("oculta_para_maria.is.null,oculta_para_maria.eq.false").limit(40);
+    
     if (filters.finalidade) {
       const dbFinalidade = filters.finalidade === "investimento" ? "compra" : filters.finalidade;
       q = q.eq("finalidade", dbFinalidade);
     }
-    if (filters.tipo) q = q.eq("tipo", filters.tipo);
-    if (filters.bairro) q = q.ilike("bairro", `%${filters.bairro}%`);
+    
+    // Filtro de Tipo (Suporta múltiplos tipos se vier string separada por vírgula ou 'e'/'ou')
+    if (filters.tipo && typeof filters.tipo === "string") {
+      const tipos = filters.tipo.toLowerCase().split(/[\s,e|/]+/).filter(t => t.length > 3);
+      if (tipos.length > 0) {
+        const orConditions = tipos.map(t => `tipo.ilike.%${t}%`).join(",");
+        q = q.or(orConditions);
+      }
+    }
+    
+    // Filtro de Bairro (Suporta múltiplos bairros se vier string separada por vírgula ou 'e'/'ou')
+    if (filters.bairro && typeof filters.bairro === "string") {
+      const bairros = filters.bairro.toLowerCase().split(/[\s,e|/]+/).filter(b => b.length > 3 && b !== "bombinhas");
+      if (bairros.length > 0) {
+        const orConditions = bairros.map(b => `bairro.ilike.%${b}%`).join(",");
+        q = q.or(orConditions);
+      }
+    }
+
     if (filters.preco_max) {
       if (filters.finalidade === "temporada") q = q.lte("preco_temporada_diaria", filters.preco_max);
       else q = q.lte("preco", filters.preco_max);
     }
+    
     const { data } = await q;
     return data || [];
-  } catch { return []; }
+  } catch (err) { 
+    console.error("Search error:", err);
+    return []; 
+  }
 }
 
 function parseFiltersBlock(text: string) {
