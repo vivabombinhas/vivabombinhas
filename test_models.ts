@@ -1,10 +1,5 @@
-const models = ["openai/gpt-5", "openai/gpt-5.5-pro", "openai/gpt-4o", "openai/gpt-4o-mini"];
+const models = ["openai/gpt-4o", "gpt-4o", "google/gemini-3-flash-preview"];
 const lovableApiKey = process.env.LOVABLE_API_KEY;
-
-if (!lovableApiKey) {
-  console.error("LOVABLE_API_KEY not found");
-  process.exit(1);
-}
 
 for (const model of models) {
   try {
