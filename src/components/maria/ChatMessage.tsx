@@ -6,7 +6,7 @@ import { LeadCaptureForm } from "./LeadCaptureForm";
 
 interface ChatMessageProps {
   message: ChatMessageType;
-  onSubmitLead?: (nome: string, telefone: string) => Promise<boolean>;
+  onSubmitLead?: (nome: string, telefone: string, extraData?: any) => Promise<boolean>;
 }
 
 export function ChatMessage({ message, onSubmitLead }: ChatMessageProps) {
@@ -63,6 +63,7 @@ export function ChatMessage({ message, onSubmitLead }: ChatMessageProps) {
           <LeadCaptureForm
             remainingCount={message.remainingForGate ?? 0}
             isAlertMode={message.isAlertMode}
+            isStrategicMode={message.isStrategicAnalysis}
             onSubmit={onSubmitLead!}
           />
         )}

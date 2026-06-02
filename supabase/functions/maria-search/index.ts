@@ -16,19 +16,39 @@ const corsHeaders = {
 // ---------- Helpers ----------
 async function upsertLeadBySession(supabase: any, sessionId: string, patch: Record<string, unknown>) {
   if (!sessionId) return null;
-  const { data: existing } = await supabase.from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
-  if (existing?.id) {
-    await supabase.from("leads_maria").update({ ...patch, last_contact_at: new Date().toISOString() }).eq("id", existing.id);
-    return existing.id;
+  console.log(`[MarIA Persistence] Upserting lead for session ${sessionId}:`, JSON.stringify(patch));
+  try {
+    const { data: existing, error: findError } = await supabase.from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
+    if (findError) {
+      console.error(`[MarIA Persistence] Error finding lead:`, findError);
+    }
+    
+    if (existing?.id) {
+      const { error: updateError } = await supabase.from("leads_maria").update({ ...patch, last_contact_at: new Date().toISOString() }).eq("id", existing.id);
+      if (updateError) {
+        console.error(`[MarIA Persistence] Error updating lead ${existing.id}:`, updateError);
+        throw updateError;
+      }
+      return existing.id;
+    }
+    
+    const { data: inserted, error: insertError } = await supabase.from("leads_maria").insert({
+      session_id: sessionId,
+      origem: "maria_chat",
+      status: (patch.nome && patch.telefone) ? "novo" : "anonimo",
+      last_contact_at: new Date().toISOString(),
+      ...patch,
+    }).select("id").single();
+    
+    if (insertError) {
+      console.error(`[MarIA Persistence] Error inserting lead:`, insertError);
+      throw insertError;
+    }
+    return inserted?.id || null;
+  } catch (err) {
+    console.error(`[MarIA Persistence] Critical error in upsertLeadBySession:`, err);
+    return null;
   }
-  const { data: inserted } = await supabase.from("leads_maria").insert({
-    session_id: sessionId,
-    origem: "maria_chat",
-    status: (patch.nome && patch.telefone) ? "novo" : "anonimo",
-    last_contact_at: new Date().toISOString(),
-    ...patch,
-  }).select("id").single();
-  return inserted?.id || null;
 }
 
 async function searchProperties(supabase: any, filters: any): Promise<any[]> {
@@ -87,13 +107,19 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, session_id, action, nome, telefone, lead_captured } = await req.json();
+    const { messages, session_id, action, nome, telefone, lead_captured, extra_data } = await req.json();
     const sessionId = session_id || "";
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     if (action === "submit_lead") {
-      await upsertLeadBySession(supabase, sessionId, { nome, telefone, status: "novo" });
+      const leadData = { 
+        nome, 
+        telefone, 
+        status: "novo",
+        ...extra_data 
+      };
+      await upsertLeadBySession(supabase, sessionId, leadData);
       return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -108,7 +134,7 @@ serve(async (req) => {
     let fallbackUsed = false;
 
     if (intent === "consultivo") {
-      mainModel = "openai/gpt-5"; // Modelo premium solicitado para estratégia e investimento
+      mainModel = "openai/gpt-4o"; // Modelo premium solicitado para estratégia e investimento
       mainPrompt = PROMPTS.CONSULTIVO_CHAT;
     } else if (intent === "proprietario") {
       mainPrompt = PROMPTS.PROPRIETARIO_CHAT;
@@ -139,7 +165,8 @@ serve(async (req) => {
     }));
 
     // 3. FILTERS, EXTRACTION & SEARCH
-    let { filters, cleaned } = parseFiltersBlock(rawReply);
+    const showStrategicForm = rawReply.includes("[STRATEGIC_FORM]");
+    let { filters, cleaned } = parseFiltersBlock(rawReply.replace("[STRATEGIC_FORM]", ""));
     
     // Immediate extraction for context
     let extractedData = null;
@@ -209,6 +236,7 @@ serve(async (req) => {
       all_properties: allProperties,
       gate_active: gateActive,
       no_results_gate: noResultsGate,
+      show_strategic_form: showStrategicForm,
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (err: any) {

@@ -631,6 +631,7 @@ export type Database = {
       leads_maria: {
         Row: {
           bairro_interesse: string | null
+          cidade_estado: string | null
           created_at: string
           email: string | null
           faixa_preco: string | null
@@ -646,15 +647,20 @@ export type Database = {
           observacao_interna: string | null
           orcamento_max: number | null
           origem: string
+          pais_codigo: string | null
           prazo_compra: string | null
+          proximo_passo_sugerido: string | null
+          quer_analise: boolean | null
           resumo_ia: string | null
           session_id: string | null
           status: Database["public"]["Enums"]["status_lead"]
           telefone: string | null
           tipo_imovel: string | null
+          tipo_lead: string | null
         }
         Insert: {
           bairro_interesse?: string | null
+          cidade_estado?: string | null
           created_at?: string
           email?: string | null
           faixa_preco?: string | null
@@ -670,15 +676,20 @@ export type Database = {
           observacao_interna?: string | null
           orcamento_max?: number | null
           origem?: string
+          pais_codigo?: string | null
           prazo_compra?: string | null
+          proximo_passo_sugerido?: string | null
+          quer_analise?: boolean | null
           resumo_ia?: string | null
           session_id?: string | null
           status?: Database["public"]["Enums"]["status_lead"]
           telefone?: string | null
           tipo_imovel?: string | null
+          tipo_lead?: string | null
         }
         Update: {
           bairro_interesse?: string | null
+          cidade_estado?: string | null
           created_at?: string
           email?: string | null
           faixa_preco?: string | null
@@ -694,12 +705,16 @@ export type Database = {
           observacao_interna?: string | null
           orcamento_max?: number | null
           origem?: string
+          pais_codigo?: string | null
           prazo_compra?: string | null
+          proximo_passo_sugerido?: string | null
+          quer_analise?: boolean | null
           resumo_ia?: string | null
           session_id?: string | null
           status?: Database["public"]["Enums"]["status_lead"]
           telefone?: string | null
           tipo_imovel?: string | null
+          tipo_lead?: string | null
         }
         Relationships: []
       }
