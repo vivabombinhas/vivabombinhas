@@ -105,9 +105,10 @@ serve(async (req) => {
     // 2. MAIN CHAT
     let mainModel = "google/gemini-3-flash-preview";
     let mainPrompt = PROMPTS.BUSCA_CHAT;
+    let fallbackUsed = false;
 
     if (intent === "consultivo") {
-      mainModel = "google/gemini-2.5-pro"; // Model mais inteligente para estratégia
+      mainModel = "openai/gpt-5"; // Modelo premium solicitado para estratégia e investimento
       mainPrompt = PROMPTS.CONSULTIVO_CHAT;
     } else if (intent === "proprietario") {
       mainPrompt = PROMPTS.PROPRIETARIO_CHAT;
@@ -119,8 +120,23 @@ serve(async (req) => {
     try {
       rawReply = await callAI(lovableApiKey, mainModel, mainPrompt, messages);
     } catch (err) {
-      rawReply = await callAI(lovableApiKey, "google/gemini-3-flash-preview", mainPrompt, messages);
+      console.error(`Error calling ${mainModel}:`, err);
+      // Fallback: OpenAI Premium -> Gemini Flash
+      if (mainModel !== "google/gemini-3-flash-preview") {
+        fallbackUsed = true;
+        rawReply = await callAI(lovableApiKey, "google/gemini-3-flash-preview", mainPrompt, messages);
+      } else {
+        throw err;
+      }
     }
+
+    // Log interno conforme solicitado
+    console.log(JSON.stringify({
+      selected_model: mainModel,
+      selected_agent: intent,
+      fallback_used: fallbackUsed,
+      session_id: sessionId
+    }));
 
     // 3. FILTERS, EXTRACTION & SEARCH
     let { filters, cleaned } = parseFiltersBlock(rawReply);
