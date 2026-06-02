@@ -95,7 +95,7 @@ const MariaChat = () => {
               <div className="w-full space-y-3 bg-muted/30 p-4 rounded-2xl border border-border/50">
                 <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-2">
                   <span>Buscando para</span>
-                  <span className="font-bold text-foreground px-2 py-0.5 bg-accent/20 rounded-full border border-accent/20">
+                  <span className="font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full border border-primary/20">
                     {finalidade === "temporada" ? "🏖️ Passar férias" : finalidade === "compra" ? "🏠 Comprar imóvel" : finalidade === "investimento" ? "📈 Comprar para investir" : "🤝 Anunciar imóvel"}
                   </span>
                   {" · "}
