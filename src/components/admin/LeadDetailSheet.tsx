@@ -59,6 +59,10 @@ interface Lead {
   prazo_compra?: string | null;
   orcamento_max?: number | null;
   resumo_ia?: string | null;
+  capital_disponivel?: number | null;
+  bens_para_permuta?: string | null;
+  proximo_passo_sugerido?: string | null;
+  chat_history?: any[] | null;
   feedback_corretor?: string | null;
   observacao_interna?: string | null;
 }
@@ -190,15 +194,32 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
       meta: lead.bairro_interesse ?? undefined,
     });
 
-    conversation?.forEach((m: any) => {
-      events.push({
-        id: `msg-${m.id}`,
-        at: m.created_at,
-        kind: m.role === "user" ? "message_user" : "message_bot",
-        title: m.role === "user" ? `${lead.nome ?? "Visitante"} enviou mensagem` : "MarIA respondeu",
-        body: m.content,
+    // Se houver chat_history persistido, usamos ele como fonte primária
+    if (lead.chat_history && Array.isArray(lead.chat_history)) {
+      lead.chat_history.forEach((m: any, idx: number) => {
+        // Ignorar mensagens de contexto interno se houver
+        if (m.content?.startsWith("[contexto")) return;
+        
+        events.push({
+          id: `chat-${lead.id}-${idx}`,
+          at: m.timestamp || lead.created_at,
+          kind: m.role === "user" ? "message_user" : "message_bot",
+          title: m.role === "user" ? `${lead.nome ?? "Visitante"} enviou mensagem` : "MarIA respondeu",
+          body: m.content,
+        });
       });
-    });
+    } else {
+      // Fallback para a tabela legada de conversas
+      conversation?.forEach((m: any) => {
+        events.push({
+          id: `msg-${m.id}`,
+          at: m.created_at,
+          kind: m.role === "user" ? "message_user" : "message_bot",
+          title: m.role === "user" ? `${lead.nome ?? "Visitante"} enviou mensagem` : "MarIA respondeu",
+          body: m.content,
+        });
+      });
+    }
 
     notes?.forEach((n: any) => {
       events.push({
@@ -241,6 +262,7 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
       });
     }
 
+    // Ordenação cronológica (mais recentes primeiro)
     return events.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
   }, [lead, conversation, notes, matches]);
 
@@ -318,6 +340,20 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
                 <p className="text-[9px] text-muted-foreground uppercase font-bold">Prazo</p>
                 <p className="text-sm font-medium capitalize">{lead.prazo_compra?.replace('_', ' ') || "—"}</p>
              </div>
+             {lead.capital_disponivel && (
+               <div className="p-2 bg-muted rounded-md col-span-2">
+                  <p className="text-[9px] text-muted-foreground uppercase font-bold text-emerald-600">Capital Disponível</p>
+                  <p className="text-sm font-bold text-emerald-700">
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(lead.capital_disponivel)}
+                  </p>
+               </div>
+             )}
+             {lead.bens_para_permuta && (
+               <div className="p-2 bg-muted rounded-md col-span-2">
+                  <p className="text-[9px] text-muted-foreground uppercase font-bold text-amber-600">Bens para Permuta</p>
+                  <p className="text-sm font-medium">{lead.bens_para_permuta}</p>
+               </div>
+             )}
              <div className="p-2 bg-muted rounded-md">
                 <p className="text-[9px] text-muted-foreground uppercase font-bold">Orçamento Máx</p>
                 <p className="text-sm font-medium">
@@ -328,7 +364,9 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
              </div>
              <div className="p-2 bg-muted rounded-md">
                 <p className="text-[9px] text-muted-foreground uppercase font-bold">Lead Score</p>
-                <Badge variant="outline" className="mt-0.5 text-[10px] font-bold border-primary/30">{lead.lead_score || "—"}</Badge>
+                <Badge variant="outline" className={`mt-0.5 text-[10px] font-bold ${lead.lead_score === 'Premium' ? 'bg-amber-500 text-white' : 'border-primary/30'}`}>
+                  {lead.lead_score || "—"}
+                </Badge>
              </div>
           </div>
 

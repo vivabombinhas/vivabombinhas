@@ -631,6 +631,9 @@ export type Database = {
       leads_maria: {
         Row: {
           bairro_interesse: string | null
+          bens_para_permuta: string | null
+          capital_disponivel: number | null
+          chat_history: Json | null
           cidade_estado: string | null
           created_at: string
           email: string | null
@@ -644,6 +647,7 @@ export type Database = {
           next_followup_at: string | null
           nome: string | null
           objetivo: string | null
+          objetivo_investimento: string | null
           observacao_interna: string | null
           orcamento_max: number | null
           origem: string
@@ -651,6 +655,7 @@ export type Database = {
           prazo_compra: string | null
           proximo_passo_sugerido: string | null
           quer_analise: boolean | null
+          região_interesse: string | null
           resumo_ia: string | null
           session_id: string | null
           status: Database["public"]["Enums"]["status_lead"]
@@ -660,6 +665,9 @@ export type Database = {
         }
         Insert: {
           bairro_interesse?: string | null
+          bens_para_permuta?: string | null
+          capital_disponivel?: number | null
+          chat_history?: Json | null
           cidade_estado?: string | null
           created_at?: string
           email?: string | null
@@ -673,6 +681,7 @@ export type Database = {
           next_followup_at?: string | null
           nome?: string | null
           objetivo?: string | null
+          objetivo_investimento?: string | null
           observacao_interna?: string | null
           orcamento_max?: number | null
           origem?: string
@@ -680,6 +689,7 @@ export type Database = {
           prazo_compra?: string | null
           proximo_passo_sugerido?: string | null
           quer_analise?: boolean | null
+          região_interesse?: string | null
           resumo_ia?: string | null
           session_id?: string | null
           status?: Database["public"]["Enums"]["status_lead"]
@@ -689,6 +699,9 @@ export type Database = {
         }
         Update: {
           bairro_interesse?: string | null
+          bens_para_permuta?: string | null
+          capital_disponivel?: number | null
+          chat_history?: Json | null
           cidade_estado?: string | null
           created_at?: string
           email?: string | null
@@ -702,6 +715,7 @@ export type Database = {
           next_followup_at?: string | null
           nome?: string | null
           objetivo?: string | null
+          objetivo_investimento?: string | null
           observacao_interna?: string | null
           orcamento_max?: number | null
           origem?: string
@@ -709,6 +723,7 @@ export type Database = {
           prazo_compra?: string | null
           proximo_passo_sugerido?: string | null
           quer_analise?: boolean | null
+          região_interesse?: string | null
           resumo_ia?: string | null
           session_id?: string | null
           status?: Database["public"]["Enums"]["status_lead"]

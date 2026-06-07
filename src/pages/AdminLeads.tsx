@@ -168,10 +168,21 @@ export default function AdminLeads() {
   const filteredLeads = useMemo(() => {
     if (!leads) return [];
     const q = search.trim().toLowerCase();
-    return leads.filter((l) => {
+    const leadsWithStrategicData = leads.map(l => ({
+      ...l,
+      isStrategic: l.proximo_passo_sugerido === "analise_daniel" || l.quer_analise === true
+    }));
+
+    return leadsWithStrategicData.filter((l) => {
       if (statusFilter !== "all" && l.status !== statusFilter) return false;
       if (scoreFilter !== "all" && l.lead_score !== scoreFilter) return false;
-      if (interesseFilter !== "all" && l.interesse !== interesseFilter) return false;
+      if (interesseFilter !== "all") {
+        if (interesseFilter === "analise_daniel") {
+          if (l.proximo_passo_sugerido !== "analise_daniel") return false;
+        } else if (l.interesse !== interesseFilter) {
+          return false;
+        }
+      }
       if (bairroFilter !== "all" && l.bairro_interesse !== bairroFilter) return false;
       if (!q) return true;
       const hay = [l.nome, l.telefone, l.email, l.bairro_interesse, l.tipo_imovel, l.mensagem_original]
@@ -274,7 +285,9 @@ export default function AdminLeads() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos interesses</SelectItem>
+                <SelectItem value="analise_daniel">✨ Análise Daniel</SelectItem>
                 <SelectItem value="compra">Compra</SelectItem>
+                <SelectItem value="investimento">Investimento</SelectItem>
                 <SelectItem value="aluguel_anual">Aluguel anual</SelectItem>
                 <SelectItem value="temporada">Temporada</SelectItem>
               </SelectContent>
@@ -425,9 +438,14 @@ export default function AdminLeads() {
                         </TableCell>
                         <TableCell className="align-top py-3">
                           <div className="font-medium text-foreground truncate">
-                            {lead.nome ?? <span className="italic text-muted-foreground">Sem nome</span>}
-                          </div>
-                          {lead.mensagem_original && (
+                          {lead.nome ?? <span className="italic text-muted-foreground">Sem nome</span>}
+                          {lead.proximo_passo_sugerido === "analise_daniel" && (
+                            <Badge variant="outline" className="ml-2 h-4 text-[9px] bg-primary/10 text-primary border-primary/20">
+                              ✨ Daniel
+                            </Badge>
+                          )}
+                        </div>
+                        {lead.mensagem_original && (
                             <div className="text-xs text-muted-foreground italic line-clamp-1 max-w-[280px]">
                               "{lead.mensagem_original}"
                             </div>
