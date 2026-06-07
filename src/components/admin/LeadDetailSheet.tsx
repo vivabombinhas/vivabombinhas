@@ -194,15 +194,32 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
       meta: lead.bairro_interesse ?? undefined,
     });
 
-    conversation?.forEach((m: any) => {
-      events.push({
-        id: `msg-${m.id}`,
-        at: m.created_at,
-        kind: m.role === "user" ? "message_user" : "message_bot",
-        title: m.role === "user" ? `${lead.nome ?? "Visitante"} enviou mensagem` : "MarIA respondeu",
-        body: m.content,
+    // Se houver chat_history persistido, usamos ele como fonte primária
+    if (lead.chat_history && Array.isArray(lead.chat_history)) {
+      lead.chat_history.forEach((m: any, idx: number) => {
+        // Ignorar mensagens de contexto interno se houver
+        if (m.content?.startsWith("[contexto")) return;
+        
+        events.push({
+          id: `chat-${lead.id}-${idx}`,
+          at: m.timestamp || lead.created_at,
+          kind: m.role === "user" ? "message_user" : "message_bot",
+          title: m.role === "user" ? `${lead.nome ?? "Visitante"} enviou mensagem` : "MarIA respondeu",
+          body: m.content,
+        });
       });
-    });
+    } else {
+      // Fallback para a tabela legada de conversas
+      conversation?.forEach((m: any) => {
+        events.push({
+          id: `msg-${m.id}`,
+          at: m.created_at,
+          kind: m.role === "user" ? "message_user" : "message_bot",
+          title: m.role === "user" ? `${lead.nome ?? "Visitante"} enviou mensagem` : "MarIA respondeu",
+          body: m.content,
+        });
+      });
+    }
 
     notes?.forEach((n: any) => {
       events.push({
@@ -245,6 +262,7 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
       });
     }
 
+    // Ordenação cronológica (mais recentes primeiro)
     return events.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
   }, [lead, conversation, notes, matches]);
 
