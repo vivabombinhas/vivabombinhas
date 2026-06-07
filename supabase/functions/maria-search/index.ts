@@ -123,6 +123,10 @@ serve(async (req) => {
       return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    console.log(`[MarIA Debug] Nova mensagem recebida. Session: ${sessionId}. Messages: ${messages.length}`);
+    const lastMessage = messages[messages.length - 1]?.content || "";
+    console.log(`[MarIA Debug] Última mensagem: "${lastMessage}"`);
+
     // 1. ROUTER
     const routerReply = await callAI(lovableApiKey, "google/gemini-3-flash-preview", PROMPTS.ROUTER, messages.slice(-5), 0);
     const routerData = safeParseJSON(routerReply);
@@ -144,13 +148,17 @@ serve(async (req) => {
 
     let rawReply = "";
     try {
+      console.log(`[MarIA Debug] Chamando IA (${mainModel}) para intent: ${intent}`);
       rawReply = await callAI(lovableApiKey, mainModel, mainPrompt, messages);
+      console.log(`[MarIA Debug] Resposta bruta da IA: "${rawReply}"`);
     } catch (err) {
       console.error(`Error calling ${mainModel}:`, err);
       // Fallback: OpenAI Premium -> Gemini Flash
       if (mainModel !== "google/gemini-3-flash-preview") {
         fallbackUsed = true;
+        console.log(`[MarIA Debug] Falha no modelo premium. Tentando fallback para Gemini Flash.`);
         rawReply = await callAI(lovableApiKey, "google/gemini-3-flash-preview", mainPrompt, messages);
+        console.log(`[MarIA Debug] Resposta do fallback: "${rawReply}"`);
       } else {
         throw err;
       }
@@ -225,8 +233,17 @@ serve(async (req) => {
 
     // 5. DETERMINISTIC REPLY FALLBACK (Para casos de resposta vazia ou erro)
     let finalReply = cleaned || rawReply;
-    if (showResults && (!finalReply || finalReply.length < 10)) {
-      finalReply = "Encontrei opções compatíveis com seu perfil em " + (filters.bairro || 'Bombinhas') + ".";
+    console.log(`[MarIA Debug] finalReply antes do fallback determinístico: "${finalReply}"`);
+    console.log(`[MarIA Debug] showResults: ${showResults}, cleaned length: ${cleaned?.length || 0}`);
+    
+    if (showResults && (!finalReply || finalReply.trim().length < 5)) {
+      finalReply = "Encontrei opções compatíveis com seu perfil em " + (filters?.bairro || 'Bombinhas') + ". Confira abaixo:";
+      console.log(`[MarIA Debug] Fallback determinístico aplicado: "${finalReply}"`);
+    }
+
+    if (!finalReply || finalReply.trim().length === 0) {
+      console.log(`[MarIA Debug] CRÍTICO: Resposta final vazia. Aplicando fallback de emergência.`);
+      finalReply = "Entendi. Estou buscando as melhores opções para você.";
     }
 
     return new Response(JSON.stringify({
