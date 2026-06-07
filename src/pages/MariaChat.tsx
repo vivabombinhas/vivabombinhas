@@ -97,6 +97,13 @@ const MariaChat = () => {
                   <div className="text-center space-y-3 mb-2 px-2">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[11px] font-bold text-primary uppercase tracking-wider">
                       📈 Comprar para investir
+                      <button 
+                        onClick={clearFinalidade} 
+                        className="ml-2 hover:text-foreground transition-colors"
+                        title="Trocar finalidade"
+                      >
+                        (trocar)
+                      </button>
                     </div>
                     <h3 className="text-base font-bold text-foreground leading-tight">
                       Vi que você está buscando investir em Bombinhas.
@@ -112,7 +119,7 @@ const MariaChat = () => {
                   <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-2">
                     <span>Buscando para</span>
                     <span className="font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full border border-primary/20">
-                      {finalidade === "temporada" ? "🏖️ Passar férias" : finalidade === "compra" ? "🏠 Comprar imóvel" : finalidade === "investimento" ? "📈 Comprar para investir" : "🤝 Anunciar imóvel"}
+                      {finalidade === "temporada" ? "🏖️ Passar férias" : finalidade === "compra" ? "🏠 Comprar imóvel" : "🤝 Anunciar imóvel"}
                     </span>
                     {" · "}
                     <button onClick={clearFinalidade} className="underline text-muted-foreground hover:text-foreground font-medium transition-colors">
