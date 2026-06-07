@@ -8,9 +8,10 @@ import { SuggestionChips } from "./SuggestionChips";
 interface ChatMessageProps {
   message: ChatMessageType;
   onSubmitLead?: (nome: string, telefone: string, extraData?: any) => Promise<boolean>;
+  onSelectSuggestion?: (suggestion: string) => void;
 }
 
-export function ChatMessage({ message, onSubmitLead }: ChatMessageProps) {
+export function ChatMessage({ message, onSubmitLead, onSelectSuggestion }: ChatMessageProps) {
   const isAssistant = message.role === "assistant";
   const hasProperties = isAssistant && message.properties && message.properties.length > 0;
   const showLeadForm = isAssistant && message.showLeadForm && onSubmitLead;
