@@ -315,15 +315,44 @@ export function useMariaChat() {
       setMessages((prev) => {
         const cleaned = prev.map((m) => ({ ...m, showLeadForm: false }));
         const firstName = nome.trim().split(/\s+/)[0];
-        const reply: ChatMessage = {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: remaining.length > 0
-            ? `Pronto, ${firstName}! Aqui estão as outras opções que separei para o seu perfil.`
-            : `Anotado, ${firstName}! Assim que surgir algo no seu perfil, aviso você.`,
-          timestamp: new Date(),
-          properties: remaining.length > 0 ? remaining : undefined,
-        };
+        
+        let reply: ChatMessage;
+        
+        if (extraData?.isStrategicMode || extraData?.quer_analise) {
+          reply = {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: `Perfeito, ${firstName}. Organizei seu perfil para análise estratégica com o Daniel. Ele terá o contexto da conversa para avaliar capital, objetivo e possibilidades em Bombinhas.\n\nEnquanto isso, você prefere ver algumas opções disponíveis no portal ou entender melhor quais regiões fazem mais sentido para o seu objetivo?`,
+            timestamp: new Date(),
+            suggestions: [
+              { 
+                label: "Ver imóveis disponíveis", 
+                subtext: "Quero olhar opções agora", 
+                value: "Ver imóveis disponíveis" 
+              },
+              { 
+                label: "Comparar regiões", 
+                subtext: "Entender Bombas, Mariscal e Canto Grande", 
+                value: "Comparar regiões" 
+              },
+              { 
+                label: "Encerrar por enquanto", 
+                subtext: "Já enviei meus dados", 
+                value: "Encerrar por enquanto" 
+              }
+            ]
+          };
+        } else {
+          reply = {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: remaining.length > 0
+              ? `Pronto, ${firstName}! Aqui estão as outras opções que separei para o seu perfil.`
+              : `Anotado, ${firstName}! Assim que surgir algo no seu perfil, aviso você.`,
+            timestamp: new Date(),
+            properties: remaining.length > 0 ? remaining : undefined,
+          };
+        }
         return [...cleaned, reply];
       });
 
