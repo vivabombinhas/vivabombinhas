@@ -168,7 +168,12 @@ export default function AdminLeads() {
   const filteredLeads = useMemo(() => {
     if (!leads) return [];
     const q = search.trim().toLowerCase();
-    return leads.filter((l) => {
+    const leadsWithStrategicData = leads.map(l => ({
+      ...l,
+      isStrategic: l.proximo_passo_sugerido === "analise_daniel" || l.quer_analise === true
+    }));
+
+    return leadsWithStrategicData.filter((l) => {
       if (statusFilter !== "all" && l.status !== statusFilter) return false;
       if (scoreFilter !== "all" && l.lead_score !== scoreFilter) return false;
       if (interesseFilter !== "all") {
