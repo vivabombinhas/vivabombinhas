@@ -59,6 +59,10 @@ interface Lead {
   prazo_compra?: string | null;
   orcamento_max?: number | null;
   resumo_ia?: string | null;
+  capital_disponivel?: number | null;
+  bens_para_permuta?: string | null;
+  proximo_passo_sugerido?: string | null;
+  chat_history?: any[] | null;
   feedback_corretor?: string | null;
   observacao_interna?: string | null;
 }
