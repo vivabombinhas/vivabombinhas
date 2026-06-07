@@ -66,8 +66,32 @@ export function ChatMessage({ message, onSubmitLead, onSelectSuggestion }: ChatM
             remainingCount={message.remainingForGate ?? 0}
             isAlertMode={message.isAlertMode}
             isStrategicMode={message.isStrategicAnalysis}
-            onSubmit={onSubmitLead!}
+            onSubmit={(nome, tel, data) => onSubmitLead!(nome, tel, { ...data, isStrategicMode: message.isStrategicAnalysis })}
           />
+        )}
+
+        {/* Inline suggestions */}
+        {isAssistant && message.suggestions && onSelectSuggestion && (
+          <div className="pt-2">
+            <div className="flex flex-wrap gap-2">
+              {message.suggestions.map((s) => (
+                <button
+                  key={s.value}
+                  onClick={() => onSelectSuggestion(s.value)}
+                  className="group flex flex-col items-start text-left p-3 rounded-2xl border border-border bg-card/50 text-muted-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 hover:shadow-md flex-1 min-w-[200px]"
+                >
+                  <span className="font-semibold text-sm mb-0.5">
+                    {s.label}
+                  </span>
+                  {s.subtext && (
+                    <span className="text-[10px] text-muted-foreground/70 group-hover:text-primary-foreground/90 leading-tight">
+                      {s.subtext}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
       </div>
       {!isAssistant && (
