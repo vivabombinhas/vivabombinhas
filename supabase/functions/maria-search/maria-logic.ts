@@ -71,6 +71,8 @@ JSON Schema:
   "objetivo": "temporada" | "morar" | "investir" | "renda" | "patrimonio" | "anunciar" | null,
   "prazo_compra": "imediato" | "3_meses" | "6_meses" | "12_meses" | "futuro" | null,
   "orcamento_max": number | null,
+  "capital_disponivel": number | null,
+  "bens_para_permuta": string | null,
   "bairro_preferencia": string | null,
   "tipo_imovel": string | null,
   "nome": string | null,
@@ -80,8 +82,13 @@ JSON Schema:
   "lead_score": "frio" | "morno" | "quente" | "premium",
   "resumo_ia": string
 }
-Regras:
-- "resumo_ia": Útil para o Daniel (ex: "Lead premium. Busca renda em Mariscal, 2mi, aberto a análise comparativa").`
+Regras para lead_score:
+- "premium": Se quer_falar_daniel=true E (orcamento_max >= 1000000 OU capital_disponivel >= 1000000 OU bens_para_permuta é informado).
+- "quente": Se quer_falar_daniel=true OU (nome e telefone informados com finalidade compra/investimento).
+- "morno": Se informou filtros mas não quer análise ainda.
+- "frio": Apenas saudações ou curiosidade.
+Regra para resumo_ia:
+- Seja ultra descritivo para o Daniel. Mencione valores, bens de troca, cidades de origem se citadas, e o 'dor/desejo' real do cliente.`
 };
 
 export async function callAI(lovableApiKey: string, model: string, system: string, messages: any[], temperature = 0.4) {
