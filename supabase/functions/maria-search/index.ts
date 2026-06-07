@@ -218,15 +218,21 @@ serve(async (req) => {
         try {
           await upsertLeadBySession(supabase, sessionId, {
             lead_score: extractedData.lead_score,
-            objetivo: extractedData.objetivo,
+            objetive: extractedData.objetivo,
             prazo_compra: extractedData.prazo_compra,
             orcamento_max: extractedData.orcamento_max,
+            capital_disponivel: extractedData.capital_disponivel,
+            bens_para_permuta: extractedData.bens_para_permuta,
             resumo_ia: extractedData.resumo_ia,
             interesse: extractedData.finalidade,
             bairro_interesse: extractedData.bairro_preferencia,
             tipo_imovel: extractedData.tipo_imovel,
             nome: extractedData.nome || undefined,
             telefone: extractedData.telefone || undefined,
+            proximo_passo_sugerido: extractedData.quer_falar_daniel ? "analise_daniel" : undefined,
+            objetivo_investimento: extractedData.objetivo,
+            região_interesse: extractedData.bairro_preferencia,
+            chat_history: messages // Always keep history updated in background
           });
         } catch (e) { console.error("Persistence error:", e); }
       })();
