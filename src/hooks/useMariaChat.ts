@@ -262,7 +262,7 @@ export function useMariaChat() {
         showLeadForm,
         remainingForGate: noResultsGate ? 0 : remainingForGate,
         isAlertMode: noResultsGate,
-        isStrategicAnalysis: showStrategicForm,
+        isStrategicAnalysis: showStrategicForm && !messages.some(m => m.isStrategicAnalysis),
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
