@@ -280,7 +280,9 @@ export default function AdminLeads() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos interesses</SelectItem>
+                <SelectItem value="analise_daniel">✨ Análise Daniel</SelectItem>
                 <SelectItem value="compra">Compra</SelectItem>
+                <SelectItem value="investimento">Investimento</SelectItem>
                 <SelectItem value="aluguel_anual">Aluguel anual</SelectItem>
                 <SelectItem value="temporada">Temporada</SelectItem>
               </SelectContent>
