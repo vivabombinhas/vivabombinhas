@@ -318,6 +318,20 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
                 <p className="text-[9px] text-muted-foreground uppercase font-bold">Prazo</p>
                 <p className="text-sm font-medium capitalize">{lead.prazo_compra?.replace('_', ' ') || "—"}</p>
              </div>
+             {lead.capital_disponivel && (
+               <div className="p-2 bg-muted rounded-md col-span-2">
+                  <p className="text-[9px] text-muted-foreground uppercase font-bold text-emerald-600">Capital Disponível</p>
+                  <p className="text-sm font-bold text-emerald-700">
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(lead.capital_disponivel)}
+                  </p>
+               </div>
+             )}
+             {lead.bens_para_permuta && (
+               <div className="p-2 bg-muted rounded-md col-span-2">
+                  <p className="text-[9px] text-muted-foreground uppercase font-bold text-amber-600">Bens para Permuta</p>
+                  <p className="text-sm font-medium">{lead.bens_para_permuta}</p>
+               </div>
+             )}
              <div className="p-2 bg-muted rounded-md">
                 <p className="text-[9px] text-muted-foreground uppercase font-bold">Orçamento Máx</p>
                 <p className="text-sm font-medium">
@@ -328,7 +342,9 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
              </div>
              <div className="p-2 bg-muted rounded-md">
                 <p className="text-[9px] text-muted-foreground uppercase font-bold">Lead Score</p>
-                <Badge variant="outline" className="mt-0.5 text-[10px] font-bold border-primary/30">{lead.lead_score || "—"}</Badge>
+                <Badge variant="outline" className={`mt-0.5 text-[10px] font-bold ${lead.lead_score === 'Premium' ? 'bg-amber-500 text-white' : 'border-primary/30'}`}>
+                  {lead.lead_score || "—"}
+                </Badge>
              </div>
           </div>
 
