@@ -3,6 +3,7 @@ import { Bot, User } from "lucide-react";
 import type { ChatMessage as ChatMessageType } from "@/hooks/useMariaChat";
 import { PropertyCard } from "./PropertyCard";
 import { LeadCaptureForm } from "./LeadCaptureForm";
+import { SuggestionChips } from "./SuggestionChips";
 
 interface ChatMessageProps {
   message: ChatMessageType;
