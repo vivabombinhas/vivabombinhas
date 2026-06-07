@@ -438,9 +438,14 @@ export default function AdminLeads() {
                         </TableCell>
                         <TableCell className="align-top py-3">
                           <div className="font-medium text-foreground truncate">
-                            {lead.nome ?? <span className="italic text-muted-foreground">Sem nome</span>}
-                          </div>
-                          {lead.mensagem_original && (
+                          {lead.nome ?? <span className="italic text-muted-foreground">Sem nome</span>}
+                          {lead.proximo_passo_sugerido === "analise_daniel" && (
+                            <Badge variant="outline" className="ml-2 h-4 text-[9px] bg-primary/10 text-primary border-primary/20">
+                              ✨ Daniel
+                            </Badge>
+                          )}
+                        </div>
+                        {lead.mensagem_original && (
                             <div className="text-xs text-muted-foreground italic line-clamp-1 max-w-[280px]">
                               "{lead.mensagem_original}"
                             </div>
