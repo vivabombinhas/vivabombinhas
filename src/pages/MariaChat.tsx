@@ -136,7 +136,12 @@ const MariaChat = () => {
         )}
 
         {messages.map((msg) => (
-          <ChatMessage key={msg.id} message={msg} onSubmitLead={submitLead} />
+          <ChatMessage 
+            key={msg.id} 
+            message={msg} 
+            onSubmitLead={submitLead} 
+            onSelectSuggestion={sendMessage}
+          />
         ))}
 
         {isLoading && (
