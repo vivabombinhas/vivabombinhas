@@ -65,7 +65,7 @@ export function SuggestionChips({ onSelect, finalidade }: SuggestionChipsProps) 
         <button
           key={s.value}
           onClick={() => onSelect(s.value)}
-          className={`group flex flex-col items-center justify-center text-center p-3 rounded-2xl border border-border bg-card/50 text-muted-foreground hover:bg-accent/10 hover:text-accent hover:border-accent/30 transition-all duration-300 hover:shadow-sm ${
+          className={`group flex flex-col items-center justify-center text-center p-3 rounded-2xl border border-border bg-card/50 text-muted-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 hover:shadow-md ${
             finalidade === 'investimento' ? 'flex-1 min-w-[200px]' : 'text-xs px-3.5 py-2 rounded-full'
           }`}
         >
@@ -73,7 +73,7 @@ export function SuggestionChips({ onSelect, finalidade }: SuggestionChipsProps) 
             {s.label}
           </span>
           {s.subtext && (
-            <span className="text-[10px] text-muted-foreground/70 group-hover:text-accent/70 leading-tight">
+            <span className="text-[10px] text-muted-foreground/70 group-hover:text-primary-foreground/90 leading-tight">
               {s.subtext}
             </span>
           )}
