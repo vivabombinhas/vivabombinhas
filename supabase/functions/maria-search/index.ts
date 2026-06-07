@@ -117,6 +117,7 @@ serve(async (req) => {
         nome, 
         telefone, 
         status: "novo",
+        chat_history: messages, // Persist history snapshot
         ...extra_data 
       };
       await upsertLeadBySession(supabase, sessionId, leadData);
