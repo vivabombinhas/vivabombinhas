@@ -171,7 +171,13 @@ export default function AdminLeads() {
     return leads.filter((l) => {
       if (statusFilter !== "all" && l.status !== statusFilter) return false;
       if (scoreFilter !== "all" && l.lead_score !== scoreFilter) return false;
-      if (interesseFilter !== "all" && l.interesse !== interesseFilter) return false;
+      if (interesseFilter !== "all") {
+        if (interesseFilter === "analise_daniel") {
+          if (l.proximo_passo_sugerido !== "analise_daniel") return false;
+        } else if (l.interesse !== interesseFilter) {
+          return false;
+        }
+      }
       if (bairroFilter !== "all" && l.bairro_interesse !== bairroFilter) return false;
       if (!q) return true;
       const hay = [l.nome, l.telefone, l.email, l.bairro_interesse, l.tipo_imovel, l.mensagem_original]
