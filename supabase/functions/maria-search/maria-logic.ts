@@ -5,8 +5,8 @@ export const PROMPTS = {
 Classifique a última mensagem do usuário e o histórico com base no significado REAL, não apenas palavras-chave.
 
 Categorias:
-- "busca": Usuário quer ver imóveis, opções, fotos, cards, preços ou informou filtros objetivos (bairro, valor, tipo, temporada). Ex: "quero casa em Mariscal até 900 mil", "me mostre apartamentos", "tem imóveis em Bombas?".
-- "consultivo": Perguntas de decisão, estratégia ou investimento. Ex: "onde é melhor investir?", "qual o m² de Mariscal?", "vale comprar na planta?", "tenho R$2 milhões".
+- "busca": Usuário quer ver imóveis, opções, fotos, cards, preços ou informou filtros objetivos. Ex: "Ver imóveis para investir", "quero casa em Mariscal", "me mostre apartamentos".
+- "consultivo": Perguntas de decisão, estratégia, investimento ou análise de perfil. Ex: "Analisar meu perfil", "Entender o mercado", "onde é melhor investir?", "qual o m²?", "tenho R$2 milhões".
 - "proprietario": Usuário quer anunciar, vender, cadastrar ou divulgar imóvel próprio. Ex: "quero anunciar meu imóvel", "tenho uma casa para vender".
 - "comum": Saudação, dúvidas sobre a MarIA ou conversa sem intenção clara de busca/venda. Ex: "oi", "quem é você?".
 
