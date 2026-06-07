@@ -87,7 +87,7 @@ export async function callAI(lovableApiKey: string, model: string, system: strin
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
     body: JSON.stringify({
       model,
-      messages: [{ role: "system", content: system }, ...messages],
+      messages: [{ role: "system", content: system }, ...messages.map(m => ({ role: m.role, content: m.content }))],
       temperature,
     }),
   });
