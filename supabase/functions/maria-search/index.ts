@@ -18,7 +18,7 @@ async function upsertLeadBySession(supabase: any, sessionId: string, patch: Reco
   if (!sessionId) return null;
   console.log(`[MarIA Persistence] Upserting lead for session ${sessionId}:`, JSON.stringify(patch));
   try {
-    const { data: existing, error: findError } = await supabase.from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
+    const { data: existing, error: findError } = await supabase.from("leads_maria").select("id, lead_score").eq("session_id", sessionId).maybeSingle();
     if (findError) {
       console.error(`[MarIA Persistence] Error finding lead:`, findError);
     }
