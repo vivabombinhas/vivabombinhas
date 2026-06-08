@@ -145,9 +145,14 @@ function isSearchAllowed(filters: any, intent: string, lastMessage: string, extr
     return hasConstraint && !!hasCapacityOrPeriod;
   }
   
-  // Compra Comum
+  // Compra Comum: exige bairro + tipo + faixa de orçamento
   if (finalidade === "compra") {
-    return hasConcreteFilter;
+    const hasBairro = !!filters.bairro;
+    const hasTipo = !!filters.tipo;
+    const hasOrcamento = !!(filters.preco_max || filters.preco_min ||
+      extractedData?.orcamento_max || extractedData?.orcamento_min);
+    console.log(`[MarIA Search Logic] Compra check: bairro=${hasBairro}, tipo=${hasTipo}, orcamento=${hasOrcamento}`);
+    return hasBairro && hasTipo && hasOrcamento;
   }
   
   return false;
