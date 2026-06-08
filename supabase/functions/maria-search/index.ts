@@ -202,7 +202,7 @@ serve(async (req) => {
     let fallbackUsed = false;
 
     if (intent === "consultivo") {
-      mainModel = "openai/gpt-4o"; // Modelo premium solicitado para estratégia e investimento
+      mainModel = "google/gemini-2.5-pro"; // Modelo premium estável para consultivo
       mainPrompt = PROMPTS.CONSULTIVO_CHAT;
     } else if (intent === "proprietario") {
       mainPrompt = PROMPTS.PROPRIETARIO_CHAT;
