@@ -368,26 +368,18 @@ serve(async (req) => {
             chat_history: messages
           });
 
-          // 2. Persist new message to history table
-          if (leadId) {
-             const lastMsg = messages[messages.length - 1];
-             if (lastMsg) {
-                await supabase.from("maria_messages").insert({
-                  session_id: sessionId,
-                  lead_id: leadId,
-                  role: lastMsg.role,
-                  content: lastMsg.content
-                });
-             }
-             
-             // Also persist the assistant's reply
-             await supabase.from("maria_messages").insert({
-               session_id: sessionId,
-               lead_id: leadId,
-               role: "assistant",
-               content: finalReply
-             });
-          }
+          // 3. Record search metrics
+          await supabase.from("maria_search_metrics").insert({
+            session_id: sessionId,
+            finalidade: filters?.finalidade || extractedData?.finalidade,
+            missing_filters: missingFilters,
+            message_count: messages.length,
+            has_shown_results: showResults,
+            intent: intent
+          });
+
+          console.log(`[MarIA Metrics] Recorded for ${sessionId}: missing=${missingFilters.join(",")}, results=${showResults}`);
+
         } catch (e) { console.error("Persistence error:", e); }
       })();
     }
