@@ -377,31 +377,47 @@ serve(async (req) => {
             chat_history: messages
           });
 
-          // 2. Persist message history
           if (leadId) {
-             const lastUserMsg = messages[messages.length - 1];
-             if (lastUserMsg) {
-                await supabase.from("maria_messages").insert({
-                  session_id: sessionId,
-                  lead_id: leadId,
-                  role: lastUserMsg.role,
-                  content: lastUserMsg.content
-                });
-             }
-             // Persist MarIA's reply
-             await supabase.from("maria_messages").insert({
-               session_id: sessionId,
-               lead_id: leadId,
-               role: "assistant",
-               content: finalReply
-             });
-          }
+            console.log(`[MarIA Persistence] Lead ID confirmed: ${leadId}. Persisting messages and metrics.`);
+            
+            // 2. Persist message history
+            const lastUserMsg = messages[messages.length - 1];
+            if (lastUserMsg) {
+              const { error: msgUserError } = await supabase.from("maria_messages").insert({
+                session_id: sessionId,
+                lead_id: leadId,
+                role: lastUserMsg.role,
+                content: lastUserMsg.content
+              });
+              if (msgUserError) console.error("[MarIA Persistence] Error persisting user message:", msgUserError);
+            }
+            
+            const { error: msgAiError } = await supabase.from("maria_messages").insert({
+              session_id: sessionId,
+              lead_id: leadId,
+              role: "assistant",
+              content: finalReply
+            });
+            if (msgAiError) console.error("[MarIA Persistence] Error persisting assistant message:", msgAiError);
 
-          // 3. Record search metrics
-          await supabase.from("maria_search_metrics").insert({
-            session_id: sessionId,
-            finalidade: filters?.finalidade || extractedData?.finalidade,
-            missing_filters: missingFilters,
+            // 3. Record search metrics
+            const { error: metricError } = await supabase.from("maria_search_metrics").insert({
+              session_id: sessionId,
+              finalidade: filters?.finalidade || extractedData?.finalidade,
+              missing_filters: missingFilters,
+              results_count: allProperties.length,
+              showed_cards: showResults,
+              messages_count: messages.length
+            });
+            if (metricError) console.error("[MarIA Persistence] Error recording metrics:", metricError);
+          } else {
+            console.warn(`[MarIA Persistence] No leadId returned for session ${sessionId}. Skipping messages/metrics.`);
+          }
+        } catch (err) {
+          console.error("[MarIA Persistence] Background persistence error:", err);
+        }
+      })();
+    }
             message_count: messages.length,
             has_shown_results: showResults,
             intent: intent
