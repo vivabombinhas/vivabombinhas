@@ -650,6 +650,7 @@ export type Database = {
           objetivo_investimento: string | null
           observacao_interna: string | null
           orcamento_max: number | null
+          orcamento_min: number | null
           origem: string
           pais_codigo: string | null
           prazo_compra: string | null
@@ -684,6 +685,7 @@ export type Database = {
           objetivo_investimento?: string | null
           observacao_interna?: string | null
           orcamento_max?: number | null
+          orcamento_min?: number | null
           origem?: string
           pais_codigo?: string | null
           prazo_compra?: string | null
@@ -718,6 +720,7 @@ export type Database = {
           objetivo_investimento?: string | null
           observacao_interna?: string | null
           orcamento_max?: number | null
+          orcamento_min?: number | null
           origem?: string
           pais_codigo?: string | null
           prazo_compra?: string | null
@@ -732,6 +735,41 @@ export type Database = {
           tipo_lead?: string | null
         }
         Relationships: []
+      }
+      maria_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          lead_id: string | null
+          role: string
+          session_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          lead_id?: string | null
+          role: string
+          session_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          lead_id?: string | null
+          role?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maria_messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads_maria"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
