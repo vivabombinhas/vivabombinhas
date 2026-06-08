@@ -219,7 +219,7 @@ serve(async (req) => {
                                    lastMessage.toLowerCase().includes("investir") ||
                                    lastMessage.toLowerCase().includes("temporada");
 
-    if (!filters && extractedData && intent === "busca" && isExplicitSearchRequest) {
+    if (!filters && extractedData && (intent === "busca" || intent === "consultivo") && isExplicitSearchRequest) {
       const candidateFilters = {
         finalidade: extractedData.finalidade || "compra",
         bairro: extractedData.bairro_preferencia,
