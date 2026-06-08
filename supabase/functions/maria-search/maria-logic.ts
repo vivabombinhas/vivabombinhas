@@ -82,6 +82,8 @@ JSON Schema:
   "bens_para_permuta": string | null,
   "bairro_preferencia": string | null,
   "tipo_imovel": string | null,
+  "pessoas": number | null,
+  "periodo": string | null,
   "nome": string | null,
   "telefone": string | null,
   "perfil_premium": boolean,
