@@ -78,6 +78,11 @@ async function searchProperties(supabase: any, filters: any): Promise<any[]> {
       }
     }
 
+    if (filters.preco_min) {
+      if (filters.finalidade === "temporada") q = q.gte("preco_temporada_diaria", filters.preco_min);
+      else q = q.gte("preco", filters.preco_min);
+    }
+
     if (filters.preco_max) {
       if (filters.finalidade === "temporada") q = q.lte("preco_temporada_diaria", filters.preco_max);
       else q = q.lte("preco", filters.preco_max);
@@ -108,10 +113,19 @@ function isSearchAllowed(filters: any, intent: string, lastMessage: string, extr
   const finalidade = filters.finalidade;
   const hasConcreteFilter = filters.bairro || filters.preco_max || filters.tipo;
   
+  console.log(`[MarIA Search Logic] Checking allowed: Finalidade=${finalidade}, Intent=${intent}, Concrete=${hasConcreteFilter}`);
+  
   // Regra específica para Investimento
   if (finalidade === "investimento" || (finalidade === "compra" && extractedData?.objetivo === "investir")) {
-    const hasObjective = extractedData?.objetivo === "renda" || extractedData?.objetivo === "patrimonio" || extractedData?.objetivo === "investir" || extractedData?.resumo_ia?.toLowerCase().includes("renda") || extractedData?.resumo_ia?.toLowerCase().includes("investir");
-    // O usuário exige: objetivo + pelo menos 1 concreto
+    const hasObjective = extractedData?.objetivo === "renda" || 
+                         extractedData?.objetivo === "patrimonio" || 
+                         extractedData?.objetivo === "investir" || 
+                         extractedData?.resumo_ia?.toLowerCase().includes("renda") || 
+                         extractedData?.resumo_ia?.toLowerCase().includes("investir") ||
+                         lastMessage.toLowerCase().includes("renda") ||
+                         lastMessage.toLowerCase().includes("investir");
+    
+    console.log(`[MarIA Search Logic] Investment check: hasObjective=${hasObjective}, hasConcrete=${hasConcreteFilter}`);
     return hasObjective && hasConcreteFilter;
   }
   
@@ -119,6 +133,7 @@ function isSearchAllowed(filters: any, intent: string, lastMessage: string, extr
   if (finalidade === "temporada") {
     const hasConstraint = hasConcreteFilter; // Bairro ou Preço
     const hasCapacityOrPeriod = extractedData?.pessoas || extractedData?.periodo;
+    console.log(`[MarIA Search Logic] Temporada check: hasConstraint=${hasConstraint}, hasCapacityOrPeriod=${!!hasCapacityOrPeriod}`);
     return hasConstraint && !!hasCapacityOrPeriod;
   }
   
@@ -238,6 +253,7 @@ serve(async (req) => {
     // Final check for search triggering
     if (filters && isSearchAllowed(filters, intent, lastMessage, extractedData) && filters.finalidade !== "anunciante") {
       allProperties = await searchProperties(supabase, filters);
+      
       if (allProperties.length > 0) {
         showResults = true;
         if (!lead_captured && allProperties.length > 2) {
@@ -247,7 +263,26 @@ serve(async (req) => {
           visibleProperties = allProperties.slice(0, 3);
         }
       } else {
-        noResultsGate = !lead_captured;
+        console.log(`[MarIA Search] No exact results for ${JSON.stringify(filters)}. Trying broader search.`);
+        // Tenta busca sem o filtro de preço para ver se há "vizinhos"
+        const broaderFilters = { ...filters, preco_min: undefined, preco_max: undefined };
+        const suggestions = await searchProperties(supabase, broaderFilters);
+        
+        if (suggestions.length > 0) {
+          allProperties = suggestions;
+          showResults = true;
+          visibleProperties = allProperties.slice(0, 3);
+          
+          // Ajusta a resposta para explicar que são sugestões
+          const bairroName = filters.bairro || "Bombinhas";
+          cleaned = `Não encontrei imóveis exatamente na faixa de valor solicitada em ${bairroName}, mas separei estas opções na região que podem fazer sentido para sua estratégia:`;
+          console.log(`[MarIA Search] Broadened results found. Adjusted reply.`);
+        } else {
+          noResultsGate = !lead_captured;
+          // Se realmente não houver nada, ajusta a resposta para ser consultiva e oferecer caminhos
+          cleaned = `No momento não encontrei imóveis disponíveis em ${filters.bairro || 'Mariscal'} com essas características. Para avançarmos, você prefere ampliar a busca para praias vizinhas (como Centro ou Bombas) ou prefere que eu te apresente uma comparação de rentabilidade entre as regiões?`;
+          console.log(`[MarIA Search] No results even after broadening.`);
+        }
       }
     }
 
