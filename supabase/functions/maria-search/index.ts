@@ -120,7 +120,7 @@ async function searchProperties(supabase: any, filters: any): Promise<any[]> {
   try {
     let q = supabase.from("imoveis").select("*").eq("status", "ativo").or("oculta_para_maria.is.null,oculta_para_maria.eq.false").limit(40);
     
-    if (filters.finalidade) {
+    if (filters?.finalidade) {
       const dbFinalidade = filters.finalidade === "investimento" ? "compra" : filters.finalidade;
       q = q.eq("finalidade", dbFinalidade);
     }
@@ -291,7 +291,7 @@ serve(async (req) => {
     let fallbackUsed = false;
 
     if (intent === "consultivo") {
-      mainModel = "openai/gpt-5"; // Modelo premium para análise estratégica e consultoria
+      mainModel = "openai/gpt-4o"; // Modelo premium para análise estratégica e consultoria
       mainPrompt = PROMPTS.CONSULTIVO_CHAT;
     } else if (intent === "proprietario") {
       mainPrompt = PROMPTS.PROPRIETARIO_CHAT;
@@ -374,8 +374,18 @@ serve(async (req) => {
     missingFilters = searchCheck.missing;
 
     // Final check for search triggering
-    if (searchCheck.allowed && filters?.finalidade !== "anunciante") {
-      allProperties = await searchProperties(supabase, filters);
+    if (searchCheck.allowed) {
+      // Garantir que temos um objeto de filtros válido
+      const effectiveFilters = filters || {
+        finalidade: extractedData?.finalidade || "compra",
+        bairro: extractedData?.bairro_preferencia,
+        tipo: extractedData?.tipo_imovel,
+        preco_max: extractedData?.orcamento_max,
+        preco_min: extractedData?.orcamento_min
+      };
+
+      if (effectiveFilters.finalidade !== "anunciante") {
+        allProperties = await searchProperties(supabase, effectiveFilters);
       
       if (allProperties.length > 0) {
         showResults = true;
