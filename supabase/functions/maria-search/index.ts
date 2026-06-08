@@ -356,8 +356,10 @@ serve(async (req) => {
     if (extractedData) {
       (async () => {
         try {
-          // 1. Update lead data
-          const leadId = await upsertLeadBySession(supabase, sessionId, {
+          console.log(`[MarIA Persistence] Starting persistence for session ${sessionId}`);
+          
+          // 1. Map extracted data to lead fields
+          const leadPayload = {
             lead_score: extractedData.lead_score,
             objetivo: extractedData.objetivo,
             prazo_compra: extractedData.prazo_compra,
@@ -375,31 +377,36 @@ serve(async (req) => {
             objetivo_investimento: extractedData.objetivo,
             região_interesse: extractedData.bairro_preferencia,
             chat_history: messages
-          });
+          };
+
+          // Update lead data
+          const leadId = await upsertLeadBySession(supabase, sessionId, leadPayload);
 
           if (leadId) {
             console.log(`[MarIA Persistence] Lead ID confirmed: ${leadId}. Persisting messages and metrics.`);
             
-            // 2. Persist message history
+            // 2. Persist message history (Individual messages)
+            const currentMessagesToSave = [];
             const lastUserMsg = messages[messages.length - 1];
             if (lastUserMsg) {
-              const { error: msgUserError } = await supabase.from("maria_messages").insert({
+              currentMessagesToSave.push({
                 session_id: sessionId,
                 lead_id: leadId,
                 role: lastUserMsg.role,
                 content: lastUserMsg.content
               });
-              if (msgUserError) console.error("[MarIA Persistence] Error persisting user message:", msgUserError);
             }
             
-            const { error: msgAiError } = await supabase.from("maria_messages").insert({
+            currentMessagesToSave.push({
               session_id: sessionId,
               lead_id: leadId,
               role: "assistant",
               content: finalReply
             });
-            if (msgAiError) console.error("[MarIA Persistence] Error persisting assistant message:", msgAiError);
 
+            const { error: msgError } = await supabase.from("maria_messages").insert(currentMessagesToSave);
+            if (msgError) console.error("[MarIA Persistence] Error persisting messages:", msgError);
+            
             // 3. Record search metrics
             const { error: metricError } = await supabase.from("maria_search_metrics").insert({
               session_id: sessionId,
@@ -410,22 +417,15 @@ serve(async (req) => {
               messages_count: messages.length
             });
             if (metricError) console.error("[MarIA Persistence] Error recording metrics:", metricError);
+
+            // 4. Update lead with final message history count to ensure sync
+            await supabase.from("leads_maria").update({ last_contact_at: new Date().toISOString() }).eq("id", leadId);
           } else {
             console.warn(`[MarIA Persistence] No leadId returned for session ${sessionId}. Skipping messages/metrics.`);
           }
         } catch (err) {
           console.error("[MarIA Persistence] Background persistence error:", err);
         }
-      })();
-    }
-            message_count: messages.length,
-            has_shown_results: showResults,
-            intent: intent
-          });
-
-          console.log(`[MarIA Metrics] Recorded for ${sessionId}: missing=${missingFilters.join(",")}, results=${showResults}`);
-
-        } catch (e) { console.error("Persistence error:", e); }
       })();
     }
 
