@@ -255,9 +255,8 @@ serve(async (req) => {
 
     // Fallback: IA esqueceu [FILTERS] mas o extrator pegou filtros objetivos
     const searchPatterns = /ver im[óo]veis|op[çc][õo]es|cards|mostrar|buscar|procurar|quero ver|me mostre/i;
-    const isExplicitSearchRequest = searchPatterns.test(lastMessage) || 
-                                   lastMessage.toLowerCase().includes("investir") ||
-                                   lastMessage.toLowerCase().includes("temporada");
+    // CRÍTICO: Não disparar busca automática se o usuário apenas citou um termo genérico sem intenção clara de VER agora.
+    const isExplicitSearchRequest = searchPatterns.test(lastMessage);
 
     if (!filters && extractedData && (intent === "busca" || intent === "consultivo") && isExplicitSearchRequest) {
       const candidateFilters = {
