@@ -105,20 +105,44 @@ Regras para resumo_ia:
 };
 
 export async function callAI(lovableApiKey: string, model: string, system: string, messages: any[], temperature = 0.4) {
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: "system", content: system }, ...messages.map(m => ({ role: m.role, content: m.content }))],
-      temperature,
-    }),
-  });
-  if (!response.ok) {
-    throw new Error(`AI Gateway error (${model}): ${response.status}`);
+  // Trim messages to avoid context window issues (keep last 15 exchanges)
+  const trimmedMessages = messages.length > 30 ? messages.slice(-30) : messages;
+  
+  console.log(`[MarIA AI] Calling ${model} with ${trimmedMessages.length} messages`);
+  
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout per AI call
+
+  try {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model,
+        messages: [{ role: "system", content: system }, ...trimmedMessages.map(m => ({ role: m.role, content: m.content }))],
+        temperature,
+      }),
+    });
+    
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[MarIA AI] Gateway error (${model}): ${response.status} - ${errorText}`);
+      throw new Error(`AI Gateway error (${model}): ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || "";
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      console.error(`[MarIA AI] Timeout calling ${model}`);
+      throw new Error(`AI Timeout (${model})`);
+    }
+    throw err;
   }
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || "";
 }
 
 export function safeParseJSON(text: string) {

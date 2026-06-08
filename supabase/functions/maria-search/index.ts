@@ -204,7 +204,7 @@ serve(async (req) => {
     let fallbackUsed = false;
 
     if (intent === "consultivo") {
-      mainModel = "google/gemini-2.5-pro"; // Modelo premium estável para consultivo
+      mainModel = "openai/gpt-4o"; // Modelo premium para análise estratégica e consultoria
       mainPrompt = PROMPTS.CONSULTIVO_CHAT;
     } else if (intent === "proprietario") {
       mainPrompt = PROMPTS.PROPRIETARIO_CHAT;
@@ -219,12 +219,15 @@ serve(async (req) => {
       console.log(`[MarIA Debug] Resposta bruta da IA: "${rawReply}"`);
     } catch (err) {
       console.error(`Error calling ${mainModel}:`, err);
-      // Fallback: OpenAI Premium -> Gemini Flash
-      if (mainModel !== "google/gemini-3-flash-preview") {
+      // Fallback: OpenAI Premium -> Gemini Pro -> Gemini Flash
+      if (mainModel === "openai/gpt-4o") {
+        fallbackUsed = true;
+        console.log(`[MarIA Debug] Falha no GPT-4o. Tentando fallback para Gemini 1.5 Pro.`);
+        rawReply = await callAI(lovableApiKey, "google/gemini-1.5-pro", mainPrompt, messages);
+      } else if (mainModel !== "google/gemini-3-flash-preview") {
         fallbackUsed = true;
         console.log(`[MarIA Debug] Falha no modelo premium. Tentando fallback para Gemini Flash.`);
         rawReply = await callAI(lovableApiKey, "google/gemini-3-flash-preview", mainPrompt, messages);
-        console.log(`[MarIA Debug] Resposta do fallback: "${rawReply}"`);
       } else {
         throw err;
       }
