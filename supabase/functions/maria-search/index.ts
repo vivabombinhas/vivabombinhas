@@ -248,7 +248,7 @@ serve(async (req) => {
         nome, 
         telefone, 
         status: "novo",
-        chat_history: messages, // Persist full history snapshot
+        chat_history: messages.length > 0 ? messages : undefined, // Persist full history snapshot
         ...safeExtraData 
       };
 
