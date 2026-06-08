@@ -165,12 +165,14 @@ serve(async (req) => {
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     if (action === "submit_lead") {
-      const leadData = { 
+      // Remove campos que não existem na tabela leads_maria
+      const { isStrategicMode, ...safeExtraData } = extra_data || {};
+      const leadData: any = { 
         nome, 
         telefone, 
         status: "novo",
         chat_history: messages, // Persist full history snapshot
-        ...extra_data 
+        ...safeExtraData 
       };
 
       // Force high priority for strategic leads
@@ -202,7 +204,7 @@ serve(async (req) => {
     let fallbackUsed = false;
 
     if (intent === "consultivo") {
-      mainModel = "openai/gpt-4o"; // Modelo premium solicitado para estratégia e investimento
+      mainModel = "google/gemini-2.5-pro"; // Modelo premium estável para consultivo
       mainPrompt = PROMPTS.CONSULTIVO_CHAT;
     } else if (intent === "proprietario") {
       mainPrompt = PROMPTS.PROPRIETARIO_CHAT;
