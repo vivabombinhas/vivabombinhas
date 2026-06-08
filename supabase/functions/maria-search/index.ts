@@ -115,13 +115,19 @@ function parseFiltersBlock(text: string) {
   }
 }
 
-function isSearchAllowed(filters: any, intent: string, lastMessage: string, extractedData: any) {
-  if (!filters || !filters.finalidade) return false;
+function checkSearchRequirements(filters: any, intent: string, lastMessage: string, extractedData: any) {
+  const missing: string[] = [];
+  if (!filters || !filters.finalidade) {
+    return { allowed: false, missing: ["finalidade"] };
+  }
   
   const finalidade = filters.finalidade;
-  const hasConcreteFilter = filters.bairro || filters.preco_max || filters.tipo;
-  
-  console.log(`[MarIA Search Logic] Checking allowed: Finalidade=${finalidade}, Intent=${intent}, Concrete=${hasConcreteFilter}`);
+  const hasBairro = !!filters.bairro;
+  const hasTipo = !!filters.tipo;
+  const hasOrcamento = !!(filters.preco_max || filters.preco_min ||
+    extractedData?.orcamento_max || extractedData?.orcamento_min);
+
+  console.log(`[MarIA Search Logic] Checking requirements: Finalidade=${finalidade}, Intent=${intent}`);
   
   // Regra específica para Investimento
   if (finalidade === "investimento" || (finalidade === "compra" && extractedData?.objetivo === "investir")) {
@@ -133,29 +139,38 @@ function isSearchAllowed(filters: any, intent: string, lastMessage: string, extr
                          lastMessage.toLowerCase().includes("renda") ||
                          lastMessage.toLowerCase().includes("investir");
     
-    console.log(`[MarIA Search Logic] Investment check: hasObjective=${hasObjective}, hasConcrete=${hasConcreteFilter}`);
-    return hasObjective && hasConcreteFilter;
+    if (!hasObjective) missing.push("objetivo");
+    if (!hasBairro && !filters.preco_max && !hasTipo) missing.push("filtros_concretos");
+    
+    return { allowed: missing.length === 0, missing };
   }
   
   // Regra específica para Temporada
   if (finalidade === "temporada") {
-    const hasConstraint = hasConcreteFilter; // Bairro ou Preço
+    const hasConstraint = hasBairro || filters.preco_max || hasTipo;
     const hasCapacityOrPeriod = extractedData?.pessoas || extractedData?.periodo;
-    console.log(`[MarIA Search Logic] Temporada check: hasConstraint=${hasConstraint}, hasCapacityOrPeriod=${!!hasCapacityOrPeriod}`);
-    return hasConstraint && !!hasCapacityOrPeriod;
+    
+    if (!hasConstraint) missing.push("filtros_concretos");
+    if (!hasCapacityOrPeriod) missing.push("capacidade_ou_periodo");
+    
+    return { allowed: missing.length === 0, missing };
   }
   
   // Compra Comum: exige bairro + tipo + faixa de orçamento
   if (finalidade === "compra") {
-    const hasBairro = !!filters.bairro;
-    const hasTipo = !!filters.tipo;
-    const hasOrcamento = !!(filters.preco_max || filters.preco_min ||
-      extractedData?.orcamento_max || extractedData?.orcamento_min);
-    console.log(`[MarIA Search Logic] Compra check: bairro=${hasBairro}, tipo=${hasTipo}, orcamento=${hasOrcamento}`);
-    return hasBairro && hasTipo && hasOrcamento;
+    if (!hasBairro) missing.push("bairro");
+    if (!hasTipo) missing.push("tipo");
+    if (!hasOrcamento) missing.push("orcamento");
+    
+    return { allowed: missing.length === 0, missing };
   }
   
-  return false;
+  return { allowed: false, missing: ["desconhecido"] };
+}
+
+// Deprecated in favor of checkSearchRequirements, but keeping a wrapper for legacy calls if any
+function isSearchAllowed(filters: any, intent: string, lastMessage: string, extractedData: any) {
+  return checkSearchRequirements(filters, intent, lastMessage, extractedData).allowed;
 }
 
 // ============================================================
@@ -278,9 +293,21 @@ serve(async (req) => {
 
     let showResults = false, noResultsGate = false, gateActive = false;
     let allProperties: any[] = [], visibleProperties: any[] = [];
+    let missingFilters: string[] = [];
+
+    // Check search requirements
+    const searchCheck = checkSearchRequirements(filters || extractedData ? {
+      finalidade: filters?.finalidade || extractedData?.finalidade || "compra",
+      bairro: filters?.bairro || extractedData?.bairro_preferencia,
+      tipo: filters?.tipo || extractedData?.tipo_imovel,
+      preco_max: filters?.preco_max || extractedData?.orcamento_max,
+      preco_min: filters?.preco_min || extractedData?.orcamento_min
+    } : null, intent, lastMessage, extractedData);
+    
+    missingFilters = searchCheck.missing;
 
     // Final check for search triggering
-    if (filters && isSearchAllowed(filters, intent, lastMessage, extractedData) && filters.finalidade !== "anunciante") {
+    if (searchCheck.allowed && filters?.finalidade !== "anunciante") {
       allProperties = await searchProperties(supabase, filters);
       
       if (allProperties.length > 0) {
@@ -316,6 +343,15 @@ serve(async (req) => {
     }
 
 
+    // 5. DETERMINISTIC REPLY FALLBACK (Para casos de resposta vazia ou erro)
+    let finalReply = cleaned || rawReply;
+    if (showResults && (!finalReply || finalReply.trim().length < 5)) {
+      finalReply = "Encontrei opções compatíveis com seu perfil em " + (filters?.bairro || 'Bombinhas') + ". Confira abaixo:";
+    }
+    if (!finalReply || finalReply.trim().length === 0) {
+      finalReply = "Entendi. Estou buscando as melhores opções para você.";
+    }
+
     // 4. PERSISTENCE (Background)
     if (extractedData) {
       (async () => {
@@ -341,19 +377,18 @@ serve(async (req) => {
             chat_history: messages
           });
 
-          // 2. Persist new message to history table
+          // 2. Persist message history
           if (leadId) {
-             const lastMsg = messages[messages.length - 1];
-             if (lastMsg) {
+             const lastUserMsg = messages[messages.length - 1];
+             if (lastUserMsg) {
                 await supabase.from("maria_messages").insert({
                   session_id: sessionId,
                   lead_id: leadId,
-                  role: lastMsg.role,
-                  content: lastMsg.content
+                  role: lastUserMsg.role,
+                  content: lastUserMsg.content
                 });
              }
-             
-             // Also persist the assistant's reply
+             // Persist MarIA's reply
              await supabase.from("maria_messages").insert({
                session_id: sessionId,
                lead_id: leadId,
@@ -361,23 +396,21 @@ serve(async (req) => {
                content: finalReply
              });
           }
+
+          // 3. Record search metrics
+          await supabase.from("maria_search_metrics").insert({
+            session_id: sessionId,
+            finalidade: filters?.finalidade || extractedData?.finalidade,
+            missing_filters: missingFilters,
+            message_count: messages.length,
+            has_shown_results: showResults,
+            intent: intent
+          });
+
+          console.log(`[MarIA Metrics] Recorded for ${sessionId}: missing=${missingFilters.join(",")}, results=${showResults}`);
+
         } catch (e) { console.error("Persistence error:", e); }
       })();
-    }
-
-    // 5. DETERMINISTIC REPLY FALLBACK (Para casos de resposta vazia ou erro)
-    let finalReply = cleaned || rawReply;
-    console.log(`[MarIA Debug] finalReply antes do fallback determinístico: "${finalReply}"`);
-    console.log(`[MarIA Debug] showResults: ${showResults}, cleaned length: ${cleaned?.length || 0}`);
-    
-    if (showResults && (!finalReply || finalReply.trim().length < 5)) {
-      finalReply = "Encontrei opções compatíveis com seu perfil em " + (filters?.bairro || 'Bombinhas') + ". Confira abaixo:";
-      console.log(`[MarIA Debug] Fallback determinístico aplicado: "${finalReply}"`);
-    }
-
-    if (!finalReply || finalReply.trim().length === 0) {
-      console.log(`[MarIA Debug] CRÍTICO: Resposta final vazia. Aplicando fallback de emergência.`);
-      finalReply = "Entendi. Estou buscando as melhores opções para você.";
     }
 
     return new Response(JSON.stringify({
