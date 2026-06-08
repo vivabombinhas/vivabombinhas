@@ -343,6 +343,15 @@ serve(async (req) => {
     }
 
 
+    // 5. DETERMINISTIC REPLY FALLBACK (Para casos de resposta vazia ou erro)
+    let finalReply = cleaned || rawReply;
+    if (showResults && (!finalReply || finalReply.trim().length < 5)) {
+      finalReply = "Encontrei opções compatíveis com seu perfil em " + (filters?.bairro || 'Bombinhas') + ". Confira abaixo:";
+    }
+    if (!finalReply || finalReply.trim().length === 0) {
+      finalReply = "Entendi. Estou buscando as melhores opções para você.";
+    }
+
     // 4. PERSISTENCE (Background)
     if (extractedData) {
       (async () => {
@@ -368,6 +377,26 @@ serve(async (req) => {
             chat_history: messages
           });
 
+          // 2. Persist message history
+          if (leadId) {
+             const lastUserMsg = messages[messages.length - 1];
+             if (lastUserMsg) {
+                await supabase.from("maria_messages").insert({
+                  session_id: sessionId,
+                  lead_id: leadId,
+                  role: lastUserMsg.role,
+                  content: lastUserMsg.content
+                });
+             }
+             // Persist MarIA's reply
+             await supabase.from("maria_messages").insert({
+               session_id: sessionId,
+               lead_id: leadId,
+               role: "assistant",
+               content: finalReply
+             });
+          }
+
           // 3. Record search metrics
           await supabase.from("maria_search_metrics").insert({
             session_id: sessionId,
@@ -382,21 +411,6 @@ serve(async (req) => {
 
         } catch (e) { console.error("Persistence error:", e); }
       })();
-    }
-
-    // 5. DETERMINISTIC REPLY FALLBACK (Para casos de resposta vazia ou erro)
-    let finalReply = cleaned || rawReply;
-    console.log(`[MarIA Debug] finalReply antes do fallback determinístico: "${finalReply}"`);
-    console.log(`[MarIA Debug] showResults: ${showResults}, cleaned length: ${cleaned?.length || 0}`);
-    
-    if (showResults && (!finalReply || finalReply.trim().length < 5)) {
-      finalReply = "Encontrei opções compatíveis com seu perfil em " + (filters?.bairro || 'Bombinhas') + ". Confira abaixo:";
-      console.log(`[MarIA Debug] Fallback determinístico aplicado: "${finalReply}"`);
-    }
-
-    if (!finalReply || finalReply.trim().length === 0) {
-      console.log(`[MarIA Debug] CRÍTICO: Resposta final vazia. Aplicando fallback de emergência.`);
-      finalReply = "Entendi. Estou buscando as melhores opções para você.";
     }
 
     return new Response(JSON.stringify({
