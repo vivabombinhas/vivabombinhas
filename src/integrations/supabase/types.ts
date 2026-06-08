@@ -771,6 +771,39 @@ export type Database = {
           },
         ]
       }
+      maria_search_metrics: {
+        Row: {
+          created_at: string
+          finalidade: string | null
+          has_shown_results: boolean | null
+          id: string
+          intent: string | null
+          message_count: number | null
+          missing_filters: string[] | null
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          finalidade?: string | null
+          has_shown_results?: boolean | null
+          id?: string
+          intent?: string | null
+          message_count?: number | null
+          missing_filters?: string[] | null
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          finalidade?: string | null
+          has_shown_results?: boolean | null
+          id?: string
+          intent?: string | null
+          message_count?: number | null
+          missing_filters?: string[] | null
+          session_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
