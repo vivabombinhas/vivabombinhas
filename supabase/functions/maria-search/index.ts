@@ -293,9 +293,21 @@ serve(async (req) => {
 
     let showResults = false, noResultsGate = false, gateActive = false;
     let allProperties: any[] = [], visibleProperties: any[] = [];
+    let missingFilters: string[] = [];
+
+    // Check search requirements
+    const searchCheck = checkSearchRequirements(filters || extractedData ? {
+      finalidade: filters?.finalidade || extractedData?.finalidade || "compra",
+      bairro: filters?.bairro || extractedData?.bairro_preferencia,
+      tipo: filters?.tipo || extractedData?.tipo_imovel,
+      preco_max: filters?.preco_max || extractedData?.orcamento_max,
+      preco_min: filters?.preco_min || extractedData?.orcamento_min
+    } : null, intent, lastMessage, extractedData);
+    
+    missingFilters = searchCheck.missing;
 
     // Final check for search triggering
-    if (filters && isSearchAllowed(filters, intent, lastMessage, extractedData) && filters.finalidade !== "anunciante") {
+    if (searchCheck.allowed && filters?.finalidade !== "anunciante") {
       allProperties = await searchProperties(supabase, filters);
       
       if (allProperties.length > 0) {
