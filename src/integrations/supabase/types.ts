@@ -827,6 +827,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_maria_filter_spikes: {
+        Args: never
+        Returns: {
+          current_count: number
+          filter_name: string
+          previous_count: number
+          spike_percentage: number
+        }[]
+      }
       find_matching_leads: {
         Args: { _imovel_id: string }
         Returns: {

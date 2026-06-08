@@ -9,7 +9,8 @@ import {
   Calendar,
   MessageSquare,
   ChevronRight,
-  Search
+  Search,
+  AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ export default function AdminAlerts() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: notifications, isLoading } = useQuery({
+  const { data: notifications, isLoading: isLoadingNotifications } = useQuery({
     queryKey: ["broker_notifications"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -36,6 +37,18 @@ export default function AdminAlerts() {
       return data;
     },
   });
+
+  const { data: spikes, isLoading: isLoadingSpikes } = useQuery({
+    queryKey: ["filter_spikes"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("check_maria_filter_spikes");
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: 300000, // Check every 5 mins
+  });
+
+  const isLoading = isLoadingNotifications || isLoadingSpikes;
 
   const markAsReadMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -110,6 +123,28 @@ export default function AdminAlerts() {
           />
         </div>
       </div>
+
+      {spikes && spikes.length > 0 && (
+        <div className="grid gap-4 mb-6">
+          <h2 className="text-lg font-bold flex items-center gap-2 text-destructive">
+            <AlertTriangle className="w-5 h-5" />
+            Alertas de Comportamento (Spikes de Desistência)
+          </h2>
+          {spikes.map((spike: any, idx: number) => (
+            <div key={idx} className="bg-destructive/10 border border-destructive/20 p-4 rounded-xl flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-destructive">Aumento de desistência: Faltando {spike.filter_name}</h3>
+                <p className="text-sm text-destructive/80">
+                  Houve um aumento de <strong>{spike.spike_percentage.toFixed(0)}%</strong> nas últimas 24h ({spike.current_count} ocorrências vs {spike.previous_count} no período anterior).
+                </p>
+              </div>
+              <Button size="sm" variant="destructive" asChild>
+                <a href="/admin/insights">Ver Insights</a>
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="grid gap-4">
         {isLoading ? (
