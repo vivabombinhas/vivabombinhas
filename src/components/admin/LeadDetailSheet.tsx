@@ -121,28 +121,16 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
     queryKey: ["maria_messages", lead?.id],
     enabled: !!lead?.id && open,
     queryFn: async () => {
-      // 1. Try to fetch from maria_messages table first (new solution)
+      // 1. Try to fetch from maria_messages table first (real-time history)
       const { data: msgData, error: msgError } = await supabase
         .from("maria_messages")
         .select("*")
-        .eq("lead_id", lead!.id)
+        .or(`lead_id.eq.${lead!.id}${lead?.session_id ? `,session_id.eq.${lead.session_id}` : ''}`)
         .order("created_at", { ascending: true });
       
       if (!msgError && msgData && msgData.length > 0) {
+        // Deduplicate messages by content and role if necessary, though created_at should handle it
         return msgData;
-      }
-
-      // 2. Fallback to session_id if lead_id not yet linked
-      if (lead?.session_id) {
-        const { data: sessionData, error: sessionError } = await supabase
-          .from("maria_messages")
-          .select("*")
-          .eq("session_id", lead.session_id)
-          .order("created_at", { ascending: true });
-        
-        if (!sessionError && sessionData && sessionData.length > 0) {
-          return sessionData;
-        }
       }
 
       // 3. Fallback to legacy lead_conversations

@@ -248,7 +248,7 @@ serve(async (req) => {
         nome, 
         telefone, 
         status: "novo",
-        chat_history: messages, // Persist full history snapshot
+        chat_history: messages.length > 0 ? messages : undefined, // Persist full history snapshot
         ...safeExtraData 
       };
 
@@ -443,7 +443,7 @@ serve(async (req) => {
             proximo_passo_sugerido: extractedData.quer_falar_daniel ? "analise_daniel" : undefined,
             objetivo_investimento: extractedData.objetivo,
             região_interesse: extractedData.bairro_preferencia,
-            chat_history: messages
+            chat_history: messages.length > 0 ? messages : undefined
           };
 
           // Update lead data
