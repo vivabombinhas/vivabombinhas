@@ -91,7 +91,7 @@ const toLocalInput = (iso?: string | null) => {
 type TimelineEvent = {
   id: string;
   at: string;
-  kind: "lead_created" | "message_user" | "message_bot" | "note" | "contact" | "match" | "followup_set";
+  kind: "lead_created" | "message_user" | "message_bot" | "note" | "contact" | "match" | "followup_set" | "status_change";
   title: string;
   body?: string;
   meta?: string;
