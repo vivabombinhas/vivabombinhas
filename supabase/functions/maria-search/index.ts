@@ -120,13 +120,13 @@ async function searchProperties(supabase: any, filters: any): Promise<any[]> {
   try {
     let q = supabase.from("imoveis").select("*").eq("status", "ativo").or("oculta_para_maria.is.null,oculta_para_maria.eq.false").limit(40);
     
-    if (filters.finalidade) {
+    if (filters?.finalidade) {
       const dbFinalidade = filters.finalidade === "investimento" ? "compra" : filters.finalidade;
       q = q.eq("finalidade", dbFinalidade);
     }
     
     // Filtro de Tipo (Suporta múltiplos tipos se vier string separada por vírgula ou 'e'/'ou')
-    if (filters.tipo && typeof filters.tipo === "string") {
+    if (filters?.tipo && typeof filters.tipo === "string") {
       const tipos = filters.tipo.toLowerCase().split(/[\s,e|/]+/).filter(t => t.length > 3);
       if (tipos.length > 0) {
         const orConditions = tipos.map(t => `tipo.ilike.%${t}%`).join(",");
@@ -135,7 +135,7 @@ async function searchProperties(supabase: any, filters: any): Promise<any[]> {
     }
     
     // Filtro de Bairro (Suporta múltiplos bairros se vier string separada por vírgula ou 'e'/'ou')
-    if (filters.bairro && typeof filters.bairro === "string") {
+    if (filters?.bairro && typeof filters.bairro === "string") {
       const bairros = filters.bairro.toLowerCase().split(/[\s,e|/]+/).filter(b => b.length > 3 && b !== "bombinhas");
       if (bairros.length > 0) {
         const orConditions = bairros.map(b => `bairro.ilike.%${b}%`).join(",");
@@ -143,12 +143,12 @@ async function searchProperties(supabase: any, filters: any): Promise<any[]> {
       }
     }
 
-    if (filters.preco_min) {
+    if (filters?.preco_min) {
       if (filters.finalidade === "temporada") q = q.gte("preco_temporada_diaria", filters.preco_min);
       else q = q.gte("preco", filters.preco_min);
     }
 
-    if (filters.preco_max) {
+    if (filters?.preco_max) {
       if (filters.finalidade === "temporada") q = q.lte("preco_temporada_diaria", filters.preco_max);
       else q = q.lte("preco", filters.preco_max);
     }
@@ -280,6 +280,9 @@ serve(async (req) => {
     const investmentKeywords = /investimento|investir|terreno|renda|permuta|compra na planta|m²|região|liquidez|construtora/i;
     const isInvestmentContext = investmentKeywords.test(lastMessage) || (extra_data?.finalidade === "investimento");
     
+    const searchPatterns = /ver im[óo]veis|op[çc][õo]es|cards|mostrar|buscar|procurar|quero ver|me mostre/i;
+    const isExplicitSearchRequest = searchPatterns.test(lastMessage);
+
     if (isInvestmentContext && intent === "busca" && !isExplicitSearchRequest) {
       console.log(`[MarIA Debug] Forçando intent consultivo para contexto de investimento: "${lastMessage}"`);
       intent = "consultivo";
@@ -291,7 +294,7 @@ serve(async (req) => {
     let fallbackUsed = false;
 
     if (intent === "consultivo") {
-      mainModel = "openai/gpt-5"; // Modelo premium para análise estratégica e consultoria
+      mainModel = "openai/gpt-4o"; // Modelo premium para análise estratégica e consultoria
       mainPrompt = PROMPTS.CONSULTIVO_CHAT;
     } else if (intent === "proprietario") {
       mainPrompt = PROMPTS.PROPRIETARIO_CHAT;
@@ -306,11 +309,11 @@ serve(async (req) => {
       console.log(`[MarIA Debug] Resposta bruta da IA: "${rawReply}"`);
     } catch (err) {
       console.error(`Error calling ${mainModel}:`, err);
-      // Fallback: Premium -> Gemini 2.5 Pro -> Gemini Flash
-      if (mainModel === "openai/gpt-5") {
+      // Fallback: Premium -> Gemini 2.0 Pro -> Gemini Flash
+      if (mainModel === "openai/gpt-4o") {
         fallbackUsed = true;
-        console.log(`[MarIA Debug] Falha no GPT-5. Tentando fallback para Gemini 2.5 Pro.`);
-        rawReply = await callAI(lovableApiKey, "google/gemini-2.5-pro", mainPrompt, messages);
+        console.log(`[MarIA Debug] Falha no GPT-4o. Tentando fallback para Gemini 2.0 Pro.`);
+        rawReply = await callAI(lovableApiKey, "google/gemini-2.0-pro-exp-02-05", mainPrompt, messages);
       } else if (mainModel !== "google/gemini-3-flash-preview") {
         fallbackUsed = true;
         console.log(`[MarIA Debug] Falha no modelo premium. Tentando fallback para Gemini Flash.`);
@@ -339,11 +342,6 @@ serve(async (req) => {
       const extReply = await callAI(lovableApiKey, "google/gemini-3-flash-preview", PROMPTS.EXTRACTION, messages.concat({ role: "assistant", content: rawReply }), 0);
       extractedData = safeParseJSON(extReply);
     } catch (e) { console.error("Extraction error:", e); }
-
-    // Fallback: IA esqueceu [FILTERS] mas o extrator pegou filtros objetivos
-    const searchPatterns = /ver im[óo]veis|op[çc][õo]es|cards|mostrar|buscar|procurar|quero ver|me mostre/i;
-    // CRÍTICO: Não disparar busca automática se o usuário apenas citou um termo genérico sem intenção clara de VER agora.
-    const isExplicitSearchRequest = searchPatterns.test(lastMessage);
 
     if (!filters && extractedData && (intent === "busca" || intent === "consultivo") && isExplicitSearchRequest) {
       const candidateFilters = {
@@ -374,37 +372,48 @@ serve(async (req) => {
     missingFilters = searchCheck.missing;
 
     // Final check for search triggering
-    if (searchCheck.allowed && filters?.finalidade !== "anunciante") {
-      allProperties = await searchProperties(supabase, filters);
-      
-      if (allProperties.length > 0) {
-        showResults = true;
-        if (!lead_captured && allProperties.length > 2) {
-          gateActive = true;
-          visibleProperties = allProperties.slice(0, 2);
-        } else {
-          visibleProperties = allProperties.slice(0, 3);
-        }
-      } else {
-        console.log(`[MarIA Search] No exact results for ${JSON.stringify(filters)}. Trying broader search.`);
-        // Tenta busca sem o filtro de preço para ver se há "vizinhos"
-        const broaderFilters = { ...filters, preco_min: undefined, preco_max: undefined };
-        const suggestions = await searchProperties(supabase, broaderFilters);
+    if (searchCheck.allowed) {
+      // Garantir que temos um objeto de filtros válido
+      const effectiveFilters = filters || {
+        finalidade: extractedData?.finalidade || "compra",
+        bairro: extractedData?.bairro_preferencia,
+        tipo: extractedData?.tipo_imovel,
+        preco_max: extractedData?.orcamento_max,
+        preco_min: extractedData?.orcamento_min
+      };
+
+      if (effectiveFilters.finalidade !== "anunciante") {
+        allProperties = await searchProperties(supabase, effectiveFilters);
         
-        if (suggestions.length > 0) {
-          allProperties = suggestions;
+        if (allProperties.length > 0) {
           showResults = true;
-          visibleProperties = allProperties.slice(0, 3);
-          
-          // Ajusta a resposta para explicar que são sugestões
-          const bairroName = filters.bairro || "Bombinhas";
-          cleaned = `Não encontrei imóveis exatamente na faixa de valor solicitada em ${bairroName}, mas separei estas opções na região que podem fazer sentido para sua estratégia:`;
-          console.log(`[MarIA Search] Broadened results found. Adjusted reply.`);
+          if (!lead_captured && allProperties.length > 2) {
+            gateActive = true;
+            visibleProperties = allProperties.slice(0, 2);
+          } else {
+            visibleProperties = allProperties.slice(0, 3);
+          }
         } else {
-          noResultsGate = !lead_captured;
-          // Se realmente não houver nada, ajusta a resposta para ser consultiva e oferecer caminhos
-          cleaned = `Esse recorte está mais restrito no portal agora. Posso ampliar a busca para regiões próximas ou organizar uma análise estratégica para encontrar alternativas mais coerentes com seu objetivo.`;
-          console.log(`[MarIA Search] No results even after broadening.`);
+          console.log(`[MarIA Search] No exact results for ${JSON.stringify(filters)}. Trying broader search.`);
+          // Tenta busca sem o filtro de preço para ver se há "vizinhos"
+          const broaderFilters = { ...effectiveFilters, preco_min: undefined, preco_max: undefined };
+          const suggestions = await searchProperties(supabase, broaderFilters);
+          
+          if (suggestions.length > 0) {
+            allProperties = suggestions;
+            showResults = true;
+            visibleProperties = allProperties.slice(0, 3);
+            
+            // Ajusta a resposta para explicar que são sugestões
+            const bairroName = effectiveFilters.bairro || "Bombinhas";
+            cleaned = `Não encontrei imóveis exatamente na faixa de valor solicitada em ${bairroName}, mas separei estas opções na região que podem fazer sentido para sua estratégia:`;
+            console.log(`[MarIA Search] Broadened results found. Adjusted reply.`);
+          } else {
+            noResultsGate = !lead_captured;
+            // Se realmente não houver nada, ajusta a resposta para ser consultiva e oferecer caminhos
+            cleaned = `Esse recorte está mais restrito no portal agora. Posso ampliar a busca para regiões próximas ou organizar uma análise estratégica para encontrar alternativas mais coerentes com seu objetivo.`;
+            console.log(`[MarIA Search] No results even after broadening.`);
+          }
         }
       }
     }
@@ -420,13 +429,17 @@ serve(async (req) => {
     }
 
     // 4. PERSISTENCE (Background)
-    if (extractedData) {
-      (async () => {
-        try {
-          console.log(`[MarIA Persistence] Starting persistence for session ${sessionId}`);
-          
-          // 1. Map extracted data to lead fields
-          const leadPayload = {
+    (async () => {
+      try {
+        console.log(`[MarIA Persistence] Starting persistence for session ${sessionId}`);
+        
+        // 1. Map data to lead fields
+        const leadPayload: any = {
+          last_contact_at: new Date().toISOString()
+        };
+
+        if (extractedData) {
+          Object.assign(leadPayload, {
             lead_score: extractedData.lead_score,
             objetivo: extractedData.objetivo,
             prazo_compra: extractedData.prazo_compra,
@@ -443,58 +456,59 @@ serve(async (req) => {
             proximo_passo_sugerido: extractedData.quer_falar_daniel ? "analise_daniel" : undefined,
             objetivo_investimento: extractedData.objetivo,
             região_interesse: extractedData.bairro_preferencia,
-            chat_history: messages.length > 0 ? messages : undefined
-          };
+          });
+        }
 
-          // Update lead data
-          const leadId = await upsertLeadBySession(supabase, sessionId, leadPayload, lastMessage, "maria_extraction");
+        // Always include chat history snapshot if we have it
+        if (messages.length > 0) {
+          leadPayload.chat_history = messages;
+        }
 
-          if (leadId) {
-            console.log(`[MarIA Persistence] Lead ID confirmed: ${leadId}. Persisting messages and metrics.`);
-            
-            // 2. Persist message history (Individual messages)
-            const currentMessagesToSave = [];
-            const lastUserMsg = messages[messages.length - 1];
-            if (lastUserMsg) {
-              currentMessagesToSave.push({
-                session_id: sessionId,
-                lead_id: leadId,
-                role: lastUserMsg.role,
-                content: lastUserMsg.content
-              });
-            }
-            
+        // Update lead data
+        const leadId = await upsertLeadBySession(supabase, sessionId, leadPayload, lastMessage, extractedData ? "maria_extraction" : "maria_chat");
+
+        if (leadId) {
+          console.log(`[MarIA Persistence] Lead ID confirmed: ${leadId}. Persisting messages and metrics.`);
+          
+          // 2. Persist message history (Individual messages)
+          const currentMessagesToSave = [];
+          const lastUserMsg = messages[messages.length - 1];
+          if (lastUserMsg) {
             currentMessagesToSave.push({
               session_id: sessionId,
               lead_id: leadId,
-              role: "assistant",
-              content: finalReply
+              role: lastUserMsg.role,
+              content: lastUserMsg.content
             });
-
-            const { error: msgError } = await supabase.from("maria_messages").insert(currentMessagesToSave);
-            if (msgError) console.error("[MarIA Persistence] Error persisting messages:", msgError);
-            
-            // 3. Record search metrics
-            const { error: metricError } = await supabase.from("maria_search_metrics").insert({
-              session_id: sessionId,
-              finalidade: filters?.finalidade || extractedData?.finalidade,
-              missing_filters: missingFilters,
-              results_count: allProperties.length,
-              showed_cards: showResults,
-              messages_count: messages.length
-            });
-            if (metricError) console.error("[MarIA Persistence] Error recording metrics:", metricError);
-
-            // 4. Update lead with final message history count to ensure sync
-            await supabase.from("leads_maria").update({ last_contact_at: new Date().toISOString() }).eq("id", leadId);
-          } else {
-            console.warn(`[MarIA Persistence] No leadId returned for session ${sessionId}. Skipping messages/metrics.`);
           }
-        } catch (err) {
-          console.error("[MarIA Persistence] Background persistence error:", err);
+          
+          currentMessagesToSave.push({
+            session_id: sessionId,
+            lead_id: leadId,
+            role: "assistant",
+            content: finalReply
+          });
+
+          const { error: msgError } = await supabase.from("maria_messages").insert(currentMessagesToSave);
+          if (msgError) console.error("[MarIA Persistence] Error persisting messages:", msgError);
+          
+          // 3. Record search metrics
+          const { error: metricError } = await supabase.from("maria_search_metrics").insert({
+            session_id: sessionId,
+            finalidade: filters?.finalidade || extractedData?.finalidade,
+            missing_filters: missingFilters,
+            results_count: allProperties.length,
+            showed_cards: showResults,
+            messages_count: messages.length
+          });
+          if (metricError) console.error("[MarIA Persistence] Error recording metrics:", metricError);
+        } else {
+          console.warn(`[MarIA Persistence] No leadId returned for session ${sessionId}. Skipping messages/metrics.`);
         }
-      })();
-    }
+      } catch (err) {
+        console.error("[MarIA Persistence] Background persistence error:", err);
+      }
+    })();
 
     return new Response(JSON.stringify({
       reply: finalReply,
