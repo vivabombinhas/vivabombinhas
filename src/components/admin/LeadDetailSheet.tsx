@@ -346,6 +346,8 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
         return <Home className="w-3.5 h-3.5 text-fuchsia-600" />;
       case "followup_set":
         return <Calendar className="w-3.5 h-3.5 text-orange-600" />;
+      case "status_change":
+        return <Activity className="w-3.5 h-3.5 text-indigo-600" />;
     }
   };
 
