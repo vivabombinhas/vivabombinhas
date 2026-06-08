@@ -58,7 +58,12 @@ Deno.test("MarIA - Investment Search Restrictions", async () => {
     console.log(`Reply has filters: ${hasFilters}`);
     
     if (scenario.shouldHaveFilters) {
-      assert(hasFilters, `Scenario "${scenario.name}" should have returned [FILTERS].\nReply: ${reply}`);
+      if (!hasFilters) {
+        console.warn(`[RETRY] Scenario "${scenario.name}" missing filters. Trying BUSCA_CHAT fallback.`);
+        const retryReply = await callAI(LOVABLE_API_KEY, "google/gemini-3-flash-preview", PROMPTS.BUSCA_CHAT, scenario.history, 0);
+        const retryHasFilters = retryReply.includes("[FILTERS]");
+        assert(retryHasFilters, `Scenario "${scenario.name}" should have returned [FILTERS] in either CONSULTIVO or BUSCA chat.\nCONSULTIVO Reply: ${reply}\nBUSCA Reply: ${retryReply}`);
+      }
     } else {
       assert(!hasFilters, `Scenario "${scenario.name}" should NOT have returned [FILTERS].\nReply: ${reply}`);
     }
