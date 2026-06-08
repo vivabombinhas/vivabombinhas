@@ -288,7 +288,7 @@ export function useMariaChat() {
         body: {
           action: "submit_lead",
           session_id: sessionIdRef.current,
-          messages: messages.map(m => ({ role: m.role, content: m.content, timestamp: m.timestamp })),
+          messages: messages.map(m => ({ role: m.role, content: m.content })),
           nome,
           telefone,
           extra_data: extraData,
