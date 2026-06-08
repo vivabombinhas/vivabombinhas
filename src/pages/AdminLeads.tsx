@@ -480,32 +480,26 @@ export default function AdminLeads() {
                         </TableCell>
 
                         <TableCell className="align-top py-3">
-                          {lead.interesse ? (
-                            <Badge variant="secondary" className="text-[10px]">
-                              {INTERESSE_MAP[lead.interesse] ?? lead.interesse}
+                          <div className="flex flex-col gap-1">
+                            <Badge variant="outline" className="w-fit text-[10px] font-normal border-primary/20 bg-primary/5">
+                              {INTERESSE_MAP[lead.interesse as string] || lead.interesse || "—"}
                             </Badge>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
-                          )}
+                            <span className="text-xs font-medium text-muted-foreground line-clamp-1">{lead.bairro_interesse || "—"}</span>
+                          </div>
                         </TableCell>
-
                         <TableCell className="align-top py-3">
-                          {lead.lead_score ? (
-                            <Badge className={`text-[10px] font-bold ${SCORE_CONFIG[lead.lead_score]?.className || ""}`}>
-                              {lead.lead_score}
-                            </Badge>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
-                          )}
+                          <Badge className={`text-[10px] font-bold ${SCORE_CONFIG[lead.lead_score as string]?.className || "bg-muted"}`}>
+                            {lead.lead_score || "—"}
+                          </Badge>
                         </TableCell>
-
                         <TableCell className="align-top py-3">
-                          <div className="text-sm truncate">{lead.bairro_interesse || <span className="text-muted-foreground">—</span>}</div>
-                          {lead.tipo_imovel && (
-                            <div className="text-xs text-muted-foreground truncate">{lead.tipo_imovel}</div>
-                          )}
+                          <div className="flex flex-col gap-0.5">
+                            <div className="text-xs font-medium">{lead.tipo_imovel || "—"}</div>
+                            <div className="text-[10px] text-muted-foreground line-clamp-1">
+                              {lead.orcamento_max ? `Até R$ ${(lead.orcamento_max/1000000).toFixed(1)}M` : lead.faixa_preco || "—"}
+                            </div>
+                          </div>
                         </TableCell>
-
                         <TableCell className="align-top py-3">
                           <span className="text-xs text-muted-foreground whitespace-nowrap">
                             {formatDate(lead.created_at)}
