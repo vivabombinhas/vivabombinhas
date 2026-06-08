@@ -430,13 +430,17 @@ serve(async (req) => {
     }
 
     // 4. PERSISTENCE (Background)
-    if (extractedData) {
-      (async () => {
-        try {
-          console.log(`[MarIA Persistence] Starting persistence for session ${sessionId}`);
-          
-          // 1. Map extracted data to lead fields
-          const leadPayload = {
+    (async () => {
+      try {
+        console.log(`[MarIA Persistence] Starting persistence for session ${sessionId}`);
+        
+        // 1. Map data to lead fields
+        const leadPayload: any = {
+          last_contact_at: new Date().toISOString()
+        };
+
+        if (extractedData) {
+          Object.assign(leadPayload, {
             lead_score: extractedData.lead_score,
             objetivo: extractedData.objetivo,
             prazo_compra: extractedData.prazo_compra,
@@ -453,58 +457,59 @@ serve(async (req) => {
             proximo_passo_sugerido: extractedData.quer_falar_daniel ? "analise_daniel" : undefined,
             objetivo_investimento: extractedData.objetivo,
             região_interesse: extractedData.bairro_preferencia,
-            chat_history: messages.length > 0 ? messages : undefined
-          };
+          });
+        }
 
-          // Update lead data
-          const leadId = await upsertLeadBySession(supabase, sessionId, leadPayload, lastMessage, "maria_extraction");
+        // Always include chat history snapshot if we have it
+        if (messages.length > 0) {
+          leadPayload.chat_history = messages;
+        }
 
-          if (leadId) {
-            console.log(`[MarIA Persistence] Lead ID confirmed: ${leadId}. Persisting messages and metrics.`);
-            
-            // 2. Persist message history (Individual messages)
-            const currentMessagesToSave = [];
-            const lastUserMsg = messages[messages.length - 1];
-            if (lastUserMsg) {
-              currentMessagesToSave.push({
-                session_id: sessionId,
-                lead_id: leadId,
-                role: lastUserMsg.role,
-                content: lastUserMsg.content
-              });
-            }
-            
+        // Update lead data
+        const leadId = await upsertLeadBySession(supabase, sessionId, leadPayload, lastMessage, extractedData ? "maria_extraction" : "maria_chat");
+
+        if (leadId) {
+          console.log(`[MarIA Persistence] Lead ID confirmed: ${leadId}. Persisting messages and metrics.`);
+          
+          // 2. Persist message history (Individual messages)
+          const currentMessagesToSave = [];
+          const lastUserMsg = messages[messages.length - 1];
+          if (lastUserMsg) {
             currentMessagesToSave.push({
               session_id: sessionId,
               lead_id: leadId,
-              role: "assistant",
-              content: finalReply
+              role: lastUserMsg.role,
+              content: lastUserMsg.content
             });
-
-            const { error: msgError } = await supabase.from("maria_messages").insert(currentMessagesToSave);
-            if (msgError) console.error("[MarIA Persistence] Error persisting messages:", msgError);
-            
-            // 3. Record search metrics
-            const { error: metricError } = await supabase.from("maria_search_metrics").insert({
-              session_id: sessionId,
-              finalidade: filters?.finalidade || extractedData?.finalidade,
-              missing_filters: missingFilters,
-              results_count: allProperties.length,
-              showed_cards: showResults,
-              messages_count: messages.length
-            });
-            if (metricError) console.error("[MarIA Persistence] Error recording metrics:", metricError);
-
-            // 4. Update lead with final message history count to ensure sync
-            await supabase.from("leads_maria").update({ last_contact_at: new Date().toISOString() }).eq("id", leadId);
-          } else {
-            console.warn(`[MarIA Persistence] No leadId returned for session ${sessionId}. Skipping messages/metrics.`);
           }
-        } catch (err) {
-          console.error("[MarIA Persistence] Background persistence error:", err);
+          
+          currentMessagesToSave.push({
+            session_id: sessionId,
+            lead_id: leadId,
+            role: "assistant",
+            content: finalReply
+          });
+
+          const { error: msgError } = await supabase.from("maria_messages").insert(currentMessagesToSave);
+          if (msgError) console.error("[MarIA Persistence] Error persisting messages:", msgError);
+          
+          // 3. Record search metrics
+          const { error: metricError } = await supabase.from("maria_search_metrics").insert({
+            session_id: sessionId,
+            finalidade: filters?.finalidade || extractedData?.finalidade,
+            missing_filters: missingFilters,
+            results_count: allProperties.length,
+            showed_cards: showResults,
+            messages_count: messages.length
+          });
+          if (metricError) console.error("[MarIA Persistence] Error recording metrics:", metricError);
+        } else {
+          console.warn(`[MarIA Persistence] No leadId returned for session ${sessionId}. Skipping messages/metrics.`);
         }
-      })();
-    }
+      } catch (err) {
+        console.error("[MarIA Persistence] Background persistence error:", err);
+      }
+    })();
 
     return new Response(JSON.stringify({
       reply: finalReply,
