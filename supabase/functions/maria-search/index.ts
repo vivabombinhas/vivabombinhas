@@ -447,7 +447,7 @@ serve(async (req) => {
           };
 
           // Update lead data
-          const leadId = await upsertLeadBySession(supabase, sessionId, leadPayload);
+          const leadId = await upsertLeadBySession(supabase, sessionId, leadPayload, lastMessage, "maria_extraction");
 
           if (leadId) {
             console.log(`[MarIA Persistence] Lead ID confirmed: ${leadId}. Persisting messages and metrics.`);
