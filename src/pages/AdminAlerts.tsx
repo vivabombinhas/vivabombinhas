@@ -25,7 +25,7 @@ export default function AdminAlerts() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: notifications, isLoading } = useQuery({
+  const { data: notifications, isLoading: isLoadingNotifications } = useQuery({
     queryKey: ["broker_notifications"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -36,6 +36,18 @@ export default function AdminAlerts() {
       return data;
     },
   });
+
+  const { data: spikes, isLoading: isLoadingSpikes } = useQuery({
+    queryKey: ["filter_spikes"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("check_maria_filter_spikes");
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: 300000, // Check every 5 mins
+  });
+
+  const isLoading = isLoadingNotifications || isLoadingSpikes;
 
   const markAsReadMutation = useMutation({
     mutationFn: async (id: string) => {
