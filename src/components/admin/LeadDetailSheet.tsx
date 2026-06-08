@@ -91,7 +91,7 @@ const toLocalInput = (iso?: string | null) => {
 type TimelineEvent = {
   id: string;
   at: string;
-  kind: "lead_created" | "message_user" | "message_bot" | "note" | "contact" | "match" | "followup_set";
+  kind: "lead_created" | "message_user" | "message_bot" | "note" | "contact" | "match" | "followup_set" | "status_change";
   title: string;
   body?: string;
   meta?: string;
@@ -165,6 +165,20 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
         .select("id, score, status, match_reasons, created_at, updated_at, imovel_id, imoveis(titulo, bairro, preco)")
         .eq("lead_id", lead!.id)
         .order("score", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: statusAudit } = useQuery({
+    queryKey: ["lead_status_audit", lead?.id],
+    enabled: !!lead?.id && open,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("lead_status_audit")
+        .select("*")
+        .eq("lead_id", lead!.id)
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -290,9 +304,27 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
       });
     }
 
+    statusAudit?.forEach((a: any) => {
+      const statusPart = a.old_status !== a.new_status
+        ? `Status: ${a.old_status ?? "—"} → ${a.new_status ?? "—"}`
+        : null;
+      const scorePart = (a.old_score ?? null) !== (a.new_score ?? null)
+        ? `Score: ${a.old_score ?? "—"} → ${a.new_score ?? "—"}`
+        : null;
+      const title = [statusPart, scorePart].filter(Boolean).join(" · ") || "Atualização de status";
+      events.push({
+        id: `audit-${a.id}`,
+        at: a.created_at,
+        kind: "status_change",
+        title,
+        body: a.trigger_message ?? undefined,
+        meta: a.source ?? undefined,
+      });
+    });
+
     // Ordenação cronológica (mais recentes primeiro)
     return events.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
-  }, [lead, conversation, notes, matches]);
+  }, [lead, conversation, notes, matches, statusAudit]);
 
   if (!lead) return null;
 
@@ -314,6 +346,8 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
         return <Home className="w-3.5 h-3.5 text-fuchsia-600" />;
       case "followup_set":
         return <Calendar className="w-3.5 h-3.5 text-orange-600" />;
+      case "status_change":
+        return <Activity className="w-3.5 h-3.5 text-indigo-600" />;
     }
   };
 

@@ -14,7 +14,13 @@ const corsHeaders = {
 // ============================================================
 
 // ---------- Helpers ----------
-async function upsertLeadBySession(supabase: any, sessionId: string, patch: Record<string, unknown>) {
+async function upsertLeadBySession(
+  supabase: any,
+  sessionId: string,
+  patch: Record<string, unknown>,
+  triggerMessage?: string,
+  source: string = "maria_chat",
+) {
   if (!sessionId) return null;
   console.log(`[MarIA Persistence] Upserting lead for session ${sessionId}:`, JSON.stringify(patch));
   try {
@@ -22,9 +28,9 @@ async function upsertLeadBySession(supabase: any, sessionId: string, patch: Reco
     if (findError) {
       console.error(`[MarIA Persistence] Error finding lead:`, findError);
     }
-    
+
     const updateData: any = { ...patch, last_contact_at: new Date().toISOString() };
-    
+
     if (existing?.id) {
       // Logic to upgrade status to 'novo' if name and phone are now present
       if (existing.status === "anonimo" && (patch.nome || existing.nome) && (patch.telefone || existing.telefone)) {
@@ -34,7 +40,7 @@ async function upsertLeadBySession(supabase: any, sessionId: string, patch: Reco
       // Don't allow downgrade of score for strategic leads
       const currentScore = (existing.lead_score || "").toLowerCase();
       const newScore = (patch.lead_score as string || "").toLowerCase();
-      
+
       if (currentScore === "premium" && newScore !== "premium") {
         delete updateData.lead_score;
       }
@@ -47,20 +53,60 @@ async function upsertLeadBySession(supabase: any, sessionId: string, patch: Reco
         console.error(`[MarIA Persistence] Error updating lead ${existing.id}:`, updateError);
         throw updateError;
       }
+
+      // AUDIT: registra mudanças de status / lead_score
+      const statusChanged = updateData.status && updateData.status !== existing.status;
+      const scoreChanged = updateData.lead_score && (updateData.lead_score as string).toLowerCase() !== currentScore;
+      if (statusChanged || scoreChanged) {
+        try {
+          await supabase.from("lead_status_audit").insert({
+            lead_id: existing.id,
+            session_id: sessionId,
+            old_status: existing.status ?? null,
+            new_status: statusChanged ? updateData.status : existing.status,
+            old_score: existing.lead_score ?? null,
+            new_score: scoreChanged ? updateData.lead_score : existing.lead_score,
+            trigger_message: triggerMessage?.slice(0, 2000) ?? null,
+            source,
+          });
+          console.log(`[MarIA Audit] Logged change for ${existing.id}: status ${existing.status}→${updateData.status}, score ${existing.lead_score}→${updateData.lead_score}`);
+        } catch (auditErr) {
+          console.error(`[MarIA Audit] Failed to log:`, auditErr);
+        }
+      }
       return existing.id;
     }
-    
+
+    const initialStatus = (patch.nome && patch.telefone) ? "novo" : "anonimo";
     const { data: inserted, error: insertError } = await supabase.from("leads_maria").insert({
       session_id: sessionId,
       origem: "maria_chat",
-      status: (patch.nome && patch.telefone) ? "novo" : "anonimo",
+      status: initialStatus,
       last_contact_at: new Date().toISOString(),
       ...patch,
     }).select("id").single();
-    
+
     if (insertError) {
       console.error(`[MarIA Persistence] Error inserting lead:`, insertError);
       throw insertError;
+    }
+
+    // AUDIT: registra criação inicial
+    if (inserted?.id) {
+      try {
+        await supabase.from("lead_status_audit").insert({
+          lead_id: inserted.id,
+          session_id: sessionId,
+          old_status: null,
+          new_status: (patch.status as string) || initialStatus,
+          old_score: null,
+          new_score: (patch.lead_score as string) ?? null,
+          trigger_message: triggerMessage?.slice(0, 2000) ?? null,
+          source,
+        });
+      } catch (auditErr) {
+        console.error(`[MarIA Audit] Failed to log creation:`, auditErr);
+      }
     }
     return inserted?.id || null;
   } catch (err) {
@@ -68,6 +114,7 @@ async function upsertLeadBySession(supabase: any, sessionId: string, patch: Reco
     return null;
   }
 }
+
 
 async function searchProperties(supabase: any, filters: any): Promise<any[]> {
   try {
@@ -215,7 +262,8 @@ serve(async (req) => {
         console.log(`[MarIA Strategic] Lead scored as ${leadData.lead_score} based on extra_data`);
       }
 
-      const leadId = await upsertLeadBySession(supabase, sessionId, leadData);
+      const triggerMsg = `[submit_lead] ${nome ?? ""} / ${telefone ?? ""}`;
+      const leadId = await upsertLeadBySession(supabase, sessionId, leadData, triggerMsg, "lead_form");
       return new Response(JSON.stringify({ success: true, lead_id: leadId }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -399,7 +447,7 @@ serve(async (req) => {
           };
 
           // Update lead data
-          const leadId = await upsertLeadBySession(supabase, sessionId, leadPayload);
+          const leadId = await upsertLeadBySession(supabase, sessionId, leadPayload, lastMessage, "maria_extraction");
 
           if (leadId) {
             console.log(`[MarIA Persistence] Lead ID confirmed: ${leadId}. Persisting messages and metrics.`);
