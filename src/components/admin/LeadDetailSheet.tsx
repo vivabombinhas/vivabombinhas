@@ -222,7 +222,7 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
       meta: lead.bairro_interesse ?? undefined,
     });
 
-    // Prioridade 1: maria_messages (tabela dedicada de histórico)
+    // Priority 1: maria_messages (tabela dedicada de histórico)
     if (conversation && conversation.length > 0) {
       conversation.forEach((m: any) => {
         events.push({
@@ -234,8 +234,9 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
         });
       });
     }
-    // Prioridade 2: chat_history persistido no JSONB
-    else if (lead.chat_history && Array.isArray(lead.chat_history)) {
+    
+    // Priority 2: chat_history persistido no JSONB (apenas se não houver mensagens na maria_messages para evitar duplicidade)
+    if ((!conversation || conversation.length === 0) && lead.chat_history && Array.isArray(lead.chat_history)) {
       lead.chat_history.forEach((m: any, idx: number) => {
         if (m.content?.startsWith("[contexto")) return;
         events.push({
