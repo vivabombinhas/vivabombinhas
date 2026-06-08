@@ -110,7 +110,7 @@ function isSearchAllowed(filters: any, intent: string, lastMessage: string, extr
   
   // Regra específica para Investimento
   if (finalidade === "investimento" || (finalidade === "compra" && extractedData?.objetivo === "investir")) {
-    const hasObjective = extractedData?.objetivo === "renda" || extractedData?.objetivo === "patrimonio" || extractedData?.objetivo === "investir";
+    const hasObjective = extractedData?.objetivo === "renda" || extractedData?.objetivo === "patrimonio" || extractedData?.objetivo === "investir" || extractedData?.resumo_ia?.toLowerCase().includes("renda") || extractedData?.resumo_ia?.toLowerCase().includes("investir");
     // O usuário exige: objetivo + pelo menos 1 concreto
     return hasObjective && hasConcreteFilter;
   }
