@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Service role inserts audit" ON public.lead_status_audit;
