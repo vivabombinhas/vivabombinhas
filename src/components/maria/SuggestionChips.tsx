@@ -26,19 +26,19 @@ const SUGGESTIONS_BY_FINALIDADE: Record<Finalidade, SuggestionItem[]> = {
   ],
   investimento: [
     { 
-      label: "Ver imóveis para investir", 
-      subtext: "Quero analisar opções disponíveis",
-      value: "Ver imóveis para investir"
-    },
-    { 
       label: "Analisar meu perfil", 
-      subtext: "Quero entender onde faz mais sentido investir",
+      subtext: "Entender onde faz mais sentido investir",
       value: "Analisar meu perfil"
     },
     { 
       label: "Entender o mercado", 
-      subtext: "Regiões, m², riscos e potencial",
+      subtext: "Regiões, riscos e compra segura",
       value: "Entender o mercado"
+    },
+    { 
+      label: "Ver imóveis disponíveis", 
+      subtext: "Navegar por opções no portal",
+      value: "Ver imóveis disponíveis"
     },
   ],
   anunciante: [
