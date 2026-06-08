@@ -316,10 +316,12 @@ serve(async (req) => {
     if (extractedData) {
       (async () => {
         try {
-          await upsertLeadBySession(supabase, sessionId, {
+          // 1. Update lead data
+          const leadId = await upsertLeadBySession(supabase, sessionId, {
             lead_score: extractedData.lead_score,
-            objetive: extractedData.objetivo,
+            objetivo: extractedData.objetivo,
             prazo_compra: extractedData.prazo_compra,
+            orcamento_min: extractedData.orcamento_min,
             orcamento_max: extractedData.orcamento_max,
             capital_disponivel: extractedData.capital_disponivel,
             bens_para_permuta: extractedData.bens_para_permuta,
@@ -332,8 +334,29 @@ serve(async (req) => {
             proximo_passo_sugerido: extractedData.quer_falar_daniel ? "analise_daniel" : undefined,
             objetivo_investimento: extractedData.objetivo,
             região_interesse: extractedData.bairro_preferencia,
-            chat_history: messages // Always keep history updated in background
+            chat_history: messages
           });
+
+          // 2. Persist new message to history table
+          if (leadId) {
+             const lastMsg = messages[messages.length - 1];
+             if (lastMsg) {
+                await supabase.from("maria_messages").insert({
+                  session_id: sessionId,
+                  lead_id: leadId,
+                  role: lastMsg.role,
+                  content: lastMsg.content
+                });
+             }
+             
+             // Also persist the assistant's reply
+             await supabase.from("maria_messages").insert({
+               session_id: sessionId,
+               lead_id: leadId,
+               role: "assistant",
+               content: finalReply
+             });
+          }
         } catch (e) { console.error("Persistence error:", e); }
       })();
     }

@@ -77,6 +77,7 @@ JSON Schema:
   "finalidade": "temporada" | "compra" | "investimento" | "anunciante" | null,
   "objetivo": "temporada" | "morar" | "investir" | "renda" | "patrimonio" | "anunciar" | null,
   "prazo_compra": "imediato" | "3_meses" | "6_meses" | "12_meses" | "futuro" | null,
+  "orcamento_min": number | null,
   "orcamento_max": number | null,
   "capital_disponivel": number | null,
   "bens_para_permuta": string | null,
@@ -91,6 +92,11 @@ JSON Schema:
   "lead_score": "frio" | "morno" | "quente" | "premium",
   "resumo_ia": string
 }
+Regras para orcamento_min e orcamento_max:
+- Se o usuário disser "entre 1 e 2 milhões", orcamento_min = 1000000 e orcamento_max = 2000000.
+- Se disser "até 1.5 milhão", orcamento_max = 1500000.
+- Se disser "mais de 800k", orcamento_min = 800000.
+
 Regras para lead_score:
 - "premium": Se (quer_falar_daniel=true OR objetivo="investir" OR objetivo="renda") AND (orcamento_max >= 1000000 OR capital_disponivel >= 1000000 OR (bens_para_permuta IS NOT NULL AND bens_para_permuta != "")).
 - "quente": Se quer_falar_daniel=true OR (nome e telefone informados com finalidade compra/investimento) OR objetivo IN ("investir", "renda", "patrimonio").
@@ -100,7 +106,7 @@ Regras para lead_score:
 Regras para resumo_ia:
 - Seja ultra descritivo para o Daniel. 
 - Estrutura sugerida: "[Tipo de Lead]. [Perfil/Objetivo]. [Filtros de Busca]. [Composição Financeira]. [Interação Estratégica]."
-- Exemplo: "Lead estratégico. Usuária jujuzinha busca investir em Bombinhas com foco em renda de temporada. Avaliou Mariscal até R$1 milhão. Possui entrada em dinheiro, carro e apartamento de R$450k para composição. Aceitou análise com Daniel."
+- Exemplo: "Lead estratégico. Usuário Francisco busca terrenos em Zimbros ou Mariscal, com orçamento entre R$1M e R$2M. Pediu contato com especialista. Próximo passo sugerido: análise Daniel."
 - Mencione explicitamente se o usuário citou bens (carro, imovel) ou capital.`
 };
 

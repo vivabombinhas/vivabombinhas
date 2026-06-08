@@ -185,7 +185,7 @@ export default function AdminLeads() {
       }
       if (bairroFilter !== "all" && l.bairro_interesse !== bairroFilter) return false;
       if (!q) return true;
-      const hay = [l.nome, l.telefone, l.email, l.bairro_interesse, l.tipo_imovel, l.mensagem_original]
+      const hay = [l.nome, l.telefone, l.email, l.bairro_interesse, l.tipo_imovel, l.mensagem_original, l.resumo_ia]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -410,9 +410,9 @@ export default function AdminLeads() {
                     </TableHead>
                     <TableHead className="w-[24%]">Lead</TableHead>
                     <TableHead className="w-[18%]">Contato</TableHead>
-                    <TableHead className="w-[12%]">Interesse</TableHead>
+                    <TableHead className="w-[12%]">Interesse / Bairro</TableHead>
                     <TableHead className="w-[10%]">Score</TableHead>
-                    <TableHead className="w-[18%]">Bairro / Tipo</TableHead>
+                    <TableHead className="w-[18%]">Tipo / Detalhes</TableHead>
                     <TableHead className="w-[10%]">Data</TableHead>
                     <TableHead className="w-[10%]">Valid.</TableHead>
                     <TableHead className="w-[18%] text-right">Status / Ações</TableHead>
@@ -480,32 +480,26 @@ export default function AdminLeads() {
                         </TableCell>
 
                         <TableCell className="align-top py-3">
-                          {lead.interesse ? (
-                            <Badge variant="secondary" className="text-[10px]">
-                              {INTERESSE_MAP[lead.interesse] ?? lead.interesse}
+                          <div className="flex flex-col gap-1">
+                            <Badge variant="outline" className="w-fit text-[10px] font-normal border-primary/20 bg-primary/5">
+                              {INTERESSE_MAP[lead.interesse as string] || lead.interesse || "—"}
                             </Badge>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
-                          )}
+                            <span className="text-xs font-medium text-muted-foreground line-clamp-1">{lead.bairro_interesse || "—"}</span>
+                          </div>
                         </TableCell>
-
                         <TableCell className="align-top py-3">
-                          {lead.lead_score ? (
-                            <Badge className={`text-[10px] font-bold ${SCORE_CONFIG[lead.lead_score]?.className || ""}`}>
-                              {lead.lead_score}
-                            </Badge>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
-                          )}
+                          <Badge className={`text-[10px] font-bold ${SCORE_CONFIG[lead.lead_score as string]?.className || "bg-muted"}`}>
+                            {lead.lead_score || "—"}
+                          </Badge>
                         </TableCell>
-
                         <TableCell className="align-top py-3">
-                          <div className="text-sm truncate">{lead.bairro_interesse || <span className="text-muted-foreground">—</span>}</div>
-                          {lead.tipo_imovel && (
-                            <div className="text-xs text-muted-foreground truncate">{lead.tipo_imovel}</div>
-                          )}
+                          <div className="flex flex-col gap-0.5">
+                            <div className="text-xs font-medium">{lead.tipo_imovel || "—"}</div>
+                            <div className="text-[10px] text-muted-foreground line-clamp-1">
+                              {lead.orcamento_max ? `Até R$ ${(lead.orcamento_max/1000000).toFixed(1)}M` : lead.faixa_preco || "—"}
+                            </div>
+                          </div>
                         </TableCell>
-
                         <TableCell className="align-top py-3">
                           <span className="text-xs text-muted-foreground whitespace-nowrap">
                             {formatDate(lead.created_at)}

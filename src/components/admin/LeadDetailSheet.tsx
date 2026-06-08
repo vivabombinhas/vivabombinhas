@@ -57,6 +57,7 @@ interface Lead {
   lead_score?: string | null;
   objetivo?: string | null;
   prazo_compra?: string | null;
+  orcamento_min?: number | null;
   orcamento_max?: number | null;
   resumo_ia?: string | null;
   capital_disponivel?: number | null;
@@ -65,6 +66,7 @@ interface Lead {
   chat_history?: any[] | null;
   feedback_corretor?: string | null;
   observacao_interna?: string | null;
+  session_id?: string | null;
 }
 
 interface Props {
@@ -99,6 +101,7 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
   const qc = useQueryClient();
   const [newNote, setNewNote] = useState("");
   const [followup, setFollowup] = useState("");
+  const [customMessage, setCustomMessage] = useState("");
 
   const { data: notes } = useQuery({
     queryKey: ["lead_notes", lead?.id],
@@ -115,9 +118,34 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
   });
 
   const { data: conversation } = useQuery({
-    queryKey: ["lead_conversations", lead?.id],
+    queryKey: ["maria_messages", lead?.id],
     enabled: !!lead?.id && open,
     queryFn: async () => {
+      // 1. Try to fetch from maria_messages table first (new solution)
+      const { data: msgData, error: msgError } = await supabase
+        .from("maria_messages")
+        .select("*")
+        .eq("lead_id", lead!.id)
+        .order("created_at", { ascending: true });
+      
+      if (!msgError && msgData && msgData.length > 0) {
+        return msgData;
+      }
+
+      // 2. Fallback to session_id if lead_id not yet linked
+      if (lead?.session_id) {
+        const { data: sessionData, error: sessionError } = await supabase
+          .from("maria_messages")
+          .select("*")
+          .eq("session_id", lead.session_id)
+          .order("created_at", { ascending: true });
+        
+        if (!sessionError && sessionData && sessionData.length > 0) {
+          return sessionData;
+        }
+      }
+
+      // 3. Fallback to legacy lead_conversations
       const { data, error } = await supabase
         .from("lead_conversations")
         .select("*")
@@ -194,26 +222,25 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
       meta: lead.bairro_interesse ?? undefined,
     });
 
-    // Se houver chat_history persistido, usamos ele como fonte primária
-    if (lead.chat_history && Array.isArray(lead.chat_history)) {
-      lead.chat_history.forEach((m: any, idx: number) => {
-        // Ignorar mensagens de contexto interno se houver
-        if (m.content?.startsWith("[contexto")) return;
-        
+    // Prioridade 1: maria_messages (tabela dedicada de histórico)
+    if (conversation && conversation.length > 0) {
+      conversation.forEach((m: any) => {
         events.push({
-          id: `chat-${lead.id}-${idx}`,
-          at: m.timestamp || lead.created_at,
+          id: `maria-msg-${m.id}`,
+          at: m.created_at,
           kind: m.role === "user" ? "message_user" : "message_bot",
           title: m.role === "user" ? `${lead.nome ?? "Visitante"} enviou mensagem` : "MarIA respondeu",
           body: m.content,
         });
       });
-    } else {
-      // Fallback para a tabela legada de conversas
-      conversation?.forEach((m: any) => {
+    }
+    // Prioridade 2: chat_history persistido no JSONB
+    else if (lead.chat_history && Array.isArray(lead.chat_history)) {
+      lead.chat_history.forEach((m: any, idx: number) => {
+        if (m.content?.startsWith("[contexto")) return;
         events.push({
-          id: `msg-${m.id}`,
-          at: m.created_at,
+          id: `chat-${lead.id}-${idx}`,
+          at: m.timestamp || lead.created_at,
           kind: m.role === "user" ? "message_user" : "message_bot",
           title: m.role === "user" ? `${lead.nome ?? "Visitante"} enviou mensagem` : "MarIA respondeu",
           body: m.content,
@@ -363,17 +390,17 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
                </div>
              )}
              <div className="p-2 bg-muted rounded-md">
-                <p className="text-[9px] text-muted-foreground uppercase font-bold">Orçamento Máx</p>
+                <p className="text-[9px] text-muted-foreground uppercase font-bold">Orçamento</p>
                 <p className="text-sm font-medium">
-                  {lead.orcamento_max 
-                    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(lead.orcamento_max) 
-                    : "—"}
+                  {lead.orcamento_min || lead.orcamento_max
+                    ? `${lead.orcamento_min ? 'de R$ ' + (lead.orcamento_min/1000000).toFixed(1) + 'M ' : ''}${lead.orcamento_max ? 'até R$ ' + (lead.orcamento_max/1000000).toFixed(1) + 'M' : ''}`
+                    : lead.faixa_preco || "—"}
                 </p>
+              </div>
               <div className="p-2 bg-muted rounded-md col-span-2">
                  <p className="text-[9px] text-muted-foreground uppercase font-bold">ID da Sessão / Origem</p>
                  <p className="text-[10px] font-mono break-all">{lead.id.slice(0, 8)}... / MarIA Chat</p>
               </div>
-          </div>
              <div className="p-2 bg-muted rounded-md">
                 <p className="text-[9px] text-muted-foreground uppercase font-bold">Lead Score</p>
                 <Badge variant="outline" className={`mt-0.5 text-[10px] font-bold ${lead.lead_score === 'Premium' ? 'bg-amber-500 text-white' : 'border-primary/30'}`}>
@@ -401,31 +428,56 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
 
 
           {lead.telefone && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700 mt-2">
-                  <MessageCircle className="w-4 h-4" /> Enviar mensagem pronta
+            <div className="flex flex-col gap-2 mt-2">
+               <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700">
+                    <MessageCircle className="w-4 h-4" /> Mensagem pronta
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-[320px]">
+                  <DropdownMenuLabel>Templates de WhatsApp</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {WHATSAPP_TEMPLATES.map((t) => (
+                    <DropdownMenuItem
+                      key={t.id}
+                      onClick={() => {
+                        openWhatsapp(lead.telefone!, t.build(lead));
+                        updateLead.mutate({ last_contact_at: new Date().toISOString() });
+                      }}
+                      className="flex flex-col items-start gap-0.5 py-2"
+                    >
+                      <span className="text-sm font-medium">{t.label}</span>
+                      <span className="text-[10px] text-muted-foreground">{t.description}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <div className="p-3 border rounded-lg bg-card mt-2">
+                <h4 className="text-[10px] font-bold uppercase mb-2 text-muted-foreground flex items-center gap-1">
+                   <MessageSquare className="w-3 h-3" /> Mensagem Personalizada
+                </h4>
+                <Textarea 
+                  className="text-xs min-h-[100px] mb-2"
+                  placeholder="Escreva sua mensagem aqui..."
+                  value={customMessage || `Olá ${lead.nome?.split(' ')[0] || ''}, aqui é o Daniel do VIV Bombinhas. A MarIA me passou seu interesse em ${lead.tipo_imovel || 'imóveis'} em ${lead.bairro_interesse || 'Bombinhas'}. Como posso te ajudar?`}
+                  onChange={(e) => setCustomMessage(e.target.value)}
+                />
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="w-full text-xs h-8 border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+                  onClick={() => {
+                    const msg = customMessage || `Olá ${lead.nome?.split(' ')[0] || ''}, aqui é o Daniel do VIV Bombinhas. A MarIA me passou seu interesse em ${lead.tipo_imovel || 'imóveis'} em ${lead.bairro_interesse || 'Bombinhas'}. Como posso te ajudar?`;
+                    openWhatsapp(lead.telefone!, msg);
+                    updateLead.mutate({ last_contact_at: new Date().toISOString() });
+                  }}
+                >
+                  <Phone className="w-3 h-3 mr-1" /> Abrir no WhatsApp
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[320px]">
-                <DropdownMenuLabel>Templates de WhatsApp</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {WHATSAPP_TEMPLATES.map((t) => (
-                  <DropdownMenuItem
-                    key={t.id}
-                    onClick={() => {
-                      openWhatsapp(lead.telefone!, t.build(lead));
-                      // Marca contato automaticamente ao abrir o WhatsApp
-                      updateLead.mutate({ last_contact_at: new Date().toISOString() });
-                    }}
-                    className="flex flex-col items-start gap-0.5 py-2"
-                  >
-                    <span className="text-sm font-medium">{t.label}</span>
-                    <span className="text-[10px] text-muted-foreground">{t.description}</span>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </div>
+            </div>
           )}
         </section>
 
