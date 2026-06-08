@@ -386,8 +386,8 @@ serve(async (req) => {
 
       if (effectiveFilters.finalidade !== "anunciante") {
         allProperties = await searchProperties(supabase, effectiveFilters);
-      
-      if (allProperties.length > 0) {
+        
+        if (allProperties.length > 0) {
         showResults = true;
         if (!lead_captured && allProperties.length > 2) {
           gateActive = true;
