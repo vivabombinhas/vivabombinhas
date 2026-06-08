@@ -24,6 +24,14 @@ async function upsertLeadBySession(supabase: any, sessionId: string, patch: Reco
     }
     
     if (existing?.id) {
+      // Don't allow downgrade of score for strategic leads
+      if (existing.lead_score === "Premium" && patch.lead_score && patch.lead_score !== "Premium") {
+        delete patch.lead_score;
+      }
+      if (existing.lead_score === "Quente" && patch.lead_score === "frio") {
+        delete patch.lead_score;
+      }
+
       const { error: updateError } = await supabase.from("leads_maria").update({ ...patch, last_contact_at: new Date().toISOString() }).eq("id", existing.id);
       if (updateError) {
         console.error(`[MarIA Persistence] Error updating lead ${existing.id}:`, updateError);
