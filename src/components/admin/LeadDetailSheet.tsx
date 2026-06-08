@@ -304,9 +304,27 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
       });
     }
 
+    statusAudit?.forEach((a: any) => {
+      const statusPart = a.old_status !== a.new_status
+        ? `Status: ${a.old_status ?? "—"} → ${a.new_status ?? "—"}`
+        : null;
+      const scorePart = (a.old_score ?? null) !== (a.new_score ?? null)
+        ? `Score: ${a.old_score ?? "—"} → ${a.new_score ?? "—"}`
+        : null;
+      const title = [statusPart, scorePart].filter(Boolean).join(" · ") || "Atualização de status";
+      events.push({
+        id: `audit-${a.id}`,
+        at: a.created_at,
+        kind: "status_change",
+        title,
+        body: a.trigger_message ?? undefined,
+        meta: a.source ?? undefined,
+      });
+    });
+
     // Ordenação cronológica (mais recentes primeiro)
     return events.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
-  }, [lead, conversation, notes, matches]);
+  }, [lead, conversation, notes, matches, statusAudit]);
 
   if (!lead) return null;
 
