@@ -114,7 +114,7 @@ export async function callAI(lovableApiKey: string, model: string, system: strin
   // Trim messages to avoid context window issues (keep last 15 exchanges)
   const trimmedMessages = messages.length > 30 ? messages.slice(-30) : messages;
   
-  console.log(\`[MarIA AI] Calling \${model} with \${trimmedMessages.length} messages\`);
+  console.log(`[MarIA AI] Calling ${model} with ${trimmedMessages.length} messages`);
   
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout per AI call
@@ -122,7 +122,7 @@ export async function callAI(lovableApiKey: string, model: string, system: strin
   try {
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: \`Bearer \${lovableApiKey}\` },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${lovableApiKey}` },
       signal: controller.signal,
       body: JSON.stringify({
         model,
@@ -135,8 +135,8 @@ export async function callAI(lovableApiKey: string, model: string, system: strin
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(\`[MarIA AI] Gateway error (\${model}): \${response.status} - \${errorText}\`);
-      throw new Error(\`AI Gateway error (\${model}): \${response.status}\`);
+      console.error(`[MarIA AI] Gateway error (${model}): ${response.status} - ${errorText}`);
+      throw new Error(`AI Gateway error (${model}): ${response.status}`);
     }
     
     const data = await response.json();
@@ -144,8 +144,8 @@ export async function callAI(lovableApiKey: string, model: string, system: strin
   } catch (err: any) {
     clearTimeout(timeoutId);
     if (err.name === 'AbortError') {
-      console.error(\`[MarIA AI] Timeout calling \${model}\`);
-      throw new Error(\`AI Timeout (\${model})\`);
+      console.error(`[MarIA AI] Timeout calling ${model}`);
+      throw new Error(`AI Timeout (${model})`);
     }
     throw err;
   }
@@ -153,7 +153,7 @@ export async function callAI(lovableApiKey: string, model: string, system: strin
 
 export function safeParseJSON(text: string) {
   try {
-    const cleaned = text.replace(/\\`\\`\\`json|\\`\\`\\`/g, "").trim();
+    const cleaned = text.replace(/```json|```/g, "").trim();
     const firstBrace = cleaned.indexOf("{");
     const lastBrace = cleaned.lastIndexOf("}");
     if (firstBrace !== -1 && lastBrace !== -1) {
