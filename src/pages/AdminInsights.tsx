@@ -39,7 +39,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function AdminInsights() {
   const { data: insights, isLoading } = useQuery({
-    queryKey: ["admin_insights"],
+    queryKey: ["admin_insights_v2"],
     queryFn: async () => {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -51,6 +51,7 @@ export default function AdminInsights() {
         noResultsData,
         leadsCapturados,
         conversasPorDia,
+        metricsData,
       ] = await Promise.all([
         // 1. TOP 5 BAIRROS
         supabase
@@ -87,6 +88,12 @@ export default function AdminInsights() {
           .from("lead_conversations")
           .select("created_at")
           .gte("created_at", isoDate),
+
+        // 6. METRICS FOR FUNNEL
+        supabase
+          .from("maria_search_metrics")
+          .select("*")
+          .gte("created_at", isoDate),
       ]);
 
       // Process Bairros
@@ -121,10 +128,33 @@ export default function AdminInsights() {
         dailyCounts[day] = (dailyCounts[day] || 0) + 1;
       });
       
-      // Sort and fill missing days if needed (simple sort for now)
       const chartData = Object.entries(dailyCounts)
         .map(([date, count]) => ({ date, count }))
-        .slice(-15); // Show last 15 active days for better fit
+        .slice(-15);
+
+      // Funnel Calculation
+      const totalSessions = metricsData.data ? new Set(metricsData.data.map(m => m.session_id)).size : 0;
+      const sessionsWithResults = metricsData.data ? new Set(metricsData.data.filter(m => m.has_shown_results).map(m => m.session_id)).size : 0;
+      const dropOffSessions = totalSessions - sessionsWithResults;
+      
+      const funnelData = [
+        { name: "Início da Conversa", value: totalSessions, fill: "#8884d8" },
+        { name: "Exibição de Cards", value: sessionsWithResults, fill: "#82ca9d" },
+      ];
+
+      // Missing Filters Breakdown
+      const filterMissingCounts: Record<string, number> = {};
+      metricsData.data?.forEach(m => {
+        if (!m.has_shown_results && m.missing_filters) {
+          m.missing_filters.forEach((f: string) => {
+            filterMissingCounts[f] = (filterMissingCounts[f] || 0) + 1;
+          });
+        }
+      });
+
+      const missingFiltersChart = Object.entries(filterMissingCounts)
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value);
 
       return {
         topBairros,
@@ -132,6 +162,10 @@ export default function AdminInsights() {
         noResults: noResultsData.data || [],
         leadsTotal: leadsCapturados.count || 0,
         chartData,
+        funnelData,
+        missingFiltersChart,
+        sessionsCount: totalSessions,
+        dropOffRate: totalSessions > 0 ? ((dropOffSessions / totalSessions) * 100).toFixed(1) : 0,
       };
     },
   });
