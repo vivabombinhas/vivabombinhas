@@ -369,7 +369,11 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
                     ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(lead.orcamento_max) 
                     : "—"}
                 </p>
-             </div>
+              <div className="p-2 bg-muted rounded-md col-span-2">
+                 <p className="text-[9px] text-muted-foreground uppercase font-bold">ID da Sessão / Origem</p>
+                 <p className="text-[10px] font-mono break-all">{lead.id.slice(0, 8)}... / MarIA Chat</p>
+              </div>
+          </div>
              <div className="p-2 bg-muted rounded-md">
                 <p className="text-[9px] text-muted-foreground uppercase font-bold">Lead Score</p>
                 <Badge variant="outline" className={`mt-0.5 text-[10px] font-bold ${lead.lead_score === 'Premium' ? 'bg-amber-500 text-white' : 'border-primary/30'}`}>
