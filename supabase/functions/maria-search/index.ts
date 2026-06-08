@@ -216,7 +216,16 @@ serve(async (req) => {
     // 1. ROUTER
     const routerReply = await callAI(lovableApiKey, "google/gemini-3-flash-preview", PROMPTS.ROUTER, messages.slice(-5), 0);
     const routerData = safeParseJSON(routerReply);
-    const intent = routerData?.intent || "busca";
+    let intent = routerData?.intent || "busca";
+
+    // Regra de Posicionamento para Investimento: Forçar consultivo se termos de investimento forem detectados
+    const investmentKeywords = /investimento|investir|terreno|renda|permuta|compra na planta|m²|região|liquidez|construtora/i;
+    const isInvestmentContext = investmentKeywords.test(lastMessage) || (extra_data?.finalidade === "investimento");
+    
+    if (isInvestmentContext && intent === "busca" && !isExplicitSearchRequest) {
+      console.log(`[MarIA Debug] Forçando intent consultivo para contexto de investimento: "${lastMessage}"`);
+      intent = "consultivo";
+    }
 
     // 2. MAIN CHAT
     let mainModel = "google/gemini-3-flash-preview";
@@ -336,7 +345,7 @@ serve(async (req) => {
         } else {
           noResultsGate = !lead_captured;
           // Se realmente não houver nada, ajusta a resposta para ser consultiva e oferecer caminhos
-          cleaned = `No momento não encontrei imóveis disponíveis em ${filters.bairro || 'Mariscal'} com essas características. Para avançarmos, você prefere ampliar a busca para praias vizinhas (como Centro ou Bombas) ou prefere que eu te apresente uma comparação de rentabilidade entre as regiões?`;
+          cleaned = `Esse recorte está mais restrito no portal agora. Posso ampliar a busca para regiões próximas ou organizar uma análise estratégica para encontrar alternativas mais coerentes com seu objetivo.`;
           console.log(`[MarIA Search] No results even after broadening.`);
         }
       }
