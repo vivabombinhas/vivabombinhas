@@ -18,12 +18,20 @@ async function upsertLeadBySession(supabase: any, sessionId: string, patch: Reco
   if (!sessionId) return null;
   console.log(`[MarIA Persistence] Upserting lead for session ${sessionId}:`, JSON.stringify(patch));
   try {
-    const { data: existing, error: findError } = await supabase.from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
+    const { data: existing, error: findError } = await supabase.from("leads_maria").select("id, lead_score").eq("session_id", sessionId).maybeSingle();
     if (findError) {
       console.error(`[MarIA Persistence] Error finding lead:`, findError);
     }
     
     if (existing?.id) {
+      // Don't allow downgrade of score for strategic leads
+      if (existing.lead_score === "Premium" && patch.lead_score && patch.lead_score !== "Premium") {
+        delete patch.lead_score;
+      }
+      if (existing.lead_score === "Quente" && patch.lead_score === "frio") {
+        delete patch.lead_score;
+      }
+
       const { error: updateError } = await supabase.from("leads_maria").update({ ...patch, last_contact_at: new Date().toISOString() }).eq("id", existing.id);
       if (updateError) {
         console.error(`[MarIA Persistence] Error updating lead ${existing.id}:`, updateError);
@@ -161,11 +169,22 @@ serve(async (req) => {
         nome, 
         telefone, 
         status: "novo",
-        chat_history: messages, // Persist history snapshot
+        chat_history: messages, // Persist full history snapshot
         ...extra_data 
       };
-      await upsertLeadBySession(supabase, sessionId, leadData);
-      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+      // Force high priority for strategic leads
+      if (extra_data?.quer_analise || extra_data?.proximo_passo_sugerido === "analise_daniel") {
+        const isPremium = (Number(extra_data?.capital_disponivel || 0) >= 1000000) || 
+                          (Number(extra_data?.orcamento_max || 0) >= 1000000) || 
+                          (extra_data?.bens_para_permuta && extra_data?.bens_para_permuta.length > 5);
+        
+        leadData.lead_score = isPremium ? "Premium" : "Quente";
+        console.log(`[MarIA Strategic] Lead scored as ${leadData.lead_score} based on extra_data`);
+      }
+
+      const leadId = await upsertLeadBySession(supabase, sessionId, leadData);
+      return new Response(JSON.stringify({ success: true, lead_id: leadId }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     console.log(`[MarIA Debug] Nova mensagem recebida. Session: ${sessionId}. Messages: ${messages.length}`);

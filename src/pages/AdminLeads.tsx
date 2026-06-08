@@ -170,7 +170,7 @@ export default function AdminLeads() {
     const q = search.trim().toLowerCase();
     const leadsWithStrategicData = leads.map(l => ({
       ...l,
-      isStrategic: l.proximo_passo_sugerido === "analise_daniel" || l.quer_analise === true
+      isStrategic: l.proximo_passo_sugerido === "analise_daniel" || l.quer_analise === true || l.tipo_lead === "consultivo" || l.lead_score === "Premium"
     }));
 
     return leadsWithStrategicData.filter((l) => {
@@ -285,7 +285,7 @@ export default function AdminLeads() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos interesses</SelectItem>
-                <SelectItem value="analise_daniel">✨ Análise Daniel</SelectItem>
+                <SelectItem value="analise_daniel">💎 Análise Daniel</SelectItem>
                 <SelectItem value="compra">Compra</SelectItem>
                 <SelectItem value="investimento">Investimento</SelectItem>
                 <SelectItem value="aluguel_anual">Aluguel anual</SelectItem>
@@ -426,7 +426,7 @@ export default function AdminLeads() {
                     return (
                       <TableRow
                         key={lead.id}
-                        className={`cursor-pointer transition-colors ${isSelected ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-muted/40'}`}
+                        className={`cursor-pointer transition-colors ${isSelected ? 'bg-primary/5 hover:bg-primary/10' : lead.isStrategic ? 'bg-amber-500/5 hover:bg-amber-500/10' : 'hover:bg-muted/40'}`}
                         onClick={() => { setSelectedLeadId(lead.id); setInitialTab("historico"); setSheetOpen(true); }}
                       >
                         <TableCell className="align-top py-3 px-3" onClick={(e) => e.stopPropagation()}>
@@ -437,19 +437,19 @@ export default function AdminLeads() {
                           />
                         </TableCell>
                         <TableCell className="align-top py-3">
-                          <div className="font-medium text-foreground truncate">
-                          {lead.nome ?? <span className="italic text-muted-foreground">Sem nome</span>}
-                          {lead.proximo_passo_sugerido === "analise_daniel" && (
-                            <Badge variant="outline" className="ml-2 h-4 text-[9px] bg-primary/10 text-primary border-primary/20">
-                              ✨ Daniel
-                            </Badge>
-                          )}
-                        </div>
-                        {lead.mensagem_original && (
-                            <div className="text-xs text-muted-foreground italic line-clamp-1 max-w-[280px]">
-                              "{lead.mensagem_original}"
-                            </div>
-                          )}
+                          <div className="flex flex-col">
+                            <span className="font-bold flex items-center gap-1.5">
+                              {lead.nome || "Lead Anônimo"}
+                              {lead.isStrategic && (
+                                <Badge variant="outline" className="h-4 text-[9px] bg-amber-500 text-white border-none px-1">
+                                  DANIEL
+                                </Badge>
+                              )}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground line-clamp-1 italic">
+                              {lead.resumo_ia || lead.mensagem_original || lead.interesse || "Interesse não identificado"}
+                            </span>
+                          </div>
                         </TableCell>
 
                         <TableCell className="align-top py-3">
