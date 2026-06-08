@@ -526,7 +526,9 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
                         </span>
                       </div>
                       {ev.body && (
-                        <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap line-clamp-4">
+                        <p className={`text-xs mt-1 whitespace-pre-wrap ${
+                          ev.kind === 'note' ? 'text-foreground font-medium' : 'text-muted-foreground'
+                        }`}>
                           {ev.body}
                         </p>
                       )}
@@ -580,7 +582,27 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
 
           {/* CONVERSA MARIA */}
           <TabsContent value="conversa" className="mt-3">
-            {conversation?.length ? (
+            {Array.isArray(lead.chat_history) && lead.chat_history.length > 0 ? (
+              <div className="space-y-2">
+                {lead.chat_history.map((m: any, idx: number) => {
+                  if (m.content?.startsWith("[contexto")) return null;
+                  return (
+                    <div
+                      key={`chat-msg-${idx}`}
+                      className={`rounded-lg p-2.5 text-sm ${
+                        m.role === "user" ? "bg-primary/10 ml-6" : "bg-muted/50 mr-6"
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
+                        {m.role === "user" ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
+                        {m.role === "user" ? (lead.nome ?? "Visitante") : "MarIA"} · {m.timestamp ? formatDateTime(m.timestamp) : formatDateTime(lead.created_at)}
+                      </div>
+                      <p className="whitespace-pre-wrap">{m.content}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : conversation?.length ? (
               <div className="space-y-2">
                 {conversation.map((m: any) => (
                   <div
