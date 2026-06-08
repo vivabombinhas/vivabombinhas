@@ -323,11 +323,19 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
           </div>
 
           {lead.resumo_ia && (
-            <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
-              <h4 className="text-[10px] font-bold uppercase text-primary mb-1 flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> Resumo MarIA
+            <div className={`mt-4 p-3 border rounded-lg ${
+              (lead.proximo_passo_sugerido === 'analise_daniel' || lead.lead_score === 'Premium')
+                ? "bg-amber-500/5 border-amber-500/30 shadow-sm"
+                : "bg-primary/5 border-primary/20"
+            }`}>
+              <h4 className={`text-[10px] font-bold uppercase mb-1 flex items-center gap-1 ${
+                (lead.proximo_passo_sugerido === 'analise_daniel' || lead.lead_score === 'Premium')
+                  ? "text-amber-700"
+                  : "text-primary"
+              }`}>
+                <Sparkles className="w-3 h-3" /> Resumo Estratégico MarIA
               </h4>
-              <p className="text-sm italic text-foreground">"{lead.resumo_ia}"</p>
+              <p className="text-sm italic text-foreground leading-relaxed">"{lead.resumo_ia}"</p>
             </div>
           )}
 

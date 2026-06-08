@@ -170,7 +170,7 @@ export default function AdminLeads() {
     const q = search.trim().toLowerCase();
     const leadsWithStrategicData = leads.map(l => ({
       ...l,
-      isStrategic: l.proximo_passo_sugerido === "analise_daniel" || l.quer_analise === true
+      isStrategic: l.proximo_passo_sugerido === "analise_daniel" || l.quer_analise === true || l.tipo_lead === "consultivo" || l.lead_score === "Premium"
     }));
 
     return leadsWithStrategicData.filter((l) => {
@@ -285,7 +285,7 @@ export default function AdminLeads() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos interesses</SelectItem>
-                <SelectItem value="analise_daniel">✨ Análise Daniel</SelectItem>
+                <SelectItem value="analise_daniel">💎 Análise Daniel</SelectItem>
                 <SelectItem value="compra">Compra</SelectItem>
                 <SelectItem value="investimento">Investimento</SelectItem>
                 <SelectItem value="aluguel_anual">Aluguel anual</SelectItem>

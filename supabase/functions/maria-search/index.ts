@@ -161,11 +161,19 @@ serve(async (req) => {
         nome, 
         telefone, 
         status: "novo",
-        chat_history: messages, // Persist history snapshot
+        chat_history: messages, // Persist full history snapshot
         ...extra_data 
       };
-      await upsertLeadBySession(supabase, sessionId, leadData);
-      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+      // Force high priority for strategic leads
+      if (extra_data?.quer_analise || extra_data?.proximo_passo_sugerido === "analise_daniel") {
+        leadData.lead_score = (extra_data?.capital_disponivel >= 1000000 || extra_data?.orcamento_max >= 1000000 || extra_data?.bens_para_permuta) 
+          ? "Premium" 
+          : "Quente";
+      }
+
+      const leadId = await upsertLeadBySession(supabase, sessionId, leadData);
+      return new Response(JSON.stringify({ success: true, lead_id: leadId }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     console.log(`[MarIA Debug] Nova mensagem recebida. Session: ${sessionId}. Messages: ${messages.length}`);
