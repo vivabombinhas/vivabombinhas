@@ -209,8 +209,10 @@ serve(async (req) => {
     } catch (e) { console.error("Extraction error:", e); }
 
     // Fallback: IA esqueceu [FILTERS] mas o extrator pegou filtros objetivos
-    const searchPatterns = /ver im[óo]veis|op[çc][õo]es|cards|mostrar|buscar|procurar|quero ver/i;
-    const isExplicitSearchRequest = searchPatterns.test(lastMessage) || lastMessage.toLowerCase().includes("investir");
+    const searchPatterns = /ver im[óo]veis|op[çc][õo]es|cards|mostrar|buscar|procurar|quero ver|me mostre/i;
+    const isExplicitSearchRequest = searchPatterns.test(lastMessage) || 
+                                   lastMessage.toLowerCase().includes("investir") ||
+                                   lastMessage.toLowerCase().includes("temporada");
 
     if (!filters && extractedData && intent === "busca" && isExplicitSearchRequest) {
       const candidateFilters = {
