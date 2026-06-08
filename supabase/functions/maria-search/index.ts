@@ -113,7 +113,7 @@ function isSearchAllowed(filters: any, intent: string, lastMessage: string, extr
   // Regra específica para Temporada
   if (finalidade === "temporada") {
     const hasConstraint = hasConcreteFilter; // Bairro ou Preço
-    const hasCapacityOrPeriod = extractedData?.prazo_compra || extractedData?.período; // prazo_compra as fallback for period
+    const hasCapacityOrPeriod = extractedData?.pessoas || extractedData?.periodo;
     return hasConstraint && !!hasCapacityOrPeriod;
   }
   
