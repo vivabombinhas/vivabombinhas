@@ -97,6 +97,11 @@ function parseFiltersBlock(text: string) {
   try {
     const filters = JSON.parse(m[1].trim());
     return { filters, cleaned: text.replace(/\[FILTERS\][\s\S]*?\[\/FILTERS\]/g, "").trim() };
+  } catch {
+    return { filters: null, cleaned: text };
+  }
+}
+
 function isSearchAllowed(filters: any, intent: string, lastMessage: string, extractedData: any) {
   if (!filters || !filters.finalidade) return false;
   
