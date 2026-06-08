@@ -426,7 +426,7 @@ export default function AdminLeads() {
                     return (
                       <TableRow
                         key={lead.id}
-                        className={`cursor-pointer transition-colors ${isSelected ? 'bg-primary/5 hover:bg-primary/10' : 'hover:bg-muted/40'}`}
+                        className={`cursor-pointer transition-colors ${isSelected ? 'bg-primary/5 hover:bg-primary/10' : lead.isStrategic ? 'bg-amber-500/5 hover:bg-amber-500/10' : 'hover:bg-muted/40'}`}
                         onClick={() => { setSelectedLeadId(lead.id); setInitialTab("historico"); setSheetOpen(true); }}
                       >
                         <TableCell className="align-top py-3 px-3" onClick={(e) => e.stopPropagation()}>
