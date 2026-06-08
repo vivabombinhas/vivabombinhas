@@ -115,13 +115,19 @@ function parseFiltersBlock(text: string) {
   }
 }
 
-function isSearchAllowed(filters: any, intent: string, lastMessage: string, extractedData: any) {
-  if (!filters || !filters.finalidade) return false;
+function checkSearchRequirements(filters: any, intent: string, lastMessage: string, extractedData: any) {
+  const missing: string[] = [];
+  if (!filters || !filters.finalidade) {
+    return { allowed: false, missing: ["finalidade"] };
+  }
   
   const finalidade = filters.finalidade;
-  const hasConcreteFilter = filters.bairro || filters.preco_max || filters.tipo;
-  
-  console.log(`[MarIA Search Logic] Checking allowed: Finalidade=${finalidade}, Intent=${intent}, Concrete=${hasConcreteFilter}`);
+  const hasBairro = !!filters.bairro;
+  const hasTipo = !!filters.tipo;
+  const hasOrcamento = !!(filters.preco_max || filters.preco_min ||
+    extractedData?.orcamento_max || extractedData?.orcamento_min);
+
+  console.log(`[MarIA Search Logic] Checking requirements: Finalidade=${finalidade}, Intent=${intent}`);
   
   // Regra específica para Investimento
   if (finalidade === "investimento" || (finalidade === "compra" && extractedData?.objetivo === "investir")) {
@@ -133,29 +139,38 @@ function isSearchAllowed(filters: any, intent: string, lastMessage: string, extr
                          lastMessage.toLowerCase().includes("renda") ||
                          lastMessage.toLowerCase().includes("investir");
     
-    console.log(`[MarIA Search Logic] Investment check: hasObjective=${hasObjective}, hasConcrete=${hasConcreteFilter}`);
-    return hasObjective && hasConcreteFilter;
+    if (!hasObjective) missing.push("objetivo");
+    if (!hasBairro && !filters.preco_max && !hasTipo) missing.push("filtros_concretos");
+    
+    return { allowed: missing.length === 0, missing };
   }
   
   // Regra específica para Temporada
   if (finalidade === "temporada") {
-    const hasConstraint = hasConcreteFilter; // Bairro ou Preço
+    const hasConstraint = hasBairro || filters.preco_max || hasTipo;
     const hasCapacityOrPeriod = extractedData?.pessoas || extractedData?.periodo;
-    console.log(`[MarIA Search Logic] Temporada check: hasConstraint=${hasConstraint}, hasCapacityOrPeriod=${!!hasCapacityOrPeriod}`);
-    return hasConstraint && !!hasCapacityOrPeriod;
+    
+    if (!hasConstraint) missing.push("filtros_concretos");
+    if (!hasCapacityOrPeriod) missing.push("capacidade_ou_periodo");
+    
+    return { allowed: missing.length === 0, missing };
   }
   
   // Compra Comum: exige bairro + tipo + faixa de orçamento
   if (finalidade === "compra") {
-    const hasBairro = !!filters.bairro;
-    const hasTipo = !!filters.tipo;
-    const hasOrcamento = !!(filters.preco_max || filters.preco_min ||
-      extractedData?.orcamento_max || extractedData?.orcamento_min);
-    console.log(`[MarIA Search Logic] Compra check: bairro=${hasBairro}, tipo=${hasTipo}, orcamento=${hasOrcamento}`);
-    return hasBairro && hasTipo && hasOrcamento;
+    if (!hasBairro) missing.push("bairro");
+    if (!hasTipo) missing.push("tipo");
+    if (!hasOrcamento) missing.push("orcamento");
+    
+    return { allowed: missing.length === 0, missing };
   }
   
-  return false;
+  return { allowed: false, missing: ["desconhecido"] };
+}
+
+// Deprecated in favor of checkSearchRequirements, but keeping a wrapper for legacy calls if any
+function isSearchAllowed(filters: any, intent: string, lastMessage: string, extractedData: any) {
+  return checkSearchRequirements(filters, intent, lastMessage, extractedData).allowed;
 }
 
 // ============================================================
