@@ -92,12 +92,16 @@ JSON Schema:
   "resumo_ia": string
 }
 Regras para lead_score:
-- "premium": Se quer_falar_daniel=true E (orcamento_max >= 1000000 OU capital_disponivel >= 1000000 OU bens_para_permuta é informado).
-- "quente": Se quer_falar_daniel=true OU (nome e telefone informados com finalidade compra/investimento).
-- "morno": Se informou filtros mas não quer análise ainda.
-- "frio": Apenas saudações ou curiosidade.
-Regra para resumo_ia:
-- Seja ultra descritivo para o Daniel. Mencione valores, bens de troca, cidades de origem se citadas, e o 'dor/desejo' real do cliente.`
+- "premium": Se (quer_falar_daniel=true OR objetivo="investir" OR objetivo="renda") AND (orcamento_max >= 1000000 OR capital_disponivel >= 1000000 OR (bens_para_permuta IS NOT NULL AND bens_para_permuta != "")).
+- "quente": Se quer_falar_daniel=true OR (nome e telefone informados com finalidade compra/investimento) OR objetivo IN ("investir", "renda", "patrimonio").
+- "morno": Se informou filtros objetivos (bairro, tipo, preco) mas não quer análise ainda.
+- "frio": Apenas saudações, curiosidade ou sem filtros concretos.
+
+Regras para resumo_ia:
+- Seja ultra descritivo para o Daniel. 
+- Estrutura sugerida: "[Tipo de Lead]. [Perfil/Objetivo]. [Filtros de Busca]. [Composição Financeira]. [Interação Estratégica]."
+- Exemplo: "Lead estratégico. Usuária jujuzinha busca investir em Bombinhas com foco em renda de temporada. Avaliou Mariscal até R$1 milhão. Possui entrada em dinheiro, carro e apartamento de R$450k para composição. Aceitou análise com Daniel."
+- Mencione explicitamente se o usuário citou bens (carro, imovel) ou capital.`
 };
 
 export async function callAI(lovableApiKey: string, model: string, system: string, messages: any[], temperature = 0.4) {
