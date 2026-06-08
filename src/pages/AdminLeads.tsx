@@ -55,10 +55,10 @@ const INTERESSE_MAP: Record<string, string> = {
 };
 
 const SCORE_CONFIG: Record<string, { label: string; className: string }> = {
-  Premium: { label: "Premium", className: "bg-amber-500 text-white border-amber-600 shadow-sm" },
-  Quente: { label: "Quente", className: "bg-orange-500 text-white border-orange-600 shadow-sm" },
-  Morno: { label: "Morno", className: "bg-blue-400 text-white border-blue-500 shadow-sm" },
-  Frio: { label: "Frio", className: "bg-slate-400 text-white border-slate-500 shadow-sm" },
+  premium: { label: "Premium", className: "bg-amber-500 text-white border-amber-600 shadow-sm" },
+  quente: { label: "Quente", className: "bg-orange-500 text-white border-orange-600 shadow-sm" },
+  morno: { label: "Morno", className: "bg-blue-400 text-white border-blue-500 shadow-sm" },
+  frio: { label: "Frio", className: "bg-slate-400 text-white border-slate-500 shadow-sm" },
 };
 
 function formatDate(d: string) {
@@ -170,12 +170,12 @@ export default function AdminLeads() {
     const q = search.trim().toLowerCase();
     const leadsWithStrategicData = leads.map(l => ({
       ...l,
-      isStrategic: l.proximo_passo_sugerido === "analise_daniel" || l.quer_analise === true || l.tipo_lead === "consultivo" || l.lead_score === "Premium"
+      isStrategic: l.proximo_passo_sugerido === "analise_daniel" || l.quer_analise === true || l.tipo_lead === "consultivo" || l.lead_score?.toLowerCase() === "premium"
     }));
 
     return leadsWithStrategicData.filter((l) => {
       if (statusFilter !== "all" && l.status !== statusFilter) return false;
-      if (scoreFilter !== "all" && l.lead_score !== scoreFilter) return false;
+      if (scoreFilter !== "all" && l.lead_score?.toLowerCase() !== scoreFilter.toLowerCase()) return false;
       if (interesseFilter !== "all") {
         if (interesseFilter === "analise_daniel") {
           if (l.proximo_passo_sugerido !== "analise_daniel") return false;
@@ -488,7 +488,7 @@ export default function AdminLeads() {
                           </div>
                         </TableCell>
                         <TableCell className="align-top py-3">
-                          <Badge className={`text-[10px] font-bold ${SCORE_CONFIG[lead.lead_score as string]?.className || "bg-muted"}`}>
+                          <Badge className={`text-[10px] font-bold ${SCORE_CONFIG[lead.lead_score?.toLowerCase() as string]?.className || "bg-muted"}`}>
                             {lead.lead_score || "—"}
                           </Badge>
                         </TableCell>

@@ -18,21 +18,31 @@ async function upsertLeadBySession(supabase: any, sessionId: string, patch: Reco
   if (!sessionId) return null;
   console.log(`[MarIA Persistence] Upserting lead for session ${sessionId}:`, JSON.stringify(patch));
   try {
-    const { data: existing, error: findError } = await supabase.from("leads_maria").select("id, lead_score").eq("session_id", sessionId).maybeSingle();
+    const { data: existing, error: findError } = await supabase.from("leads_maria").select("id, lead_score, nome, telefone, status").eq("session_id", sessionId).maybeSingle();
     if (findError) {
       console.error(`[MarIA Persistence] Error finding lead:`, findError);
     }
     
+    const updateData: any = { ...patch, last_contact_at: new Date().toISOString() };
+    
     if (existing?.id) {
-      // Don't allow downgrade of score for strategic leads
-      if (existing.lead_score === "Premium" && patch.lead_score && patch.lead_score !== "Premium") {
-        delete patch.lead_score;
-      }
-      if (existing.lead_score === "Quente" && patch.lead_score === "frio") {
-        delete patch.lead_score;
+      // Logic to upgrade status to 'novo' if name and phone are now present
+      if (existing.status === "anonimo" && (patch.nome || existing.nome) && (patch.telefone || existing.telefone)) {
+        updateData.status = "novo";
       }
 
-      const { error: updateError } = await supabase.from("leads_maria").update({ ...patch, last_contact_at: new Date().toISOString() }).eq("id", existing.id);
+      // Don't allow downgrade of score for strategic leads
+      const currentScore = (existing.lead_score || "").toLowerCase();
+      const newScore = (patch.lead_score as string || "").toLowerCase();
+      
+      if (currentScore === "premium" && newScore !== "premium") {
+        delete updateData.lead_score;
+      }
+      if (currentScore === "quente" && newScore === "frio") {
+        delete updateData.lead_score;
+      }
+
+      const { error: updateError } = await supabase.from("leads_maria").update(updateData).eq("id", existing.id);
       if (updateError) {
         console.error(`[MarIA Persistence] Error updating lead ${existing.id}:`, updateError);
         throw updateError;
