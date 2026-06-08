@@ -628,6 +628,53 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_status_audit: {
+        Row: {
+          created_at: string
+          id: string
+          lead_id: string | null
+          new_score: string | null
+          new_status: string | null
+          old_score: string | null
+          old_status: string | null
+          session_id: string | null
+          source: string | null
+          trigger_message: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          new_score?: string | null
+          new_status?: string | null
+          old_score?: string | null
+          old_status?: string | null
+          session_id?: string | null
+          source?: string | null
+          trigger_message?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          new_score?: string | null
+          new_status?: string | null
+          old_score?: string | null
+          old_status?: string | null
+          session_id?: string | null
+          source?: string | null
+          trigger_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_status_audit_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads_maria"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads_maria: {
         Row: {
           bairro_interesse: string | null
