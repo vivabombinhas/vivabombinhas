@@ -262,7 +262,8 @@ serve(async (req) => {
         console.log(`[MarIA Strategic] Lead scored as ${leadData.lead_score} based on extra_data`);
       }
 
-      const leadId = await upsertLeadBySession(supabase, sessionId, leadData);
+      const triggerMsg = `[submit_lead] ${nome ?? ""} / ${telefone ?? ""}`;
+      const leadId = await upsertLeadBySession(supabase, sessionId, leadData, triggerMsg, "lead_form");
       return new Response(JSON.stringify({ success: true, lead_id: leadId }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
