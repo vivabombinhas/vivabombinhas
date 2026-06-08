@@ -185,7 +185,7 @@ export default function AdminLeads() {
       }
       if (bairroFilter !== "all" && l.bairro_interesse !== bairroFilter) return false;
       if (!q) return true;
-      const hay = [l.nome, l.telefone, l.email, l.bairro_interesse, l.tipo_imovel, l.mensagem_original]
+      const hay = [l.nome, l.telefone, l.email, l.bairro_interesse, l.tipo_imovel, l.mensagem_original, l.resumo_ia]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -410,9 +410,9 @@ export default function AdminLeads() {
                     </TableHead>
                     <TableHead className="w-[24%]">Lead</TableHead>
                     <TableHead className="w-[18%]">Contato</TableHead>
-                    <TableHead className="w-[12%]">Interesse</TableHead>
+                    <TableHead className="w-[12%]">Interesse / Bairro</TableHead>
                     <TableHead className="w-[10%]">Score</TableHead>
-                    <TableHead className="w-[18%]">Bairro / Tipo</TableHead>
+                    <TableHead className="w-[18%]">Tipo / Detalhes</TableHead>
                     <TableHead className="w-[10%]">Data</TableHead>
                     <TableHead className="w-[10%]">Valid.</TableHead>
                     <TableHead className="w-[18%] text-right">Status / Ações</TableHead>
