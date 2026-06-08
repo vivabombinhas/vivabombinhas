@@ -123,6 +123,28 @@ export default function AdminAlerts() {
         </div>
       </div>
 
+      {spikes && spikes.length > 0 && (
+        <div className="grid gap-4 mb-6">
+          <h2 className="text-lg font-bold flex items-center gap-2 text-destructive">
+            <AlertTriangle className="w-5 h-5" />
+            Alertas de Comportamento (Spikes de Desistência)
+          </h2>
+          {spikes.map((spike: any, idx: number) => (
+            <div key={idx} className="bg-destructive/10 border border-destructive/20 p-4 rounded-xl flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-destructive">Aumento de desistência: Faltando {spike.filter_name}</h3>
+                <p className="text-sm text-destructive/80">
+                  Houve um aumento de <strong>{spike.spike_percentage.toFixed(0)}%</strong> nas últimas 24h ({spike.current_count} ocorrências vs {spike.previous_count} no período anterior).
+                </p>
+              </div>
+              <Button size="sm" variant="destructive" asChild>
+                <a href="/admin/insights">Ver Insights</a>
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="grid gap-4">
         {isLoading ? (
           <div className="space-y-4">
