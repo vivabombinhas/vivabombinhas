@@ -209,19 +209,27 @@ serve(async (req) => {
     } catch (e) { console.error("Extraction error:", e); }
 
     // Fallback: IA esqueceu [FILTERS] mas o extrator pegou filtros objetivos
-    if (!filters && extractedData && (extractedData.bairro_preferencia || extractedData.orcamento_max || extractedData.tipo_imovel)) {
-      filters = {
+    const searchPatterns = /ver im[óo]veis|op[çc][õo]es|cards|mostrar|buscar|procurar|quero ver/i;
+    const isExplicitSearchRequest = searchPatterns.test(lastMessage) || lastMessage.toLowerCase().includes("investir");
+
+    if (!filters && extractedData && intent === "busca" && isExplicitSearchRequest) {
+      const candidateFilters = {
         finalidade: extractedData.finalidade || "compra",
         bairro: extractedData.bairro_preferencia,
         tipo: extractedData.tipo_imovel,
         preco_max: extractedData.orcamento_max
       };
+      
+      if (isSearchAllowed(candidateFilters, intent, lastMessage, extractedData)) {
+        filters = candidateFilters;
+      }
     }
 
     let showResults = false, noResultsGate = false, gateActive = false;
     let allProperties: any[] = [], visibleProperties: any[] = [];
 
-    if (filters && filters.finalidade && filters.finalidade !== "anunciante") {
+    // Final check for search triggering
+    if (filters && isSearchAllowed(filters, intent, lastMessage, extractedData) && filters.finalidade !== "anunciante") {
       allProperties = await searchProperties(supabase, filters);
       if (allProperties.length > 0) {
         showResults = true;
@@ -235,6 +243,7 @@ serve(async (req) => {
         noResultsGate = !lead_captured;
       }
     }
+
 
     // 4. PERSISTENCE (Background)
     if (extractedData) {
