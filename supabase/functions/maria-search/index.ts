@@ -102,7 +102,36 @@ function parseFiltersBlock(text: string) {
   }
 }
 
+function isSearchAllowed(filters: any, intent: string, lastMessage: string, extractedData: any) {
+  if (!filters || !filters.finalidade) return false;
+  
+  const finalidade = filters.finalidade;
+  const hasConcreteFilter = filters.bairro || filters.preco_max || filters.tipo;
+  
+  // Regra específica para Investimento
+  if (finalidade === "investimento" || (finalidade === "compra" && extractedData?.objetivo === "investir")) {
+    const hasObjective = extractedData?.objetivo === "renda" || extractedData?.objetivo === "patrimonio" || extractedData?.objetivo === "investir";
+    // O usuário exige: objetivo + pelo menos 1 concreto
+    return hasObjective && hasConcreteFilter;
+  }
+  
+  // Regra específica para Temporada
+  if (finalidade === "temporada") {
+    const hasConstraint = hasConcreteFilter; // Bairro ou Preço
+    const hasCapacityOrPeriod = extractedData?.pessoas || extractedData?.periodo;
+    return hasConstraint && !!hasCapacityOrPeriod;
+  }
+  
+  // Compra Comum
+  if (finalidade === "compra") {
+    return hasConcreteFilter;
+  }
+  
+  return false;
+}
+
 // ============================================================
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -185,19 +214,29 @@ serve(async (req) => {
     } catch (e) { console.error("Extraction error:", e); }
 
     // Fallback: IA esqueceu [FILTERS] mas o extrator pegou filtros objetivos
-    if (!filters && extractedData && (extractedData.bairro_preferencia || extractedData.orcamento_max || extractedData.tipo_imovel)) {
-      filters = {
+    const searchPatterns = /ver im[óo]veis|op[çc][õo]es|cards|mostrar|buscar|procurar|quero ver|me mostre/i;
+    const isExplicitSearchRequest = searchPatterns.test(lastMessage) || 
+                                   lastMessage.toLowerCase().includes("investir") ||
+                                   lastMessage.toLowerCase().includes("temporada");
+
+    if (!filters && extractedData && intent === "busca" && isExplicitSearchRequest) {
+      const candidateFilters = {
         finalidade: extractedData.finalidade || "compra",
         bairro: extractedData.bairro_preferencia,
         tipo: extractedData.tipo_imovel,
         preco_max: extractedData.orcamento_max
       };
+      
+      if (isSearchAllowed(candidateFilters, intent, lastMessage, extractedData)) {
+        filters = candidateFilters;
+      }
     }
 
     let showResults = false, noResultsGate = false, gateActive = false;
     let allProperties: any[] = [], visibleProperties: any[] = [];
 
-    if (filters && filters.finalidade && filters.finalidade !== "anunciante") {
+    // Final check for search triggering
+    if (filters && isSearchAllowed(filters, intent, lastMessage, extractedData) && filters.finalidade !== "anunciante") {
       allProperties = await searchProperties(supabase, filters);
       if (allProperties.length > 0) {
         showResults = true;
@@ -211,6 +250,7 @@ serve(async (req) => {
         noResultsGate = !lead_captured;
       }
     }
+
 
     // 4. PERSISTENCE (Background)
     if (extractedData) {
