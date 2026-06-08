@@ -167,9 +167,12 @@ serve(async (req) => {
 
       // Force high priority for strategic leads
       if (extra_data?.quer_analise || extra_data?.proximo_passo_sugerido === "analise_daniel") {
-        leadData.lead_score = (extra_data?.capital_disponivel >= 1000000 || extra_data?.orcamento_max >= 1000000 || extra_data?.bens_para_permuta) 
-          ? "Premium" 
-          : "Quente";
+        const isPremium = (Number(extra_data?.capital_disponivel || 0) >= 1000000) || 
+                          (Number(extra_data?.orcamento_max || 0) >= 1000000) || 
+                          (extra_data?.bens_para_permuta && extra_data?.bens_para_permuta.length > 5);
+        
+        leadData.lead_score = isPremium ? "Premium" : "Quente";
+        console.log(`[MarIA Strategic] Lead scored as ${leadData.lead_score} based on extra_data`);
       }
 
       const leadId = await upsertLeadBySession(supabase, sessionId, leadData);
