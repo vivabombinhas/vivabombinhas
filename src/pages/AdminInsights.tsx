@@ -13,8 +13,10 @@ import {
   Cell,
   LineChart,
   Line,
+  AreaChart,
+  Area,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -25,9 +27,15 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Brain, MapPin, Target, MessageSquareOff, Users, Calendar } from "lucide-react";
+import { Brain, MapPin, Target, MessageSquareOff, Users, Calendar, Filter, AlertTriangle, ArrowDown } from "lucide-react";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088FE", "#00C49F"];
+const STATUS_COLORS: Record<string, string> = {
+  "frio": "bg-blue-100 text-blue-800",
+  "morno": "bg-yellow-100 text-yellow-800",
+  "quente": "bg-orange-100 text-orange-800",
+  "premium": "bg-purple-100 text-purple-800",
+};
 
 export default function AdminInsights() {
   const { data: insights, isLoading } = useQuery({
