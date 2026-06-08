@@ -170,6 +170,20 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
     },
   });
 
+  const { data: statusAudit } = useQuery({
+    queryKey: ["lead_status_audit", lead?.id],
+    enabled: !!lead?.id && open,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("lead_status_audit")
+        .select("*")
+        .eq("lead_id", lead!.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const addNote = useMutation({
     mutationFn: async (content: string) => {
       const { error } = await supabase.from("lead_notes").insert({ lead_id: lead!.id, content });
