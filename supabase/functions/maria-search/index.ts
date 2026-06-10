@@ -343,76 +343,89 @@ serve(async (req) => {
       extractedData = safeParseJSON(extReply);
     } catch (e) { console.error("Extraction error:", e); }
 
-    if (!filters && extractedData && (intent === "busca" || intent === "consultivo") && isExplicitSearchRequest) {
-      const candidateFilters = {
-        finalidade: extractedData.finalidade || "compra",
-        bairro: extractedData.bairro_preferencia,
-        tipo: extractedData.tipo_imovel,
-        preco_max: extractedData.orcamento_max
-      };
-      
-      if (isSearchAllowed(candidateFilters, intent, lastMessage, extractedData)) {
-        filters = candidateFilters;
-      }
-    }
-
+    // REGRA OBRIGATÓRIA: Se showStrategicForm for true, forçar limpeza de resultados e busca
     let showResults = false, noResultsGate = false, gateActive = false;
     let allProperties: any[] = [], visibleProperties: any[] = [];
     let missingFilters: string[] = [];
 
-    // Check search requirements
-    const searchCheck = checkSearchRequirements(filters || extractedData ? {
-      finalidade: filters?.finalidade || extractedData?.finalidade || "compra",
-      bairro: filters?.bairro || extractedData?.bairro_preferencia,
-      tipo: filters?.tipo || extractedData?.tipo_imovel,
-      preco_max: filters?.preco_max || extractedData?.orcamento_max,
-      preco_min: filters?.preco_min || extractedData?.orcamento_min
-    } : null, intent, lastMessage, extractedData);
-    
-    missingFilters = searchCheck.missing;
-
-    // Final check for search triggering
-    if (searchCheck.allowed) {
-      // Garantir que temos um objeto de filtros válido
-      const effectiveFilters = filters || {
-        finalidade: extractedData?.finalidade || "compra",
-        bairro: extractedData?.bairro_preferencia,
-        tipo: extractedData?.tipo_imovel,
-        preco_max: extractedData?.orcamento_max,
-        preco_min: extractedData?.orcamento_min
-      };
-
-      if (effectiveFilters.finalidade !== "anunciante") {
-        allProperties = await searchProperties(supabase, effectiveFilters);
+    if (showStrategicForm) {
+      console.log(`[MarIA Strategic] Strategic form detected. Blocking property search.`);
+      showResults = false;
+      gateActive = false;
+      allProperties = [];
+      visibleProperties = [];
+      // Se for estratégico e a IA não deu uma resposta amigável antes do form, usamos a padrão
+      if (!cleaned || cleaned.trim().length < 5) {
+        cleaned = "Perfeito. Vou organizar seu perfil para análise estratégica com o Daniel.";
+      }
+    } else {
+      if (!filters && extractedData && (intent === "busca" || intent === "consultivo") && isExplicitSearchRequest) {
+        const candidateFilters = {
+          finalidade: extractedData.finalidade || "compra",
+          bairro: extractedData.bairro_preferencia,
+          tipo: extractedData.tipo_imovel,
+          preco_max: extractedData.orcamento_max
+        };
         
-        if (allProperties.length > 0) {
-          showResults = true;
-          if (!lead_captured && allProperties.length > 2) {
-            gateActive = true;
-            visibleProperties = allProperties.slice(0, 2);
-          } else {
-            visibleProperties = allProperties.slice(0, 3);
-          }
-        } else {
-          console.log(`[MarIA Search] No exact results for ${JSON.stringify(filters)}. Trying broader search.`);
-          // Tenta busca sem o filtro de preço para ver se há "vizinhos"
-          const broaderFilters = { ...effectiveFilters, preco_min: undefined, preco_max: undefined };
-          const suggestions = await searchProperties(supabase, broaderFilters);
+        if (isSearchAllowed(candidateFilters, intent, lastMessage, extractedData)) {
+          filters = candidateFilters;
+        }
+      }
+
+      // Check search requirements
+      const searchCheck = checkSearchRequirements(filters || extractedData ? {
+        finalidade: filters?.finalidade || extractedData?.finalidade || "compra",
+        bairro: filters?.bairro || extractedData?.bairro_preferencia,
+        tipo: filters?.tipo || extractedData?.tipo_imovel,
+        preco_max: filters?.preco_max || extractedData?.orcamento_max,
+        preco_min: filters?.preco_min || extractedData?.orcamento_min
+      } : null, intent, lastMessage, extractedData);
+      
+      missingFilters = searchCheck.missing;
+
+      // Final check for search triggering
+      if (searchCheck.allowed) {
+        // Garantir que temos um objeto de filtros válido
+        const effectiveFilters = filters || {
+          finalidade: extractedData?.finalidade || "compra",
+          bairro: extractedData?.bairro_preferencia,
+          tipo: extractedData?.tipo_imovel,
+          preco_max: extractedData?.orcamento_max,
+          preco_min: extractedData?.orcamento_min
+        };
+
+        if (effectiveFilters.finalidade !== "anunciante") {
+          allProperties = await searchProperties(supabase, effectiveFilters);
           
-          if (suggestions.length > 0) {
-            allProperties = suggestions;
+          if (allProperties.length > 0) {
             showResults = true;
-            visibleProperties = allProperties.slice(0, 3);
-            
-            // Ajusta a resposta para explicar que são sugestões
-            const bairroName = effectiveFilters.bairro || "Bombinhas";
-            cleaned = `Não encontrei imóveis exatamente na faixa de valor solicitada em ${bairroName}, mas separei estas opções na região que podem fazer sentido para sua estratégia:`;
-            console.log(`[MarIA Search] Broadened results found. Adjusted reply.`);
+            if (!lead_captured && allProperties.length > 2) {
+              gateActive = true;
+              visibleProperties = allProperties.slice(0, 2);
+            } else {
+              visibleProperties = allProperties.slice(0, 3);
+            }
           } else {
-            noResultsGate = !lead_captured;
-            // Se realmente não houver nada, ajusta a resposta para ser consultiva e oferecer caminhos
-            cleaned = `Esse recorte está mais restrito no portal agora. Posso ampliar a busca para regiões próximas ou organizar uma análise estratégica para encontrar alternativas mais coerentes com seu objetivo.`;
-            console.log(`[MarIA Search] No results even after broadening.`);
+            console.log(`[MarIA Search] No exact results for ${JSON.stringify(filters)}. Trying broader search.`);
+            // Tenta busca sem o filtro de preço para ver se há "vizinhos"
+            const broaderFilters = { ...effectiveFilters, preco_min: undefined, preco_max: undefined };
+            const suggestions = await searchProperties(supabase, broaderFilters);
+            
+            if (suggestions.length > 0) {
+              allProperties = suggestions;
+              showResults = true;
+              visibleProperties = allProperties.slice(0, 3);
+              
+              // Ajusta a resposta para explicar que são sugestões
+              const bairroName = effectiveFilters.bairro || "Bombinhas";
+              cleaned = `Não encontrei imóveis exatamente na faixa de valor solicitada em ${bairroName}, mas separei estas opções na região que podem fazer sentido para sua estratégia:`;
+              console.log(`[MarIA Search] Broadened results found. Adjusted reply.`);
+            } else {
+              noResultsGate = !lead_captured;
+              // Se realmente não houver nada, ajusta a resposta para ser consultiva e oferecer caminhos
+              cleaned = `Esse recorte está mais restrito no portal agora. Posso ampliar a busca para regiões próximas ou organizar uma análise estratégica para encontrar alternativas mais coerentes com seu objetivo.`;
+              console.log(`[MarIA Search] No results even after broadening.`);
+            }
           }
         }
       }
