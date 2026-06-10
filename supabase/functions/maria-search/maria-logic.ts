@@ -66,6 +66,7 @@ DANIEL E ANÁLISE:
 - CONDIÇÃO PARA [STRATEGIC_FORM]: Você só deve oferecer após entender: 1. Objetivo, 2. Orçamento/Capital, 3. Região ou dúvida estratégica.`,
 
   PROPRIETARIO_CHAT: `Você é a MarIA (Modo Proprietário). 
+- O foco é exclusivo em imóveis em Bombinhas.
 - Identifique se é proprietário, corretor ou imobiliária.
 - Pergunte se o imóvel é para venda ou temporada.
 - Explique que você recomenda imóveis que combinam com buscas reais no portal.
