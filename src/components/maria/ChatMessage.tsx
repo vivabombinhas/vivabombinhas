@@ -43,7 +43,7 @@ export function ChatMessage({ message, onSubmitLead, onSelectSuggestion }: ChatM
                   ),
                 }}
               >
-                {message.content}
+                {message.content.replace("[STRATEGIC_FORM]", "")}
               </ReactMarkdown>
             </div>
           ) : (
