@@ -434,7 +434,7 @@ serve(async (req) => {
               allProperties = [];
               visibleProperties = [];
               noResultsGate = !lead_captured;
-              cleaned = `Esse recorte está restrito no portal agora. Posso ampliar para regiões próximas ou ajustar a faixa de valor para encontrar alternativas?`;
+              cleaned = `No momento, não encontrei opções compatíveis com esse perfil no portal. Posso ampliar para regiões próximas dentro de Bombinhas ou ajustar a faixa de valor para encontrar alternativas?`;
               console.log(`[MarIA Search] No exact results. Asking for authorization to broaden.`);
             }
           }
