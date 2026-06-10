@@ -409,8 +409,8 @@ serve(async (req) => {
             console.log(`[MarIA Search] No exact results for ${JSON.stringify(effectiveFilters)}. Checking for broadened authorization.`);
             
             const isBroadSearchAuthorized = lastMessage.toLowerCase().includes("pode ampliar") || 
-                                          lastMessage.toLowerCase().includes("sim") || 
-                                          lastMessage.toLowerCase().includes("pode ser") ||
+                                          lastMessage.toLowerCase() === "sim" || 
+                                          lastMessage.toLowerCase() === "pode" ||
                                           extra_data?.allow_broad_search === true;
 
             if (isBroadSearchAuthorized) {
