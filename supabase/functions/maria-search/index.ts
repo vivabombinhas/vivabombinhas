@@ -423,18 +423,18 @@ serve(async (req) => {
                 visibleProperties = allProperties.slice(0, 3);
                 
                 const bairroName = effectiveFilters.bairro || "Bombinhas";
-                cleaned = `Não encontrei imóveis exatamente na faixa de valor solicitada em ${bairroName}, mas como você autorizou, separei estas opções na região que podem fazer sentido:`;
+                cleaned = `Não encontrei imóveis exatamente com esses critérios em ${bairroName}, mas como você autorizou a ampliação, selecionei estas opções que podem fazer sentido:`;
                 console.log(`[MarIA Search] Broadened results found with authorization.`);
               } else {
                 showResults = false;
-                cleaned = `Mesmo ampliando a busca, não encontrei opções disponíveis no momento com essas características. Posso ajustar algum outro critério?`;
+                cleaned = `Mesmo buscando em outras regiões de Bombinhas, não encontrei opções com esse perfil agora. Quer tentar ajustar algum critério?`;
               }
             } else {
               showResults = false;
               allProperties = [];
               visibleProperties = [];
               noResultsGate = !lead_captured;
-              cleaned = `Esse recorte está restrito no portal agora. Posso ampliar para regiões próximas ou ajustar a faixa de valor para encontrar alternativas?`;
+              cleaned = `No momento, não encontrei opções compatíveis com esse perfil no portal. Posso ampliar para regiões próximas dentro de Bombinhas ou ajustar a faixa de valor para encontrar alternativas?`;
               console.log(`[MarIA Search] No exact results. Asking for authorization to broaden.`);
             }
           }
