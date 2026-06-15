@@ -7,16 +7,144 @@ interface LeadLike {
   tipo_imovel?: string | null;
   interesse?: string | null;
   faixa_preco?: string | null;
+  // Campos enriquecidos pelo CRM/MarIA
+  tipo_lead?: string | null;
+  objetivo?: string | null;
+  objetivo_investimento?: string | null;
+  ["região_interesse"]?: string | null;
+  regiao_interesse?: string | null;
+  orcamento_min?: number | null;
+  orcamento_max?: number | null;
+  capital_disponivel?: number | null;
+  prazo_compra?: string | null;
+  bens_para_permuta?: string | null;
+  resumo_ia?: string | null;
+  proximo_passo_sugerido?: string | null;
+}
+
+export interface ViewedProperty {
+  titulo?: string | null;
+  bairro?: string | null;
+  preco?: number | null;
+  quartos?: number | null;
+  tipo?: string | null;
 }
 
 const firstName = (full?: string | null) =>
   (full ?? "").trim().split(/\s+/)[0] || "tudo bem";
 
+const fmtBRL = (n?: number | null) => {
+  if (n == null || !isFinite(n)) return null;
+  if (n >= 1_000_000) {
+    const v = n / 1_000_000;
+    return `R$ ${v.toFixed(v % 1 === 0 ? 0 : 1).replace(".", ",")} milhão`.replace("1 milhão", "1 milhão");
+  }
+  if (n >= 1000) return `R$ ${(n / 1000).toFixed(0)} mil`;
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(n);
+};
+
+const orcamentoLabel = (l: LeadLike) => {
+  const min = fmtBRL(l.orcamento_min);
+  const max = fmtBRL(l.orcamento_max);
+  if (min && max) return `de ${min} a ${max}`;
+  if (max) return `até ${max}`;
+  if (min) return `a partir de ${min}`;
+  return l.faixa_preco?.trim() || null;
+};
+
+const describeProperty = (p: ViewedProperty) => {
+  const parts: string[] = [];
+  if (p.tipo) parts.push(String(p.tipo));
+  if (p.quartos) parts.push(`${p.quartos} dorm.`);
+  let head = parts.join(" ");
+  if (p.titulo && !head) head = p.titulo;
+  if (!head) head = "imóvel";
+  const tail: string[] = [];
+  if (p.bairro) tail.push(p.bairro);
+  if (p.preco) tail.push(fmtBRL(p.preco) || "");
+  return tail.filter(Boolean).length ? `${head} em ${tail.join(" por ")}` : head;
+};
+
+const detectKind = (l: LeadLike): "investimento" | "temporada" | "anuncio" | "compra" => {
+  const blob = `${l.tipo_lead ?? ""} ${l.interesse ?? ""} ${l.objetivo ?? ""}`.toLowerCase();
+  if (/(invest|renda|locac|aluguel.*temp|liquidez)/.test(blob) || l.capital_disponivel) return "investimento";
+  if (/(temporada|f[eé]rias|aluguel.*temp|di[aá]ria)/.test(blob)) return "temporada";
+  if (/(anunciar|vender|proprietari|cadastrar)/.test(blob)) return "anuncio";
+  return "compra";
+};
+
+/**
+ * Gera uma mensagem personalizada de WhatsApp para o consultor Daniel,
+ * usando todos os dados disponíveis no CRM. Omite campos ausentes.
+ */
+export const buildPersonalizedMessage = (
+  lead: LeadLike,
+  viewed: ViewedProperty[] = []
+): string => {
+  const nome = firstName(lead.nome);
+  const kind = detectKind(lead);
+  const bairro = lead.bairro_interesse?.trim();
+  const regiao = (lead as any)["região_interesse"] || lead.regiao_interesse;
+  const local = bairro || regiao || "Bombinhas";
+  const tipo = lead.tipo_imovel?.trim();
+  const orc = orcamentoLabel(lead);
+  const capital = fmtBRL(lead.capital_disponivel);
+  const top = viewed[0] ? describeProperty(viewed[0]) : null;
+
+  const apresentacao = lead.nome
+    ? `Oi, Daniel. Sou o(a) ${lead.nome.split(/\s+/)[0]}.`
+    : `Oi, Daniel.`;
+
+  const linhas: string[] = [apresentacao];
+
+  if (kind === "investimento") {
+    const intro: string[] = [`Conversei com a MarIA sobre investimento em ${local}.`];
+    const objetivos: string[] = [];
+    if (lead.objetivo_investimento) objetivos.push(lead.objetivo_investimento);
+    if (capital) objetivos.push(`tenho ${capital} disponível`);
+    else if (orc) objetivos.push(`orçamento ${orc}`);
+    if (tipo) objetivos.push(`avaliando ${tipo}${bairro ? " em " + bairro : ""}`);
+    if (objetivos.length) intro.push(objetivos.join(", ") + ".");
+    linhas.push(intro.join(" "));
+    if (top) linhas.push(`A MarIA me mostrou ${top}.`);
+    if (lead.bens_para_permuta) linhas.push(`Também tenho ${lead.bens_para_permuta} como possível permuta.`);
+    linhas.push("Gostaria da sua opinião sobre liquidez, potencial de locação e se faz sentido para meu perfil.");
+  } else if (kind === "temporada") {
+    const intro: string[] = ["Conversei com a MarIA sobre temporada"];
+    if (bairro) intro.push(`em ${bairro}`);
+    if (lead.prazo_compra) intro.push(`para ${lead.prazo_compra}`);
+    if (orc) intro.push(`com diária ${orc}`);
+    linhas.push(intro.join(" ") + ".");
+    if (top) linhas.push(`Vi a opção: ${top}.`);
+    linhas.push("Gostaria de verificar disponibilidade e tirar dúvidas.");
+  } else if (kind === "anuncio") {
+    const intro: string[] = ["Conversei com a MarIA porque quero anunciar"];
+    if (tipo) intro.push(tipo);
+    if (bairro) intro.push(`em ${bairro}`);
+    linhas.push(intro.join(" ") + ".");
+    if (lead.objetivo) linhas.push(`Objetivo: ${lead.objetivo}.`);
+    linhas.push("Pode me orientar sobre os próximos passos?");
+  } else {
+    // compra
+    const intro: string[] = ["Conversei com a MarIA porque estou buscando"];
+    if (tipo) intro.push(tipo);
+    else intro.push("um imóvel");
+    if (bairro) intro.push(`em ${bairro}`);
+    if (orc) intro.push(orc);
+    linhas.push(intro.join(" ") + ".");
+    if (top) linhas.push(`Vi uma opção: ${top}.`);
+    if (lead.prazo_compra) linhas.push(`Prazo: ${lead.prazo_compra}.`);
+    linhas.push("Gostaria de receber mais detalhes e orientação.");
+  }
+
+  return linhas.join("\n\n");
+};
+
 export type WhatsappTemplate = {
   id: string;
   label: string;
   description: string;
-  build: (lead: LeadLike) => string;
+  build: (lead: LeadLike, viewed?: ViewedProperty[]) => string;
 };
 
 export const WHATSAPP_TEMPLATES: WhatsappTemplate[] = [
