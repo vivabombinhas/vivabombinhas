@@ -488,7 +488,7 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
                     <DropdownMenuItem
                       key={t.id}
                       onClick={() => {
-                        openWhatsapp(lead.telefone!, t.build(lead));
+                        openWhatsapp(lead.telefone!, t.build(lead, viewedProperties));
                         updateLead.mutate({ last_contact_at: new Date().toISOString() });
                       }}
                       className="flex flex-col items-start gap-0.5 py-2"
@@ -501,21 +501,30 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
               </DropdownMenu>
 
               <div className="p-3 border rounded-lg bg-card mt-2">
-                <h4 className="text-[10px] font-bold uppercase mb-2 text-muted-foreground flex items-center gap-1">
-                   <MessageSquare className="w-3 h-3" /> Mensagem Personalizada
-                </h4>
-                <Textarea 
-                  className="text-xs min-h-[100px] mb-2"
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1">
+                     <MessageSquare className="w-3 h-3" /> Mensagem Personalizada
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={() => setCustomMessage(defaultPersonalizedMessage)}
+                    className="text-[10px] text-primary hover:underline"
+                  >
+                    Regenerar
+                  </button>
+                </div>
+                <Textarea
+                  className="text-xs min-h-[140px] mb-2"
                   placeholder="Escreva sua mensagem aqui..."
-                  value={customMessage || `Olá ${lead.nome?.split(' ')[0] || ''}, aqui é o Daniel do VIV Bombinhas. A MarIA me passou seu interesse em ${lead.tipo_imovel || 'imóveis'} em ${lead.bairro_interesse || 'Bombinhas'}. Como posso te ajudar?`}
+                  value={customMessage}
                   onChange={(e) => setCustomMessage(e.target.value)}
                 />
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   variant="outline"
                   className="w-full text-xs h-8 border-emerald-600 text-emerald-700 hover:bg-emerald-50"
                   onClick={() => {
-                    const msg = customMessage || `Olá ${lead.nome?.split(' ')[0] || ''}, aqui é o Daniel do VIV Bombinhas. A MarIA me passou seu interesse em ${lead.tipo_imovel || 'imóveis'} em ${lead.bairro_interesse || 'Bombinhas'}. Como posso te ajudar?`;
+                    const msg = (customMessage || defaultPersonalizedMessage).trim();
                     openWhatsapp(lead.telefone!, msg);
                     updateLead.mutate({ last_contact_at: new Date().toISOString() });
                   }}
