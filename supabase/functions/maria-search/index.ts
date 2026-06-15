@@ -116,27 +116,56 @@ async function upsertLeadBySession(
 }
 
 
+// Valores válidos do enum tipo_imovel no banco
+const TIPO_ENUM = ["apartamento","casa","cobertura","terreno","sobrado","studio","pousada","sala_comercial","outro"] as const;
+
+// Mapeia variações livres do usuário/IA para valores reais do enum tipo_imovel
+function normalizeTipo(raw: string): string[] {
+  if (!raw || typeof raw !== "string") return [];
+  const text = raw.toLowerCase();
+  const synonyms: Record<string, string> = {
+    "apartamento": "apartamento", "apartamentos": "apartamento", "apto": "apartamento", "aptos": "apartamento", "ap": "apartamento", "flat": "apartamento",
+    "casa": "casa", "casas": "casa",
+    "cobertura": "cobertura", "coberturas": "cobertura",
+    "terreno": "terreno", "terrenos": "terreno", "lote": "terreno", "lotes": "terreno",
+    "sobrado": "sobrado", "sobrados": "sobrado", "geminado": "sobrado",
+    "studio": "studio", "studios": "studio", "stúdio": "studio", "kitnet": "studio", "kitinete": "studio",
+    "pousada": "pousada", "pousadas": "pousada",
+    "sala comercial": "sala_comercial", "comercial": "sala_comercial", "sala_comercial": "sala_comercial",
+    "outro": "outro",
+  };
+  const found = new Set<string>();
+  // Match multi-palavra primeiro
+  for (const key of Object.keys(synonyms).sort((a,b) => b.length - a.length)) {
+    const re = new RegExp(`\\b${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+    if (re.test(text)) found.add(synonyms[key]);
+  }
+  return Array.from(found).filter(t => (TIPO_ENUM as readonly string[]).includes(t));
+}
+
 async function searchProperties(supabase: any, filters: any): Promise<any[]> {
+  const normalizedTipos = filters?.tipo ? normalizeTipo(String(filters.tipo)) : [];
+  const normalized = { ...filters, tiposNormalizados: normalizedTipos };
   try {
     let q = supabase.from("imoveis").select("*").eq("status", "ativo").or("oculta_para_maria.is.null,oculta_para_maria.eq.false").limit(40);
-    
+
     if (filters?.finalidade) {
       const dbFinalidade = filters.finalidade === "investimento" ? "compra" : filters.finalidade;
       q = q.eq("finalidade", dbFinalidade);
     }
-    
-    // Filtro de Tipo (Suporta múltiplos tipos se vier string separada por vírgula ou 'e'/'ou')
-    if (filters?.tipo && typeof filters.tipo === "string") {
-      const tipos = filters.tipo.toLowerCase().split(/[\s,e|/]+/).filter(t => t.length > 3);
-      if (tipos.length > 0) {
-        const orConditions = tipos.map(t => `tipo.ilike.%${t}%`).join(",");
-        q = q.or(orConditions);
-      }
+
+    // Filtro de Tipo (enum) — usa eq/in com valores normalizados
+    if (normalizedTipos.length === 1) {
+      q = q.eq("tipo", normalizedTipos[0]);
+    } else if (normalizedTipos.length > 1) {
+      q = q.in("tipo", normalizedTipos);
+    } else if (filters?.tipo) {
+      console.warn(`[MarIA Search] Tipo "${filters.tipo}" não mapeou para nenhum valor do enum. Ignorando filtro de tipo.`);
     }
-    
-    // Filtro de Bairro (Suporta múltiplos bairros se vier string separada por vírgula ou 'e'/'ou')
+
+    // Filtro de Bairro (text) — mantém ilike, com split apenas em vírgula/barra/pipe
     if (filters?.bairro && typeof filters.bairro === "string") {
-      const bairros = filters.bairro.toLowerCase().split(/[\s,e|/]+/).filter(b => b.length > 3 && b !== "bombinhas");
+      const bairros = filters.bairro.toLowerCase().split(/[,|/]+|\s+e\s+|\s+ou\s+/).map(s => s.trim()).filter(b => b.length > 3 && b !== "bombinhas");
       if (bairros.length > 0) {
         const orConditions = bairros.map(b => `bairro.ilike.%${b}%`).join(",");
         q = q.or(orConditions);
@@ -152,12 +181,27 @@ async function searchProperties(supabase: any, filters: any): Promise<any[]> {
       if (filters.finalidade === "temporada") q = q.lte("preco_temporada_diaria", filters.preco_max);
       else q = q.lte("preco", filters.preco_max);
     }
-    
-    const { data } = await q;
+
+    const { data, error } = await q;
+    if (error) {
+      console.error("[MarIA Search] PostgREST error:", {
+        filtersRecebidos: filters,
+        filtrosNormalizados: normalized,
+        fase: "searchProperties.query",
+        error,
+      });
+      return [];
+    }
+    console.log(`[MarIA Search] OK — filtros=${JSON.stringify(normalized)} resultados=${data?.length ?? 0}`);
     return data || [];
-  } catch (err) { 
-    console.error("Search error:", err);
-    return []; 
+  } catch (err) {
+    console.error("[MarIA Search] Exception:", {
+      filtersRecebidos: filters,
+      filtrosNormalizados: normalized,
+      fase: "searchProperties.catch",
+      err: String(err),
+    });
+    return [];
   }
 }
 
