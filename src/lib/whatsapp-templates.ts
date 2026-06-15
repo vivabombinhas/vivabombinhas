@@ -140,6 +140,12 @@ export const buildPersonalizedMessage = (
   return linhas.join("\n\n");
 };
 
+export type WhatsappTemplate = {
+  id: string;
+  label: string;
+  description: string;
+  build: (lead: LeadLike, viewed?: ViewedProperty[]) => string;
+};
 
 export const WHATSAPP_TEMPLATES: WhatsappTemplate[] = [
   {
