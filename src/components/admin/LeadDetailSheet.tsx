@@ -314,6 +314,29 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
     return events.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
   }, [lead, conversation, notes, matches, statusAudit]);
 
+  // Imóveis visualizados (matches) → usados na mensagem personalizada
+  const viewedProperties = useMemo<ViewedProperty[]>(() => {
+    if (!matches) return [];
+    return matches
+      .filter((m: any) => m.imoveis)
+      .map((m: any) => ({
+        titulo: m.imoveis?.titulo ?? null,
+        bairro: m.imoveis?.bairro ?? null,
+        preco: m.imoveis?.preco ?? null,
+      }));
+  }, [matches]);
+
+  // Mensagem personalizada padrão baseada no contexto do lead
+  const defaultPersonalizedMessage = useMemo(
+    () => (lead ? buildPersonalizedMessage(lead as any, viewedProperties) : ""),
+    [lead, viewedProperties]
+  );
+
+  // Sempre que trocar de lead ou recalcular o contexto, repopular o textarea
+  useEffect(() => {
+    setCustomMessage(defaultPersonalizedMessage);
+  }, [lead?.id, defaultPersonalizedMessage]);
+
   if (!lead) return null;
 
   const waLink = lead.telefone ? buildWhatsappLink(lead.telefone, "") : null;
