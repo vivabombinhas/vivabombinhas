@@ -312,66 +312,117 @@ serve(async (req) => {
         );
       }
 
-      // Extract image URLs from markdown
+      // ===== Image extraction scoped to the main gallery =====
+      let photosConfidence: "high" | "low" = "low";
+      let photosWarning: string | null = null;
       const candidateImages: string[] = [];
-      for (const m of scrapedMd.matchAll(/!\[.*?\]\((https?:\/\/[^\s)]+)\)/g)) {
-        candidateImages.push(m[1]);
+      const ogImages: string[] = [];
+
+      // Always capture OG image up-front (it's usually the main listing photo)
+      if (scrapedHtml) {
+        for (const m of scrapedHtml.matchAll(/<meta[^>]+property=["']og:image[^"']*["'][^>]+content=["']([^"']+)["']/gi)) {
+          ogImages.push(m[1]);
+        }
       }
-      
-      // Extract from HTML with relative URL resolution
+
       if (scrapedHtml && sourceUrl) {
         const baseUrl = new URL(sourceUrl);
-        
-        // Find all img tags and look for src, data-src, data-lazy, etc.
-        const imgRegex = /<img[^>]+(?:src|data-src|data-lazy|data-original|data-srcset)=["']([^"']+)["']/gi;
-        let match;
-        while ((match = imgRegex.exec(scrapedHtml)) !== null) {
-          let imgUrl = match[1];
+        const resolve = (raw: string): string | null => {
           try {
-            // Resolve relative URLs
-            if (imgUrl.startsWith("//")) {
-              imgUrl = baseUrl.protocol + imgUrl;
-            } else if (imgUrl.startsWith("/")) {
-              imgUrl = baseUrl.origin + imgUrl;
-            } else if (!imgUrl.startsWith("http") && !imgUrl.startsWith("data:")) {
-              imgUrl = new URL(imgUrl, baseUrl.origin + baseUrl.pathname).href;
-            }
-            candidateImages.push(imgUrl);
-          } catch (e) {
-            console.error("Error resolving image URL:", imgUrl, e);
+            let u = raw;
+            if (u.startsWith("//")) u = baseUrl.protocol + u;
+            else if (u.startsWith("/")) u = baseUrl.origin + u;
+            else if (!u.startsWith("http") && !u.startsWith("data:")) u = new URL(u, baseUrl.origin + baseUrl.pathname).href;
+            return u;
+          } catch { return null; }
+        };
+
+        // 1) Strip headers/footers/nav/asides and any "similar/related/recommended" blocks
+        const { cleaned, removed: removedSections } = stripRelatedSections(scrapedHtml);
+        console.log(`[gallery] stripped ${removedSections} related/chrome sections`);
+
+        // 2) Try to scope to the main gallery container; fall back to the cleaned HTML
+        const gallery = extractGalleryHtml(cleaned);
+        let scope: string;
+        let scopeLabel: string;
+        if (gallery) {
+          scope = gallery.gallery;
+          scopeLabel = `gallery(${gallery.matchedBy})`;
+          photosConfidence = "high";
+          console.log(`[gallery] matched main gallery container by "${gallery.matchedBy}"`);
+        } else {
+          scope = cleaned;
+          scopeLabel = "cleaned-main";
+          photosConfidence = "low";
+          photosWarning =
+            "Não foi possível identificar com segurança a galeria principal. Revise as fotos manualmente antes de salvar.";
+          console.log("[gallery] no main gallery container matched — using cleaned main content");
+        }
+
+        // 3) Collect <img> with lazy-load attributes, scoped
+        const imgRegex = /<img\b[^>]*>/gi;
+        let tagMatch: RegExpExecArray | null;
+        while ((tagMatch = imgRegex.exec(scope)) !== null) {
+          const tag = tagMatch[0];
+          const attrRe = /(src|data-src|data-lazy|data-original|data-large|data-full|data-zoom|data-image|data-bg)=["']([^"']+)["']/gi;
+          let a: RegExpExecArray | null;
+          while ((a = attrRe.exec(tag)) !== null) {
+            const u = resolve(a[2]);
+            if (u) candidateImages.push(u);
+          }
+          // srcset on this img tag — prefer the largest descriptor
+          const srcsetMatch = /srcset=["']([^"']+)["']/i.exec(tag);
+          if (srcsetMatch) {
+            const parts = srcsetMatch[1].split(",").map((p) => p.trim());
+            // pick last (usually largest)
+            const last = parts[parts.length - 1]?.split(/\s+/)[0];
+            if (last) { const u = resolve(last); if (u) candidateImages.push(u); }
           }
         }
 
-        // srcset handling
-        for (const m of scrapedHtml.matchAll(/srcset=["']([^"']+)["']/gi)) {
-          const parts = m[1].split(",").map((p) => p.trim().split(" ")[0]);
-          if (parts.length > 0) {
-            let imgUrl = parts[parts.length - 1];
-            try {
-              if (imgUrl.startsWith("//")) {
-                imgUrl = baseUrl.protocol + imgUrl;
-              } else if (imgUrl.startsWith("/")) {
-                imgUrl = baseUrl.origin + imgUrl;
-              } else if (!imgUrl.startsWith("http")) {
-                imgUrl = new URL(imgUrl, baseUrl.origin + baseUrl.pathname).href;
-              }
-              candidateImages.push(imgUrl);
-            } catch (e) {}
-          }
+        // 4) <source srcset=...> inside scoped <picture>
+        for (const m of scope.matchAll(/<source\b[^>]*srcset=["']([^"']+)["'][^>]*>/gi)) {
+          const parts = m[1].split(",").map((p) => p.trim().split(/\s+/)[0]);
+          const last = parts[parts.length - 1];
+          if (last) { const u = resolve(last); if (u) candidateImages.push(u); }
         }
-        
-        // OG image / meta
-        for (const m of scrapedHtml.matchAll(/<meta[^>]+property=["']og:image[^"']*["'][^>]+content=["']([^"']+)["']/gi)) {
-          candidateImages.unshift(m[1]); // priority
+
+        // 5) Markdown images, only if they also appear in the scope (avoid related-section markdown)
+        for (const m of scrapedMd.matchAll(/!\[.*?\]\((https?:\/\/[^\s)]+)\)/g)) {
+          const u = m[1];
+          if (scope.includes(u) || gallery === null) candidateImages.push(u);
         }
+
+        console.log(`[gallery] scope=${scopeLabel}, raw candidates=${candidateImages.length}`);
       }
 
-      scrapedImages = dedupeAndFilterPhotos(candidateImages, 40);
-      console.log(`Found ${candidateImages.length} candidate images, filtered to ${scrapedImages.length}`);
+      // Always prepend OG image as a strong hint (it's the listing's hero image)
+      for (const og of ogImages.reverse()) candidateImages.unshift(og);
 
-      // Bigger context window for better extraction
+      const { photos, logs } = dedupeAndFilterPhotos(candidateImages, 40);
+      scrapedImages = photos;
+      const includedCount = logs.filter((l) => l.status === "included").length;
+      const excludedCount = logs.length - includedCount;
+      console.log(`[gallery] photos kept=${includedCount}, excluded=${excludedCount}, total raw=${candidateImages.length}`);
+      // Sample a few exclusion reasons for debugging
+      const excludeSample = logs.filter((l) => l.status === "excluded").slice(0, 8);
+      if (excludeSample.length) {
+        console.log("[gallery] sample excluded:", JSON.stringify(excludeSample));
+      }
+
+      if (scrapedImages.length === 0) {
+        photosWarning = photosWarning ?? "Nenhuma foto da galeria principal foi identificada. Adicione manualmente antes de salvar.";
+      } else if (scrapedImages.length < 3 && photosConfidence === "low") {
+        photosWarning = photosWarning ?? "Poucas fotos detectadas e a galeria principal não foi confirmada. Revise antes de salvar.";
+      }
+
+      // Expose to outer scope via closure variables on the returned payload
+      (globalThis as unknown as { __photosConfidence?: string }).__photosConfidence = photosConfidence;
+      (globalThis as unknown as { __photosWarning?: string | null }).__photosWarning = photosWarning;
+
       content = scrapedMd.slice(0, 35000);
     }
+
 
     // Step 2: Extract structured data with Lovable AI (tool calling)
     console.log("Extracting structured data with AI, content length:", content.length);
