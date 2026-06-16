@@ -214,7 +214,10 @@ serve(async (req) => {
 
     let content = text || "";
     let sourceUrl = url || null;
-    let scrapedImages: string[] = [];
+    let likelyPhotos: string[] = [];
+    let doubtfulPhotos: string[] = [];
+    let rejectedPhotos: Array<{ url: string; reason: string; source: PhotoSource }> = [];
+    let photoDebug: ClassifiedPhoto[] = [];
     let photosConfidence: "high" | "low" = "low";
     let photosWarning: string | null = null;
 
