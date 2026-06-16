@@ -138,10 +138,11 @@ export default function AdminImoveis() {
   };
 
   const filteredImoveis = imoveis?.filter(i => {
+    const normalizedSearch = search.toLowerCase();
     const matchesSearch = 
-      i.titulo?.toLowerCase().includes(search.toLowerCase()) ||
-      i.bairro?.toLowerCase().includes(search.toLowerCase()) ||
-      i.codigo?.toLowerCase().includes(search.toLowerCase());
+      (i.titulo ?? "").toLowerCase().includes(normalizedSearch) ||
+      (i.bairro ?? "").toLowerCase().includes(normalizedSearch) ||
+      (i.codigo ?? "").toLowerCase().includes(normalizedSearch);
     
     const matchesStatus = statusFilter === "all" || i.status === statusFilter;
     

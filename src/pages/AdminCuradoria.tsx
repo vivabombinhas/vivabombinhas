@@ -63,10 +63,13 @@ export default function AdminCuradoria() {
     },
   });
 
-  const filteredImoveis = imoveis?.filter(i => 
-    i.titulo?.toLowerCase().includes(search.toLowerCase()) ||
-    i.bairro?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredImoveis = imoveis?.filter(i => {
+    const normalizedSearch = search.toLowerCase();
+    return (
+      (i.titulo ?? "").toLowerCase().includes(normalizedSearch) ||
+      (i.bairro ?? "").toLowerCase().includes(normalizedSearch)
+    );
+  });
 
   return (
     <div className="container py-6 space-y-6">
