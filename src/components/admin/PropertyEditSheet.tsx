@@ -50,6 +50,10 @@ export function PropertyEditSheet({ property, open, onOpenChange }: PropertyEdit
       // Limpeza de campos vazios/nulos se necessário ou conversão de tipos
       if (updateData.preco === "") updateData.preco = null;
       if (updateData.area_m2 === "") updateData.area_m2 = null;
+      if (updateData.distancia_praia_m === "" || Number.isNaN(updateData.distancia_praia_m)) updateData.distancia_praia_m = null;
+
+      // Calcula qualidade_score automaticamente
+      updateData.qualidade_score = computeQualidadeScore(updateData);
 
       if (isNew) {
         const { error } = await supabase.from("imoveis").insert([{
@@ -81,6 +85,11 @@ export function PropertyEditSheet({ property, open, onOpenChange }: PropertyEdit
     setFormData((prev: any) => ({ ...prev, [field]: value }));
   };
 
+  // Converte texto multilinha/CSV em array (e vice-versa)
+  const arrayToText = (v: any) => Array.isArray(v) ? v.join("\n") : (v || "");
+  const textToArray = (s: string) =>
+    s.split(/[\n,]+/).map(x => x.trim()).filter(Boolean);
+
   const handleSave = () => {
     if (!formData.titulo) {
       toast({ title: "Título é obrigatório", variant: "destructive" });
@@ -88,6 +97,9 @@ export function PropertyEditSheet({ property, open, onOpenChange }: PropertyEdit
     }
     mutation.mutate(formData);
   };
+
+  const previewScore = computeQualidadeScore(formData);
+
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
