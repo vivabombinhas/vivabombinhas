@@ -203,6 +203,8 @@ serve(async (req) => {
     let content = text || "";
     let sourceUrl = url || null;
     let scrapedImages: string[] = [];
+    let photosConfidence: "high" | "low" = "low";
+    let photosWarning: string | null = null;
 
     // Step 1: Scrape with Firecrawl (markdown + html for richer extraction)
     if (url) {
