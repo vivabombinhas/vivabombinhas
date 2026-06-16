@@ -126,9 +126,11 @@ export default function AdminImportarLink() {
       setData(result.data);
       setStep("review");
       const fotosCount = result.data.fotos?.length || 0;
+      const conf = result.data.photos_confidence === "high" ? "galeria principal identificada" : "revise as fotos com atenção";
       toast({
         title: "Extraído com IA ✨",
-        description: `${fotosCount} fotos detectadas. Revise e ajuste antes de salvar.`,
+        description: `${fotosCount} fotos detectadas — ${conf}.`,
+      });
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Erro";
