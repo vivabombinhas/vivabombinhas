@@ -349,7 +349,16 @@ export default function AdminImportarLink() {
               </div>
             </div>
 
-            {/* ===== FOTOS ===== */}
+            {data.photos_warning && (
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 flex items-start gap-3">
+                <X className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5 rotate-45" />
+                <div className="text-sm">
+                  <p className="font-semibold text-amber-700 dark:text-amber-300">Atenção às fotos</p>
+                  <p className="text-amber-700/80 dark:text-amber-200/80">{data.photos_warning}</p>
+                </div>
+              </div>
+            )}
+
             <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-semibold">
