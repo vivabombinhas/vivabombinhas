@@ -315,7 +315,6 @@ serve(async (req) => {
       }
 
       // ===== Image extraction scoped to the main gallery =====
-      // ===== Image extraction scoped to the main gallery =====
       const candidateImages: string[] = [];
       const ogImages: string[] = [];
 
