@@ -211,6 +211,39 @@ export default function AdminImportarLink() {
     });
   };
   const clearAllPhotos = () => setData((prev) => ({ ...prev, fotos: [] }));
+
+  const handleUploadFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploadingFiles(true);
+    const uploadedUrls: string[] = [];
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith("image/")) continue;
+        const ext = file.name.split(".").pop() || "jpg";
+        const path = `import-tmp/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("imoveis").upload(path, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage.from("imoveis").getPublicUrl(path);
+        uploadedUrls.push(pub.publicUrl);
+      }
+      if (uploadedUrls.length > 0) {
+        addPhotosToGallery(uploadedUrls);
+        toast({ title: `${uploadedUrls.length} foto(s) enviada(s) do computador` });
+      } else {
+        toast({ title: "Nenhuma imagem válida selecionada", variant: "destructive" });
+      }
+    } catch (err: any) {
+      toast({ title: "Erro no upload", description: err.message, variant: "destructive" });
+    } finally {
+      setUploadingFiles(false);
+      e.target.value = "";
+    }
+  };
   const toggleDoubtful = (url: string) =>
     setDoubtfulSelected((prev) => ({ ...prev, [url]: !prev[url] }));
   const addSelectedDoubtful = () => {
