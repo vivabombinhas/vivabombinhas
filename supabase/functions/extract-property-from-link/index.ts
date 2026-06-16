@@ -39,58 +39,141 @@ interface ExtractionRequest {
   text?: string;
 }
 
-// Filtra fotos: remove ícones, logos, avatars, placeholders, sprites
-function isLikelyPropertyPhoto(url: string): boolean {
+function isLikelyPropertyPhoto(url: string): { ok: boolean; reason: string } {
   const u = url.toLowerCase();
-  
-  // Ignore base64 data URLs if they are small (placeholders)
   if (u.startsWith("data:image")) {
-    // If it's a very short data URL, it's definitely a placeholder
-    return u.length > 2000; 
+    return u.length > 2000 ? { ok: true, reason: "data-url-large" } : { ok: false, reason: "data-url-placeholder" };
   }
-
-  // Remove obvious non-photo URLs
   const badPatterns = [
     "logo", "icon", "avatar", "favicon", "sprite", "placeholder",
     "/static/", "/assets/icons", "share-", "social-", "/badges/",
     "google-play", "app-store", "whatsapp.svg", "pixel.gif",
     "1x1", "spacer", "blank.", "loading.", "/flags/", "/emoji",
-    "marker", "map", "pin", "heart", "star",
+    "marker", "/map", "/pin", "/heart", "/star",
+    "/perfil", "/profile", "/anunciante", "/agency", "/agente",
+    "/banner", "thumb-small", "_small.", "_thumb.", "small_thumb",
   ];
-  if (badPatterns.some((p) => u.includes(p))) return false;
+  for (const p of badPatterns) if (u.includes(p)) return { ok: false, reason: `bad-pattern:${p}` };
 
-  // Must be image extension or common CDN pattern
   const goodExt = /\.(jpe?g|png|webp|avif)(\?|$|#)/i.test(u);
-  const cdnPatterns = [
-    "muscache.com", "olx.", "zap", "vivareal", "imovelweb", "booking.com", 
-    "cloudfront", "cloudinary", "imgur", "cdn", "images", "img.", "foto"
-  ];
+  const cdnPatterns = ["muscache.com", "olx.", "zap", "vivareal", "imovelweb", "booking.com", "cloudfront", "cloudinary", "imgur", "cdn", "images", "img.", "foto"];
   const looksLikeCdn = cdnPatterns.some((p) => u.includes(p));
+  if (!goodExt && !looksLikeCdn) return { ok: false, reason: "no-ext-no-cdn" };
 
-  if (!goodExt && !looksLikeCdn) return false;
+  if (/[?&](w|width)=([1-9]?\d)(&|$)/i.test(u)) return { ok: false, reason: "url-width<100" };
+  if (/\b(16x16|24x24|32x32|48x48|50x50|64x64|96x96|100x100|120x120|150x150)\b/.test(u)) return { ok: false, reason: "tiny-dimension" };
 
-  // Reject tiny images by URL hint (e.g., w=50, 64x64)
-  if (/[?&](w|width)=([1-9]?\d)(&|$)/i.test(u)) return false; // width < 100
-  if (/\b(32x32|64x64|100x100|50x50)\b/.test(u)) return false;
-
-  return true;
+  return { ok: true, reason: "accepted" };
 }
 
-function dedupeAndFilterPhotos(urls: string[], max = 30): string[] {
+// Collapse known thumbnail-size variants so big/small versions of same photo dedupe together
+function photoKey(url: string): string {
+  let key = url.split("#")[0].split("?")[0].toLowerCase();
+  key = key.replace(/[-_](\d{2,4})x(\d{2,4})(?=\.[a-z]+$)/i, "");
+  key = key.replace(/\/im_w_\d+\//, "/");
+  key = key.replace(/\/policy\/[^/]+\//, "/original/");
+  return key;
+}
+
+function dedupeAndFilterPhotos(
+  urls: string[],
+  max = 30,
+): { photos: string[]; logs: Array<{ url: string; status: string; reason: string }> } {
   const seen = new Set<string>();
   const out: string[] = [];
+  const logs: Array<{ url: string; status: string; reason: string }> = [];
   for (const raw of urls) {
     if (!raw) continue;
-    // Normalize: remove tracking params noise but keep core URL
     const url = raw.trim().split("#")[0];
-    const key = url.split("?")[0].toLowerCase();
-    if (seen.has(key)) continue;
-    if (!isLikelyPropertyPhoto(url)) continue;
+    const check = isLikelyPropertyPhoto(url);
+    if (!check.ok) { logs.push({ url, status: "excluded", reason: check.reason }); continue; }
+    const key = photoKey(url);
+    if (seen.has(key)) { logs.push({ url, status: "excluded", reason: "duplicate" }); continue; }
     seen.add(key);
     out.push(url);
+    logs.push({ url, status: "included", reason: check.reason });
     if (out.length >= max) break;
   }
-  return out;
+  return { photos: out, logs };
+}
+
+// Remove blocks whose class/id/aria-label hint they are related/similar/recommended content.
+function stripRelatedSections(html: string): { cleaned: string; removed: number } {
+  let cleaned = html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ");
+  let removed = 0;
+  cleaned = cleaned
+    .replace(/<header\b[\s\S]*?<\/header>/gi, () => { removed++; return " "; })
+    .replace(/<footer\b[\s\S]*?<\/footer>/gi, () => { removed++; return " "; })
+    .replace(/<nav\b[\s\S]*?<\/nav>/gi, () => { removed++; return " "; })
+    .replace(/<aside\b[\s\S]*?<\/aside>/gi, () => { removed++; return " "; });
+
+  const relatedHint = /(similar|relacionad|recomend|recommended|related|outros[-_ ]?im(o|ó)veis|veja[-_ ]?tamb|sugest|may[-_ ]?like|tamb[-_ ]?gostar|outros[-_ ]?an(uncios|úncios))/i;
+  for (const tag of ["section", "div", "ul", "article"]) {
+    const openRe = new RegExp(`<${tag}\\b[^>]*>`, "gi");
+    let result = "";
+    let lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = openRe.exec(cleaned)) !== null) {
+      if (!relatedHint.test(m[0])) continue;
+      const startIdx = m.index;
+      const closeRe = new RegExp(`<\\/?${tag}\\b[^>]*>`, "gi");
+      closeRe.lastIndex = openRe.lastIndex;
+      let depth = 1, endIdx = -1;
+      let cm: RegExpExecArray | null;
+      while ((cm = closeRe.exec(cleaned)) !== null) {
+        if (cm[0].startsWith("</")) { depth--; if (depth === 0) { endIdx = cm.index + cm[0].length; break; } }
+        else depth++;
+        if (closeRe.lastIndex - startIdx > 300000) break;
+      }
+      if (endIdx > 0) {
+        result += cleaned.slice(lastIndex, startIdx);
+        lastIndex = endIdx;
+        removed++;
+        openRe.lastIndex = endIdx;
+      }
+    }
+    result += cleaned.slice(lastIndex);
+    cleaned = result;
+  }
+  return { cleaned, removed };
+}
+
+// Try to find the main gallery container. Returns null if not confident.
+function extractGalleryHtml(html: string): { gallery: string; matchedBy: string } | null {
+  const hints = [
+    "property-gallery", "listing-gallery", "imovel-gallery", "image-gallery",
+    "main-gallery", "gallery-main", "photo-gallery", "galeria-imovel",
+    "galeria-principal", "fotos-imovel", "main-carousel", "principal-carousel",
+    "swiper-main", "main-swiper", "photos-container", "gallery-container",
+    "fotos-anuncio", "anuncio-fotos", "imagens-imovel", "imovel-fotos",
+    "ad-gallery", "ad-photos", "lightbox-gallery", "carousel-photos",
+    "carrossel-fotos",
+  ];
+  const hintRe = new RegExp(`(class|id|data-testid|aria-label)=["'][^"']*(${hints.join("|")})[^"']*["']`, "i");
+  for (const tag of ["section", "div", "ul"]) {
+    const openRe = new RegExp(`<${tag}\\b[^>]*>`, "gi");
+    let m: RegExpExecArray | null;
+    while ((m = openRe.exec(html)) !== null) {
+      const openTag = m[0];
+      if (!hintRe.test(openTag)) continue;
+      const matched = openTag.match(hintRe)?.[2] || "gallery";
+      const startIdx = m.index;
+      const closeRe = new RegExp(`<\\/?${tag}\\b[^>]*>`, "gi");
+      closeRe.lastIndex = openRe.lastIndex;
+      let depth = 1, endIdx = -1;
+      let cm: RegExpExecArray | null;
+      while ((cm = closeRe.exec(html)) !== null) {
+        if (cm[0].startsWith("</")) { depth--; if (depth === 0) { endIdx = cm.index + cm[0].length; break; } }
+        else depth++;
+        if (closeRe.lastIndex - startIdx > 500000) break;
+      }
+      if (endIdx > 0) return { gallery: html.slice(startIdx, endIdx), matchedBy: matched };
+    }
+  }
+  return null;
 }
 
 serve(async (req) => {
