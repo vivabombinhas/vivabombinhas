@@ -31,6 +31,26 @@ interface PropertyEditSheetProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// Calcula score 0-100 de qualidade da curadoria
+function computeQualidadeScore(p: any): number {
+  if (!p) return 0;
+  const checks = [
+    !!p.titulo && p.titulo.length > 5,
+    !!p.descricao && p.descricao.length > 80,
+    Array.isArray(p.fotos) && p.fotos.length > 0,
+    !!p.preco || !!p.preco_temporada_diaria,
+    !!p.bairro,
+    !!p.tipo && !!p.finalidade,
+    p.distancia_praia_m != null,
+    Array.isArray(p.pontos_fortes) && p.pontos_fortes.length > 0,
+    !!p.resumo_estrategico_ia && p.resumo_estrategico_ia.length > 20,
+    p.finalidade !== "temporada" || (p.capacidade_pessoas ?? 0) > 0,
+  ];
+  const passed = checks.filter(Boolean).length;
+  return Math.round((passed / checks.length) * 100);
+}
+
+
 export function PropertyEditSheet({ property, open, onOpenChange }: PropertyEditSheetProps) {
   const isNew = !property.id;
   const [formData, setFormData] = useState<any>({});
@@ -50,6 +70,10 @@ export function PropertyEditSheet({ property, open, onOpenChange }: PropertyEdit
       // Limpeza de campos vazios/nulos se necessário ou conversão de tipos
       if (updateData.preco === "") updateData.preco = null;
       if (updateData.area_m2 === "") updateData.area_m2 = null;
+      if (updateData.distancia_praia_m === "" || Number.isNaN(updateData.distancia_praia_m)) updateData.distancia_praia_m = null;
+
+      // Calcula qualidade_score automaticamente
+      updateData.qualidade_score = computeQualidadeScore(updateData);
 
       if (isNew) {
         const { error } = await supabase.from("imoveis").insert([{
@@ -81,6 +105,11 @@ export function PropertyEditSheet({ property, open, onOpenChange }: PropertyEdit
     setFormData((prev: any) => ({ ...prev, [field]: value }));
   };
 
+  // Converte texto multilinha/CSV em array (e vice-versa)
+  const arrayToText = (v: any) => Array.isArray(v) ? v.join("\n") : (v || "");
+  const textToArray = (s: string) =>
+    s.split(/[\n,]+/).map(x => x.trim()).filter(Boolean);
+
   const handleSave = () => {
     if (!formData.titulo) {
       toast({ title: "Título é obrigatório", variant: "destructive" });
@@ -88,6 +117,9 @@ export function PropertyEditSheet({ property, open, onOpenChange }: PropertyEdit
     }
     mutation.mutate(formData);
   };
+
+  const previewScore = computeQualidadeScore(formData);
+
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -366,8 +398,195 @@ export function PropertyEditSheet({ property, open, onOpenChange }: PropertyEdit
                 </div>
               </div>
             </div>
+
+            {/* ================= CURADORIA ESTRATÉGICA ================= */}
+            <div className="space-y-4 pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
+                  Curadoria Estratégica
+                </h3>
+                <span
+                  className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                    previewScore >= 80
+                      ? "bg-emerald-100 text-emerald-700"
+                      : previewScore >= 50
+                      ? "bg-amber-100 text-amber-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  Qualidade: {previewScore}/100
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Campos internos de curadoria. Não aparecem no card público nem influenciam a busca da MarIA ainda.
+              </p>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="distancia_praia_m">Distância da praia (m)</Label>
+                  <Input
+                    id="distancia_praia_m"
+                    type="number"
+                    value={formData.distancia_praia_m ?? ""}
+                    onChange={(e) =>
+                      handleChange(
+                        "distancia_praia_m",
+                        e.target.value === "" ? null : parseInt(e.target.value)
+                      )
+                    }
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="micro_regiao">Micro-região</Label>
+                  <Select
+                    value={formData.micro_regiao || ""}
+                    onValueChange={(v) => handleChange("micro_regiao", v)}
+                  >
+                    <SelectTrigger id="micro_regiao">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="orla">Orla</SelectItem>
+                      <SelectItem value="miolo">Miolo</SelectItem>
+                      <SelectItem value="alto">Alto / Morro</SelectItem>
+                      <SelectItem value="beira_rodovia">Beira da rodovia</SelectItem>
+                      <SelectItem value="rural">Rural</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="condicao">Condição</Label>
+                  <Select
+                    value={formData.condicao || ""}
+                    onValueChange={(v) => handleChange("condicao", v)}
+                  >
+                    <SelectTrigger id="condicao">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="planta">Na planta</SelectItem>
+                      <SelectItem value="em_obra">Em obra</SelectItem>
+                      <SelectItem value="pronto_novo">Pronto / Novo</SelectItem>
+                      <SelectItem value="usado_conservado">Usado conservado</SelectItem>
+                      <SelectItem value="reforma">Precisa de reforma</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="perfil_lead_ideal">Perfil de lead ideal</Label>
+                  <Input
+                    id="perfil_lead_ideal"
+                    placeholder="Ex: família com filhos, investidor de renda…"
+                    value={formData.perfil_lead_ideal || ""}
+                    onChange={(e) => handleChange("perfil_lead_ideal", e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="aceita_financiamento">Aceita financiamento</Label>
+                  <Switch
+                    id="aceita_financiamento"
+                    checked={!!formData.aceita_financiamento}
+                    onCheckedChange={(v) => handleChange("aceita_financiamento", v)}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="aceita_permuta">Aceita permuta</Label>
+                  <Switch
+                    id="aceita_permuta"
+                    checked={!!formData.aceita_permuta}
+                    onCheckedChange={(v) => handleChange("aceita_permuta", v)}
+                  />
+                </div>
+              </div>
+
+              {formData.aceita_permuta && (
+                <div className="grid gap-2">
+                  <Label htmlFor="permuta_descricao">Descrição da permuta</Label>
+                  <Textarea
+                    id="permuta_descricao"
+                    rows={2}
+                    placeholder="Ex: aceita carro até R$150 mil + diferença em dinheiro"
+                    value={formData.permuta_descricao || ""}
+                    onChange={(e) => handleChange("permuta_descricao", e.target.value)}
+                  />
+                </div>
+              )}
+
+              <div className="grid gap-2">
+                <Label htmlFor="pontos_fortes">Pontos fortes (um por linha)</Label>
+                <Textarea
+                  id="pontos_fortes"
+                  rows={3}
+                  placeholder={"Vista mar panorâmica\nPé na areia\nPrédio com piscina"}
+                  value={arrayToText(formData.pontos_fortes)}
+                  onChange={(e) => handleChange("pontos_fortes", textToArray(e.target.value))}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="pontos_atencao">Pontos de atenção (um por linha)</Label>
+                <Textarea
+                  id="pontos_atencao"
+                  rows={3}
+                  placeholder={"Condomínio alto\nSem elevador\nReforma na cozinha"}
+                  value={arrayToText(formData.pontos_atencao)}
+                  onChange={(e) => handleChange("pontos_atencao", textToArray(e.target.value))}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="argumentos_venda">Argumentos de venda</Label>
+                <Textarea
+                  id="argumentos_venda"
+                  rows={3}
+                  placeholder="Texto livre que o Daniel/equipe usa para vender este imóvel"
+                  value={formData.argumentos_venda || ""}
+                  onChange={(e) => handleChange("argumentos_venda", e.target.value)}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="tags_maria">Tags MarIA (separe por vírgula ou linha)</Label>
+                <Textarea
+                  id="tags_maria"
+                  rows={2}
+                  placeholder="pe-na-areia, familia, primeira-compra, renda-temporada"
+                  value={arrayToText(formData.tags_maria)}
+                  onChange={(e) => handleChange("tags_maria", textToArray(e.target.value))}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="resumo_estrategico_ia">Resumo estratégico (para a MarIA)</Label>
+                <Textarea
+                  id="resumo_estrategico_ia"
+                  rows={4}
+                  placeholder="Resumo curto e objetivo para a MarIA usar no futuro ao recomendar o imóvel."
+                  value={formData.resumo_estrategico_ia || ""}
+                  onChange={(e) => handleChange("resumo_estrategico_ia", e.target.value)}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="observacoes_internas_daniel">Observações internas (Daniel/equipe)</Label>
+                <Textarea
+                  id="observacoes_internas_daniel"
+                  rows={3}
+                  placeholder="Notas internas, contexto do proprietário, histórico de negociação…"
+                  value={formData.observacoes_internas_daniel || ""}
+                  onChange={(e) => handleChange("observacoes_internas_daniel", e.target.value)}
+                />
+              </div>
+            </div>
           </div>
         </ScrollArea>
+
 
         <SheetFooter className="pt-4 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
