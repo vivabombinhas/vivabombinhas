@@ -67,7 +67,10 @@ export default function AdminImoveis() {
   const { data: imoveis, isLoading } = useQuery({
     queryKey: ["admin_imoveis"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("admin_list_imoveis");
+      const { data, error } = await supabase
+        .from("imoveis")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
