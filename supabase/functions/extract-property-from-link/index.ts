@@ -416,10 +416,6 @@ serve(async (req) => {
         photosWarning = photosWarning ?? "Poucas fotos detectadas e a galeria principal não foi confirmada. Revise antes de salvar.";
       }
 
-      // Expose to outer scope via closure variables on the returned payload
-      (globalThis as unknown as { __photosConfidence?: string }).__photosConfidence = photosConfidence;
-      (globalThis as unknown as { __photosWarning?: string | null }).__photosWarning = photosWarning;
-
       content = scrapedMd.slice(0, 35000);
     }
 
