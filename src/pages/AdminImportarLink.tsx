@@ -394,6 +394,132 @@ export default function AdminImportarLink() {
               </div>
             )}
 
+            {/* ===== TRIAGEM DE FOTOS (3 grupos) ===== */}
+            {(data.photos_groups?.likely?.length || data.photos_groups?.doubtful?.length || data.photos_groups?.rejected?.length) ? (
+              <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div>
+                    <h3 className="font-semibold text-sm">Triagem das fotos extraídas</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Confiança da galeria: <strong>{data.photos_confidence === "high" ? "alta" : "baixa"}</strong>
+                      {" · "}Prováveis {data.photos_groups?.likely?.length ?? 0}
+                      {" · "}Duvidosas {data.photos_groups?.doubtful?.length ?? 0}
+                      {" · "}Rejeitadas {data.photos_groups?.rejected?.length ?? 0}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    {(data.photos_groups?.likely?.length || 0) > 0 && (
+                      <Button type="button" variant="outline" size="sm" onClick={() => addPhotosToGallery(data.photos_groups!.likely)}>
+                        + Adicionar prováveis
+                      </Button>
+                    )}
+                    {(data.fotos?.length || 0) > 0 && (
+                      <Button type="button" variant="outline" size="sm" onClick={clearAllPhotos}>
+                        Limpar galeria
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Prováveis */}
+                {(data.photos_groups?.likely?.length || 0) > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                      ✓ Fotos prováveis do imóvel ({data.photos_groups!.likely.length})
+                    </p>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                      {data.photos_groups!.likely.map((u) => {
+                        const inGallery = data.fotos?.includes(u);
+                        return (
+                          <button
+                            type="button"
+                            key={u}
+                            onClick={() => inGallery ? setData((p) => ({ ...p, fotos: (p.fotos || []).filter((x) => x !== u) })) : addPhotosToGallery([u])}
+                            className={`relative aspect-square rounded-md overflow-hidden border-2 transition ${
+                              inGallery ? "border-emerald-500" : "border-border opacity-60 hover:opacity-100"
+                            }`}
+                            title={inGallery ? "Remover da galeria" : "Adicionar à galeria"}
+                          >
+                            <img src={u} alt="" className="w-full h-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
+                            {inGallery && (
+                              <div className="absolute top-0.5 right-0.5 bg-emerald-500 text-white rounded-full p-0.5">
+                                <CheckCircle2 className="h-3 w-3" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Duvidosas */}
+                {(data.photos_groups?.doubtful?.length || 0) > 0 && (
+                  <div className="space-y-2 pt-3 border-t border-border">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">
+                        ? Fotos duvidosas ({data.photos_groups!.doubtful.length}) — desmarcadas por padrão
+                      </p>
+                      {Object.values(doubtfulSelected).some(Boolean) && (
+                        <Button type="button" size="sm" variant="outline" onClick={addSelectedDoubtful}>
+                          Mover selecionadas para galeria
+                        </Button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                      {data.photos_groups!.doubtful.map((u) => {
+                        const sel = !!doubtfulSelected[u];
+                        return (
+                          <button
+                            type="button"
+                            key={u}
+                            onClick={() => toggleDoubtful(u)}
+                            className={`relative aspect-square rounded-md overflow-hidden border-2 transition ${
+                              sel ? "border-amber-500" : "border-border opacity-50 hover:opacity-100"
+                            }`}
+                          >
+                            <img src={u} alt="" className="w-full h-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
+                            {sel && (
+                              <div className="absolute top-0.5 right-0.5 bg-amber-500 text-white rounded-full p-0.5">
+                                <CheckCircle2 className="h-3 w-3" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Rejeitadas (colapsável) */}
+                {(data.photos_groups?.rejected?.length || 0) > 0 && (
+                  <div className="pt-3 border-t border-border">
+                    <button
+                      type="button"
+                      onClick={() => setShowRejected((v) => !v)}
+                      className="text-xs font-semibold text-muted-foreground hover:text-foreground"
+                    >
+                      {showRejected ? "▼" : "▶"} Fotos rejeitadas ({data.photos_groups!.rejected.length}) — apenas auditoria
+                    </button>
+                    {showRejected && (
+                      <div className="mt-3 grid grid-cols-3 sm:grid-cols-6 gap-2">
+                        {data.photos_groups!.rejected.map((r) => (
+                          <div key={r.url} className="space-y-1">
+                            <div className="relative aspect-square rounded-md overflow-hidden border border-border bg-muted opacity-50">
+                              <img src={r.url} alt="" className="w-full h-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
+                            </div>
+                            <p className="text-[10px] text-muted-foreground truncate" title={`${r.reason} · ${r.source || ""}`}>
+                              {r.reason}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : null}
+
             <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-semibold">
