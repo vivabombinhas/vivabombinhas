@@ -200,6 +200,25 @@ export default function AdminImportarLink() {
     toast({ title: `${urls.length} foto(s) adicionada(s)` });
   };
 
+  const addPhotosToGallery = (urls: string[]) => {
+    if (urls.length === 0) return;
+    setData((prev) => {
+      const existing = new Set(prev.fotos || []);
+      const merged = [...(prev.fotos || [])];
+      for (const u of urls) if (!existing.has(u)) merged.push(u);
+      return { ...prev, fotos: merged };
+    });
+  };
+  const clearAllPhotos = () => setData((prev) => ({ ...prev, fotos: [] }));
+  const toggleDoubtful = (url: string) =>
+    setDoubtfulSelected((prev) => ({ ...prev, [url]: !prev[url] }));
+  const addSelectedDoubtful = () => {
+    const urls = Object.entries(doubtfulSelected).filter(([, v]) => v).map(([u]) => u);
+    addPhotosToGallery(urls);
+    setDoubtfulSelected({});
+    toast({ title: `${urls.length} foto(s) movida(s) para a galeria` });
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors: string[] = [];
