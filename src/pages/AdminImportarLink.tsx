@@ -59,6 +59,8 @@ interface ExtractedData {
   anunciante_email?: string;
   imobiliaria?: string;
   codigo?: string;
+  photos_confidence?: "high" | "low";
+  photos_warning?: string | null;
 }
 
 const tipoLabels: Record<string, string> = {
