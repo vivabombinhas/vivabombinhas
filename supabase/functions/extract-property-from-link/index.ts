@@ -538,6 +538,8 @@ serve(async (req) => {
           ...extracted,
           link_anuncio: sourceUrl,
           fotos: scrapedImages,
+          photos_confidence: photosConfidence,
+          photos_warning: photosWarning,
         },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
