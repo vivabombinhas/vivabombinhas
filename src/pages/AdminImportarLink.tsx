@@ -131,12 +131,20 @@ export default function AdminImportarLink() {
       }
 
       setData(result.data);
+      setDoubtfulSelected({});
+      setShowRejected(false);
       setStep("review");
-      const fotosCount = result.data.fotos?.length || 0;
-      const conf = result.data.photos_confidence === "high" ? "galeria principal identificada" : "revise as fotos com atenção";
+      const groups = result.data.photos_groups;
+      const likely = groups?.likely?.length ?? result.data.fotos?.length ?? 0;
+      const doubtful = groups?.doubtful?.length ?? 0;
+      const rejected = groups?.rejected?.length ?? 0;
+      const conf =
+        result.data.photos_confidence === "high"
+          ? "galeria principal identificada"
+          : "baixa confiança — selecione manualmente as fotos corretas";
       toast({
         title: "Extraído com IA ✨",
-        description: `${fotosCount} fotos detectadas — ${conf}.`,
+        description: `Prováveis: ${likely} · Duvidosas: ${doubtful} · Rejeitadas: ${rejected} — ${conf}.`,
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Erro";
