@@ -39,19 +39,32 @@ interface ExtractionRequest {
   text?: string;
 }
 
-function isLikelyPropertyPhoto(url: string): { ok: boolean; reason: string } {
+type PhotoSource = "og" | "gallery" | "main";
+type PhotoGroup = "likely" | "doubtful" | "rejected";
+
+interface ClassifiedPhoto {
+  url: string;
+  group: PhotoGroup;
+  reason: string;
+  source: PhotoSource;
+}
+
+function classifyByUrl(url: string): { ok: boolean; reason: string } {
   const u = url.toLowerCase();
   if (u.startsWith("data:image")) {
     return u.length > 2000 ? { ok: true, reason: "data-url-large" } : { ok: false, reason: "data-url-placeholder" };
   }
+  // Expanded blocklist: logos, icons, avatars, badges, banners, maps, agent/agency, related/similar/ads, share/social.
   const badPatterns = [
-    "logo", "icon", "avatar", "favicon", "sprite", "placeholder",
-    "/static/", "/assets/icons", "share-", "social-", "/badges/",
-    "google-play", "app-store", "whatsapp.svg", "pixel.gif",
+    "logo", "icon", "favicon", "sprite", "placeholder", "spinner",
+    "avatar", "/perfil", "/profile", "/anunciante", "/agency", "/agente", "/corretor", "/broker",
+    "/static/", "/assets/icons", "/badges/", "/badge/", "shield", "verified", "stamp", "/selo", "/seal",
+    "share-", "social-", "/social/", "google-play", "app-store", "whatsapp.svg", "pixel.gif",
     "1x1", "spacer", "blank.", "loading.", "/flags/", "/emoji",
-    "marker", "/map", "/pin", "/heart", "/star",
-    "/perfil", "/profile", "/anunciante", "/agency", "/agente",
-    "/banner", "thumb-small", "_small.", "_thumb.", "small_thumb",
+    "marker", "/map/", "googlemap", "static-map", "/pin", "/heart", "/star/",
+    "/banner", "/banners/", "/ads/", "ad-image", "promoted", "publicidade",
+    "/related", "/similar", "/recommend", "/sugest", "/outros-anuncios", "/veja-tambem",
+    "thumb-small", "_small.", "_thumb.", "small_thumb", "/mini/", "/micro/",
   ];
   for (const p of badPatterns) if (u.includes(p)) return { ok: false, reason: `bad-pattern:${p}` };
 
@@ -60,41 +73,40 @@ function isLikelyPropertyPhoto(url: string): { ok: boolean; reason: string } {
   const looksLikeCdn = cdnPatterns.some((p) => u.includes(p));
   if (!goodExt && !looksLikeCdn) return { ok: false, reason: "no-ext-no-cdn" };
 
-  if (/[?&](w|width)=([1-9]?\d)(&|$)/i.test(u)) return { ok: false, reason: "url-width<100" };
-  if (/\b(16x16|24x24|32x32|48x48|50x50|64x64|96x96|100x100|120x120|150x150)\b/.test(u)) return { ok: false, reason: "tiny-dimension" };
+  if (/[?&](w|width|h|height|size)=([1-9]?\d)(&|$)/i.test(u)) return { ok: false, reason: "url-dim<100" };
+  if (/\b(16x16|24x24|32x32|48x48|50x50|64x64|96x96|100x100|120x120|150x150|180x180|200x200)\b/.test(u)) return { ok: false, reason: "tiny-dimension" };
 
   return { ok: true, reason: "accepted" };
 }
 
-// Collapse known thumbnail-size variants so big/small versions of same photo dedupe together
+// Strong normalization to collapse near-duplicates (thumbnails, size suffixes, query params)
 function photoKey(url: string): string {
   let key = url.split("#")[0].split("?")[0].toLowerCase();
   key = key.replace(/[-_](\d{2,4})x(\d{2,4})(?=\.[a-z]+$)/i, "");
+  key = key.replace(/[-_](small|medium|large|thumb|thumbnail|mini|big|original|full|hd|hq)(?=\.[a-z]+$)/i, "");
   key = key.replace(/\/im_w_\d+\//, "/");
   key = key.replace(/\/policy\/[^/]+\//, "/original/");
+  key = key.replace(/\/(thumb|thumbs|thumbnail|small|medium|large|mini|cache)\//g, "/");
+  key = key.replace(/([^:])\/+/g, "$1/");
   return key;
 }
 
-function dedupeAndFilterPhotos(
-  urls: string[],
-  max = 30,
-): { photos: string[]; logs: Array<{ url: string; status: string; reason: string }> } {
+function classifyPhotos(candidates: Array<{ url: string; source: PhotoSource }>): ClassifiedPhoto[] {
   const seen = new Set<string>();
-  const out: string[] = [];
-  const logs: Array<{ url: string; status: string; reason: string }> = [];
-  for (const raw of urls) {
+  const out: ClassifiedPhoto[] = [];
+  for (const c of candidates) {
+    const raw = c.url?.trim().split("#")[0];
     if (!raw) continue;
-    const url = raw.trim().split("#")[0];
-    const check = isLikelyPropertyPhoto(url);
-    if (!check.ok) { logs.push({ url, status: "excluded", reason: check.reason }); continue; }
-    const key = photoKey(url);
-    if (seen.has(key)) { logs.push({ url, status: "excluded", reason: "duplicate" }); continue; }
+    const check = classifyByUrl(raw);
+    if (!check.ok) { out.push({ url: raw, group: "rejected", reason: check.reason, source: c.source }); continue; }
+    const key = photoKey(raw);
+    if (seen.has(key)) { out.push({ url: raw, group: "rejected", reason: "duplicate", source: c.source }); continue; }
     seen.add(key);
-    out.push(url);
-    logs.push({ url, status: "included", reason: check.reason });
-    if (out.length >= max) break;
+    // OG + confirmed gallery container → likely. "main" (no gallery container matched) → doubtful, needs admin review.
+    const group: PhotoGroup = c.source === "main" ? "doubtful" : "likely";
+    out.push({ url: raw, group, reason: c.source === "og" ? "og:image" : `from:${c.source}`, source: c.source });
   }
-  return { photos: out, logs };
+  return out;
 }
 
 // Remove blocks whose class/id/aria-label hint they are related/similar/recommended content.
@@ -202,7 +214,10 @@ serve(async (req) => {
 
     let content = text || "";
     let sourceUrl = url || null;
-    let scrapedImages: string[] = [];
+    let likelyPhotos: string[] = [];
+    let doubtfulPhotos: string[] = [];
+    let rejectedPhotos: Array<{ url: string; reason: string; source: PhotoSource }> = [];
+    let photoDebug: ClassifiedPhoto[] = [];
     let photosConfidence: "high" | "low" = "low";
     let photosWarning: string | null = null;
 
@@ -315,10 +330,9 @@ serve(async (req) => {
       }
 
       // ===== Image extraction scoped to the main gallery =====
-      const candidateImages: string[] = [];
+      const candidates: Array<{ url: string; source: PhotoSource }> = [];
       const ogImages: string[] = [];
 
-      // Always capture OG image up-front (it's usually the main listing photo)
       if (scrapedHtml) {
         for (const m of scrapedHtml.matchAll(/<meta[^>]+property=["']og:image[^"']*["'][^>]+content=["']([^"']+)["']/gi)) {
           ogImages.push(m[1]);
@@ -337,29 +351,29 @@ serve(async (req) => {
           } catch { return null; }
         };
 
-        // 1) Strip headers/footers/nav/asides and any "similar/related/recommended" blocks
         const { cleaned, removed: removedSections } = stripRelatedSections(scrapedHtml);
         console.log(`[gallery] stripped ${removedSections} related/chrome sections`);
 
-        // 2) Try to scope to the main gallery container; fall back to the cleaned HTML
         const gallery = extractGalleryHtml(cleaned);
         let scope: string;
         let scopeLabel: string;
+        let scopeSource: PhotoSource;
         if (gallery) {
           scope = gallery.gallery;
           scopeLabel = `gallery(${gallery.matchedBy})`;
+          scopeSource = "gallery";
           photosConfidence = "high";
           console.log(`[gallery] matched main gallery container by "${gallery.matchedBy}"`);
         } else {
           scope = cleaned;
           scopeLabel = "cleaned-main";
+          scopeSource = "main";
           photosConfidence = "low";
           photosWarning =
-            "Não foi possível identificar com segurança a galeria principal. Revise as fotos manualmente antes de salvar.";
-          console.log("[gallery] no main gallery container matched — using cleaned main content");
+            "Não foi possível identificar com segurança a galeria principal. As fotos abaixo precisam de revisão manual antes de salvar.";
+          console.log("[gallery] no main gallery container matched — collected as DOUBTFUL only");
         }
 
-        // 3) Collect <img> with lazy-load attributes, scoped
         const imgRegex = /<img\b[^>]*>/gi;
         let tagMatch: RegExpExecArray | null;
         while ((tagMatch = imgRegex.exec(scope)) !== null) {
@@ -368,52 +382,57 @@ serve(async (req) => {
           let a: RegExpExecArray | null;
           while ((a = attrRe.exec(tag)) !== null) {
             const u = resolve(a[2]);
-            if (u) candidateImages.push(u);
+            if (u) candidates.push({ url: u, source: scopeSource });
           }
-          // srcset on this img tag — prefer the largest descriptor
           const srcsetMatch = /srcset=["']([^"']+)["']/i.exec(tag);
           if (srcsetMatch) {
             const parts = srcsetMatch[1].split(",").map((p) => p.trim());
-            // pick last (usually largest)
             const last = parts[parts.length - 1]?.split(/\s+/)[0];
-            if (last) { const u = resolve(last); if (u) candidateImages.push(u); }
+            if (last) { const u = resolve(last); if (u) candidates.push({ url: u, source: scopeSource }); }
           }
         }
 
-        // 4) <source srcset=...> inside scoped <picture>
         for (const m of scope.matchAll(/<source\b[^>]*srcset=["']([^"']+)["'][^>]*>/gi)) {
           const parts = m[1].split(",").map((p) => p.trim().split(/\s+/)[0]);
           const last = parts[parts.length - 1];
-          if (last) { const u = resolve(last); if (u) candidateImages.push(u); }
+          if (last) { const u = resolve(last); if (u) candidates.push({ url: u, source: scopeSource }); }
         }
 
-        // 5) Markdown images, only if they also appear in the scope (avoid related-section markdown)
+        // Markdown images only if they appear in the scoped HTML (avoid related-section markdown)
         for (const m of scrapedMd.matchAll(/!\[.*?\]\((https?:\/\/[^\s)]+)\)/g)) {
           const u = m[1];
-          if (scope.includes(u) || gallery === null) candidateImages.push(u);
+          if (scope.includes(u)) candidates.push({ url: u, source: scopeSource });
         }
 
-        console.log(`[gallery] scope=${scopeLabel}, raw candidates=${candidateImages.length}`);
+        console.log(`[gallery] scope=${scopeLabel}, raw candidates=${candidates.length}`);
       }
 
-      // Always prepend OG image as a strong hint (it's the listing's hero image)
-      for (const og of ogImages.reverse()) candidateImages.unshift(og);
+      // OG image is the hero — always treat as likely
+      for (const og of ogImages.reverse()) candidates.unshift({ url: og, source: "og" });
 
-      const { photos, logs } = dedupeAndFilterPhotos(candidateImages, 40);
-      scrapedImages = photos;
-      const includedCount = logs.filter((l) => l.status === "included").length;
-      const excludedCount = logs.length - includedCount;
-      console.log(`[gallery] photos kept=${includedCount}, excluded=${excludedCount}, total raw=${candidateImages.length}`);
-      // Sample a few exclusion reasons for debugging
-      const excludeSample = logs.filter((l) => l.status === "excluded").slice(0, 8);
-      if (excludeSample.length) {
-        console.log("[gallery] sample excluded:", JSON.stringify(excludeSample));
+      photoDebug = classifyPhotos(candidates);
+      likelyPhotos = photoDebug.filter((p) => p.group === "likely").slice(0, 40).map((p) => p.url);
+      doubtfulPhotos = photoDebug
+        .filter((p) => p.group === "doubtful")
+        .slice(0, 40)
+        .map((p) => p.url)
+        .filter((u) => !likelyPhotos.includes(u));
+      rejectedPhotos = photoDebug
+        .filter((p) => p.group === "rejected")
+        .slice(0, 60)
+        .map((p) => ({ url: p.url, reason: p.reason, source: p.source }));
+
+      console.log(
+        `[gallery] likely=${likelyPhotos.length}, doubtful=${doubtfulPhotos.length}, rejected=${rejectedPhotos.length}, total raw=${candidates.length}`,
+      );
+      if (rejectedPhotos.length) {
+        console.log("[gallery] sample rejected:", JSON.stringify(rejectedPhotos.slice(0, 8)));
       }
 
-      if (scrapedImages.length === 0) {
+      if (likelyPhotos.length === 0 && doubtfulPhotos.length === 0) {
         photosWarning = photosWarning ?? "Nenhuma foto da galeria principal foi identificada. Adicione manualmente antes de salvar.";
-      } else if (scrapedImages.length < 3 && photosConfidence === "low") {
-        photosWarning = photosWarning ?? "Poucas fotos detectadas e a galeria principal não foi confirmada. Revise antes de salvar.";
+      } else if (likelyPhotos.length === 0 && photosConfidence === "low") {
+        photosWarning = photosWarning ?? "Apenas fotos duvidosas foram detectadas. Selecione manualmente as que pertencem ao imóvel.";
       }
 
       content = scrapedMd.slice(0, 35000);
@@ -531,15 +550,25 @@ serve(async (req) => {
       );
     }
 
+    // Safety rule: if confidence is low, DO NOT auto-populate the main gallery (fotos = []).
+    // The admin must explicitly promote doubtful photos to the gallery from the UI.
+    const fotos = photosConfidence === "high" ? likelyPhotos : [];
+
     return new Response(
       JSON.stringify({
         success: true,
         data: {
           ...extracted,
           link_anuncio: sourceUrl,
-          fotos: scrapedImages,
+          fotos,
           photos_confidence: photosConfidence,
           photos_warning: photosWarning,
+          photos_groups: {
+            likely: likelyPhotos,
+            doubtful: doubtfulPhotos,
+            rejected: rejectedPhotos,
+          },
+          photos_debug: photoDebug.slice(0, 120),
         },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
