@@ -31,6 +31,26 @@ interface PropertyEditSheetProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// Calcula score 0-100 de qualidade da curadoria
+function computeQualidadeScore(p: any): number {
+  if (!p) return 0;
+  const checks = [
+    !!p.titulo && p.titulo.length > 5,
+    !!p.descricao && p.descricao.length > 80,
+    Array.isArray(p.fotos) && p.fotos.length > 0,
+    !!p.preco || !!p.preco_temporada_diaria,
+    !!p.bairro,
+    !!p.tipo && !!p.finalidade,
+    p.distancia_praia_m != null,
+    Array.isArray(p.pontos_fortes) && p.pontos_fortes.length > 0,
+    !!p.resumo_estrategico_ia && p.resumo_estrategico_ia.length > 20,
+    p.finalidade !== "temporada" || (p.capacidade_pessoas ?? 0) > 0,
+  ];
+  const passed = checks.filter(Boolean).length;
+  return Math.round((passed / checks.length) * 100);
+}
+
+
 export function PropertyEditSheet({ property, open, onOpenChange }: PropertyEditSheetProps) {
   const isNew = !property.id;
   const [formData, setFormData] = useState<any>({});
