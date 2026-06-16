@@ -131,7 +131,6 @@ export default function AdminImportarLink() {
         title: "Extraído com IA ✨",
         description: `${fotosCount} fotos detectadas — ${conf}.`,
       });
-      });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Erro";
       toast({ title: "Falhou", description: msg, variant: "destructive" });
