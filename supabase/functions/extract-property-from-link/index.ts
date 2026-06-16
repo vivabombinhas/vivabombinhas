@@ -550,15 +550,25 @@ serve(async (req) => {
       );
     }
 
+    // Safety rule: if confidence is low, DO NOT auto-populate the main gallery (fotos = []).
+    // The admin must explicitly promote doubtful photos to the gallery from the UI.
+    const fotos = photosConfidence === "high" ? likelyPhotos : [];
+
     return new Response(
       JSON.stringify({
         success: true,
         data: {
           ...extracted,
           link_anuncio: sourceUrl,
-          fotos: scrapedImages,
+          fotos,
           photos_confidence: photosConfidence,
           photos_warning: photosWarning,
+          photos_groups: {
+            likely: likelyPhotos,
+            doubtful: doubtfulPhotos,
+            rejected: rejectedPhotos,
+          },
+          photos_debug: photoDebug.slice(0, 120),
         },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
