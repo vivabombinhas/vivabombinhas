@@ -92,6 +92,7 @@ export default function AdminImportarLink() {
   const [newPhotoUrl, setNewPhotoUrl] = useState("");
   const [showRejected, setShowRejected] = useState(false);
   const [doubtfulSelected, setDoubtfulSelected] = useState<Record<string, boolean>>({});
+  const [uploadingFiles, setUploadingFiles] = useState(false);
 
   const handleExtract = async () => {
     if (mode === "link") {
