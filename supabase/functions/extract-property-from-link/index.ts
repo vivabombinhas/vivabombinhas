@@ -315,8 +315,7 @@ serve(async (req) => {
       }
 
       // ===== Image extraction scoped to the main gallery =====
-      let photosConfidence: "high" | "low" = "low";
-      let photosWarning: string | null = null;
+      // ===== Image extraction scoped to the main gallery =====
       const candidateImages: string[] = [];
       const ogImages: string[] = [];
 
