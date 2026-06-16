@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Sparkles, Link2, FileText, Loader2, ArrowRight,
-  BedDouble, Bath, Car, Ruler, CheckCircle2, X, ArrowUp, ArrowDown, Plus, Star,
+  BedDouble, Bath, Car, Ruler, CheckCircle2, X, ArrowUp, ArrowDown, Plus, Star, Upload,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -92,6 +92,7 @@ export default function AdminImportarLink() {
   const [newPhotoUrl, setNewPhotoUrl] = useState("");
   const [showRejected, setShowRejected] = useState(false);
   const [doubtfulSelected, setDoubtfulSelected] = useState<Record<string, boolean>>({});
+  const [uploadingFiles, setUploadingFiles] = useState(false);
 
   const handleExtract = async () => {
     if (mode === "link") {
@@ -210,6 +211,39 @@ export default function AdminImportarLink() {
     });
   };
   const clearAllPhotos = () => setData((prev) => ({ ...prev, fotos: [] }));
+
+  const handleUploadFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setUploadingFiles(true);
+    const uploadedUrls: string[] = [];
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith("image/")) continue;
+        const ext = file.name.split(".").pop() || "jpg";
+        const path = `import-tmp/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("imoveis").upload(path, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage.from("imoveis").getPublicUrl(path);
+        uploadedUrls.push(pub.publicUrl);
+      }
+      if (uploadedUrls.length > 0) {
+        addPhotosToGallery(uploadedUrls);
+        toast({ title: `${uploadedUrls.length} foto(s) enviada(s) do computador` });
+      } else {
+        toast({ title: "Nenhuma imagem válida selecionada", variant: "destructive" });
+      }
+    } catch (err: any) {
+      toast({ title: "Erro no upload", description: err.message, variant: "destructive" });
+    } finally {
+      setUploadingFiles(false);
+      e.target.value = "";
+    }
+  };
   const toggleDoubtful = (url: string) =>
     setDoubtfulSelected((prev) => ({ ...prev, [url]: !prev[url] }));
   const addSelectedDoubtful = () => {
@@ -596,18 +630,39 @@ export default function AdminImportarLink() {
                 <p className="text-sm text-muted-foreground italic">Nenhuma foto detectada. Adicione abaixo coando URLs.</p>
               )}
 
-              <div className="flex gap-2 pt-2 border-t border-border">
-                <Input
-                  placeholder="Cole URL(s) de fotos (separe por vírgula ou espaço)"
-                  value={newPhotoUrl}
-                  onChange={(e) => setNewPhotoUrl(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") { e.preventDefault(); addPhotoUrl(); }
-                  }}
-                />
-                <Button type="button" variant="outline" onClick={addPhotoUrl} className="gap-1 flex-shrink-0">
-                  <Plus className="h-4 w-4" /> Adicionar
-                </Button>
+              <div className="flex flex-col gap-2 pt-2 border-t border-border">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Cole URL(s) de fotos (separe por vírgula ou espaço)"
+                    value={newPhotoUrl}
+                    onChange={(e) => setNewPhotoUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") { e.preventDefault(); addPhotoUrl(); }
+                    }}
+                  />
+                  <Button type="button" variant="outline" onClick={addPhotoUrl} className="gap-1 flex-shrink-0">
+                    <Plus className="h-4 w-4" /> Adicionar
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    id="upload-fotos-computador"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleUploadFiles}
+                    disabled={uploadingFiles}
+                  />
+                  <Label
+                    htmlFor="upload-fotos-computador"
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-md border border-border bg-background hover:bg-accent cursor-pointer text-sm ${uploadingFiles ? "opacity-60 pointer-events-none" : ""}`}
+                  >
+                    {uploadingFiles ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    {uploadingFiles ? "Enviando..." : "Subir fotos do computador"}
+                  </Label>
+                  <span className="text-xs text-muted-foreground">JPG, PNG ou WebP — múltiplas permitidas</span>
+                </div>
               </div>
             </div>
 
