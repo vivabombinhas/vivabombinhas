@@ -74,8 +74,9 @@ const detectKind = (l: LeadLike): "investimento" | "temporada" | "anuncio" | "co
 };
 
 /**
- * Gera uma mensagem personalizada de WhatsApp para o consultor Daniel,
- * usando todos os dados disponíveis no CRM. Omite campos ausentes.
+ * Gera uma mensagem personalizada de WhatsApp DO DANIEL PARA O LEAD,
+ * para uso no CRM Admin. Persona: Daniel/Viva Bombinhas iniciando o contato.
+ * Usa todos os dados disponíveis no CRM e omite campos ausentes.
  */
 export const buildPersonalizedMessage = (
   lead: LeadLike,
@@ -92,49 +93,49 @@ export const buildPersonalizedMessage = (
   const top = viewed[0] ? describeProperty(viewed[0]) : null;
 
   const apresentacao = lead.nome
-    ? `Oi, Daniel. Sou o(a) ${lead.nome.split(/\s+/)[0]}.`
-    : `Oi, Daniel.`;
+    ? `Oi, ${nome}, aqui é o Daniel da Viva Bombinhas.`
+    : `Oi, aqui é o Daniel da Viva Bombinhas.`;
 
   const linhas: string[] = [apresentacao];
 
   if (kind === "investimento") {
-    const intro: string[] = [`Conversei com a MarIA sobre investimento em ${local}.`];
-    const objetivos: string[] = [];
-    if (lead.objetivo_investimento) objetivos.push(lead.objetivo_investimento);
-    if (capital) objetivos.push(`tenho ${capital} disponível`);
-    else if (orc) objetivos.push(`orçamento ${orc}`);
-    if (tipo) objetivos.push(`avaliando ${tipo}${bairro ? " em " + bairro : ""}`);
-    if (objetivos.length) intro.push(objetivos.join(", ") + ".");
-    linhas.push(intro.join(" "));
-    if (top) linhas.push(`A MarIA me mostrou ${top}.`);
-    if (lead.bens_para_permuta) linhas.push(`Também tenho ${lead.bens_para_permuta} como possível permuta.`);
-    linhas.push("Gostaria da sua opinião sobre liquidez, potencial de locação e se faz sentido para meu perfil.");
+    const ctx: string[] = [`Vi que você conversou com a MarIA sobre investimento em ${local}`];
+    const det: string[] = [];
+    if (lead.objetivo_investimento) det.push(`com foco em ${lead.objetivo_investimento}`);
+    if (capital) det.push(`capital disponível de ${capital}`);
+    else if (orc) det.push(`orçamento ${orc}`);
+    if (tipo) det.push(`avaliando ${tipo}`);
+    if (det.length) ctx.push(det.join(", "));
+    linhas.push(ctx.join(", ") + ".");
+    if (top) linhas.push(`A MarIA me passou que você avaliou ${top}.`);
+    if (lead.bens_para_permuta) linhas.push(`Anotei também a possibilidade de permuta envolvendo ${lead.bens_para_permuta}.`);
+    linhas.push("Posso te ajudar a analisar se essa opção faz sentido para o seu objetivo?");
   } else if (kind === "temporada") {
-    const intro: string[] = ["Conversei com a MarIA sobre temporada"];
-    if (bairro) intro.push(`em ${bairro}`);
-    if (lead.prazo_compra) intro.push(`para ${lead.prazo_compra}`);
-    if (orc) intro.push(`com diária ${orc}`);
-    linhas.push(intro.join(" ") + ".");
-    if (top) linhas.push(`Vi a opção: ${top}.`);
-    linhas.push("Gostaria de verificar disponibilidade e tirar dúvidas.");
+    const ctx: string[] = ["Vi que você conversou com a MarIA sobre temporada"];
+    if (bairro) ctx.push(`em ${bairro}`);
+    if (lead.prazo_compra) ctx.push(`para ${lead.prazo_compra}`);
+    if (orc) ctx.push(`com diária ${orc}`);
+    linhas.push(ctx.join(" ") + ".");
+    if (top) linhas.push(`A MarIA me passou que você se interessou por ${top}.`);
+    linhas.push("Posso confirmar a disponibilidade e te passar os detalhes?");
   } else if (kind === "anuncio") {
-    const intro: string[] = ["Conversei com a MarIA porque quero anunciar"];
-    if (tipo) intro.push(tipo);
-    if (bairro) intro.push(`em ${bairro}`);
-    linhas.push(intro.join(" ") + ".");
-    if (lead.objetivo) linhas.push(`Objetivo: ${lead.objetivo}.`);
-    linhas.push("Pode me orientar sobre os próximos passos?");
+    const ctx: string[] = ["Vi que você falou com a MarIA sobre anunciar"];
+    if (tipo) ctx.push(tipo);
+    if (bairro) ctx.push(`em ${bairro}`);
+    linhas.push(ctx.join(" ") + ".");
+    if (lead.objetivo) linhas.push(`Anotei seu objetivo: ${lead.objetivo}.`);
+    linhas.push("Posso te orientar sobre os próximos passos para colocar o imóvel no portal?");
   } else {
     // compra
-    const intro: string[] = ["Conversei com a MarIA porque estou buscando"];
-    if (tipo) intro.push(tipo);
-    else intro.push("um imóvel");
-    if (bairro) intro.push(`em ${bairro}`);
-    if (orc) intro.push(orc);
-    linhas.push(intro.join(" ") + ".");
-    if (top) linhas.push(`Vi uma opção: ${top}.`);
-    if (lead.prazo_compra) linhas.push(`Prazo: ${lead.prazo_compra}.`);
-    linhas.push("Gostaria de receber mais detalhes e orientação.");
+    const ctx: string[] = ["Vi que você conversou com a MarIA buscando"];
+    if (tipo) ctx.push(tipo);
+    else ctx.push("um imóvel");
+    if (bairro) ctx.push(`em ${bairro}`);
+    if (orc) ctx.push(orc);
+    linhas.push(ctx.join(" ") + ".");
+    if (top) linhas.push(`A MarIA me passou que você avaliou ${top}.`);
+    if (lead.prazo_compra) linhas.push(`Anotei o prazo: ${lead.prazo_compra}.`);
+    linhas.push("Posso te ajudar com mais detalhes e ver se faz sentido agendarmos uma conversa?");
   }
 
   return linhas.join("\n\n");
