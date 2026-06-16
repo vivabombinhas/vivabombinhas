@@ -64,7 +64,7 @@ export default function AdminImoveis() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: imoveis, isLoading } = useQuery({
+  const { data: imoveis, isLoading, error: imoveisError } = useQuery({
     queryKey: ["admin_imoveis"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -138,10 +138,11 @@ export default function AdminImoveis() {
   };
 
   const filteredImoveis = imoveis?.filter(i => {
+    const normalizedSearch = search.toLowerCase();
     const matchesSearch = 
-      i.titulo?.toLowerCase().includes(search.toLowerCase()) ||
-      i.bairro?.toLowerCase().includes(search.toLowerCase()) ||
-      i.codigo?.toLowerCase().includes(search.toLowerCase());
+      (i.titulo ?? "").toLowerCase().includes(normalizedSearch) ||
+      (i.bairro ?? "").toLowerCase().includes(normalizedSearch) ||
+      (i.codigo ?? "").toLowerCase().includes(normalizedSearch);
     
     const matchesStatus = statusFilter === "all" || i.status === statusFilter;
     
@@ -237,6 +238,12 @@ export default function AdminImoveis() {
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-10">Carregando...</TableCell>
+              </TableRow>
+            ) : imoveisError ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-10 text-destructive">
+                  Erro ao carregar imóveis: {(imoveisError as Error).message}
+                </TableCell>
               </TableRow>
             ) : filteredImoveis?.length === 0 ? (
               <TableRow>

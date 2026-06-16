@@ -27,7 +27,7 @@ export default function AdminCuradoria() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: imoveis, isLoading } = useQuery({
+  const { data: imoveis, isLoading, error: imoveisError } = useQuery({
     queryKey: ["admin_curadoria"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -63,10 +63,13 @@ export default function AdminCuradoria() {
     },
   });
 
-  const filteredImoveis = imoveis?.filter(i => 
-    i.titulo?.toLowerCase().includes(search.toLowerCase()) ||
-    i.bairro?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredImoveis = imoveis?.filter(i => {
+    const normalizedSearch = search.toLowerCase();
+    return (
+      (i.titulo ?? "").toLowerCase().includes(normalizedSearch) ||
+      (i.bairro ?? "").toLowerCase().includes(normalizedSearch)
+    );
+  });
 
   return (
     <div className="container py-6 space-y-6">
@@ -106,6 +109,12 @@ export default function AdminCuradoria() {
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-10">Carregando...</TableCell>
+              </TableRow>
+            ) : imoveisError ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-10 text-destructive">
+                  Erro ao carregar imóveis: {(imoveisError as Error).message}
+                </TableCell>
               </TableRow>
             ) : filteredImoveis?.length === 0 ? (
               <TableRow>
