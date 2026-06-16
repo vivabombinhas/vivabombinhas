@@ -330,10 +330,9 @@ serve(async (req) => {
       }
 
       // ===== Image extraction scoped to the main gallery =====
-      const candidateImages: string[] = [];
+      const candidates: Array<{ url: string; source: PhotoSource }> = [];
       const ogImages: string[] = [];
 
-      // Always capture OG image up-front (it's usually the main listing photo)
       if (scrapedHtml) {
         for (const m of scrapedHtml.matchAll(/<meta[^>]+property=["']og:image[^"']*["'][^>]+content=["']([^"']+)["']/gi)) {
           ogImages.push(m[1]);
@@ -352,29 +351,29 @@ serve(async (req) => {
           } catch { return null; }
         };
 
-        // 1) Strip headers/footers/nav/asides and any "similar/related/recommended" blocks
         const { cleaned, removed: removedSections } = stripRelatedSections(scrapedHtml);
         console.log(`[gallery] stripped ${removedSections} related/chrome sections`);
 
-        // 2) Try to scope to the main gallery container; fall back to the cleaned HTML
         const gallery = extractGalleryHtml(cleaned);
         let scope: string;
         let scopeLabel: string;
+        let scopeSource: PhotoSource;
         if (gallery) {
           scope = gallery.gallery;
           scopeLabel = `gallery(${gallery.matchedBy})`;
+          scopeSource = "gallery";
           photosConfidence = "high";
           console.log(`[gallery] matched main gallery container by "${gallery.matchedBy}"`);
         } else {
           scope = cleaned;
           scopeLabel = "cleaned-main";
+          scopeSource = "main";
           photosConfidence = "low";
           photosWarning =
-            "Não foi possível identificar com segurança a galeria principal. Revise as fotos manualmente antes de salvar.";
-          console.log("[gallery] no main gallery container matched — using cleaned main content");
+            "Não foi possível identificar com segurança a galeria principal. As fotos abaixo precisam de revisão manual antes de salvar.";
+          console.log("[gallery] no main gallery container matched — collected as DOUBTFUL only");
         }
 
-        // 3) Collect <img> with lazy-load attributes, scoped
         const imgRegex = /<img\b[^>]*>/gi;
         let tagMatch: RegExpExecArray | null;
         while ((tagMatch = imgRegex.exec(scope)) !== null) {
@@ -383,52 +382,57 @@ serve(async (req) => {
           let a: RegExpExecArray | null;
           while ((a = attrRe.exec(tag)) !== null) {
             const u = resolve(a[2]);
-            if (u) candidateImages.push(u);
+            if (u) candidates.push({ url: u, source: scopeSource });
           }
-          // srcset on this img tag — prefer the largest descriptor
           const srcsetMatch = /srcset=["']([^"']+)["']/i.exec(tag);
           if (srcsetMatch) {
             const parts = srcsetMatch[1].split(",").map((p) => p.trim());
-            // pick last (usually largest)
             const last = parts[parts.length - 1]?.split(/\s+/)[0];
-            if (last) { const u = resolve(last); if (u) candidateImages.push(u); }
+            if (last) { const u = resolve(last); if (u) candidates.push({ url: u, source: scopeSource }); }
           }
         }
 
-        // 4) <source srcset=...> inside scoped <picture>
         for (const m of scope.matchAll(/<source\b[^>]*srcset=["']([^"']+)["'][^>]*>/gi)) {
           const parts = m[1].split(",").map((p) => p.trim().split(/\s+/)[0]);
           const last = parts[parts.length - 1];
-          if (last) { const u = resolve(last); if (u) candidateImages.push(u); }
+          if (last) { const u = resolve(last); if (u) candidates.push({ url: u, source: scopeSource }); }
         }
 
-        // 5) Markdown images, only if they also appear in the scope (avoid related-section markdown)
+        // Markdown images only if they appear in the scoped HTML (avoid related-section markdown)
         for (const m of scrapedMd.matchAll(/!\[.*?\]\((https?:\/\/[^\s)]+)\)/g)) {
           const u = m[1];
-          if (scope.includes(u) || gallery === null) candidateImages.push(u);
+          if (scope.includes(u)) candidates.push({ url: u, source: scopeSource });
         }
 
-        console.log(`[gallery] scope=${scopeLabel}, raw candidates=${candidateImages.length}`);
+        console.log(`[gallery] scope=${scopeLabel}, raw candidates=${candidates.length}`);
       }
 
-      // Always prepend OG image as a strong hint (it's the listing's hero image)
-      for (const og of ogImages.reverse()) candidateImages.unshift(og);
+      // OG image is the hero — always treat as likely
+      for (const og of ogImages.reverse()) candidates.unshift({ url: og, source: "og" });
 
-      const { photos, logs } = dedupeAndFilterPhotos(candidateImages, 40);
-      scrapedImages = photos;
-      const includedCount = logs.filter((l) => l.status === "included").length;
-      const excludedCount = logs.length - includedCount;
-      console.log(`[gallery] photos kept=${includedCount}, excluded=${excludedCount}, total raw=${candidateImages.length}`);
-      // Sample a few exclusion reasons for debugging
-      const excludeSample = logs.filter((l) => l.status === "excluded").slice(0, 8);
-      if (excludeSample.length) {
-        console.log("[gallery] sample excluded:", JSON.stringify(excludeSample));
+      photoDebug = classifyPhotos(candidates);
+      likelyPhotos = photoDebug.filter((p) => p.group === "likely").slice(0, 40).map((p) => p.url);
+      doubtfulPhotos = photoDebug
+        .filter((p) => p.group === "doubtful")
+        .slice(0, 40)
+        .map((p) => p.url)
+        .filter((u) => !likelyPhotos.includes(u));
+      rejectedPhotos = photoDebug
+        .filter((p) => p.group === "rejected")
+        .slice(0, 60)
+        .map((p) => ({ url: p.url, reason: p.reason, source: p.source }));
+
+      console.log(
+        `[gallery] likely=${likelyPhotos.length}, doubtful=${doubtfulPhotos.length}, rejected=${rejectedPhotos.length}, total raw=${candidates.length}`,
+      );
+      if (rejectedPhotos.length) {
+        console.log("[gallery] sample rejected:", JSON.stringify(rejectedPhotos.slice(0, 8)));
       }
 
-      if (scrapedImages.length === 0) {
+      if (likelyPhotos.length === 0 && doubtfulPhotos.length === 0) {
         photosWarning = photosWarning ?? "Nenhuma foto da galeria principal foi identificada. Adicione manualmente antes de salvar.";
-      } else if (scrapedImages.length < 3 && photosConfidence === "low") {
-        photosWarning = photosWarning ?? "Poucas fotos detectadas e a galeria principal não foi confirmada. Revise antes de salvar.";
+      } else if (likelyPhotos.length === 0 && photosConfidence === "low") {
+        photosWarning = photosWarning ?? "Apenas fotos duvidosas foram detectadas. Selecione manualmente as que pertencem ao imóvel.";
       }
 
       content = scrapedMd.slice(0, 35000);
