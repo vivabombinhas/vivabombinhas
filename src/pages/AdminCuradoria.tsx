@@ -30,10 +30,7 @@ export default function AdminCuradoria() {
   const { data: imoveis, isLoading } = useQuery({
     queryKey: ["admin_curadoria"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("imoveis")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const { data, error } = await (supabase as any).rpc("admin_list_imoveis");
       if (error) throw error;
       return data;
     },
