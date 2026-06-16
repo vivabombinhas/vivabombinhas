@@ -61,6 +61,11 @@ interface ExtractedData {
   codigo?: string;
   photos_confidence?: "high" | "low";
   photos_warning?: string | null;
+  photos_groups?: {
+    likely: string[];
+    doubtful: string[];
+    rejected: Array<{ url: string; reason: string; source?: string }>;
+  };
 }
 
 const tipoLabels: Record<string, string> = {
