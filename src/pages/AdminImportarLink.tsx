@@ -630,18 +630,39 @@ export default function AdminImportarLink() {
                 <p className="text-sm text-muted-foreground italic">Nenhuma foto detectada. Adicione abaixo coando URLs.</p>
               )}
 
-              <div className="flex gap-2 pt-2 border-t border-border">
-                <Input
-                  placeholder="Cole URL(s) de fotos (separe por vírgula ou espaço)"
-                  value={newPhotoUrl}
-                  onChange={(e) => setNewPhotoUrl(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") { e.preventDefault(); addPhotoUrl(); }
-                  }}
-                />
-                <Button type="button" variant="outline" onClick={addPhotoUrl} className="gap-1 flex-shrink-0">
-                  <Plus className="h-4 w-4" /> Adicionar
-                </Button>
+              <div className="flex flex-col gap-2 pt-2 border-t border-border">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Cole URL(s) de fotos (separe por vírgula ou espaço)"
+                    value={newPhotoUrl}
+                    onChange={(e) => setNewPhotoUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") { e.preventDefault(); addPhotoUrl(); }
+                    }}
+                  />
+                  <Button type="button" variant="outline" onClick={addPhotoUrl} className="gap-1 flex-shrink-0">
+                    <Plus className="h-4 w-4" /> Adicionar
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    id="upload-fotos-computador"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleUploadFiles}
+                    disabled={uploadingFiles}
+                  />
+                  <Label
+                    htmlFor="upload-fotos-computador"
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-md border border-border bg-background hover:bg-accent cursor-pointer text-sm ${uploadingFiles ? "opacity-60 pointer-events-none" : ""}`}
+                  >
+                    {uploadingFiles ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    {uploadingFiles ? "Enviando..." : "Subir fotos do computador"}
+                  </Label>
+                  <span className="text-xs text-muted-foreground">JPG, PNG ou WebP — múltiplas permitidas</span>
+                </div>
               </div>
             </div>
 
