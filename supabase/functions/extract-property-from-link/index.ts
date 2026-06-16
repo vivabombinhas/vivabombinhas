@@ -39,19 +39,32 @@ interface ExtractionRequest {
   text?: string;
 }
 
-function isLikelyPropertyPhoto(url: string): { ok: boolean; reason: string } {
+type PhotoSource = "og" | "gallery" | "main";
+type PhotoGroup = "likely" | "doubtful" | "rejected";
+
+interface ClassifiedPhoto {
+  url: string;
+  group: PhotoGroup;
+  reason: string;
+  source: PhotoSource;
+}
+
+function classifyByUrl(url: string): { ok: boolean; reason: string } {
   const u = url.toLowerCase();
   if (u.startsWith("data:image")) {
     return u.length > 2000 ? { ok: true, reason: "data-url-large" } : { ok: false, reason: "data-url-placeholder" };
   }
+  // Expanded blocklist: logos, icons, avatars, badges, banners, maps, agent/agency, related/similar/ads, share/social.
   const badPatterns = [
-    "logo", "icon", "avatar", "favicon", "sprite", "placeholder",
-    "/static/", "/assets/icons", "share-", "social-", "/badges/",
-    "google-play", "app-store", "whatsapp.svg", "pixel.gif",
+    "logo", "icon", "favicon", "sprite", "placeholder", "spinner",
+    "avatar", "/perfil", "/profile", "/anunciante", "/agency", "/agente", "/corretor", "/broker",
+    "/static/", "/assets/icons", "/badges/", "/badge/", "shield", "verified", "stamp", "/selo", "/seal",
+    "share-", "social-", "/social/", "google-play", "app-store", "whatsapp.svg", "pixel.gif",
     "1x1", "spacer", "blank.", "loading.", "/flags/", "/emoji",
-    "marker", "/map", "/pin", "/heart", "/star",
-    "/perfil", "/profile", "/anunciante", "/agency", "/agente",
-    "/banner", "thumb-small", "_small.", "_thumb.", "small_thumb",
+    "marker", "/map/", "googlemap", "static-map", "/pin", "/heart", "/star/",
+    "/banner", "/banners/", "/ads/", "ad-image", "promoted", "publicidade",
+    "/related", "/similar", "/recommend", "/sugest", "/outros-anuncios", "/veja-tambem",
+    "thumb-small", "_small.", "_thumb.", "small_thumb", "/mini/", "/micro/",
   ];
   for (const p of badPatterns) if (u.includes(p)) return { ok: false, reason: `bad-pattern:${p}` };
 
@@ -60,41 +73,40 @@ function isLikelyPropertyPhoto(url: string): { ok: boolean; reason: string } {
   const looksLikeCdn = cdnPatterns.some((p) => u.includes(p));
   if (!goodExt && !looksLikeCdn) return { ok: false, reason: "no-ext-no-cdn" };
 
-  if (/[?&](w|width)=([1-9]?\d)(&|$)/i.test(u)) return { ok: false, reason: "url-width<100" };
-  if (/\b(16x16|24x24|32x32|48x48|50x50|64x64|96x96|100x100|120x120|150x150)\b/.test(u)) return { ok: false, reason: "tiny-dimension" };
+  if (/[?&](w|width|h|height|size)=([1-9]?\d)(&|$)/i.test(u)) return { ok: false, reason: "url-dim<100" };
+  if (/\b(16x16|24x24|32x32|48x48|50x50|64x64|96x96|100x100|120x120|150x150|180x180|200x200)\b/.test(u)) return { ok: false, reason: "tiny-dimension" };
 
   return { ok: true, reason: "accepted" };
 }
 
-// Collapse known thumbnail-size variants so big/small versions of same photo dedupe together
+// Strong normalization to collapse near-duplicates (thumbnails, size suffixes, query params)
 function photoKey(url: string): string {
   let key = url.split("#")[0].split("?")[0].toLowerCase();
   key = key.replace(/[-_](\d{2,4})x(\d{2,4})(?=\.[a-z]+$)/i, "");
+  key = key.replace(/[-_](small|medium|large|thumb|thumbnail|mini|big|original|full|hd|hq)(?=\.[a-z]+$)/i, "");
   key = key.replace(/\/im_w_\d+\//, "/");
   key = key.replace(/\/policy\/[^/]+\//, "/original/");
+  key = key.replace(/\/(thumb|thumbs|thumbnail|small|medium|large|mini|cache)\//g, "/");
+  key = key.replace(/([^:])\/+/g, "$1/");
   return key;
 }
 
-function dedupeAndFilterPhotos(
-  urls: string[],
-  max = 30,
-): { photos: string[]; logs: Array<{ url: string; status: string; reason: string }> } {
+function classifyPhotos(candidates: Array<{ url: string; source: PhotoSource }>): ClassifiedPhoto[] {
   const seen = new Set<string>();
-  const out: string[] = [];
-  const logs: Array<{ url: string; status: string; reason: string }> = [];
-  for (const raw of urls) {
+  const out: ClassifiedPhoto[] = [];
+  for (const c of candidates) {
+    const raw = c.url?.trim().split("#")[0];
     if (!raw) continue;
-    const url = raw.trim().split("#")[0];
-    const check = isLikelyPropertyPhoto(url);
-    if (!check.ok) { logs.push({ url, status: "excluded", reason: check.reason }); continue; }
-    const key = photoKey(url);
-    if (seen.has(key)) { logs.push({ url, status: "excluded", reason: "duplicate" }); continue; }
+    const check = classifyByUrl(raw);
+    if (!check.ok) { out.push({ url: raw, group: "rejected", reason: check.reason, source: c.source }); continue; }
+    const key = photoKey(raw);
+    if (seen.has(key)) { out.push({ url: raw, group: "rejected", reason: "duplicate", source: c.source }); continue; }
     seen.add(key);
-    out.push(url);
-    logs.push({ url, status: "included", reason: check.reason });
-    if (out.length >= max) break;
+    // OG + confirmed gallery container → likely. "main" (no gallery container matched) → doubtful, needs admin review.
+    const group: PhotoGroup = c.source === "main" ? "doubtful" : "likely";
+    out.push({ url: raw, group, reason: c.source === "og" ? "og:image" : `from:${c.source}`, source: c.source });
   }
-  return { photos: out, logs };
+  return out;
 }
 
 // Remove blocks whose class/id/aria-label hint they are related/similar/recommended content.
