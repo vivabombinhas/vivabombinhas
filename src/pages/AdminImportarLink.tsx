@@ -90,6 +90,8 @@ export default function AdminImportarLink() {
   const [data, setData] = useState<ExtractedData>({});
   const [submitting, setSubmitting] = useState(false);
   const [newPhotoUrl, setNewPhotoUrl] = useState("");
+  const [showRejected, setShowRejected] = useState(false);
+  const [doubtfulSelected, setDoubtfulSelected] = useState<Record<string, boolean>>({});
 
   const handleExtract = async () => {
     if (mode === "link") {
