@@ -457,7 +457,14 @@ async function searchSeasonPropertiesProgressive(supabase: any, filters: any, ex
   ];
 
   const selected = layers.find((layer) => layer.results.length > 0) ?? layers[0];
-  const sorted = sortSeasonProperties(selected.results, ctx).slice(0, 40);
+  const sorted = (selected.isFallback
+    ? [...selected.results].sort((a, b) => {
+        const priceDiff = dailyPrice(a) - dailyPrice(b);
+        if (priceDiff !== 0) return priceDiff;
+        return rankSeasonProperty(b, ctx) - rankSeasonProperty(a, ctx);
+      })
+    : sortSeasonProperties(selected.results, ctx)
+  ).slice(0, 40);
   const fallbackCount = selected.isFallback ? sorted.length : 0;
 
   console.debug("[MarIA Season Search]", JSON.stringify({
