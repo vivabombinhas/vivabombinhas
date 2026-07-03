@@ -83,10 +83,10 @@ const MariaChat = () => {
               <h2 className="text-xl font-bold font-display text-foreground tracking-tight">
                 Olá! Sou a{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Mar</span>
-                <span className="text-foreground">IA</span>, sua assistente aqui no VIV Bombinhas. 😊
+                <span className="text-foreground">IA</span>, seu concierge imobiliário em Bombinhas. 😊
               </h2>
               <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
-                Como posso ajudar você hoje em Bombinhas?
+                Combino IA, curadoria local e atendimento humano para te ajudar a encontrar o imóvel certo. Como posso ajudar hoje?
               </p>
             </div>
             {!finalidade ? (
