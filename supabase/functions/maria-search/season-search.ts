@@ -259,23 +259,20 @@ export function validateSeasonSearchState(state: SeasonSearchState): SeasonValid
   if (!state.preco_min && !state.preco_max) missing.push("orcamento");
   if (!state.periodo) missing.push("periodo");
 
-  // Se o usuário pediu explicitamente "me mostre opções", período nunca bloqueia.
-  const blocking = missing.filter((m) => {
-    if (m === "periodo") return false; // período nunca bloqueia
-    if (m === "orcamento" && state.explicit_show_request) return false;
-    return true;
-  });
+  // Regra determinística de bloqueio:
+  // - período NUNCA bloqueia;
+  // - pessoas SÓ bloqueia quando o usuário não pediu cards explicitamente E não temos bairro/tipo suficientes;
+  // - orçamento SÓ bloqueia quando não temos bairro nem tipo (sinal fraco) e o usuário não pediu explicitamente.
+  const hasStrongSignal = state.bairros.length > 0 || state.tipos.length > 0;
+  const blocking: SeasonValidation["missing"] = [];
+  if (!state.pessoas && !state.explicit_show_request && !hasStrongSignal) blocking.push("pessoas");
+  if (!state.preco_min && !state.preco_max && !state.explicit_show_request && !hasStrongSignal) blocking.push("orcamento");
 
-  if (blocking.length === 0 || state.explicit_show_request && !missing.includes("pessoas")) {
-    return { ok: true, missing, ask: null };
-  }
+  if (blocking.length === 0) return { ok: true, missing, ask: null };
 
-  let ask: string | null = null;
-  if (blocking.includes("pessoas")) {
-    ask = "Para quantas pessoas você precisa?";
-  } else if (blocking.includes("orcamento")) {
-    ask = "Qual faixa de valor por diária faz sentido para você?";
-  }
+  const ask = blocking.includes("pessoas")
+    ? "Para quantas pessoas você precisa?"
+    : "Qual faixa de valor por diária faz sentido para você?";
   return { ok: false, missing, ask };
 }
 
