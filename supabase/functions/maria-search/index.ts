@@ -819,9 +819,9 @@ serve(async (req) => {
           if (allProperties.length > 0) {
             showResults = true;
             if (seasonSearch?.isFallback) {
-              cleaned = "Não encontrei casa exatamente nessa faixa, mas encontrei alternativas reais próximas no portal. Para janeiro ou fevereiro, a disponibilidade precisa ser confirmada com o parceiro local.";
+              cleaned = "Não encontrei exatamente nessa faixa, mas encontrei alternativas reais próximas no portal. A disponibilidade precisa ser confirmada com o parceiro local.";
             } else if (effectiveFilters.finalidade === "temporada") {
-              cleaned = "Encontrei opções compatíveis. Para janeiro ou fevereiro, a disponibilidade precisa ser confirmada com o parceiro local.";
+              cleaned = "Encontrei opções compatíveis. A disponibilidade precisa ser confirmada com o parceiro local. Se você tiver datas em mente, posso ajudar a filtrar melhor.";
             }
             if (!lead_captured && allProperties.length > 2) {
               gateActive = true;
