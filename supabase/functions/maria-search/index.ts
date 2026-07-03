@@ -410,6 +410,9 @@ serve(async (req) => {
         cleaned = "Perfeito. Vou organizar seu perfil para análise estratégica com o Daniel.";
       }
     } else {
+      // Concatena histórico para permitir inferência de capacidade/período em temporada
+      const historyText = messages.map((m: any) => String(m?.content ?? "")).join(" \n ");
+
       if (!filters && extractedData && (intent === "busca" || intent === "consultivo") && isExplicitSearchRequest) {
         const candidateFilters = {
           finalidade: extractedData.finalidade || "compra",
@@ -418,7 +421,7 @@ serve(async (req) => {
           preco_max: extractedData.orcamento_max
         };
         
-        if (isSearchAllowed(candidateFilters, intent, lastMessage, extractedData)) {
+        if (isSearchAllowed(candidateFilters, intent, lastMessage, extractedData, historyText)) {
           filters = candidateFilters;
         }
       }
@@ -430,9 +433,10 @@ serve(async (req) => {
         tipo: filters?.tipo || extractedData?.tipo_imovel,
         preco_max: filters?.preco_max || extractedData?.orcamento_max,
         preco_min: filters?.preco_min || extractedData?.orcamento_min
-      } : null, intent, lastMessage, extractedData);
+      } : null, intent, lastMessage, extractedData, historyText);
       
       missingFilters = searchCheck.missing;
+      console.debug(`[MarIA Debug] filters=${JSON.stringify(filters)} searchCheck.allowed=${searchCheck.allowed} missing=${JSON.stringify(searchCheck.missing)}`);
 
       // Final check for search triggering
       if (searchCheck.allowed) {
