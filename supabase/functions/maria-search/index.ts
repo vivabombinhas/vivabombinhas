@@ -945,28 +945,35 @@ serve(async (req) => {
         : inferSeasonFilters(filters || {}, extractedData, historyText);
 
       if (!filters && extractedData && (intent === "busca" || intent === "consultivo") && isExplicitSearchRequest) {
+        const candidateFinalidade = purchaseMode
+          ? "compra"
+          : (extractedData.finalidade || effectiveSearchFilters?.finalidade || "compra");
         const candidateFilters = {
-          finalidade: extractedData.finalidade || effectiveSearchFilters?.finalidade || "compra",
+          finalidade: candidateFinalidade,
           bairro: extractedData.bairro_preferencia,
           tipo: extractedData.tipo_imovel,
           preco_max: extractedData.orcamento_max,
           preco_min: extractedData.orcamento_min,
-          pessoas: extractedData.pessoas,
-          periodo: extractedData.periodo,
+          pessoas: purchaseMode ? undefined : extractedData.pessoas,
+          periodo: purchaseMode ? undefined : extractedData.periodo,
         };
 
-        const inferredCandidate = inferSeasonFilters(candidateFilters, extractedData, historyText);
+        const inferredCandidate = purchaseMode
+          ? candidateFilters
+          : inferSeasonFilters(candidateFilters, extractedData, historyText);
         if (isSearchAllowed(inferredCandidate, intent, lastMessage, extractedData, historyText)) {
           filters = inferredCandidate;
           effectiveSearchFilters = inferredCandidate;
         }
       }
 
-      if (!filters && effectiveSearchFilters?.finalidade === "temporada" && isExplicitSearchRequest) {
+      if (!purchaseMode && !filters && effectiveSearchFilters?.finalidade === "temporada" && isExplicitSearchRequest) {
         filters = effectiveSearchFilters;
       }
 
-      effectiveSearchFilters = inferSeasonFilters(filters || effectiveSearchFilters || {}, extractedData, historyText);
+      effectiveSearchFilters = purchaseMode
+        ? { ...(filters || effectiveSearchFilters || {}), finalidade: "compra" }
+        : inferSeasonFilters(filters || effectiveSearchFilters || {}, extractedData, historyText);
 
       // Check search requirements
       const searchCheckFilters = (effectiveSearchFilters?.finalidade || filters || extractedData) ? {
