@@ -119,7 +119,7 @@ const MariaChat = () => {
                   <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-2">
                     <span>Buscando para</span>
                     <span className="font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full border border-primary/20">
-                      {finalidade === "temporada" ? "🏖️ Passar férias" : finalidade === "compra" ? "🏠 Comprar imóvel" : "🤝 Anunciar imóvel"}
+                      {finalidade === "temporada" ? "🏖️ Alugar para temporada" : finalidade === "compra" ? "🏠 Comprar / investir" : finalidade === "entender" ? "🧭 Entender Bombinhas" : "🤝 Anunciar imóvel"}
                     </span>
                     {" · "}
                     <button onClick={clearFinalidade} className="underline text-muted-foreground hover:text-foreground font-medium transition-colors">

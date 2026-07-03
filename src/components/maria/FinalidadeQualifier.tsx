@@ -1,6 +1,6 @@
-import { Home, Calendar, Tag, UserPlus } from "lucide-react";
+import { Home, Calendar, UserPlus, Compass } from "lucide-react";
 
-export type Finalidade = "compra" | "investimento" | "temporada" | "anunciante";
+export type Finalidade = "compra" | "investimento" | "temporada" | "anunciante" | "entender";
 
 interface FinalidadeQualifierProps {
   onSelect: (finalidade: Finalidade) => void;
@@ -15,31 +15,31 @@ const OPTIONS: Array<{
 }> = [
   {
     id: "temporada",
-    label: "Passar férias",
-    description: "Lazer e família",
+    label: "Quero alugar para temporada",
+    description: "Férias, feriados e fins de semana",
     icon: Calendar,
     emoji: "🏖️",
   },
   {
     id: "compra",
-    label: "Comprar imóvel",
-    description: "Morar ou ter casa de praia",
+    label: "Quero comprar / investir",
+    description: "Uso próprio, renda de temporada ou patrimônio",
     icon: Home,
     emoji: "🏠",
   },
   {
-    id: "investimento",
-    label: "Comprar para investir",
-    description: "Análise e perfil de busca",
-    icon: Tag,
-    emoji: "📈",
-  },
-  {
     id: "anunciante",
-    label: "Quero anunciar",
-    description: "Sou proprietário ou anunciante",
+    label: "Quero anunciar um imóvel",
+    description: "Sou proprietário, corretor ou imobiliária",
     icon: UserPlus,
     emoji: "🤝",
+  },
+  {
+    id: "entender",
+    label: "Quero entender Bombinhas",
+    description: "Bairros, perfil das praias e o mercado local",
+    icon: Compass,
+    emoji: "🧭",
   },
 ];
 
@@ -47,7 +47,7 @@ export function FinalidadeQualifier({ onSelect }: FinalidadeQualifierProps) {
   return (
     <div className="w-full max-w-md mx-auto px-4 space-y-3">
       <p className="text-sm text-muted-foreground text-center">
-        O que você busca hoje?
+        Por onde prefere começar?
       </p>
       <div className="grid gap-2">
         {OPTIONS.map((opt) => {
