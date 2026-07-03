@@ -5,10 +5,11 @@ import type { Finalidade } from "@/components/maria/FinalidadeQualifier";
 
 const FINALIDADE_KEY = "maria_finalidade";
 const FINALIDADE_LABEL: Record<Finalidade, string> = {
-  temporada: "passar férias",
+  temporada: "alugar para temporada",
   investimento: "comprar para investir",
-  compra: "comprar imóvel",
+  compra: "comprar ou investir",
   anunciante: "anunciar imóvel",
+  entender: "entender Bombinhas antes de decidir",
 };
 
 export interface ChatMessage {
