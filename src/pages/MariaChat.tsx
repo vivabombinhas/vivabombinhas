@@ -36,11 +36,11 @@ const MariaChat = () => {
   return (
     <div className="flex flex-col h-[100dvh] bg-background">
       <Helmet>
-        <title>MarIA — Assistente de imóveis em Bombinhas</title>
-        <meta name="description" content="Converse com a MarIA, a assistente de IA que encontra imóveis em Bombinhas para temporada, compra ou investimento." />
+        <title>MarIA — Concierge imobiliário em Bombinhas</title>
+        <meta name="description" content="Converse com a MarIA: IA, curadoria local e atendimento humano para turistas e investidores encontrarem imóveis em Bombinhas." />
         <link rel="canonical" href="https://vivabombinhas.lovable.app/maria" />
-        <meta property="og:title" content="MarIA — Assistente de imóveis em Bombinhas" />
-        <meta property="og:description" content="Encontre imóveis reais e disponíveis em Bombinhas conversando com a MarIA." />
+        <meta property="og:title" content="MarIA — Concierge imobiliário em Bombinhas" />
+        <meta property="og:description" content="IA, curadoria local e atendimento humano ajudando você a encontrar imóveis em Bombinhas." />
         <meta property="og:url" content="https://vivabombinhas.lovable.app/maria" />
         <meta property="og:type" content="website" />
         <meta name="robots" content="noindex" />
