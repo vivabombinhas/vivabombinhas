@@ -591,8 +591,8 @@ function checkSearchRequirements(filters: any, intent: string, lastMessage: stri
     // Padrões: "8 pessoas", "para 6", "casal", período/mês/dias
     const capacityRegex = /\b(\d+)\s*(pessoas|pessoa|adultos|h[óo]spedes|gente)\b|\bpara\s+(\d+)\b|\bcasal\b|\bfam[íi]lia\b/;
     const periodRegex = /\b(janeiro|fevereiro|mar[çc]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|carnaval|r[ée]veillon|natal|feriado|temporada)\b|\b\d+\s*(dias|noites|di[áa]rias|semanas?)\b|\bdia\s+\d+\b/;
-    const hasCapacity = capacityRegex.test(text) || !!extractedData?.pessoas;
-    const hasPeriod = periodRegex.test(text) || !!extractedData?.periodo;
+    const hasCapacity = capacityRegex.test(text) || !!extractedData?.pessoas || !!filters?.pessoas || !!filters?.capacidade_pessoas;
+    const hasPeriod = periodRegex.test(text) || !!extractedData?.periodo || !!filters?.periodo;
     const hasCapacityOrPeriod = hasCapacity || hasPeriod;
     
     if (!hasConstraint) missing.push("filtros_concretos");
