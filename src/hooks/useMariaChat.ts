@@ -370,8 +370,10 @@ export function useMariaChat() {
     setMessages([]);
     clearPropertyState();
     try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
+    try { localStorage.removeItem(FINALIDADE_KEY); } catch { /* ignore */ }
     sessionIdRef.current = getOrCreateSessionId();
     finalidadeHintSentRef.current = false;
+    setFinalidadeState(null);
   }, [clearPropertyState]);
 
   return {
