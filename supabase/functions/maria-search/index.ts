@@ -207,6 +207,47 @@ function normalizeText(value: unknown): string {
     .trim();
 }
 
+// Remove menções a meses/períodos da resposta se o usuário não os citou na conversa atual.
+const PERIOD_TERMS = [
+  "janeiro","fevereiro","marco","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro",
+  "carnaval","reveillon","réveillon","natal","alta temporada","baixa temporada","feriado","feriadao","feriadão"
+];
+function sanitizePeriodMentions(reply: string, messages: any[]): string {
+  if (!reply) return reply;
+  const userText = normalizeText(messages.filter(m => m.role === "user").map(m => m.content).join(" "));
+  const mentioned = new Set<string>();
+  for (const term of PERIOD_TERMS) {
+    const key = normalizeText(term);
+    if (userText.includes(key)) mentioned.add(key);
+  }
+  const replyNorm = normalizeText(reply);
+  const hasForbidden = PERIOD_TERMS.some(t => {
+    const k = normalizeText(t);
+    return replyNorm.includes(k) && !mentioned.has(k);
+  });
+  if (!hasForbidden) return reply;
+
+  // Substitui frases inteiras que citam mês/período por texto neutro.
+  const sentences = reply.split(/(?<=[\.\!\?])\s+/);
+  const cleanedSentences = sentences.map((s) => {
+    const sn = normalizeText(s);
+    const bad = PERIOD_TERMS.some(t => {
+      const k = normalizeText(t);
+      return sn.includes(k) && !mentioned.has(k);
+    });
+    if (!bad) return s;
+    return "A disponibilidade precisa ser confirmada com o parceiro local. Se você tiver datas em mente, posso ajudar a filtrar melhor.";
+  });
+  // De-duplica a frase neutra caso apareça várias vezes seguidas.
+  const out: string[] = [];
+  for (const s of cleanedSentences) {
+    if (out.length && out[out.length - 1] === s) continue;
+    out.push(s);
+  }
+  return out.join(" ").trim();
+}
+
+
 function uniqueValues<T>(values: T[]): T[] {
   return Array.from(new Set(values.filter(Boolean)));
 }
