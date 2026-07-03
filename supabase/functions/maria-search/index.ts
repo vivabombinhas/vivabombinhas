@@ -8,6 +8,7 @@ import {
   searchAndRankSeasonProperties,
   buildSeasonReply,
 } from "./season-search.ts";
+import { callMariaCore, isMariaCoreConfigured } from "../_shared/mariaCore.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
