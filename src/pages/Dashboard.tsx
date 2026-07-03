@@ -131,16 +131,6 @@ export default function Dashboard() {
   if (!session) {
     return <AdvertiserLoginPanel />;
   }
-              Quero Anunciar um Imóvel
-            </Button>
-            <Button variant="ghost" onClick={() => navigate("/")} className="w-full text-xs">
-              Voltar para o Início
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const pendingSubmissions = submissions.filter(s => s.status_submission === "pendente");
   const approvedProperties = properties.length;
