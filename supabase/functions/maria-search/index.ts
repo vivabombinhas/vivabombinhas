@@ -143,6 +143,351 @@ function normalizeTipo(raw: string): string[] {
   return Array.from(found).filter(t => (TIPO_ENUM as readonly string[]).includes(t));
 }
 
+const BAIRROS_BOMBINHAS = [
+  "Centro",
+  "Bombas",
+  "Bombinhas",
+  "José Amândio",
+  "Quatro Ilhas",
+  "Mariscal",
+  "Canto Grande",
+  "Morrinhos",
+  "Zimbros",
+  "Praia de Fora",
+  "Sertãozinho",
+];
+
+const BAIRROS_PROXIMOS: Record<string, string[]> = {
+  mariscal: ["Canto Grande", "Morrinhos", "Zimbros"],
+  "canto grande": ["Mariscal", "Morrinhos", "Zimbros"],
+  morrinhos: ["Canto Grande", "Zimbros", "Mariscal"],
+  zimbros: ["Morrinhos", "Canto Grande"],
+  bombas: ["Centro", "José Amândio", "Bombinhas"],
+  centro: ["Bombas", "Bombinhas", "Quatro Ilhas"],
+  bombinhas: ["Centro", "Quatro Ilhas", "Bombas"],
+  "quatro ilhas": ["Bombinhas", "Centro", "Mariscal"],
+  "josé amândio": ["Bombas", "Centro"],
+  "praia de fora": ["Zimbros", "Morrinhos"],
+  sertãozinho: ["Zimbros", "Morrinhos"],
+};
+
+type PriceContext = {
+  value: number | null;
+  mode: "rigid_max" | "around" | "economic_from" | "none";
+  exactMax: number | null;
+  flexibleMax: number | null;
+};
+
+type SeasonSearchContext = {
+  bairros: string[];
+  nearbyBairros: string[];
+  requestedTipos: string[];
+  primaryTipos: string[];
+  expandedTipos: string[];
+  releaseAllTypes: boolean;
+  pessoas: number | null;
+  price: PriceContext;
+};
+
+type SeasonSearchResult = {
+  properties: any[];
+  exactCount: number;
+  fallbackCount: number;
+  layer: string;
+  isFallback: boolean;
+  totalActive: number;
+  context: SeasonSearchContext;
+};
+
+function normalizeText(value: unknown): string {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function uniqueValues<T>(values: T[]): T[] {
+  return Array.from(new Set(values.filter(Boolean)));
+}
+
+function canonicalBairro(raw: string): string | null {
+  const normalized = normalizeText(raw);
+  if (!normalized || normalized === "bombinhas/sc" || normalized === "bombinhas sc") return null;
+  return BAIRROS_BOMBINHAS.find((bairro) => normalizeText(bairro) === normalized || normalized.includes(normalizeText(bairro)) || normalizeText(bairro).includes(normalized)) ?? null;
+}
+
+function extractBairros(filters: any, extractedData: any, historyText: string): string[] {
+  const chunks: string[] = [];
+  const rawFilterBairro = filters?.bairro || extractedData?.bairro_preferencia;
+  if (rawFilterBairro) chunks.push(...String(rawFilterBairro).split(/[,|/]+|\s+e\s+|\s+ou\s+/i));
+
+  const normalizedHistory = normalizeText(historyText);
+  for (const bairro of BAIRROS_BOMBINHAS) {
+    // "Bombinhas" sozinho costuma ser a cidade; só usar como bairro se veio explicitamente no filtro.
+    if (bairro === "Bombinhas" && !rawFilterBairro) continue;
+    const key = normalizeText(bairro);
+    const re = new RegExp(`(^|\\W)${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(\\W|$)`, "i");
+    if (re.test(normalizedHistory)) chunks.push(bairro);
+  }
+
+  return uniqueValues(chunks.map((chunk) => canonicalBairro(chunk)).filter(Boolean) as string[]);
+}
+
+function getNearbyBairros(bairros: string[]): string[] {
+  const nearby = bairros.flatMap((bairro) => BAIRROS_PROXIMOS[normalizeText(bairro)] ?? []);
+  return uniqueValues(nearby).filter((bairro) => !bairros.some((b) => normalizeText(b) === normalizeText(bairro)));
+}
+
+function extractCapacity(filters: any, extractedData: any, historyText: string): number | null {
+  const direct = Number(filters?.pessoas ?? filters?.capacidade_pessoas ?? extractedData?.pessoas ?? 0);
+  if (Number.isFinite(direct) && direct > 0) return direct;
+
+  const text = normalizeText(historyText);
+  const explicit = text.match(/\b(?:para\s+)?(\d{1,2})\s*(?:pessoas|pessoa|adultos|hospedes|hospedes|gente)\b/);
+  if (explicit) return Number(explicit[1]);
+  if (/\bcasal\b/.test(text)) return 2;
+
+  const afterQuestion = text.match(/(?:quantas pessoas|numero de pessoas|pessoas\?|hospedes\?)[\s\S]{0,120}\b(\d{1,2})\b/);
+  if (afterQuestion) {
+    const value = Number(afterQuestion[1]);
+    if (value > 0 && value <= 30) return value;
+  }
+
+  return null;
+}
+
+function extractPriceContext(filters: any, extractedData: any, historyText: string): PriceContext {
+  const text = normalizeText(historyText);
+  let value = Number(filters?.preco_max ?? extractedData?.orcamento_max ?? 0) || null;
+
+  if (!value) {
+    const moneyMatches = Array.from(text.matchAll(/\b(?:r\$\s*)?(\d{2,6})(?:[\.,]\d{1,2})?\b/g));
+    for (const match of moneyMatches) {
+      const start = Math.max(0, (match.index ?? 0) - 35);
+      const end = Math.min(text.length, (match.index ?? 0) + match[0].length + 45);
+      const window = text.slice(start, end);
+      const hasPriceCue = /r\$|reais|real|diaria|dia\b|noite|orcamento|valor|media|por volta|cerca|aprox|ate|maximo|limite|partir/.test(window);
+      const looksLikeDate = /dia\s+\d{1,2}|\d{1,2}\s+(dias|noites)/.test(window);
+      if (hasPriceCue && !looksLikeDate) {
+        value = Number(match[1]);
+      }
+    }
+  }
+
+  const hasPrecoMinOnly = !!(filters?.preco_min || extractedData?.orcamento_min) && !(filters?.preco_max || extractedData?.orcamento_max);
+  const isEconomic = /\b(a partir|partir de|desde)\b/.test(text) || hasPrecoMinOnly;
+  const isRigid = /\b(ate|no maximo|limite|teto|maximo)\b/.test(text) && !isEconomic;
+  const isAround = /\b(media|por volta|cerca|aprox|aproximad[ao]|em torno)\b/.test(text);
+
+  if (!value) {
+    const minValue = Number(filters?.preco_min ?? extractedData?.orcamento_min ?? 0) || null;
+    value = minValue;
+  }
+
+  if (!value) return { value: null, mode: "none", exactMax: null, flexibleMax: null };
+  if (isEconomic) return { value, mode: "economic_from", exactMax: null, flexibleMax: null };
+  if (isRigid) return { value, mode: "rigid_max", exactMax: value, flexibleMax: Math.max(Math.ceil(value * 1.5), value + 250) };
+  if (isAround) return { value, mode: "around", exactMax: Math.ceil(value * 1.15), flexibleMax: Math.max(Math.ceil(value * 1.25), value + 150) };
+
+  return { value, mode: "around", exactMax: Math.ceil(value * 1.15), flexibleMax: Math.max(Math.ceil(value * 1.25), value + 150) };
+}
+
+function getSeasonTypeContext(filters: any, extractedData: any, historyText: string) {
+  const text = normalizeText(`${filters?.tipo ?? ""} ${extractedData?.tipo_imovel ?? ""} ${historyText}`);
+  const releaseAllTypes = /nem casa nem apartamento|qualquer tipo|todos os tipos|tanto faz o tipo|sem preferencia de tipo/.test(text);
+  const requestedTipos = releaseAllTypes ? [] : uniqueValues([
+    ...normalizeTipo(String(filters?.tipo ?? "")),
+    ...normalizeTipo(String(extractedData?.tipo_imovel ?? "")),
+    ...normalizeTipo(historyText),
+  ]);
+
+  let primaryTipos = requestedTipos;
+  if (requestedTipos.includes("casa")) primaryTipos = uniqueValues(["casa", "sobrado", ...requestedTipos]);
+  if (requestedTipos.includes("apartamento")) primaryTipos = uniqueValues(["apartamento", "cobertura", ...requestedTipos]);
+
+  const expandedTipos = primaryTipos.length > 0 ? uniqueValues([...primaryTipos, "apartamento", "cobertura", "casa", "sobrado"]) : [];
+  return { requestedTipos, primaryTipos, expandedTipos, releaseAllTypes };
+}
+
+function inferSeasonFilters(filters: any, extractedData: any, historyText: string) {
+  const text = normalizeText(historyText);
+  const bairros = extractBairros(filters, extractedData, historyText);
+  const typeContext = getSeasonTypeContext(filters, extractedData, historyText);
+  const price = extractPriceContext(filters, extractedData, historyText);
+  const pessoas = extractCapacity(filters, extractedData, historyText);
+  const isSeasonContext =
+    filters?.finalidade === "temporada" ||
+    extractedData?.finalidade === "temporada" ||
+    /temporada|diaria|ferias|janeiro|fevereiro|carnaval|reveillon|natal|dias|noites/.test(text);
+
+  if (!isSeasonContext) return filters;
+  return {
+    ...filters,
+    finalidade: "temporada",
+    bairro: filters?.bairro || extractedData?.bairro_preferencia || bairros.join(" ou ") || undefined,
+    tipo: filters?.tipo || extractedData?.tipo_imovel || typeContext.requestedTipos[0] || undefined,
+    preco_max: filters?.preco_max ?? extractedData?.orcamento_max ?? (price.mode !== "economic_from" ? price.value : undefined),
+    preco_min: filters?.preco_min ?? extractedData?.orcamento_min ?? (price.mode === "economic_from" ? price.value : undefined),
+    pessoas: filters?.pessoas ?? extractedData?.pessoas ?? pessoas ?? undefined,
+    periodo: filters?.periodo ?? extractedData?.periodo ?? undefined,
+  };
+}
+
+function buildSeasonSearchContext(filters: any, extractedData: any, historyText: string): SeasonSearchContext {
+  const bairros = extractBairros(filters, extractedData, historyText);
+  const typeContext = getSeasonTypeContext(filters, extractedData, historyText);
+  return {
+    bairros,
+    nearbyBairros: getNearbyBairros(bairros),
+    ...typeContext,
+    pessoas: extractCapacity(filters, extractedData, historyText),
+    price: extractPriceContext(filters, extractedData, historyText),
+  };
+}
+
+function propertyBairroKey(property: any): string | null {
+  return canonicalBairro(String(property?.bairro ?? ""));
+}
+
+function matchesBairro(property: any, bairros: string[]) {
+  if (bairros.length === 0) return true;
+  const key = propertyBairroKey(property);
+  return !!key && bairros.some((bairro) => normalizeText(bairro) === normalizeText(key));
+}
+
+function matchesTipo(property: any, tipos: string[], releaseAllTypes: boolean) {
+  if (releaseAllTypes || tipos.length === 0) return true;
+  return tipos.includes(String(property?.tipo ?? ""));
+}
+
+function matchesCapacity(property: any, pessoas: number | null) {
+  if (!pessoas) return true;
+  const capacidade = Number(property?.capacidade_pessoas ?? 0);
+  return capacidade >= pessoas || capacidade <= 0;
+}
+
+function dailyPrice(property: any) {
+  const value = Number(property?.preco_temporada_diaria ?? 0);
+  return Number.isFinite(value) && value > 0 ? value : Number.POSITIVE_INFINITY;
+}
+
+function matchesPrice(property: any, price: PriceContext, mode: "exact" | "flexible" | "none") {
+  const daily = dailyPrice(property);
+  if (mode === "none" || price.mode === "economic_from" || !price.value) return true;
+  if (!Number.isFinite(daily)) return false;
+  const max = mode === "exact" ? price.exactMax : price.flexibleMax;
+  return !max || daily <= max;
+}
+
+function rankSeasonProperty(property: any, ctx: SeasonSearchContext) {
+  const price = dailyPrice(property);
+  const capacidade = Number(property?.capacidade_pessoas ?? 0);
+  const sameBairro = matchesBairro(property, ctx.bairros);
+  const nearby = matchesBairro(property, ctx.nearbyBairros);
+  const primaryType = matchesTipo(property, ctx.primaryTipos, ctx.releaseAllTypes);
+  const expandedType = matchesTipo(property, ctx.expandedTipos, ctx.releaseAllTypes);
+  const capacityScore = !ctx.pessoas ? 30 : capacidade >= ctx.pessoas ? 60 : capacidade <= 0 ? 12 : -80;
+  const priceScore = ctx.price.value && Number.isFinite(price)
+    ? Math.max(0, 50 - Math.abs(price - ctx.price.value) / 20)
+    : Number.isFinite(price) ? 25 : 0;
+
+  return (
+    (sameBairro ? 220 : nearby ? 120 : 40) +
+    (primaryType ? 90 : expandedType ? 50 : 10) +
+    capacityScore +
+    priceScore +
+    (property?.destaque ? 8 : 0)
+  );
+}
+
+function sortSeasonProperties(properties: any[], ctx: SeasonSearchContext) {
+  return [...properties].sort((a, b) => {
+    const scoreDiff = rankSeasonProperty(b, ctx) - rankSeasonProperty(a, ctx);
+    if (scoreDiff !== 0) return scoreDiff;
+    return dailyPrice(a) - dailyPrice(b);
+  });
+}
+
+async function searchSeasonPropertiesProgressive(supabase: any, filters: any, extractedData: any, historyText: string): Promise<SeasonSearchResult> {
+  const ctx = buildSeasonSearchContext(filters, extractedData, historyText);
+  const { data, error } = await supabase
+    .from("imoveis")
+    .select("*")
+    .eq("status", "ativo")
+    .eq("finalidade", "temporada")
+    .or("oculta_para_maria.is.null,oculta_para_maria.eq.false")
+    .limit(160);
+
+  if (error) {
+    console.error("[MarIA Season Search] PostgREST error:", { filters, error });
+    return { properties: [], exactCount: 0, fallbackCount: 0, layer: "query_error", isFallback: false, totalActive: 0, context: ctx };
+  }
+
+  const active = data || [];
+  const baseCompatible = active.filter((property: any) => matchesCapacity(property, ctx.pessoas));
+  const filterLayer = (layer: {
+    bairro: "same" | "nearby" | "any";
+    tipo: "primary" | "expanded" | "any";
+    price: "exact" | "flexible" | "none";
+  }) => {
+    return baseCompatible.filter((property: any) => {
+      const bairroOk = layer.bairro === "any"
+        ? true
+        : layer.bairro === "same"
+          ? matchesBairro(property, ctx.bairros)
+          : matchesBairro(property, ctx.nearbyBairros);
+      const tipoOk = layer.tipo === "any"
+        ? true
+        : layer.tipo === "primary"
+          ? matchesTipo(property, ctx.primaryTipos, ctx.releaseAllTypes)
+          : matchesTipo(property, ctx.expandedTipos, ctx.releaseAllTypes);
+      return bairroOk && tipoOk && matchesPrice(property, ctx.price, layer.price);
+    });
+  };
+
+  const exact = filterLayer({ bairro: "same", tipo: "primary", price: "exact" });
+  const layers = [
+    { name: "exact", results: exact, isFallback: false },
+    { name: "fallback_same_bairro_tipo_flex_price", results: filterLayer({ bairro: "same", tipo: "expanded", price: "flexible" }), isFallback: true },
+    { name: "fallback_same_bairro_any_type_flex_price", results: filterLayer({ bairro: "same", tipo: "any", price: "flexible" }), isFallback: true },
+    { name: "fallback_same_bairro_any_type_lowest_daily", results: filterLayer({ bairro: "same", tipo: "any", price: "none" }), isFallback: true },
+    { name: "fallback_nearby_any_type_lowest_daily", results: filterLayer({ bairro: "nearby", tipo: "any", price: "none" }), isFallback: true },
+    { name: "fallback_bombinhas_any_type_lowest_daily", results: baseCompatible, isFallback: true },
+  ];
+
+  const selected = layers.find((layer) => layer.results.length > 0) ?? layers[0];
+  const sorted = (selected.isFallback
+    ? [...selected.results].sort((a, b) => {
+        const priceDiff = dailyPrice(a) - dailyPrice(b);
+        if (priceDiff !== 0) return priceDiff;
+        return rankSeasonProperty(b, ctx) - rankSeasonProperty(a, ctx);
+      })
+    : sortSeasonProperties(selected.results, ctx)
+  ).slice(0, 40);
+  const fallbackCount = selected.isFallback ? sorted.length : 0;
+
+  console.debug("[MarIA Season Search]", JSON.stringify({
+    filters,
+    context: ctx,
+    total_active_temporada: active.length,
+    exact_results: exact.length,
+    fallback_results: fallbackCount,
+    layer: selected.name,
+    show_results: sorted.length > 0,
+  }));
+
+  return {
+    properties: sorted,
+    exactCount: exact.length,
+    fallbackCount,
+    layer: selected.name,
+    isFallback: selected.isFallback,
+    totalActive: active.length,
+    context: ctx,
+  };
+}
+
 async function searchProperties(supabase: any, filters: any): Promise<any[]> {
   const normalizedTipos = filters?.tipo ? normalizeTipo(String(filters.tipo)) : [];
   const normalized = { ...filters, tiposNormalizados: normalizedTipos };
@@ -165,9 +510,9 @@ async function searchProperties(supabase: any, filters: any): Promise<any[]> {
 
     // Filtro de Bairro (text) — mantém ilike, com split apenas em vírgula/barra/pipe
     if (filters?.bairro && typeof filters.bairro === "string") {
-      const bairros = filters.bairro.toLowerCase().split(/[,|/]+|\s+e\s+|\s+ou\s+/).map(s => s.trim()).filter(b => b.length > 3 && b !== "bombinhas");
+      const bairros = filters.bairro.toLowerCase().split(/[,|/]+|\s+e\s+|\s+ou\s+/).map((s: string) => s.trim()).filter((b: string) => b.length > 3 && b !== "bombinhas");
       if (bairros.length > 0) {
-        const orConditions = bairros.map(b => `bairro.ilike.%${b}%`).join(",");
+        const orConditions = bairros.map((b: string) => `bairro.ilike.%${b}%`).join(",");
         q = q.or(orConditions);
       }
     }
@@ -253,8 +598,8 @@ function checkSearchRequirements(filters: any, intent: string, lastMessage: stri
     // Padrões: "8 pessoas", "para 6", "casal", período/mês/dias
     const capacityRegex = /\b(\d+)\s*(pessoas|pessoa|adultos|h[óo]spedes|gente)\b|\bpara\s+(\d+)\b|\bcasal\b|\bfam[íi]lia\b/;
     const periodRegex = /\b(janeiro|fevereiro|mar[çc]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|carnaval|r[ée]veillon|natal|feriado|temporada)\b|\b\d+\s*(dias|noites|di[áa]rias|semanas?)\b|\bdia\s+\d+\b/;
-    const hasCapacity = capacityRegex.test(text) || !!extractedData?.pessoas;
-    const hasPeriod = periodRegex.test(text) || !!extractedData?.periodo;
+    const hasCapacity = capacityRegex.test(text) || !!extractedData?.pessoas || !!filters?.pessoas || !!filters?.capacidade_pessoas;
+    const hasPeriod = periodRegex.test(text) || !!extractedData?.periodo || !!filters?.periodo;
     const hasCapacityOrPeriod = hasCapacity || hasPeriod;
     
     if (!hasConstraint) missing.push("filtros_concretos");
@@ -412,48 +757,72 @@ serve(async (req) => {
     } else {
       // Concatena histórico para permitir inferência de capacidade/período em temporada
       const historyText = messages.map((m: any) => String(m?.content ?? "")).join(" \n ");
+      let effectiveSearchFilters = inferSeasonFilters(filters || {}, extractedData, historyText);
 
       if (!filters && extractedData && (intent === "busca" || intent === "consultivo") && isExplicitSearchRequest) {
         const candidateFilters = {
-          finalidade: extractedData.finalidade || "compra",
+          finalidade: extractedData.finalidade || effectiveSearchFilters?.finalidade || "compra",
           bairro: extractedData.bairro_preferencia,
           tipo: extractedData.tipo_imovel,
-          preco_max: extractedData.orcamento_max
+          preco_max: extractedData.orcamento_max,
+          preco_min: extractedData.orcamento_min,
+          pessoas: extractedData.pessoas,
+          periodo: extractedData.periodo,
         };
-        
-        if (isSearchAllowed(candidateFilters, intent, lastMessage, extractedData, historyText)) {
-          filters = candidateFilters;
+
+        const inferredCandidate = inferSeasonFilters(candidateFilters, extractedData, historyText);
+        if (isSearchAllowed(inferredCandidate, intent, lastMessage, extractedData, historyText)) {
+          filters = inferredCandidate;
+          effectiveSearchFilters = inferredCandidate;
         }
       }
 
+      if (!filters && effectiveSearchFilters?.finalidade === "temporada" && isExplicitSearchRequest) {
+        filters = effectiveSearchFilters;
+      }
+
+      effectiveSearchFilters = inferSeasonFilters(filters || effectiveSearchFilters || {}, extractedData, historyText);
+
       // Check search requirements
-      const searchCheck = checkSearchRequirements(filters || extractedData ? {
-        finalidade: filters?.finalidade || extractedData?.finalidade || "compra",
-        bairro: filters?.bairro || extractedData?.bairro_preferencia,
-        tipo: filters?.tipo || extractedData?.tipo_imovel,
-        preco_max: filters?.preco_max || extractedData?.orcamento_max,
-        preco_min: filters?.preco_min || extractedData?.orcamento_min
-      } : null, intent, lastMessage, extractedData, historyText);
+      const searchCheckFilters = (effectiveSearchFilters?.finalidade || filters || extractedData) ? {
+        finalidade: effectiveSearchFilters?.finalidade || filters?.finalidade || extractedData?.finalidade || "compra",
+        bairro: effectiveSearchFilters?.bairro || filters?.bairro || extractedData?.bairro_preferencia,
+        tipo: effectiveSearchFilters?.tipo || filters?.tipo || extractedData?.tipo_imovel,
+        preco_max: effectiveSearchFilters?.preco_max || filters?.preco_max || extractedData?.orcamento_max,
+        preco_min: effectiveSearchFilters?.preco_min || filters?.preco_min || extractedData?.orcamento_min,
+        pessoas: effectiveSearchFilters?.pessoas || extractedData?.pessoas,
+        periodo: effectiveSearchFilters?.periodo || extractedData?.periodo,
+      } : null;
+      const searchCheck = checkSearchRequirements(searchCheckFilters, intent, lastMessage, extractedData, historyText);
       
       missingFilters = searchCheck.missing;
-      console.debug(`[MarIA Debug] filters=${JSON.stringify(filters)} searchCheck.allowed=${searchCheck.allowed} missing=${JSON.stringify(searchCheck.missing)}`);
+      console.debug(`[MarIA Debug] filters=${JSON.stringify(searchCheckFilters)} extracted=${JSON.stringify(extractedData)} searchCheck.allowed=${searchCheck.allowed} missing=${JSON.stringify(searchCheck.missing)}`);
 
       // Final check for search triggering
       if (searchCheck.allowed) {
         // Garantir que temos um objeto de filtros válido
-        const effectiveFilters = filters || {
+        const effectiveFilters = effectiveSearchFilters?.finalidade ? effectiveSearchFilters : (filters || {
           finalidade: extractedData?.finalidade || "compra",
           bairro: extractedData?.bairro_preferencia,
           tipo: extractedData?.tipo_imovel,
           preco_max: extractedData?.orcamento_max,
           preco_min: extractedData?.orcamento_min
-        };
+        });
 
         if (effectiveFilters.finalidade !== "anunciante") {
-          allProperties = await searchProperties(supabase, effectiveFilters);
+          const seasonSearch = effectiveFilters.finalidade === "temporada"
+            ? await searchSeasonPropertiesProgressive(supabase, effectiveFilters, extractedData, historyText)
+            : null;
+          allProperties = seasonSearch ? seasonSearch.properties : await searchProperties(supabase, effectiveFilters);
+          console.debug(`[MarIA Debug] search_results exact=${seasonSearch?.exactCount ?? allProperties.length} fallback=${seasonSearch?.fallbackCount ?? 0} layer=${seasonSearch?.layer ?? "standard"} total=${allProperties.length}`);
           
           if (allProperties.length > 0) {
             showResults = true;
+            if (seasonSearch?.isFallback) {
+              cleaned = "Não encontrei casa exatamente nessa faixa, mas encontrei alternativas reais próximas no portal. Para janeiro ou fevereiro, a disponibilidade precisa ser confirmada com o parceiro local.";
+            } else if (effectiveFilters.finalidade === "temporada") {
+              cleaned = "Encontrei opções compatíveis. Para janeiro ou fevereiro, a disponibilidade precisa ser confirmada com o parceiro local.";
+            }
             if (!lead_captured && allProperties.length > 2) {
               gateActive = true;
               visibleProperties = allProperties.slice(0, 2);
