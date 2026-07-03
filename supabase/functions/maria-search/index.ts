@@ -589,6 +589,7 @@ serve(async (req) => {
       }
     })();
 
+    console.debug(`[MarIA Debug] RESPONSE show_results=${showResults} results_count=${allProperties.length} visible=${visibleProperties.length} gate_active=${gateActive}`);
     return new Response(JSON.stringify({
       reply: finalReply,
       show_results: showResults,
