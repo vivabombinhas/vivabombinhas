@@ -802,8 +802,66 @@ serve(async (req) => {
         cleaned = "Perfeito. Vou organizar seu perfil para análise estratégica com o Daniel.";
       }
     } else {
+      // ============================================================
+      // TEMPORADA — camada determinística (bypass do fluxo LLM/[FILTERS])
+      // ============================================================
+      const finalidadeHint = (extra_data?.finalidade_hint ?? extra_data?.finalidade) as string | undefined;
+      const seasonState = buildSeasonSearchState(messages, finalidadeHint);
+      let seasonHandled = false;
+
+      if (seasonState) {
+        const seasonValidation = validateSeasonSearchState(seasonState);
+        const shouldSearch = seasonValidation.ok || seasonState.explicit_show_request;
+
+        if (shouldSearch) {
+          const seasonResult = await searchAndRankSeasonProperties(seasonState, supabase);
+          allProperties = seasonResult.properties;
+          const seasonReply = buildSeasonReply(seasonState, seasonValidation, seasonResult);
+
+          console.log(JSON.stringify({
+            tag: "MarIA Season Deterministic",
+            session_id: sessionId,
+            season_state: seasonState,
+            validation: seasonValidation,
+            exact_count: seasonResult.exact_count,
+            fallback_count: seasonResult.fallback_count,
+            fallback_layer: seasonResult.layer,
+            total_active_temporada: seasonResult.total_active_temporada,
+            show_results: allProperties.length > 0,
+            results_count: allProperties.length,
+          }));
+
+          if (allProperties.length > 0) {
+            showResults = true;
+            if (!lead_captured && allProperties.length > 2) {
+              gateActive = true;
+              visibleProperties = allProperties.slice(0, 2);
+            } else {
+              visibleProperties = allProperties.slice(0, 3);
+            }
+          }
+          cleaned = seasonReply;
+          seasonHandled = true;
+        } else if (seasonValidation.ask) {
+          // Falta info obrigatória e o usuário não pediu cards explicitamente.
+          cleaned = seasonValidation.ask;
+          seasonHandled = true;
+          console.log(JSON.stringify({
+            tag: "MarIA Season Deterministic",
+            session_id: sessionId,
+            season_state: seasonState,
+            validation: seasonValidation,
+            show_results: false,
+            results_count: 0,
+          }));
+        }
+      }
+
       // Concatena histórico para permitir inferência de capacidade/período em temporada
       const historyText = messages.map((m: any) => String(m?.content ?? "")).join(" \n ");
+      if (seasonHandled) {
+        // Nada mais a fazer no fluxo legado quando a busca determinística já respondeu.
+      } else {
       let effectiveSearchFilters = inferSeasonFilters(filters || {}, extractedData, historyText);
 
       if (!filters && extractedData && (intent === "busca" || intent === "consultivo") && isExplicitSearchRequest) {
