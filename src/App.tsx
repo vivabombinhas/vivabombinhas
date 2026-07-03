@@ -20,6 +20,7 @@ import AdminRevenue from "./pages/AdminRevenue.tsx";
 import AdminAIConfig from "./pages/AdminAIConfig.tsx";
 import AdminImoveis from "./pages/AdminImoveis.tsx";
 import AdminCuradoria from "./pages/AdminCuradoria.tsx";
+import AdminInventario from "./pages/AdminInventario.tsx";
 import AdminLayout from "./components/admin/AdminLayout.tsx";
 import AdminInsights from "./pages/AdminInsights.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
