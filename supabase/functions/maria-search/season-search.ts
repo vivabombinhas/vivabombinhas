@@ -206,6 +206,84 @@ function isSeasonContext(userText: string, finalidade_hint?: string | null): boo
 }
 
 // ============================================================
+// Interpretação contextual de respostas curtas
+// ============================================================
+// Se a assistente perguntou X e o usuário respondeu um valor "solto"
+// (ex: "5", "500", "janeiro"), devolvemos o tipo semântico da resposta.
+type ShortAnswerKind = "pessoas" | "orcamento" | "periodo" | null;
+
+function classifyAssistantQuestion(assistantText: string): ShortAnswerKind {
+  const t = norm(assistantText);
+  if (!t) return null;
+  if (/(quantas pessoas|quantidade de pessoas|numero de pessoas|para quantas|quantos hospedes|quantos adultos|capacidade)/.test(t)) {
+    return "pessoas";
+  }
+  if (/(orcamento|faixa de valor|faixa de preco|valor por diaria|valor da diaria|diaria|budget|quanto pretende|quanto por dia)/.test(t)) {
+    return "orcamento";
+  }
+  if (/(quando|que datas|qual periodo|quais datas|qual data|tem datas|periodo|quantos dias|quantas noites|mes)/.test(t)) {
+    return "periodo";
+  }
+  return null;
+}
+
+interface ShortAnswer {
+  kind: ShortAnswerKind;
+  numeric?: number;
+  text?: string;
+}
+
+function parseShortUserAnswer(userText: string, expected: ShortAnswerKind): ShortAnswer | null {
+  const t = norm(userText).replace(/[\.!\?]+$/g, "").trim();
+  if (!t || !expected) return null;
+  // Curta = até ~4 tokens sem verbo forte
+  const tokens = t.split(/\s+/);
+  if (tokens.length > 4) return null;
+
+  if (expected === "pessoas") {
+    const m = t.match(/\b(\d{1,2})\b/);
+    if (m) {
+      const v = Number(m[1]);
+      if (v >= 1 && v <= 30) return { kind: "pessoas", numeric: v };
+    }
+    if (/\bcasal\b/.test(t)) return { kind: "pessoas", numeric: 2 };
+  }
+
+  if (expected === "orcamento") {
+    const m = t.match(/\b(\d{2,6})\b/);
+    if (m) return { kind: "orcamento", numeric: Number(m[1]) };
+  }
+
+  if (expected === "periodo") {
+    if (/(janeiro|fevereiro|marco|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|carnaval|reveillon|réveillon|natal|feriad[oa])/.test(t)) {
+      return { kind: "periodo", text: t };
+    }
+    if (/\b\d{1,2}\s*(dias|noites|semanas?)\b/.test(t)) return { kind: "periodo", text: t };
+    if (/\bdia\s+\d{1,2}\b/.test(t)) return { kind: "periodo", text: t };
+  }
+
+  return null;
+}
+
+function collectShortAnswers(messages: Array<{ role: string; content: string }>) {
+  const answers: ShortAnswer[] = [];
+  for (let i = 0; i < messages.length; i++) {
+    const m = messages[i];
+    if (m.role !== "user") continue;
+    // encontra a última mensagem do assistente ANTES desta do usuário
+    let prevAssistant = "";
+    for (let j = i - 1; j >= 0; j--) {
+      if (messages[j].role === "assistant") { prevAssistant = String(messages[j].content ?? ""); break; }
+    }
+    const expected = classifyAssistantQuestion(prevAssistant);
+    if (!expected) continue;
+    const parsed = parseShortUserAnswer(String(m.content ?? ""), expected);
+    if (parsed) answers.push(parsed);
+  }
+  return answers;
+}
+
+// ============================================================
 // 1. buildSeasonSearchState
 // ============================================================
 export function buildSeasonSearchState(
@@ -222,9 +300,22 @@ export function buildSeasonSearchState(
 
   const bairros = extractBairros(userText);
   const tipos = extractTipos(userText);
-  const pessoas = extractPessoas(userText);
-  const { min, max, mode } = extractBudget(userText);
-  const periodo = extractPeriodo(userText);
+  let pessoas = extractPessoas(userText);
+  let { min, max, mode } = extractBudget(userText);
+  let periodo = extractPeriodo(userText);
+
+  // Preenche lacunas com respostas curtas contextuais (turno anterior da assistente).
+  // Prioridade: valor explícito completo já extraído acima ganha; short answers só preenchem NULL.
+  const shortAnswers = collectShortAnswers(messages);
+  for (const a of shortAnswers) {
+    if (a.kind === "pessoas" && !pessoas && a.numeric) pessoas = a.numeric;
+    if (a.kind === "orcamento" && !min && !max && a.numeric) {
+      max = a.numeric;
+      if (mode === "unknown") mode = "max";
+    }
+    if (a.kind === "periodo" && !periodo && a.text) periodo = a.text;
+  }
+
   const explicit = isExplicitShowRequest(lastUser) || /me mostre opcoes|me mostre opções/.test(norm(userText));
 
   const raw_summary = [
@@ -234,6 +325,7 @@ export function buildSeasonSearchState(
     (min || max) ? `budget=${min ?? ""}-${max ?? ""}/${mode}` : null,
     periodo ? `periodo=${periodo}` : null,
     explicit ? "explicit_show" : null,
+    shortAnswers.length ? `short_answers=${shortAnswers.length}` : null,
   ].filter(Boolean).join(" ");
 
   return {
@@ -249,6 +341,7 @@ export function buildSeasonSearchState(
     raw_summary,
   };
 }
+
 
 // ============================================================
 // 2. validateSeasonSearchState
