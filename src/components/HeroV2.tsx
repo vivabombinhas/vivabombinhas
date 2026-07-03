@@ -12,8 +12,8 @@ const CHIPS = [
 ];
 
 const STATS = [
-  { value: "+20", label: "Imobiliárias" },
-  { value: "+580", label: "Imóveis ativos" },
+  { value: "+20", label: "Imobiliárias parceiras" },
+  { value: "+580", label: "Imóveis acompanhados" },
   { value: "100%", label: "Foco em Bombinhas" },
 ];
 
