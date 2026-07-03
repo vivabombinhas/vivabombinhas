@@ -12,8 +12,8 @@ const CHIPS = [
 ];
 
 const STATS = [
-  { value: "+20", label: "Imobiliárias" },
-  { value: "+580", label: "Imóveis ativos" },
+  { value: "+20", label: "Imobiliárias parceiras" },
+  { value: "+580", label: "Imóveis acompanhados" },
   { value: "100%", label: "Foco em Bombinhas" },
 ];
 
@@ -61,7 +61,7 @@ export const HeroV2 = () => {
         >
           <MapPin className="w-3.5 h-3.5 text-primary" />
           <span className="text-[12px] font-medium tracking-wide text-white/90">
-            Inteligência imobiliária em Bombinhas
+            Concierge imobiliário inteligente em Bombinhas
           </span>
         </motion.div>
 
@@ -72,7 +72,7 @@ export const HeroV2 = () => {
           transition={{ duration: 0.8, delay: 0.1 }}
           className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] mb-4 md:mb-6"
         >
-          Encontre o imóvel certo<br />
+          Seu concierge imobiliário<br />
           <span className="italic font-serif text-primary">em Bombinhas.</span>
         </motion.h1>
 
@@ -83,8 +83,8 @@ export const HeroV2 = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-base md:text-lg text-white/90 font-light max-w-xl mx-auto mb-10 leading-relaxed"
         >
-          Diga o que você procura — a MarIA entende seu perfil e mostra apenas
-          imóveis que fazem sentido para você.
+          IA, curadoria local e atendimento humano para ajudar turistas e
+          investidores a encontrar imóveis em Bombinhas com mais confiança.
         </motion.p>
 
         {/* ── Search bar ── */}

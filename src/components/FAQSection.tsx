@@ -5,33 +5,37 @@ import { HelpCircle } from "lucide-react";
 
 const faqs = [
   {
+    q: "O que é a MarIA?",
+    a: "A MarIA é um concierge imobiliário inteligente focado em Bombinhas. Ela combina IA, curadoria da nossa equipe local e atendimento humano para ajudar turistas e investidores a encontrar imóveis com mais confiança.",
+  },
+  {
     q: "A MarIA é gratuita?",
-    a: "Sim. O uso da MarIA para encontrar imóveis é totalmente gratuito para quem busca seu lugar em Bombinhas.",
+    a: "Sim. Conversar com a MarIA para encontrar imóveis em Bombinhas é gratuito.",
   },
   {
     q: "Como os imóveis são selecionados?",
-    a: "Nossa tecnologia analisa bases de dados locais e anúncios verificados para garantir que você receba apenas opções reais.",
+    a: "Os imóveis mostrados vêm de imobiliárias e proprietários parceiros em Bombinhas. Nossa equipe local organiza o cadastro e a IA filtra as opções de acordo com o seu perfil.",
   },
   {
-    q: "Preciso de cadastro?",
-    a: "Não é necessário criar conta. Você pode iniciar uma conversa agora mesmo e receber sugestões instantâneas.",
+    q: "Preciso me cadastrar para usar?",
+    a: "Não é preciso criar conta para começar a conversar. O cadastro pode ser pedido quando fizer sentido, por exemplo para receber contato de um especialista ou avisos de novos imóveis.",
   },
   {
-    q: "Como falo com o anunciante?",
-    a: "Nós conectamos você diretamente ao link original ou ao contato do responsável pelo imóvel de forma fluida.",
+    q: "Como falo com o anunciante ou visito o imóvel?",
+    a: "Quando o interesse é concreto, um especialista local do time da MarIA entra em contato para organizar informações, visitas, calls e a negociação junto com a imobiliária ou proprietário responsável pelo imóvel.",
   },
   {
-    q: "Os imóveis mostrados são reais e disponíveis?",
-    a: "Sim. Todos os imóveis são verificados e cadastrados por imobiliárias e proprietários em Bombinhas. A MarIA só mostra o que está disponível."
+    q: "Os imóveis mostrados estão realmente disponíveis?",
+    a: "Trabalhamos com imóveis acompanhados por parceiros locais em Bombinhas e mantemos a base atualizada com a equipe. Ainda assim, disponibilidade e valores podem mudar rapidamente — sempre confirmamos os detalhes antes de qualquer negociação.",
   },
   {
-    q: "Recebo alertas quando entrar imóvel novo no meu perfil?",
-    a: "Sim! Ao compartilhar seu perfil de busca, a MarIA te notifica pelo WhatsApp sempre que um imóvel compatível for cadastrado na plataforma."
+    q: "Recebo aviso quando entrar um imóvel novo compatível?",
+    a: "Ao compartilhar seu perfil de busca, a MarIA pode te avisar pelo WhatsApp quando um imóvel compatível for cadastrado na plataforma.",
   },
   {
-    q: "Como anuncio meu imóvel na plataforma?",
-    a: "Acesse a seção 'Anunciar', preencha as informações básicas do seu imóvel e nossa equipe ativa o anúncio em até 24 horas."
-  }
+    q: "Como anuncio meu imóvel?",
+    a: "Acesse a seção 'Anunciar' e envie as informações básicas do imóvel. Nossa equipe revisa o cadastro antes de publicar.",
+  },
 ];
 
 const FAQSection = () => {

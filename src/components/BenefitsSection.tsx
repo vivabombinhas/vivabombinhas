@@ -3,10 +3,10 @@ import { motion } from "framer-motion";
 import { TypingText } from "@/components/ui/TypingText";
 
 const benefits = [
-  { icon: Zap, title: "Velocidade", desc: "Encontre em segundos o que levaria horas pesquisando manualmente.", stat: "10x", label: "mais rápido" },
-  { icon: LayoutList, title: "Curadoria", desc: "Anúncios centralizados e filtrados pela nossa inteligência local.", stat: "100%", label: "foco local" },
-  { icon: Link2, title: "Transparente", desc: "Veja preço, fotos, bairro e contato antes do primeiro clique. Sem surpresas.", stat: "100%", label: "transparência" },
-  { icon: MessageCircle, title: "Fluidez", desc: "Busque imóveis como se estivesse conversando com um amigo.", stat: "24/7", label: "ativo" },
+  { icon: Zap, title: "Agilidade", desc: "A IA filtra e organiza opções em segundos, reduzindo o tempo de pesquisa.", stat: "10x", label: "mais rápido" },
+  { icon: LayoutList, title: "Curadoria local", desc: "Imóveis acompanhados por parceiros locais em Bombinhas, organizados pela nossa equipe.", stat: "100%", label: "foco local" },
+  { icon: Link2, title: "Transparência", desc: "Preço, fotos, bairro e responsável pelo imóvel visíveis antes do primeiro contato.", stat: "Sem", label: "surpresas" },
+  { icon: MessageCircle, title: "Atendimento humano", desc: "Para leads quentes, visitas, calls e negociação, um especialista local entra no atendimento.", stat: "IA + humano", label: "no mesmo fluxo" },
 ];
 
 const BenefitsSection = () => {
@@ -28,14 +28,14 @@ const BenefitsSection = () => {
               className="inline-flex items-center gap-2 mb-8"
             >
               <Star className="h-4 w-4 text-primary fill-primary" />
-              <TypingText text="Vantagem MarIA" className="text-badge text-primary" />
+              <TypingText text="Como a MarIA ajuda" className="text-badge text-primary" />
             </motion.div>
             <motion.h2 
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               className="text-h2 mb-10"
             >
-              A busca imobiliária,<br /><span className="text-muted-foreground/80 italic font-serif">totalmente simplificada.</span>
+              IA, curadoria local e<br /><span className="text-muted-foreground/80 italic font-serif">atendimento humano.</span>
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, y: 15 }}
@@ -43,7 +43,7 @@ const BenefitsSection = () => {
               transition={{ delay: 0.1 }}
               className="text-subtitle"
             >
-              Menos tempo procurando. Mais tempo visitando e aproveitando o melhor de Bombinhas.
+              Turistas e investidores exploram Bombinhas com a MarIA, e um especialista local acompanha as decisões que precisam de atenção humana.
             </motion.p>
           </div>
 

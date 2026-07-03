@@ -6,17 +6,17 @@ const audiences = [
   {
     icon: Umbrella,
     title: "Temporada",
-    desc: "A casa ou apartamento ideal para suas próximas férias em família.",
+    desc: "Turistas encontram casas e apartamentos para férias em Bombinhas, com apoio da nossa equipe local.",
   },
   {
     icon: Key,
     title: "Compra",
-    desc: "Explore as melhores opções para adquirir seu imóvel na região.",
+    desc: "Compradores exploram opções acompanhadas por imobiliárias parceiras, com atendimento humano em cada etapa.",
   },
   {
     icon: TrendingUp,
     title: "Investimento",
-    desc: "Encontre imóveis com perfil para locação ou patrimônio.",
+    desc: "Investidores recebem análise consultiva sobre bairros, perfis de imóvel e potencial de locação em Bombinhas.",
   },
 ];
 
@@ -42,8 +42,8 @@ const AudienceSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               className="text-h2"
             >
-              Soluções reais para <br className="hidden md:block" />
-              <span className="text-muted-foreground/80 italic font-serif">diferentes perfis.</span>
+              Um concierge para <br className="hidden md:block" />
+              <span className="text-muted-foreground/80 italic font-serif">cada tipo de busca.</span>
             </motion.h2>
           </div>
           <motion.p 
@@ -51,7 +51,7 @@ const AudienceSection = () => {
             whileInView={{ opacity: 1 }}
             className="text-subtitle max-w-sm"
           >
-            Centralizamos a inteligência local para entregar utilidade imediata.
+            IA para organizar as opções, curadoria local para trazer contexto e atendimento humano quando a decisão exige.
           </motion.p>
         </div>
 

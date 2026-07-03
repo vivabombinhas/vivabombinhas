@@ -37,7 +37,7 @@ const CTASection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             className="text-display mb-10"
           >
-            Pronto para encontrar<br /><span className="text-primary italic font-serif">seu lugar no paraíso?</span>
+            Pronto para explorar<br /><span className="text-primary italic font-serif">imóveis em Bombinhas?</span>
           </motion.h2>
           
           <motion.p 
@@ -46,7 +46,7 @@ const CTASection = () => {
             transition={{ delay: 0.1 }}
             className="text-subtitle mb-16 max-w-2xl"
           >
-            Experimente a forma mais elegante e inteligente de buscar em Bombinhas. Sem formulários, apenas conversa fluida.
+            Converse com a MarIA. Ela combina IA, curadoria local e atendimento humano para orientar sua busca em Bombinhas.
           </motion.p>
 
           <motion.form 
@@ -73,7 +73,7 @@ const CTASection = () => {
                 size="lg" 
                 className="h-14 px-10 rounded-full bg-primary text-primary-foreground font-bold text-lg hover:brightness-105 transition-all duration-500 shadow-xl shadow-primary/10 group-hover:scale-[1.01]"
               >
-                Buscar agora
+                Conversar com a MarIA
                 <ArrowRight className="ml-3 h-5 w-5" />
               </Button>
             </div>
@@ -85,7 +85,7 @@ const CTASection = () => {
             transition={{ delay: 0.4 }}
             className="mt-12 flex flex-wrap justify-center gap-8"
           >
-            {['Busca inteligente', 'Instantâneo', 'Sem Cadastro'].map((item) => (
+            {['IA + curadoria local', 'Atendimento humano quando precisar', 'Sem cadastro'].map((item) => (
               <div key={item} className="flex items-center gap-2">
                 <div className="w-1 h-1 rounded-full bg-primary/40" />
                 <span className="text-badge">{item}</span>
