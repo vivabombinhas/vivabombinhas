@@ -503,9 +503,9 @@ async function searchProperties(supabase: any, filters: any): Promise<any[]> {
 
     // Filtro de Bairro (text) — mantém ilike, com split apenas em vírgula/barra/pipe
     if (filters?.bairro && typeof filters.bairro === "string") {
-      const bairros = filters.bairro.toLowerCase().split(/[,|/]+|\s+e\s+|\s+ou\s+/).map(s => s.trim()).filter(b => b.length > 3 && b !== "bombinhas");
+      const bairros = filters.bairro.toLowerCase().split(/[,|/]+|\s+e\s+|\s+ou\s+/).map((s: string) => s.trim()).filter((b: string) => b.length > 3 && b !== "bombinhas");
       if (bairros.length > 0) {
-        const orConditions = bairros.map(b => `bairro.ilike.%${b}%`).join(",");
+        const orConditions = bairros.map((b: string) => `bairro.ilike.%${b}%`).join(",");
         q = q.or(orConditions);
       }
     }
