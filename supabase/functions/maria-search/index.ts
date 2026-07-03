@@ -969,6 +969,7 @@ serve(async (req) => {
           }
         }
       }
+      } // end else (legacy flow when temporada não foi tratada deterministicamente)
     }
 
 
