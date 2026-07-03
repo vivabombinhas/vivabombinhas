@@ -216,7 +216,7 @@ function parseFiltersBlock(text: string) {
   }
 }
 
-function checkSearchRequirements(filters: any, intent: string, lastMessage: string, extractedData: any) {
+function checkSearchRequirements(filters: any, intent: string, lastMessage: string, extractedData: any, historyText: string = "") {
   const missing: string[] = [];
   if (!filters || !filters.finalidade) {
     return { allowed: false, missing: ["finalidade"] };
@@ -228,7 +228,7 @@ function checkSearchRequirements(filters: any, intent: string, lastMessage: stri
   const hasOrcamento = !!(filters.preco_max || filters.preco_min ||
     extractedData?.orcamento_max || extractedData?.orcamento_min);
 
-  console.log(`[MarIA Search Logic] Checking requirements: Finalidade=${finalidade}, Intent=${intent}`);
+  console.log(`[MarIA Search Logic] Checking requirements: Finalidade=${finalidade}, Intent=${intent}, hasBairro=${hasBairro}, hasTipo=${hasTipo}, hasOrcamento=${hasOrcamento}`);
   
   // Regra específica para Investimento
   if (finalidade === "investimento" || (finalidade === "compra" && extractedData?.objetivo === "investir")) {
@@ -246,14 +246,21 @@ function checkSearchRequirements(filters: any, intent: string, lastMessage: stri
     return { allowed: missing.length === 0, missing };
   }
   
-  // Regra específica para Temporada
+  // Regra específica para Temporada — usar histórico completo para inferir capacidade/período
   if (finalidade === "temporada") {
     const hasConstraint = hasBairro || filters.preco_max || hasTipo;
-    const hasCapacityOrPeriod = extractedData?.pessoas || extractedData?.periodo;
+    const text = (historyText + " " + lastMessage).toLowerCase();
+    // Padrões: "8 pessoas", "para 6", "casal", período/mês/dias
+    const capacityRegex = /\b(\d+)\s*(pessoas|pessoa|adultos|h[óo]spedes|gente)\b|\bpara\s+(\d+)\b|\bcasal\b|\bfam[íi]lia\b/;
+    const periodRegex = /\b(janeiro|fevereiro|mar[çc]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|carnaval|r[ée]veillon|natal|feriado|temporada)\b|\b\d+\s*(dias|noites|di[áa]rias|semanas?)\b|\bdia\s+\d+\b/;
+    const hasCapacity = capacityRegex.test(text) || !!extractedData?.pessoas;
+    const hasPeriod = periodRegex.test(text) || !!extractedData?.periodo;
+    const hasCapacityOrPeriod = hasCapacity || hasPeriod;
     
     if (!hasConstraint) missing.push("filtros_concretos");
     if (!hasCapacityOrPeriod) missing.push("capacidade_ou_periodo");
     
+    console.log(`[MarIA Search Logic] Temporada: hasConstraint=${hasConstraint}, hasCapacity=${hasCapacity}, hasPeriod=${hasPeriod}`);
     return { allowed: missing.length === 0, missing };
   }
   
