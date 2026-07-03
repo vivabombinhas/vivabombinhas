@@ -8,6 +8,7 @@ import {
   searchAndRankSeasonProperties,
   buildSeasonReply,
 } from "./season-search.ts";
+import { callMariaCore, isMariaCoreConfigured } from "../_shared/mariaCore.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -778,6 +779,56 @@ serve(async (req) => {
     console.log(`[MarIA Debug] Nova mensagem recebida. Session: ${sessionId}. Messages: ${messages.length}`);
     const lastMessage = messages[messages.length - 1]?.content || "";
     console.log(`[MarIA Debug] Última mensagem: "${lastMessage}"`);
+
+    // ============================================================
+    // MarIA Core proxy — tenta o cérebro externo antes do fallback local.
+    // Só executa se MARIA_CORE_API_URL + MARIA_CORE_API_KEY existirem.
+    // Qualquer status != "ok" cai no fallback local (comportamento atual).
+    // ============================================================
+    if (isMariaCoreConfigured()) {
+      const coreResult = await callMariaCore<any>("/chat", {
+        method: "POST",
+        body: {
+          session_id: sessionId,
+          messages,
+          lead_captured: !!lead_captured,
+          extra_data: extra_data ?? null,
+          nome: nome ?? null,
+          telefone: telefone ?? null,
+        },
+      });
+
+      console.log(JSON.stringify({
+        tag: "MarIA Core Proxy",
+        session_id: sessionId,
+        status: coreResult.status,
+        http_status: coreResult.http_status ?? null,
+        latency_ms: coreResult.latency_ms ?? null,
+        mode: coreResult.data?.mode ?? coreResult.data?.conversation_mode ?? null,
+        error: coreResult.error ?? null,
+      }));
+
+      if (coreResult.status === "ok" && coreResult.data && typeof coreResult.data === "object") {
+        const d: any = coreResult.data;
+        // Normaliza para o mesmo contrato consumido por useMariaChat.
+        const payload = {
+          reply: typeof d.reply === "string" ? d.reply : "",
+          show_results: !!d.show_results,
+          properties: Array.isArray(d.properties) ? d.properties : [],
+          all_properties: Array.isArray(d.all_properties) ? d.all_properties : (Array.isArray(d.properties) ? d.properties : []),
+          gate_active: !!d.gate_active,
+          no_results_gate: !!d.no_results_gate,
+          show_strategic_form: !!d.show_strategic_form,
+        };
+        if (payload.reply && payload.reply.trim().length > 0) {
+          return new Response(JSON.stringify(payload), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        console.warn("[MarIA Core Proxy] Resposta ok porém sem 'reply' válido — usando fallback local.");
+      }
+      // status not_configured/error/timeout → segue fluxo local abaixo.
+    }
 
     // 1. ROUTER
     const routerReply = await callAI(lovableApiKey, "google/gemini-3-flash-preview", PROMPTS.ROUTER, messages.slice(-5), 0);
