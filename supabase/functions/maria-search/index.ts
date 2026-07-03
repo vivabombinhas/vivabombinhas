@@ -876,6 +876,9 @@ serve(async (req) => {
       finalReply = "Entendi. Estou buscando as melhores opções para você.";
     }
 
+    // 6. PERIOD SANITIZER — a MarIA não pode citar datas/meses que o usuário não mencionou
+    finalReply = sanitizePeriodMentions(finalReply, messages);
+
     // 4. PERSISTENCE (Background)
     (async () => {
       try {
