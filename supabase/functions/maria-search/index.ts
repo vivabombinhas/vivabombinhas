@@ -674,6 +674,71 @@ function isSearchAllowed(filters: any, intent: string, lastMessage: string, extr
 }
 
 // ============================================================
+// CONVERSATION MODE ROUTER — determinístico
+// ============================================================
+type ConversationMode = "temporada" | "compra" | "investimento" | "anunciante" | "comum";
+
+const PURCHASE_KEYWORDS = /\b(comprar|compra|comprando|venda|vender|à\s*venda|a\s*venda|investir|investimento|investidor|patrimonio|patrimônio|renda|permuta|permutar|carro\s+(?:de|como)|entrada|financiamento|financiar|capital|dinheiro\s+(?:vivo|em)|à\s*vista|a\s*vista|mil[hõ]ão|milh[ãa]o|milh[õo]es|planta|construtora|m2|m²|metro\s+quadrado|valoriza[cç][aã]o|liquidez)\b/i;
+const SEASON_KEYWORDS = /\b(temporada|f[ée]rias|di[áa]ria|di[áa]rias|por\s+noite|pernoite|hospedagem|hospedar|reservar|reserva|check[- ]?in|check[- ]?out|carnaval|r[ée]veillon|passar\s+(?:o\s+)?(?:ano\s+novo|natal|feriado|ferias)|alugar\s+para\s+temporada|alugar\s+por\s+(?:um|uma|\d))\b/i;
+const ANNOUNCE_KEYWORDS = /\b(anunciar|cadastrar\s+im[óo]vel|colocar\s+(?:meu|minha)\s+im[óo]vel|sou\s+propriet[áa]rio|meu\s+im[óo]vel\s+para\s+(?:venda|alugar|temporada))\b/i;
+
+function resolveConversationMode(messages: any[], finalidadeHint?: string): { mode: ConversationMode; reason: string } {
+  const userMsgs = messages.filter((m: any) => m?.role === "user").map((m: any) => String(m?.content ?? ""));
+  if (userMsgs.length === 0) {
+    if (finalidadeHint === "investimento") return { mode: "investimento", reason: "hint_only" };
+    if (finalidadeHint === "compra") return { mode: "compra", reason: "hint_only" };
+    if (finalidadeHint === "temporada") return { mode: "temporada", reason: "hint_only" };
+    if (finalidadeHint === "anunciante") return { mode: "anunciante", reason: "hint_only" };
+    return { mode: "comum", reason: "empty" };
+  }
+  const last = userMsgs[userMsgs.length - 1] || "";
+  const recent = userMsgs.slice(-4).join(" \n ");
+  const all = userMsgs.join(" \n ");
+
+  const scoreFor = (re: RegExp) => {
+    let s = 0;
+    if (re.test(last)) s += 5;
+    if (re.test(recent)) s += 2;
+    if (re.test(all)) s += 1;
+    return s;
+  };
+
+  const purchase = scoreFor(PURCHASE_KEYWORDS);
+  const season = scoreFor(SEASON_KEYWORDS);
+  const announce = scoreFor(ANNOUNCE_KEYWORDS);
+
+  // Hint só é usada como desempate — nunca sobrescreve sinal forte do usuário.
+  if (finalidadeHint === "investimento" && purchase === 0 && season === 0) {
+    return { mode: "investimento", reason: "hint_no_signal" };
+  }
+  if (finalidadeHint === "compra" && purchase === 0 && season === 0) {
+    return { mode: "compra", reason: "hint_no_signal" };
+  }
+  if (finalidadeHint === "temporada" && season === 0 && purchase === 0) {
+    return { mode: "temporada", reason: "hint_no_signal" };
+  }
+  if (finalidadeHint === "anunciante" && announce === 0 && purchase === 0 && season === 0) {
+    return { mode: "anunciante", reason: "hint_no_signal" };
+  }
+
+  if (announce >= purchase && announce >= season && announce > 0) {
+    return { mode: "anunciante", reason: `announce_score=${announce}` };
+  }
+  if (purchase > season) {
+    const isInvestment = /invest|renda|patrim[oô]nio|permuta|liquidez|valoriza|planta|construtora/i.test(all) || finalidadeHint === "investimento";
+    return { mode: isInvestment ? "investimento" : "compra", reason: `purchase_score=${purchase} season=${season}` };
+  }
+  if (season > 0) {
+    return { mode: "temporada", reason: `season_score=${season} purchase=${purchase}` };
+  }
+  if (finalidadeHint === "investimento") return { mode: "investimento", reason: "hint_fallback" };
+  if (finalidadeHint === "compra") return { mode: "compra", reason: "hint_fallback" };
+  if (finalidadeHint === "temporada") return { mode: "temporada", reason: "hint_fallback" };
+  if (finalidadeHint === "anunciante") return { mode: "anunciante", reason: "hint_fallback" };
+  return { mode: "comum", reason: "no_signal" };
+}
+
+// ============================================================
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -803,90 +868,112 @@ serve(async (req) => {
       }
     } else {
       // ============================================================
-      // TEMPORADA — camada determinística (bypass do fluxo LLM/[FILTERS])
+      // CONVERSATION MODE ROUTER — antes de qualquer busca
       // ============================================================
       const finalidadeHint = (extra_data?.finalidade_hint ?? extra_data?.finalidade) as string | undefined;
-      const seasonState = buildSeasonSearchState(messages, finalidadeHint);
+      const conv = resolveConversationMode(messages, finalidadeHint);
+      const conversationMode = conv.mode;
+
+      console.log(JSON.stringify({
+        tag: "MarIA ConversationMode",
+        session_id: sessionId,
+        conversation_mode: conversationMode,
+        mode_reason: conv.reason,
+        last_user_message: lastMessage,
+        search_engine_used:
+          conversationMode === "temporada" ? "season" :
+          conversationMode === "compra" ? "purchase" :
+          conversationMode === "investimento" ? "investment" : "none",
+      }));
+
+      // ============================================================
+      // TEMPORADA — camada determinística (SÓ roda em modo temporada)
+      // ============================================================
       let seasonHandled = false;
 
-      if (seasonState) {
-        const seasonValidation = validateSeasonSearchState(seasonState);
-        const shouldSearch = seasonValidation.ok || seasonState.explicit_show_request;
+      if (conversationMode === "temporada") {
+        const seasonState = buildSeasonSearchState(messages, finalidadeHint);
+        if (seasonState) {
+          const seasonValidation = validateSeasonSearchState(seasonState);
+          const shouldSearch = seasonValidation.ok || seasonState.explicit_show_request;
 
-        if (shouldSearch) {
-          const seasonResult = await searchAndRankSeasonProperties(seasonState, supabase);
-          allProperties = seasonResult.properties;
-          const seasonReply = buildSeasonReply(seasonState, seasonValidation, seasonResult);
+          if (shouldSearch) {
+            const seasonResult = await searchAndRankSeasonProperties(seasonState, supabase);
+            allProperties = seasonResult.properties;
+            const seasonReply = buildSeasonReply(seasonState, seasonValidation, seasonResult);
 
-          console.log(JSON.stringify({
-            tag: "MarIA Season Deterministic",
-            session_id: sessionId,
-            season_state: seasonState,
-            validation: seasonValidation,
-            exact_count: seasonResult.exact_count,
-            fallback_count: seasonResult.fallback_count,
-            fallback_layer: seasonResult.layer,
-            total_active_temporada: seasonResult.total_active_temporada,
-            show_results: allProperties.length > 0,
-            results_count: allProperties.length,
-          }));
+            console.log(JSON.stringify({
+              tag: "MarIA Season Deterministic",
+              session_id: sessionId,
+              season_state: seasonState,
+              validation: seasonValidation,
+              exact_count: seasonResult.exact_count,
+              fallback_count: seasonResult.fallback_count,
+              fallback_layer: seasonResult.layer,
+              total_active_temporada: seasonResult.total_active_temporada,
+              show_results: allProperties.length > 0,
+              results_count: allProperties.length,
+            }));
 
-          if (allProperties.length > 0) {
-            showResults = true;
-            if (!lead_captured && allProperties.length > 2) {
-              gateActive = true;
-              visibleProperties = allProperties.slice(0, 2);
-            } else {
-              visibleProperties = allProperties.slice(0, 3);
+            if (allProperties.length > 0) {
+              showResults = true;
+              if (!lead_captured && allProperties.length > 2) {
+                gateActive = true;
+                visibleProperties = allProperties.slice(0, 2);
+              } else {
+                visibleProperties = allProperties.slice(0, 3);
+              }
             }
+            cleaned = seasonReply;
+            seasonHandled = true;
+          } else if (seasonValidation.ask) {
+            cleaned = seasonValidation.ask;
+            seasonHandled = true;
           }
-          cleaned = seasonReply;
-          seasonHandled = true;
-        } else if (seasonValidation.ask) {
-          // Falta info obrigatória e o usuário não pediu cards explicitamente.
-          cleaned = seasonValidation.ask;
-          seasonHandled = true;
-          console.log(JSON.stringify({
-            tag: "MarIA Season Deterministic",
-            session_id: sessionId,
-            season_state: seasonState,
-            validation: seasonValidation,
-            show_results: false,
-            results_count: 0,
-          }));
         }
       }
 
-      // Concatena histórico para permitir inferência de capacidade/período em temporada
+      // Concatena histórico para permitir inferência em fluxos legados
       const historyText = messages.map((m: any) => String(m?.content ?? "")).join(" \n ");
       if (seasonHandled) {
         // Nada mais a fazer no fluxo legado quando a busca determinística já respondeu.
       } else {
-      let effectiveSearchFilters = inferSeasonFilters(filters || {}, extractedData, historyText);
+      // Em modos de compra/investimento, jamais deixar a inferência forçar finalidade=temporada.
+      const purchaseMode = conversationMode === "compra" || conversationMode === "investimento";
+      let effectiveSearchFilters = purchaseMode
+        ? { ...(filters || {}), finalidade: filters?.finalidade === "temporada" ? "compra" : (filters?.finalidade || "compra") }
+        : inferSeasonFilters(filters || {}, extractedData, historyText);
 
       if (!filters && extractedData && (intent === "busca" || intent === "consultivo") && isExplicitSearchRequest) {
+        const candidateFinalidade = purchaseMode
+          ? "compra"
+          : (extractedData.finalidade || effectiveSearchFilters?.finalidade || "compra");
         const candidateFilters = {
-          finalidade: extractedData.finalidade || effectiveSearchFilters?.finalidade || "compra",
+          finalidade: candidateFinalidade,
           bairro: extractedData.bairro_preferencia,
           tipo: extractedData.tipo_imovel,
           preco_max: extractedData.orcamento_max,
           preco_min: extractedData.orcamento_min,
-          pessoas: extractedData.pessoas,
-          periodo: extractedData.periodo,
+          pessoas: purchaseMode ? undefined : extractedData.pessoas,
+          periodo: purchaseMode ? undefined : extractedData.periodo,
         };
 
-        const inferredCandidate = inferSeasonFilters(candidateFilters, extractedData, historyText);
+        const inferredCandidate = purchaseMode
+          ? candidateFilters
+          : inferSeasonFilters(candidateFilters, extractedData, historyText);
         if (isSearchAllowed(inferredCandidate, intent, lastMessage, extractedData, historyText)) {
           filters = inferredCandidate;
           effectiveSearchFilters = inferredCandidate;
         }
       }
 
-      if (!filters && effectiveSearchFilters?.finalidade === "temporada" && isExplicitSearchRequest) {
+      if (!purchaseMode && !filters && effectiveSearchFilters?.finalidade === "temporada" && isExplicitSearchRequest) {
         filters = effectiveSearchFilters;
       }
 
-      effectiveSearchFilters = inferSeasonFilters(filters || effectiveSearchFilters || {}, extractedData, historyText);
+      effectiveSearchFilters = purchaseMode
+        ? { ...(filters || effectiveSearchFilters || {}), finalidade: "compra" }
+        : inferSeasonFilters(filters || effectiveSearchFilters || {}, extractedData, historyText);
 
       // Check search requirements
       const searchCheckFilters = (effectiveSearchFilters?.finalidade || filters || extractedData) ? {
