@@ -277,8 +277,8 @@ function checkSearchRequirements(filters: any, intent: string, lastMessage: stri
 }
 
 // Deprecated in favor of checkSearchRequirements, but keeping a wrapper for legacy calls if any
-function isSearchAllowed(filters: any, intent: string, lastMessage: string, extractedData: any) {
-  return checkSearchRequirements(filters, intent, lastMessage, extractedData).allowed;
+function isSearchAllowed(filters: any, intent: string, lastMessage: string, extractedData: any, historyText: string = "") {
+  return checkSearchRequirements(filters, intent, lastMessage, extractedData, historyText).allowed;
 }
 
 // ============================================================
