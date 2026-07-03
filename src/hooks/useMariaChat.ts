@@ -65,7 +65,7 @@ export function useMariaChat() {
   const [finalidade, setFinalidadeState] = useState<Finalidade | null>(() => {
     try {
       const v = localStorage.getItem(FINALIDADE_KEY);
-      return (v === "compra" || v === "investimento" || v === "temporada" || v === "anunciante") ? (v as Finalidade) : null;
+      return (v === "compra" || v === "investimento" || v === "temporada" || v === "anunciante" || v === "entender") ? (v as Finalidade) : null;
     } catch {
       return null;
     }
