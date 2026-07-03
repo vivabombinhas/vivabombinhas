@@ -85,7 +85,7 @@ const CTASection = () => {
             transition={{ delay: 0.4 }}
             className="mt-12 flex flex-wrap justify-center gap-8"
           >
-            {['Busca inteligente', 'Instantâneo', 'Sem Cadastro'].map((item) => (
+            {['IA + curadoria local', 'Atendimento humano quando precisar', 'Sem cadastro'].map((item) => (
               <div key={item} className="flex items-center gap-2">
                 <div className="w-1 h-1 rounded-full bg-primary/40" />
                 <span className="text-badge">{item}</span>
