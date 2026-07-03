@@ -13,6 +13,7 @@ import {
   DollarSign,
   Settings,
   LineChart as ChartIcon,
+  PackageSearch,
 } from "lucide-react";
 import {
   Sidebar,
