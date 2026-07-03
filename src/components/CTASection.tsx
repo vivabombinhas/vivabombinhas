@@ -73,7 +73,7 @@ const CTASection = () => {
                 size="lg" 
                 className="h-14 px-10 rounded-full bg-primary text-primary-foreground font-bold text-lg hover:brightness-105 transition-all duration-500 shadow-xl shadow-primary/10 group-hover:scale-[1.01]"
               >
-                Buscar agora
+                Conversar com a MarIA
                 <ArrowRight className="ml-3 h-5 w-5" />
               </Button>
             </div>
