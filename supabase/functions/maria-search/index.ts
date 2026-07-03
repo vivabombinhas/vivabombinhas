@@ -750,48 +750,72 @@ serve(async (req) => {
     } else {
       // Concatena histórico para permitir inferência de capacidade/período em temporada
       const historyText = messages.map((m: any) => String(m?.content ?? "")).join(" \n ");
+      let effectiveSearchFilters = inferSeasonFilters(filters || {}, extractedData, historyText);
 
       if (!filters && extractedData && (intent === "busca" || intent === "consultivo") && isExplicitSearchRequest) {
         const candidateFilters = {
-          finalidade: extractedData.finalidade || "compra",
+          finalidade: extractedData.finalidade || effectiveSearchFilters?.finalidade || "compra",
           bairro: extractedData.bairro_preferencia,
           tipo: extractedData.tipo_imovel,
-          preco_max: extractedData.orcamento_max
+          preco_max: extractedData.orcamento_max,
+          preco_min: extractedData.orcamento_min,
+          pessoas: extractedData.pessoas,
+          periodo: extractedData.periodo,
         };
-        
-        if (isSearchAllowed(candidateFilters, intent, lastMessage, extractedData, historyText)) {
-          filters = candidateFilters;
+
+        const inferredCandidate = inferSeasonFilters(candidateFilters, extractedData, historyText);
+        if (isSearchAllowed(inferredCandidate, intent, lastMessage, extractedData, historyText)) {
+          filters = inferredCandidate;
+          effectiveSearchFilters = inferredCandidate;
         }
       }
 
+      if (!filters && effectiveSearchFilters?.finalidade === "temporada" && isExplicitSearchRequest) {
+        filters = effectiveSearchFilters;
+      }
+
+      effectiveSearchFilters = inferSeasonFilters(filters || effectiveSearchFilters || {}, extractedData, historyText);
+
       // Check search requirements
-      const searchCheck = checkSearchRequirements(filters || extractedData ? {
-        finalidade: filters?.finalidade || extractedData?.finalidade || "compra",
-        bairro: filters?.bairro || extractedData?.bairro_preferencia,
-        tipo: filters?.tipo || extractedData?.tipo_imovel,
-        preco_max: filters?.preco_max || extractedData?.orcamento_max,
-        preco_min: filters?.preco_min || extractedData?.orcamento_min
-      } : null, intent, lastMessage, extractedData, historyText);
+      const searchCheckFilters = (effectiveSearchFilters?.finalidade || filters || extractedData) ? {
+        finalidade: effectiveSearchFilters?.finalidade || filters?.finalidade || extractedData?.finalidade || "compra",
+        bairro: effectiveSearchFilters?.bairro || filters?.bairro || extractedData?.bairro_preferencia,
+        tipo: effectiveSearchFilters?.tipo || filters?.tipo || extractedData?.tipo_imovel,
+        preco_max: effectiveSearchFilters?.preco_max || filters?.preco_max || extractedData?.orcamento_max,
+        preco_min: effectiveSearchFilters?.preco_min || filters?.preco_min || extractedData?.orcamento_min,
+        pessoas: effectiveSearchFilters?.pessoas || extractedData?.pessoas,
+        periodo: effectiveSearchFilters?.periodo || extractedData?.periodo,
+      } : null;
+      const searchCheck = checkSearchRequirements(searchCheckFilters, intent, lastMessage, extractedData, historyText);
       
       missingFilters = searchCheck.missing;
-      console.debug(`[MarIA Debug] filters=${JSON.stringify(filters)} searchCheck.allowed=${searchCheck.allowed} missing=${JSON.stringify(searchCheck.missing)}`);
+      console.debug(`[MarIA Debug] filters=${JSON.stringify(searchCheckFilters)} extracted=${JSON.stringify(extractedData)} searchCheck.allowed=${searchCheck.allowed} missing=${JSON.stringify(searchCheck.missing)}`);
 
       // Final check for search triggering
       if (searchCheck.allowed) {
         // Garantir que temos um objeto de filtros válido
-        const effectiveFilters = filters || {
+        const effectiveFilters = effectiveSearchFilters?.finalidade ? effectiveSearchFilters : (filters || {
           finalidade: extractedData?.finalidade || "compra",
           bairro: extractedData?.bairro_preferencia,
           tipo: extractedData?.tipo_imovel,
           preco_max: extractedData?.orcamento_max,
           preco_min: extractedData?.orcamento_min
-        };
+        });
 
         if (effectiveFilters.finalidade !== "anunciante") {
-          allProperties = await searchProperties(supabase, effectiveFilters);
+          const seasonSearch = effectiveFilters.finalidade === "temporada"
+            ? await searchSeasonPropertiesProgressive(supabase, effectiveFilters, extractedData, historyText)
+            : null;
+          allProperties = seasonSearch ? seasonSearch.properties : await searchProperties(supabase, effectiveFilters);
+          console.debug(`[MarIA Debug] search_results exact=${seasonSearch?.exactCount ?? allProperties.length} fallback=${seasonSearch?.fallbackCount ?? 0} layer=${seasonSearch?.layer ?? "standard"} total=${allProperties.length}`);
           
           if (allProperties.length > 0) {
             showResults = true;
+            if (seasonSearch?.isFallback) {
+              cleaned = "Não encontrei casa exatamente nessa faixa, mas encontrei alternativas reais próximas no portal. Para janeiro ou fevereiro, a disponibilidade precisa ser confirmada com o parceiro local.";
+            } else if (effectiveFilters.finalidade === "temporada") {
+              cleaned = "Encontrei opções compatíveis. Para janeiro ou fevereiro, a disponibilidade precisa ser confirmada com o parceiro local.";
+            }
             if (!lead_captured && allProperties.length > 2) {
               gateActive = true;
               visibleProperties = allProperties.slice(0, 2);
