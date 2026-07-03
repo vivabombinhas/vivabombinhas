@@ -42,8 +42,8 @@ const AudienceSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               className="text-h2"
             >
-              Soluções reais para <br className="hidden md:block" />
-              <span className="text-muted-foreground/80 italic font-serif">diferentes perfis.</span>
+              Um concierge para <br className="hidden md:block" />
+              <span className="text-muted-foreground/80 italic font-serif">cada tipo de busca.</span>
             </motion.h2>
           </div>
           <motion.p 
@@ -51,7 +51,7 @@ const AudienceSection = () => {
             whileInView={{ opacity: 1 }}
             className="text-subtitle max-w-sm"
           >
-            Centralizamos a inteligência local para entregar utilidade imediata.
+            IA para organizar as opções, curadoria local para trazer contexto e atendimento humano quando a decisão exige.
           </motion.p>
         </div>
 
