@@ -27,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import AdvertiserLoginPanel from "@/components/AdvertiserLoginPanel";
 
 export default function Dashboard() {
   const [session, setSession] = useState<any>(null);
