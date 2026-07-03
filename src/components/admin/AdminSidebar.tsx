@@ -13,6 +13,7 @@ import {
   DollarSign,
   Settings,
   LineChart as ChartIcon,
+  PackageSearch,
 } from "lucide-react";
 import {
   Sidebar,
@@ -42,6 +43,7 @@ const mainItems = [
 
 const importItems = [
   { title: "Meus Imóveis", url: "/admin/imoveis", icon: ClipboardList },
+  { title: "Inventário", url: "/admin/inventario", icon: PackageSearch },
   { title: "Curadoria", url: "/admin/curadoria", icon: Sparkles },
   { title: "Submissões", url: "/admin/submissions", icon: Bell },
   { title: "Importar link", url: "/admin/importar-link", icon: Link2 },

@@ -20,6 +20,7 @@ import AdminRevenue from "./pages/AdminRevenue.tsx";
 import AdminAIConfig from "./pages/AdminAIConfig.tsx";
 import AdminImoveis from "./pages/AdminImoveis.tsx";
 import AdminCuradoria from "./pages/AdminCuradoria.tsx";
+import AdminInventario from "./pages/AdminInventario.tsx";
 import AdminLayout from "./components/admin/AdminLayout.tsx";
 import AdminInsights from "./pages/AdminInsights.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="receita" element={<AdminRevenue />} />
             <Route path="submissions" element={<AdminSubmissions />} />
             <Route path="imoveis" element={<AdminImoveis />} />
+            <Route path="inventario" element={<AdminInventario />} />
             <Route path="curadoria" element={<AdminCuradoria />} />
             <Route path="importar" element={<AdminImportar />} />
             <Route path="importar-link" element={<AdminImportarLink />} />
