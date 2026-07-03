@@ -674,6 +674,71 @@ function isSearchAllowed(filters: any, intent: string, lastMessage: string, extr
 }
 
 // ============================================================
+// CONVERSATION MODE ROUTER — determinístico
+// ============================================================
+type ConversationMode = "temporada" | "compra" | "investimento" | "anunciante" | "comum";
+
+const PURCHASE_KEYWORDS = /\b(comprar|compra|comprando|venda|vender|à\s*venda|a\s*venda|investir|investimento|investidor|patrimonio|patrimônio|renda|permuta|permutar|carro\s+(?:de|como)|entrada|financiamento|financiar|capital|dinheiro\s+(?:vivo|em)|à\s*vista|a\s*vista|mil[hõ]ão|milh[ãa]o|milh[õo]es|planta|construtora|m2|m²|metro\s+quadrado|valoriza[cç][aã]o|liquidez)\b/i;
+const SEASON_KEYWORDS = /\b(temporada|f[ée]rias|di[áa]ria|di[áa]rias|por\s+noite|pernoite|hospedagem|hospedar|reservar|reserva|check[- ]?in|check[- ]?out|carnaval|r[ée]veillon|passar\s+(?:o\s+)?(?:ano\s+novo|natal|feriado|ferias)|alugar\s+para\s+temporada|alugar\s+por\s+(?:um|uma|\d))\b/i;
+const ANNOUNCE_KEYWORDS = /\b(anunciar|cadastrar\s+im[óo]vel|colocar\s+(?:meu|minha)\s+im[óo]vel|sou\s+propriet[áa]rio|meu\s+im[óo]vel\s+para\s+(?:venda|alugar|temporada))\b/i;
+
+function resolveConversationMode(messages: any[], finalidadeHint?: string): { mode: ConversationMode; reason: string } {
+  const userMsgs = messages.filter((m: any) => m?.role === "user").map((m: any) => String(m?.content ?? ""));
+  if (userMsgs.length === 0) {
+    if (finalidadeHint === "investimento") return { mode: "investimento", reason: "hint_only" };
+    if (finalidadeHint === "compra") return { mode: "compra", reason: "hint_only" };
+    if (finalidadeHint === "temporada") return { mode: "temporada", reason: "hint_only" };
+    if (finalidadeHint === "anunciante") return { mode: "anunciante", reason: "hint_only" };
+    return { mode: "comum", reason: "empty" };
+  }
+  const last = userMsgs[userMsgs.length - 1] || "";
+  const recent = userMsgs.slice(-4).join(" \n ");
+  const all = userMsgs.join(" \n ");
+
+  const scoreFor = (re: RegExp) => {
+    let s = 0;
+    if (re.test(last)) s += 5;
+    if (re.test(recent)) s += 2;
+    if (re.test(all)) s += 1;
+    return s;
+  };
+
+  const purchase = scoreFor(PURCHASE_KEYWORDS);
+  const season = scoreFor(SEASON_KEYWORDS);
+  const announce = scoreFor(ANNOUNCE_KEYWORDS);
+
+  // Hint só é usada como desempate — nunca sobrescreve sinal forte do usuário.
+  if (finalidadeHint === "investimento" && purchase === 0 && season === 0) {
+    return { mode: "investimento", reason: "hint_no_signal" };
+  }
+  if (finalidadeHint === "compra" && purchase === 0 && season === 0) {
+    return { mode: "compra", reason: "hint_no_signal" };
+  }
+  if (finalidadeHint === "temporada" && season === 0 && purchase === 0) {
+    return { mode: "temporada", reason: "hint_no_signal" };
+  }
+  if (finalidadeHint === "anunciante" && announce === 0 && purchase === 0 && season === 0) {
+    return { mode: "anunciante", reason: "hint_no_signal" };
+  }
+
+  if (announce >= purchase && announce >= season && announce > 0) {
+    return { mode: "anunciante", reason: `announce_score=${announce}` };
+  }
+  if (purchase > season) {
+    const isInvestment = /invest|renda|patrim[oô]nio|permuta|liquidez|valoriza|planta|construtora/i.test(all) || finalidadeHint === "investimento";
+    return { mode: isInvestment ? "investimento" : "compra", reason: `purchase_score=${purchase} season=${season}` };
+  }
+  if (season > 0) {
+    return { mode: "temporada", reason: `season_score=${season} purchase=${purchase}` };
+  }
+  if (finalidadeHint === "investimento") return { mode: "investimento", reason: "hint_fallback" };
+  if (finalidadeHint === "compra") return { mode: "compra", reason: "hint_fallback" };
+  if (finalidadeHint === "temporada") return { mode: "temporada", reason: "hint_fallback" };
+  if (finalidadeHint === "anunciante") return { mode: "anunciante", reason: "hint_fallback" };
+  return { mode: "comum", reason: "no_signal" };
+}
+
+// ============================================================
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
