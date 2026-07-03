@@ -37,7 +37,7 @@ const CTASection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             className="text-display mb-10"
           >
-            Pronto para encontrar<br /><span className="text-primary italic font-serif">seu lugar no paraíso?</span>
+            Pronto para explorar<br /><span className="text-primary italic font-serif">imóveis em Bombinhas?</span>
           </motion.h2>
           
           <motion.p 
@@ -46,7 +46,7 @@ const CTASection = () => {
             transition={{ delay: 0.1 }}
             className="text-subtitle mb-16 max-w-2xl"
           >
-            Experimente a forma mais elegante e inteligente de buscar em Bombinhas. Sem formulários, apenas conversa fluida.
+            Converse com a MarIA. Ela combina IA, curadoria local e atendimento humano para orientar sua busca em Bombinhas.
           </motion.p>
 
           <motion.form 
