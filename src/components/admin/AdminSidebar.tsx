@@ -16,6 +16,7 @@ import {
   PackageSearch,
   Activity,
   MessageSquare,
+  KanbanSquare,
 } from "lucide-react";
 import {
   Sidebar,
