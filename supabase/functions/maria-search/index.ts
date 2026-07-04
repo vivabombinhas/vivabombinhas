@@ -785,6 +785,14 @@ serve(async (req) => {
     // Só executa se MARIA_CORE_API_URL + MARIA_CORE_API_KEY existirem.
     // Qualquer status != "ok" cai no fallback local (comportamento atual).
     // ============================================================
+    if (!isMariaCoreConfigured()) {
+      console.log(JSON.stringify({
+        tag: "MarIA Core Proxy",
+        event: "skipped_not_configured",
+        session_id: sessionId,
+        timestamp: new Date().toISOString(),
+      }));
+    }
     if (isMariaCoreConfigured()) {
       const coreResult = await callMariaCore<any>("/chat", {
         method: "POST",
