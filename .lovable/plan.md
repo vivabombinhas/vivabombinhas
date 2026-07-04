@@ -120,3 +120,33 @@ Passos seguintes (em ordem, cada um isolado e revertível):
 - Passo 4: expor o novo prompt em `AdminAIConfig` para edição sem deploy.
 
 Quando aprovar, eu começo pelo Passo 0.
+
+---
+
+## Checkpoint — 2026-07-04
+
+Núcleo operacional do CRM MarIA concluído e estável:
+
+- ✅ **Passo 0–3** aplicados anteriormente (edge maria-search, copy v3, migração de campos, handover).
+- ✅ **Passo 4A `/admin/maria-core`** — monitor de saúde da integração.
+- ✅ **Passo 4B `/admin/conversas`** — sessões agrupadas por `session_id` com transcript em Sheet lateral (leitura pura).
+- ✅ **Passo 4C `/admin/funil`** — Kanban por `status` (Novo, Em atendimento, Fechado, Perdido, Nutrir) com update simples + audit.
+- ✅ **Passo 4C.1** — policy INSERT em `lead_status_audit` para admins.
+- ✅ **Passo 4D `/admin/atendimento`** — Inbox priorizado (quer_falar_daniel, status, finalidade, resumo_ia), mensagem WhatsApp sugerida (copiar), transição para `contatado` com audit `source='admin_atendimento'`.
+
+Tabelas de apoio já criadas e em uso: `maria_core_config`, `maria_core_events`, `lead_status_audit` (SELECT + INSERT policies).
+
+Ajuste técnico registrado: `leads_maria` só possui `created_at` (não tem `updated_at`); ordenações e displays admin usam `created_at`.
+
+Nada público/chat/edge foi alterado nos Passos 4A–4D.
+
+### Próximo passo recomendado — Passo 5: AdminAIConfig ↔ MarIA Core (modo seguro)
+
+Objetivo: permitir editar a configuração da MarIA no admin com fallback total ao comportamento atual, sem depender de disponibilidade do Core externo.
+
+Escopo previsto:
+- Ler/gravar `maria_core_config` a partir de `/admin/ai-config`.
+- Toggle "usar Core" que, se desligado ou se o health-check falhar, mantém a rota atual `maria-search` sem qualquer mudança de contrato.
+- Nenhuma migração nova, nenhum envio real ao Core ainda — apenas persistência de config + preview do payload.
+- Aguardar aprovação antes de iniciar.
+
