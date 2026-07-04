@@ -62,6 +62,7 @@ const App = () => (
             <Route path="ai-config" element={<AdminAIConfig />} />
             <Route path="maria-core" element={<AdminMariaCore />} />
             <Route path="conversas" element={<AdminConversas />} />
+            <Route path="funil" element={<AdminFunil />} />
           </Route>
           <Route path="/reset-password" element={<ResetPassword />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
