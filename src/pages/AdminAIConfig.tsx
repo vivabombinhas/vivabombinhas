@@ -6,8 +6,49 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Save, Cpu, Play, MessageSquare } from "lucide-react";
+import { Loader2, Save, Cpu, Play, MessageSquare, RefreshCw, Activity, AlertTriangle, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+type CoreConfigResponse = {
+  configured: boolean;
+  status: "ok" | "not_configured" | "error" | "timeout";
+  message: string;
+  config: Record<string, unknown> | null;
+  latency_ms?: number | null;
+  http_status?: number | null;
+  checked_at: string;
+};
+
+function coreStatusBadge(status: CoreConfigResponse["status"]) {
+  switch (status) {
+    case "ok":
+      return (
+        <Badge className="bg-green-500/15 text-green-700 border border-green-500/30">
+          <CheckCircle2 className="w-3 h-3 mr-1" /> OK
+        </Badge>
+      );
+    case "not_configured":
+      return (
+        <Badge variant="secondary">
+          <AlertTriangle className="w-3 h-3 mr-1" /> Não configurado
+        </Badge>
+      );
+    case "timeout":
+      return (
+        <Badge className="bg-yellow-500/15 text-yellow-700 border border-yellow-500/30">
+          <Clock className="w-3 h-3 mr-1" /> Timeout
+        </Badge>
+      );
+    default:
+      return (
+        <Badge variant="destructive">
+          <XCircle className="w-3 h-3 mr-1" /> Erro
+        </Badge>
+      );
+  }
+}
 
 export default function AdminAIConfig() {
   const { toast } = useToast();
@@ -36,6 +77,18 @@ export default function AdminAIConfig() {
       return data;
     },
   });
+
+  const coreConfigQuery = useQuery({
+    queryKey: ["maria_core_config"],
+    queryFn: async (): Promise<CoreConfigResponse> => {
+      const { data, error } = await supabase.functions.invoke("maria-core-config", {
+        method: "POST",
+      });
+      if (error) throw error;
+      return data as CoreConfigResponse;
+    },
+  });
+
 
   useEffect(() => {
     if (config) {
@@ -140,6 +193,87 @@ export default function AdminAIConfig() {
           </p>
         </div>
       </div>
+
+      <Card className="mb-6">
+        <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-primary" /> MarIA Core
+            </CardTitle>
+            <CardDescription>
+              Estado da integração com o backend externo (somente leitura).
+            </CardDescription>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => coreConfigQuery.refetch()}
+            disabled={coreConfigQuery.isFetching}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${coreConfigQuery.isFetching ? "animate-spin" : ""}`} />
+            Recarregar config
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {coreConfigQuery.isLoading ? (
+            <div className="text-sm text-muted-foreground flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" /> Consultando MarIA Core…
+            </div>
+          ) : coreConfigQuery.data ? (
+            <>
+              <div className="flex items-center gap-3 flex-wrap">
+                {coreStatusBadge(coreConfigQuery.data.status)}
+                <span className="text-sm text-muted-foreground">
+                  {coreConfigQuery.data.message}
+                </span>
+                {coreConfigQuery.data.latency_ms != null && (
+                  <span className="text-xs text-muted-foreground">
+                    {coreConfigQuery.data.latency_ms} ms
+                  </span>
+                )}
+              </div>
+
+              {!coreConfigQuery.data.configured && (
+                <Alert>
+                  <AlertTriangle className="w-4 h-4" />
+                  <AlertTitle>Configuração local ativa</AlertTitle>
+                  <AlertDescription>
+                    O MarIA Core ainda não está configurado. A MarIA continua
+                    operando com a configuração local abaixo (fallback seguro).
+                    Edição/envio ao Core está desativado nesta versão.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {coreConfigQuery.data.configured && coreConfigQuery.data.status !== "ok" && (
+                <Alert variant="destructive">
+                  <XCircle className="w-4 h-4" />
+                  <AlertTitle>Falha ao ler config do Core</AlertTitle>
+                  <AlertDescription>
+                    Usando configuração local como fallback. Detalhes: {coreConfigQuery.data.message}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {coreConfigQuery.data.config && (
+                <div>
+                  <div className="text-xs font-medium text-muted-foreground mb-1">
+                    Config recebida do Core (sanitizada)
+                  </div>
+                  <pre className="text-[11px] bg-muted/40 rounded p-3 overflow-x-auto max-h-64">
+                    {JSON.stringify(coreConfigQuery.data.config, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-sm text-destructive">
+              {(coreConfigQuery.error as any)?.message ?? "Falha ao consultar MarIA Core."}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
