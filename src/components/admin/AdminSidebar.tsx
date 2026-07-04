@@ -17,6 +17,7 @@ import {
   Activity,
   MessageSquare,
   KanbanSquare,
+  Inbox,
 } from "lucide-react";
 import {
   Sidebar,
@@ -45,6 +46,7 @@ const mainItems = [
   { title: "MarIA Core", url: "/admin/maria-core", icon: Activity },
   { title: "Conversas", url: "/admin/conversas", icon: MessageSquare },
   { title: "Funil", url: "/admin/funil", icon: KanbanSquare },
+  { title: "Atendimento", url: "/admin/atendimento", icon: Inbox },
 ];
 
 const importItems = [
