@@ -20,6 +20,7 @@ import AdminRevenue from "./pages/AdminRevenue.tsx";
 import AdminAIConfig from "./pages/AdminAIConfig.tsx";
 import AdminMariaCore from "./pages/AdminMariaCore.tsx";
 import AdminConversas from "./pages/AdminConversas.tsx";
+import AdminFunil from "./pages/AdminFunil.tsx";
 import AdminImoveis from "./pages/AdminImoveis.tsx";
 import AdminCuradoria from "./pages/AdminCuradoria.tsx";
 import AdminInventario from "./pages/AdminInventario.tsx";
@@ -61,6 +62,7 @@ const App = () => (
             <Route path="ai-config" element={<AdminAIConfig />} />
             <Route path="maria-core" element={<AdminMariaCore />} />
             <Route path="conversas" element={<AdminConversas />} />
+            <Route path="funil" element={<AdminFunil />} />
           </Route>
           <Route path="/reset-password" element={<ResetPassword />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
