@@ -42,6 +42,7 @@ const mainItems = [
   { title: "Receita", url: "/admin/receita", icon: DollarSign },
   { title: "Configuração IA", url: "/admin/ai-config", icon: Settings },
   { title: "MarIA Core", url: "/admin/maria-core", icon: Activity },
+  { title: "Conversas", url: "/admin/conversas", icon: MessageSquare },
 ];
 
 const importItems = [
