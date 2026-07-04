@@ -728,11 +728,14 @@ export type Database = {
           email: string | null
           faixa_preco: string | null
           feedback_corretor: string | null
+          finalidade: string | null
           id: string
           interesse: string | null
           last_contact_at: string | null
           lead_score: string | null
+          maria_core_session_id: string | null
           mensagem_original: string | null
+          next_action_suggested: string | null
           next_followup_at: string | null
           nome: string | null
           objetivo: string | null
@@ -742,9 +745,11 @@ export type Database = {
           orcamento_min: number | null
           origem: string
           pais_codigo: string | null
+          perfil_anunciante: string | null
           prazo_compra: string | null
           proximo_passo_sugerido: string | null
           quer_analise: boolean | null
+          quer_falar_daniel: boolean | null
           região_interesse: string | null
           resumo_ia: string | null
           session_id: string | null
@@ -763,11 +768,14 @@ export type Database = {
           email?: string | null
           faixa_preco?: string | null
           feedback_corretor?: string | null
+          finalidade?: string | null
           id?: string
           interesse?: string | null
           last_contact_at?: string | null
           lead_score?: string | null
+          maria_core_session_id?: string | null
           mensagem_original?: string | null
+          next_action_suggested?: string | null
           next_followup_at?: string | null
           nome?: string | null
           objetivo?: string | null
@@ -777,9 +785,11 @@ export type Database = {
           orcamento_min?: number | null
           origem?: string
           pais_codigo?: string | null
+          perfil_anunciante?: string | null
           prazo_compra?: string | null
           proximo_passo_sugerido?: string | null
           quer_analise?: boolean | null
+          quer_falar_daniel?: boolean | null
           região_interesse?: string | null
           resumo_ia?: string | null
           session_id?: string | null
@@ -798,11 +808,14 @@ export type Database = {
           email?: string | null
           faixa_preco?: string | null
           feedback_corretor?: string | null
+          finalidade?: string | null
           id?: string
           interesse?: string | null
           last_contact_at?: string | null
           lead_score?: string | null
+          maria_core_session_id?: string | null
           mensagem_original?: string | null
+          next_action_suggested?: string | null
           next_followup_at?: string | null
           nome?: string | null
           objetivo?: string | null
@@ -812,9 +825,11 @@ export type Database = {
           orcamento_min?: number | null
           origem?: string
           pais_codigo?: string | null
+          perfil_anunciante?: string | null
           prazo_compra?: string | null
           proximo_passo_sugerido?: string | null
           quer_analise?: boolean | null
+          quer_falar_daniel?: boolean | null
           região_interesse?: string | null
           resumo_ia?: string | null
           session_id?: string | null
@@ -825,12 +840,41 @@ export type Database = {
         }
         Relationships: []
       }
+      maria_core_events: {
+        Row: {
+          created_at: string
+          id: string
+          lead_id: string | null
+          payload: Json
+          session_id: string | null
+          tipo: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          payload?: Json
+          session_id?: string | null
+          tipo: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          payload?: Json
+          session_id?: string | null
+          tipo?: string
+        }
+        Relationships: []
+      }
       maria_messages: {
         Row: {
           content: string
           created_at: string | null
           id: string
+          latency_ms: number | null
           lead_id: string | null
+          mode: string | null
           role: string
           session_id: string
         }
@@ -838,7 +882,9 @@ export type Database = {
           content: string
           created_at?: string | null
           id?: string
+          latency_ms?: number | null
           lead_id?: string | null
+          mode?: string | null
           role: string
           session_id: string
         }
@@ -846,7 +892,9 @@ export type Database = {
           content?: string
           created_at?: string | null
           id?: string
+          latency_ms?: number | null
           lead_id?: string | null
+          mode?: string | null
           role?: string
           session_id?: string
         }
