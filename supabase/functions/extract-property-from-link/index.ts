@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { callMariaCore, isMariaCoreConfigured } from "../_shared/mariaCore.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -203,6 +205,70 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // ============================================================
+    // MarIA Core proxy — POST /property-from-link
+    // Só ativa quando os secrets estão presentes. Qualquer status
+    // != "ok" (ou payload sem `data`) cai no fallback local abaixo.
+    // ============================================================
+    if (!isMariaCoreConfigured()) {
+      console.log(JSON.stringify({
+        tag: "MarIA Core PropertyFromLink",
+        event: "skipped_not_configured",
+        timestamp: new Date().toISOString(),
+      }));
+    } else {
+      const coreResult = await callMariaCore<any>("/property-from-link", {
+        method: "POST",
+        body: { url: url ?? null, text: text ?? null },
+      });
+
+      console.log(JSON.stringify({
+        tag: "MarIA Core PropertyFromLink",
+        event: "core_call",
+        status: coreResult.status,
+        http_status: coreResult.http_status ?? null,
+        latency_ms: coreResult.latency_ms ?? null,
+        error: coreResult.error ?? null,
+        timestamp: new Date().toISOString(),
+      }));
+
+      const coreData: any = coreResult.data;
+      const hasValidPayload =
+        coreResult.status === "ok" &&
+        coreData &&
+        typeof coreData === "object" &&
+        (coreData.data || coreData.titulo || coreData.finalidade);
+
+      if (hasValidPayload) {
+        // Normaliza para o mesmo contrato consumido pelo admin.
+        const inner = coreData.data && typeof coreData.data === "object" ? coreData.data : coreData;
+        const payload = {
+          success: true,
+          data: {
+            ...inner,
+            link_anuncio: inner.link_anuncio ?? url ?? null,
+            fotos: Array.isArray(inner.fotos) ? inner.fotos : [],
+            photos_confidence: inner.photos_confidence ?? "low",
+            photos_warning: inner.photos_warning ?? null,
+            photos_groups: inner.photos_groups ?? { likely: [], doubtful: [], rejected: [] },
+            photos_debug: Array.isArray(inner.photos_debug) ? inner.photos_debug : [],
+          },
+        };
+        return new Response(JSON.stringify(payload), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      console.log(JSON.stringify({
+        tag: "MarIA Core PropertyFromLink",
+        event: "fallback_local",
+        reason: coreResult.status !== "ok" ? coreResult.status : "invalid_payload",
+        timestamp: new Date().toISOString(),
+      }));
+    }
+
+
 
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!lovableApiKey) {
