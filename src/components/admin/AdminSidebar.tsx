@@ -14,6 +14,7 @@ import {
   Settings,
   LineChart as ChartIcon,
   PackageSearch,
+  Activity,
 } from "lucide-react";
 import {
   Sidebar,
@@ -39,6 +40,7 @@ const mainItems = [
   { title: "Matches", url: "/admin/matches", icon: Sparkles },
   { title: "Receita", url: "/admin/receita", icon: DollarSign },
   { title: "Configuração IA", url: "/admin/ai-config", icon: Settings },
+  { title: "MarIA Core", url: "/admin/maria-core", icon: Activity },
 ];
 
 const importItems = [
