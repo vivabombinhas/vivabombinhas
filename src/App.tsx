@@ -18,6 +18,7 @@ import AdminFollowups from "./pages/AdminFollowups.tsx";
 import AdminAlerts from "./pages/AdminAlerts.tsx";
 import AdminRevenue from "./pages/AdminRevenue.tsx";
 import AdminAIConfig from "./pages/AdminAIConfig.tsx";
+import AdminMariaCore from "./pages/AdminMariaCore.tsx";
 import AdminImoveis from "./pages/AdminImoveis.tsx";
 import AdminCuradoria from "./pages/AdminCuradoria.tsx";
 import AdminInventario from "./pages/AdminInventario.tsx";
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="importar-link" element={<AdminImportarLink />} />
             <Route path="matches" element={<AdminMatches />} />
             <Route path="ai-config" element={<AdminAIConfig />} />
+            <Route path="maria-core" element={<AdminMariaCore />} />
           </Route>
           <Route path="/reset-password" element={<ResetPassword />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
