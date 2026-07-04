@@ -94,15 +94,38 @@ serve(async (req) => {
           message = d.message.trim();
         }
       } else {
+        const reason = coreResult.status !== "ok"
+          ? coreResult.status
+          : (!hasMinimumLead ? "missing_min_lead_data" : "invalid_payload");
         console.log(JSON.stringify({
           tag: "MarIA Core NotifyBroker",
           event: "fallback_local",
           session_id,
-          reason: coreResult.status !== "ok"
-            ? coreResult.status
-            : (!hasMinimumLead ? "missing_min_lead_data" : "invalid_payload"),
+          reason,
           timestamp: new Date().toISOString(),
         }));
+        // Passo 3B — persistência observacional (fire-and-forget)
+        const tipo = coreResult.status === "timeout" ? "core_timeout"
+          : coreResult.status === "error" ? "core_error"
+          : "core_invalid_payload";
+        (async () => {
+          try {
+            await supabase.from("maria_core_events").insert({
+              session_id: session_id ?? null,
+              lead_id: lead?.id ?? null,
+              tipo,
+              payload: {
+                source: "notify-broker",
+                reason,
+                http_status: coreResult.http_status ?? null,
+                latency_ms: coreResult.latency_ms ?? null,
+                error: coreResult.error ?? null,
+              },
+            });
+          } catch (e) {
+            console.error("[NotifyBroker Core Event] insert failed:", e);
+          }
+        })();
       }
     }
 

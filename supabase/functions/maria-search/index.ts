@@ -806,15 +806,36 @@ serve(async (req) => {
         },
       });
 
+      const coreModeLog = coreResult.data?.mode ?? coreResult.data?.conversation_mode ?? null;
       console.log(JSON.stringify({
         tag: "MarIA Core Proxy",
         session_id: sessionId,
         status: coreResult.status,
         http_status: coreResult.http_status ?? null,
         latency_ms: coreResult.latency_ms ?? null,
-        mode: coreResult.data?.mode ?? coreResult.data?.conversation_mode ?? null,
+        mode: coreModeLog,
         error: coreResult.error ?? null,
       }));
+
+      // Helper: fire-and-forget event insert (never blocks response)
+      const insertCoreEvent = (tipo: string, payloadExtra: Record<string, unknown> = {}) => {
+        (async () => {
+          try {
+            await supabase.from("maria_core_events").insert({
+              session_id: sessionId || null,
+              tipo,
+              payload: {
+                http_status: coreResult.http_status ?? null,
+                latency_ms: coreResult.latency_ms ?? null,
+                error: coreResult.error ?? null,
+                ...payloadExtra,
+              },
+            });
+          } catch (e) {
+            console.error(`[MarIA Core Event] insert(${tipo}) failed:`, e);
+          }
+        })();
+      };
 
       if (coreResult.status === "ok" && coreResult.data && typeof coreResult.data === "object") {
         const d: any = coreResult.data;
@@ -829,13 +850,75 @@ serve(async (req) => {
           show_strategic_form: !!d.show_strategic_form,
         };
         if (payload.reply && payload.reply.trim().length > 0) {
+          // ============================================================
+          // Persistência observacional (Passo 3B) — fire-and-forget.
+          // Nunca bloqueia a resposta ao usuário; erros só logam.
+          // ============================================================
+          const modeFromCore: string | null = typeof coreModeLog === "string" ? coreModeLog : null;
+          const latencyFromCore: number | null = typeof coreResult.latency_ms === "number" ? coreResult.latency_ms : null;
+          const leadFromCore: any = d.lead && typeof d.lead === "object" ? d.lead : {};
+          const finalidadeRaw = typeof leadFromCore.finalidade === "string" ? leadFromCore.finalidade.toLowerCase() : null;
+          const finalidadeSafe = finalidadeRaw && ["temporada","compra","investimento","anunciante","morar"].includes(finalidadeRaw) ? finalidadeRaw : null;
+
+          (async () => {
+            try {
+              const leadPatch: Record<string, unknown> = {};
+              if (sessionId) leadPatch.maria_core_session_id = sessionId;
+              if (typeof leadFromCore.next_action === "string") leadPatch.next_action_suggested = leadFromCore.next_action;
+              if (typeof leadFromCore.resumo_ia === "string") leadPatch.resumo_ia = leadFromCore.resumo_ia;
+              if (finalidadeSafe) leadPatch.finalidade = finalidadeSafe;
+
+              let leadId: string | null = null;
+              if (sessionId && Object.keys(leadPatch).length > 0) {
+                leadId = await upsertLeadBySession(supabase, sessionId, leadPatch, "[core observational]", "maria_core");
+              } else if (sessionId) {
+                const { data: existing } = await supabase.from("leads_maria").select("id").eq("session_id", sessionId).maybeSingle();
+                leadId = existing?.id ?? null;
+              }
+
+              if (sessionId) {
+                const rows: any[] = [];
+                const lastUserMsg = messages[messages.length - 1];
+                if (lastUserMsg) {
+                  rows.push({
+                    session_id: sessionId,
+                    lead_id: leadId,
+                    role: lastUserMsg.role,
+                    content: lastUserMsg.content,
+                    mode: modeFromCore,
+                  });
+                }
+                rows.push({
+                  session_id: sessionId,
+                  lead_id: leadId,
+                  role: "assistant",
+                  content: payload.reply,
+                  mode: modeFromCore,
+                  latency_ms: latencyFromCore,
+                });
+                const { error: msgErr } = await supabase.from("maria_messages").insert(rows);
+                if (msgErr) console.error("[MarIA Core Persist] messages insert failed:", msgErr);
+              }
+            } catch (e) {
+              console.error("[MarIA Core Persist] observational persistence failed:", e);
+            }
+          })();
+
           return new Response(JSON.stringify(payload), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
         console.warn("[MarIA Core Proxy] Resposta ok porém sem 'reply' válido — usando fallback local.");
+        insertCoreEvent("core_invalid_payload", { reason: "missing_reply" });
+        insertCoreEvent("core_fallback_local", { from: "core_invalid_payload" });
+      } else if (coreResult.status === "timeout") {
+        insertCoreEvent("core_timeout");
+        insertCoreEvent("core_fallback_local", { from: "core_timeout" });
+      } else if (coreResult.status === "error") {
+        insertCoreEvent("core_error");
+        insertCoreEvent("core_fallback_local", { from: "core_error" });
       }
-      // status not_configured/error/timeout → segue fluxo local abaixo.
+      // status not_configured não chega aqui (guardado no if externo).
     }
 
     // 1. ROUTER
