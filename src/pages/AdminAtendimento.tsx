@@ -165,7 +165,7 @@ export default function AdminAtendimento() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-          {sorted.map((l) => (
+          {sorted.map((l: any) => (
             <Card
               key={l.id}
               className="cursor-pointer hover:border-primary transition-colors"
