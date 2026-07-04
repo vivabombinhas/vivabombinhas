@@ -6,8 +6,49 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Save, Cpu, Play, MessageSquare } from "lucide-react";
+import { Loader2, Save, Cpu, Play, MessageSquare, RefreshCw, Activity, AlertTriangle, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+type CoreConfigResponse = {
+  configured: boolean;
+  status: "ok" | "not_configured" | "error" | "timeout";
+  message: string;
+  config: Record<string, unknown> | null;
+  latency_ms?: number | null;
+  http_status?: number | null;
+  checked_at: string;
+};
+
+function coreStatusBadge(status: CoreConfigResponse["status"]) {
+  switch (status) {
+    case "ok":
+      return (
+        <Badge className="bg-green-500/15 text-green-700 border border-green-500/30">
+          <CheckCircle2 className="w-3 h-3 mr-1" /> OK
+        </Badge>
+      );
+    case "not_configured":
+      return (
+        <Badge variant="secondary">
+          <AlertTriangle className="w-3 h-3 mr-1" /> Não configurado
+        </Badge>
+      );
+    case "timeout":
+      return (
+        <Badge className="bg-yellow-500/15 text-yellow-700 border border-yellow-500/30">
+          <Clock className="w-3 h-3 mr-1" /> Timeout
+        </Badge>
+      );
+    default:
+      return (
+        <Badge variant="destructive">
+          <XCircle className="w-3 h-3 mr-1" /> Erro
+        </Badge>
+      );
+  }
+}
 
 export default function AdminAIConfig() {
   const { toast } = useToast();
