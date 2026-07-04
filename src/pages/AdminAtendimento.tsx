@@ -42,7 +42,7 @@ export default function AdminAtendimento() {
         .from("leads_maria")
         .select("*")
         .not("status", "in", "(convertido,descartado,anonimo)")
-        .order("updated_at", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(200);
       if (error) throw error;
       return data ?? [];
@@ -116,7 +116,7 @@ export default function AdminAtendimento() {
       const old = selected.status;
       const { error } = await supabase
         .from("leads_maria")
-        .update({ status: "contatado", updated_at: new Date().toISOString() })
+        .update({ status: "contatado" })
         .eq("id", selected.id);
       if (error) throw error;
       try {
@@ -203,7 +203,7 @@ export default function AdminAtendimento() {
                   <p className="text-xs font-medium text-primary line-clamp-1">→ {l.next_action_suggested}</p>
                 )}
                 <div className="text-[10px] text-muted-foreground">
-                  Atualizado {fmtDate(l.updated_at)}
+                  Criado {fmtDate(l.created_at)}
                 </div>
               </CardContent>
             </Card>
@@ -229,7 +229,6 @@ export default function AdminAtendimento() {
                   <div><span className="text-muted-foreground">Tipo:</span> {selected.tipo_imovel || "—"}</div>
                   <div><span className="text-muted-foreground">Faixa:</span> {selected.faixa_preco || "—"}</div>
                   <div><span className="text-muted-foreground">Criado:</span> {fmtDate(selected.created_at)}</div>
-                  <div><span className="text-muted-foreground">Atualizado:</span> {fmtDate(selected.updated_at)}</div>
                 </div>
 
                 {selected.resumo_ia && (
