@@ -42,7 +42,7 @@ export default function AdminAtendimento() {
         .from("leads_maria")
         .select("*")
         .not("status", "in", "(convertido,descartado,anonimo)")
-        .order("updated_at", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(200);
       if (error) throw error;
       return data ?? [];
