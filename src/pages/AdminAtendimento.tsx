@@ -229,7 +229,6 @@ export default function AdminAtendimento() {
                   <div><span className="text-muted-foreground">Tipo:</span> {selected.tipo_imovel || "—"}</div>
                   <div><span className="text-muted-foreground">Faixa:</span> {selected.faixa_preco || "—"}</div>
                   <div><span className="text-muted-foreground">Criado:</span> {fmtDate(selected.created_at)}</div>
-                  <div><span className="text-muted-foreground">Atualizado:</span> {fmtDate(selected.updated_at)}</div>
                 </div>
 
                 {selected.resumo_ia && (
