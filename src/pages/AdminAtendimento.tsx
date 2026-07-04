@@ -116,7 +116,7 @@ export default function AdminAtendimento() {
       const old = selected.status;
       const { error } = await supabase
         .from("leads_maria")
-        .update({ status: "contatado", updated_at: new Date().toISOString() })
+        .update({ status: "contatado" })
         .eq("id", selected.id);
       if (error) throw error;
       try {
