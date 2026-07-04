@@ -263,12 +263,40 @@ serve(async (req) => {
         });
       }
 
+      const reason = coreResult.status !== "ok" ? coreResult.status : "invalid_payload";
       console.log(JSON.stringify({
         tag: "MarIA Core PropertyFromLink",
         event: "fallback_local",
-        reason: coreResult.status !== "ok" ? coreResult.status : "invalid_payload",
+        reason,
         timestamp: new Date().toISOString(),
       }));
+      // Passo 3B — persistência observacional (fire-and-forget)
+      const tipo = coreResult.status === "timeout" ? "core_timeout"
+        : coreResult.status === "error" ? "core_error"
+        : "core_invalid_payload";
+      (async () => {
+        try {
+          const supabase = createClient(
+            Deno.env.get("SUPABASE_URL") ?? "",
+            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+          );
+          await supabase.from("maria_core_events").insert({
+            session_id: null,
+            lead_id: null,
+            tipo,
+            payload: {
+              source: "extract-property-from-link",
+              reason,
+              url: url ?? null,
+              http_status: coreResult.http_status ?? null,
+              latency_ms: coreResult.latency_ms ?? null,
+              error: coreResult.error ?? null,
+            },
+          });
+        } catch (e) {
+          console.error("[PropertyFromLink Core Event] insert failed:", e);
+        }
+      })();
     }
 
 
