@@ -44,6 +44,7 @@ const mainItems = [
   { title: "Configuração IA", url: "/admin/ai-config", icon: Settings },
   { title: "MarIA Core", url: "/admin/maria-core", icon: Activity },
   { title: "Conversas", url: "/admin/conversas", icon: MessageSquare },
+  { title: "Funil", url: "/admin/funil", icon: KanbanSquare },
 ];
 
 const importItems = [
