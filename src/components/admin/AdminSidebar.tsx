@@ -15,6 +15,7 @@ import {
   LineChart as ChartIcon,
   PackageSearch,
   Activity,
+  MessageSquare,
 } from "lucide-react";
 import {
   Sidebar,
