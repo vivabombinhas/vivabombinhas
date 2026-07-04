@@ -61,7 +61,7 @@ export default function AdminAtendimento() {
       .sort((a, b) => priorityScore(b) - priorityScore(a));
   }, [leads, search]);
 
-  const selected = sorted.find((l) => l.id === selectedId) || null;
+  const selected: any = sorted.find((l: any) => l.id === selectedId) || null;
 
   const { data: messages = [] } = useQuery({
     queryKey: ["atendimento_msgs", selected?.id],
