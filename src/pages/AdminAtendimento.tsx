@@ -203,7 +203,7 @@ export default function AdminAtendimento() {
                   <p className="text-xs font-medium text-primary line-clamp-1">→ {l.next_action_suggested}</p>
                 )}
                 <div className="text-[10px] text-muted-foreground">
-                  Atualizado {fmtDate(l.updated_at)}
+                  Criado {fmtDate(l.created_at)}
                 </div>
               </CardContent>
             </Card>
