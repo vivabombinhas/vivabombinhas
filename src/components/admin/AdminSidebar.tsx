@@ -17,6 +17,7 @@ import {
   Activity,
   MessageSquare,
   KanbanSquare,
+  Inbox,
 } from "lucide-react";
 import {
   Sidebar,
