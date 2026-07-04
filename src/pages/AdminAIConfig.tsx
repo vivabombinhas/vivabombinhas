@@ -78,6 +78,18 @@ export default function AdminAIConfig() {
     },
   });
 
+  const coreConfigQuery = useQuery({
+    queryKey: ["maria_core_config"],
+    queryFn: async (): Promise<CoreConfigResponse> => {
+      const { data, error } = await supabase.functions.invoke("maria-core-config", {
+        method: "POST",
+      });
+      if (error) throw error;
+      return data as CoreConfigResponse;
+    },
+  });
+
+
   useEffect(() => {
     if (config) {
       setFormData({
