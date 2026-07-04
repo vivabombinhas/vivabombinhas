@@ -64,6 +64,7 @@ const App = () => (
             <Route path="maria-core" element={<AdminMariaCore />} />
             <Route path="conversas" element={<AdminConversas />} />
             <Route path="funil" element={<AdminFunil />} />
+            <Route path="atendimento" element={<AdminAtendimento />} />
           </Route>
           <Route path="/reset-password" element={<ResetPassword />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
