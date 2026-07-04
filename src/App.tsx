@@ -19,6 +19,7 @@ import AdminAlerts from "./pages/AdminAlerts.tsx";
 import AdminRevenue from "./pages/AdminRevenue.tsx";
 import AdminAIConfig from "./pages/AdminAIConfig.tsx";
 import AdminMariaCore from "./pages/AdminMariaCore.tsx";
+import AdminConversas from "./pages/AdminConversas.tsx";
 import AdminImoveis from "./pages/AdminImoveis.tsx";
 import AdminCuradoria from "./pages/AdminCuradoria.tsx";
 import AdminInventario from "./pages/AdminInventario.tsx";
