@@ -133,7 +133,7 @@ const Navbar = () => {
             </Link>
             <div className="p-4">
               <Button asChild className="w-full rounded-2xl h-14 text-sm font-bold bg-primary text-primary-foreground hover:brightness-110">
-                <a href="/maria" onClick={() => setOpen(false)}>Experimentar Grátis</a>
+                <a href={buildMariaWhatsappLink("geral")} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}>Falar no WhatsApp</a>
               </Button>
             </div>
           </nav>
