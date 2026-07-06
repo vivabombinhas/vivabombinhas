@@ -623,48 +623,46 @@ function checkSearchRequirements(filters: any, intent: string, lastMessage: stri
 
   console.log(`[MarIA Search Logic] Checking requirements: Finalidade=${finalidade}, Intent=${intent}, hasBairro=${hasBairro}, hasTipo=${hasTipo}, hasOrcamento=${hasOrcamento}`);
   
-  // Regra específica para Investimento
+  // Regra específica para Investimento — Prompt Mestre v2:
+  // exige capital/orçamento + objetivo (renda, valorização, liquidez, uso misto...).
   if (finalidade === "investimento" || (finalidade === "compra" && extractedData?.objetivo === "investir")) {
-    const hasObjective = extractedData?.objetivo === "renda" || 
-                         extractedData?.objetivo === "patrimonio" || 
-                         extractedData?.objetivo === "investir" || 
-                         extractedData?.resumo_ia?.toLowerCase().includes("renda") || 
-                         extractedData?.resumo_ia?.toLowerCase().includes("investir") ||
-                         lastMessage.toLowerCase().includes("renda") ||
-                         lastMessage.toLowerCase().includes("investir");
-    
+    const objetivoRe = /\b(renda|valoriza[cç][aã]o|liquidez|patrim[oô]nio|uso\s+misto|investir|aposentad)\b/i;
+    const hasObjective = !!extractedData?.objetivo ||
+      objetivoRe.test((extractedData?.resumo_ia || "") + " " + (lastMessage || "") + " " + (historyText || ""));
+    const hasCapital = !!(extractedData?.capital_disponivel || filters.preco_max || filters.preco_min ||
+      extractedData?.orcamento_max || extractedData?.orcamento_min);
+
+    if (!hasCapital) missing.push("capital");
     if (!hasObjective) missing.push("objetivo");
-    if (!hasBairro && !filters.preco_max && !hasTipo) missing.push("filtros_concretos");
-    
+
     return { allowed: missing.length === 0, missing };
   }
-  
-  // Regra específica para Temporada — usar histórico completo para inferir capacidade/período
+
+  // Temporada — o gate deterministic acima já bloqueia; aqui só backup para fluxos legados.
   if (finalidade === "temporada") {
     const hasConstraint = hasBairro || filters.preco_max || hasTipo;
     const text = (historyText + " " + lastMessage).toLowerCase();
-    // Padrões: "8 pessoas", "para 6", "casal", período/mês/dias
     const capacityRegex = /\b(\d+)\s*(pessoas|pessoa|adultos|h[óo]spedes|gente)\b|\bpara\s+(\d+)\b|\bcasal\b|\bfam[íi]lia\b/;
-    const periodRegex = /\b(janeiro|fevereiro|mar[çc]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|carnaval|r[ée]veillon|natal|feriado|temporada)\b|\b\d+\s*(dias|noites|di[áa]rias|semanas?)\b|\bdia\s+\d+\b/;
     const hasCapacity = capacityRegex.test(text) || !!extractedData?.pessoas || !!filters?.pessoas || !!filters?.capacidade_pessoas;
-    const hasPeriod = periodRegex.test(text) || !!extractedData?.periodo || !!filters?.periodo;
-    const hasCapacityOrPeriod = hasCapacity || hasPeriod;
-    
-    if (!hasConstraint) missing.push("filtros_concretos");
-    if (!hasCapacityOrPeriod) missing.push("capacidade_ou_periodo");
-    
-    console.log(`[MarIA Search Logic] Temporada: hasConstraint=${hasConstraint}, hasCapacity=${hasCapacity}, hasPeriod=${hasPeriod}`);
+
+    if (!hasCapacity) missing.push("pessoas");
+    if (!hasOrcamento && !hasConstraint) missing.push("orcamento");
+
     return { allowed: missing.length === 0, missing };
   }
-  
-  // Compra Comum: exige bairro + tipo + faixa de orçamento
+
+  // Compra/moradia — Prompt Mestre v2:
+  // exige faixa de valor E (tipo OU região OU objetivo claro).
   if (finalidade === "compra") {
-    if (!hasBairro) missing.push("bairro");
-    if (!hasTipo) missing.push("tipo");
+    const objetivoRe = /\b(morar|moradia|segunda\s+casa|f[ée]rias|renda|investir|passar\s+tempo)\b/i;
+    const hasObjetivo = !!extractedData?.objetivo || objetivoRe.test((lastMessage || "") + " " + (historyText || ""));
+
     if (!hasOrcamento) missing.push("orcamento");
-    
+    if (!hasTipo && !hasBairro && !hasObjetivo) missing.push("tipo_ou_regiao_ou_objetivo");
+
     return { allowed: missing.length === 0, missing };
   }
+
   
   return { allowed: false, missing: ["desconhecido"] };
 }
@@ -740,6 +738,106 @@ function resolveConversationMode(messages: any[], finalidadeHint?: string): { mo
 }
 
 // ============================================================
+// Camada de decisão conversacional (Prompt Mestre MarIA v2)
+// ============================================================
+const GREETING_RE = /^\s*(oi+|ol[áa]|opa|e[ai]|hey|hi|hello|bom\s*dia|boa\s*tarde|boa\s*noite|tudo\s*bem|tudo\s*bom|salve)[\s!.,?]*$/i;
+
+function isGreetingOnly(text: string): boolean {
+  const t = String(text || "").trim();
+  if (!t) return false;
+  if (t.length > 40) return false;
+  return GREETING_RE.test(t);
+}
+
+interface GateDecision {
+  can_show_cards: boolean;
+  block_reason: string | null;
+  missing_fields: string[];
+  ask: string | null;
+}
+
+function evaluateIntentGate(params: {
+  mode: ConversationMode;
+  filters: any;
+  extractedData: any;
+  historyText: string;
+  lastMessage: string;
+}): GateDecision {
+  const { mode, filters, extractedData, historyText, lastMessage } = params;
+  const text = ((historyText || "") + " " + (lastMessage || "")).toLowerCase();
+  const f = filters || {};
+  const ed = extractedData || {};
+
+  const hasBairro = !!(f.bairro || ed.bairro_preferencia);
+  const hasTipo = !!(f.tipo || ed.tipo_imovel);
+  const hasOrcamento = !!(f.preco_max || f.preco_min || ed.orcamento_max || ed.orcamento_min);
+  const hasCapital = !!(ed.capital_disponivel || f.preco_max || f.preco_min || ed.orcamento_max || ed.orcamento_min);
+
+  const capacityRe = /\b(\d{1,2})\s*(pessoas?|adultos?|h[óo]spedes?|gente|pax)\b|\bpara\s+(\d{1,2})\b|\bcasal\b|\bfam[íi]lia\b/i;
+  const hasPessoas = !!(ed.pessoas || f.pessoas || f.capacidade_pessoas) || capacityRe.test(text);
+
+  const objetivoRe = /\b(renda|valoriza[cç][aã]o|liquidez|patrim[oô]nio|uso\s+misto|morar|moradia|investir|aposentad|passar\s+f[ée]rias)\b/i;
+  const hasObjetivo = !!(ed.objetivo) || objetivoRe.test(text);
+
+  if (mode === "anunciante") {
+    return { can_show_cards: false, block_reason: "anunciante_no_cards", missing_fields: [], ask: null };
+  }
+
+  if (mode === "temporada") {
+    const missing: string[] = [];
+    if (!hasPessoas) missing.push("pessoas");
+    if (!hasOrcamento) missing.push("orcamento");
+    if (missing.length === 0) return { can_show_cards: true, block_reason: null, missing_fields: [], ask: null };
+    const parts: string[] = [];
+    if (!hasPessoas) parts.push("para quantas pessoas");
+    if (!hasOrcamento) parts.push("qual faixa de diária faz sentido");
+    return {
+      can_show_cards: false,
+      block_reason: "missing_temporada_criteria",
+      missing_fields: missing,
+      ask: `Para eu indicar as melhores opções em Bombinhas, me conta ${parts.join(" e ")}? Se tiver um bairro ou período em mente, também ajuda.`,
+    };
+  }
+
+  if (mode === "compra") {
+    const missing: string[] = [];
+    if (!hasOrcamento) missing.push("orcamento");
+    if (!hasTipo && !hasBairro && !hasObjetivo) missing.push("tipo_ou_regiao_ou_objetivo");
+    if (missing.length === 0) return { can_show_cards: true, block_reason: null, missing_fields: [], ask: null };
+    const parts: string[] = [];
+    if (!hasOrcamento) parts.push("a faixa de valor que faz sentido");
+    if (!hasTipo && !hasBairro && !hasObjetivo) parts.push("o tipo de imóvel, bairro ou objetivo (morar, segunda casa, etc.)");
+    return {
+      can_show_cards: false,
+      block_reason: "missing_compra_criteria",
+      missing_fields: missing,
+      ask: `Para eu buscar opções coerentes em Bombinhas, me conta ${parts.join(" e ")}?`,
+    };
+  }
+
+  if (mode === "investimento") {
+    const missing: string[] = [];
+    if (!hasCapital) missing.push("capital");
+    if (!hasObjetivo) missing.push("objetivo_investimento");
+    if (missing.length === 0) return { can_show_cards: true, block_reason: null, missing_fields: [], ask: null };
+    const parts: string[] = [];
+    if (!hasCapital) parts.push("qual a faixa de investimento");
+    if (!hasObjetivo) parts.push("qual seu objetivo (renda de temporada, valorização, liquidez, uso misto)");
+    return {
+      can_show_cards: false,
+      block_reason: "missing_investimento_criteria",
+      missing_fields: missing,
+      ask: `Antes de sugerir imóveis, me conta ${parts.join(" e ")}? Assim consigo montar um recorte estratégico sem prometer retorno que não posso garantir.`,
+    };
+  }
+
+  // modo comum / turismo / desconhecido — nunca mostra cards por conta própria
+  return { can_show_cards: false, block_reason: "mode_comum_no_cards", missing_fields: [], ask: null };
+}
+
+// ============================================================
+
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -779,6 +877,34 @@ serve(async (req) => {
     console.log(`[MarIA Debug] Nova mensagem recebida. Session: ${sessionId}. Messages: ${messages.length}`);
     const lastMessage = messages[messages.length - 1]?.content || "";
     console.log(`[MarIA Debug] Última mensagem: "${lastMessage}"`);
+
+    // ============================================================
+    // Camada de decisão — saudação pura não deve disparar busca nenhuma
+    // ============================================================
+    const userMessagesCount = messages.filter((m: any) => m?.role === "user").length;
+    if (isGreetingOnly(lastMessage) && userMessagesCount <= 1) {
+      console.log(JSON.stringify({
+        tag: "MarIA Gate",
+        session_id: sessionId,
+        intent: "greeting",
+        known_fields: [],
+        missing_fields: ["intencao"],
+        can_show_cards: false,
+        block_reason: "greeting_only",
+      }));
+      const greetingReply = "Oi! Eu sou a MarIA, assistente do VIV Bombinhas. Posso te ajudar a passar uma temporada, comprar um imóvel, investir, anunciar o seu ou tirar dúvidas sobre Bombinhas. O que você está procurando?";
+      return new Response(JSON.stringify({
+        reply: greetingReply,
+        show_results: false,
+        properties: [],
+        all_properties: [],
+        gate_active: false,
+        no_results_gate: false,
+        show_strategic_form: false,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+
 
     // ============================================================
     // MarIA Core proxy — tenta o cérebro externo antes do fallback local.
@@ -1035,58 +1161,42 @@ serve(async (req) => {
 
       if (conversationMode === "temporada") {
         // ----------------------------------------------------------
-        // TRAVA DE QUALIFICAÇÃO: exige datas concretas + nº pessoas
-        // antes de qualquer busca/cards de temporada.
-        // "final do ano", "réveillon", "janeiro" NÃO contam como datas.
+        // GATE conversacional temporada (Prompt Mestre v2):
+        // MarIA é curadora/facilitadora — datas exatas NÃO são exigidas.
+        // Mínimo para mostrar cards: quantidade de pessoas + faixa de diária.
+        // Período (janeiro, fim de ano, carnaval, férias) é contexto, não filtro.
         // ----------------------------------------------------------
-        const allUserText = messages
+        const historyTextForGate = messages
           .filter((m: any) => m?.role === "user")
           .map((m: any) => String(m?.content ?? ""))
-          .join("\n")
-          .toLowerCase();
+          .join("\n");
 
-        const monthName = "(janeiro|fevereiro|marco|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)";
-        const ddmm = /\b(\d{1,2})[\/\-\.](\d{1,2})(?:[\/\-\.]\d{2,4})?\b/g;
-        const ddDeMes = new RegExp(`\\b(\\d{1,2})\\s*(?:de\\s+)?${monthName}\\b`, "gi");
-        const isoDate = /\b\d{4}-\d{2}-\d{2}\b/g;
-        const rangeDeA = new RegExp(`\\bde\\s+\\d{1,2}(?:[\\/\\-\\.]\\d{1,2})?(?:\\s*(?:de\\s+)?${monthName})?\\s+(?:a|ate|até|à|a\\s+)\\s*\\d{1,2}`, "i");
-        const checkInOut = /\bcheck[\s\-]?in\b[\s\S]{0,80}\bcheck[\s\-]?out\b/i;
+        const gate = evaluateIntentGate({
+          mode: "temporada",
+          filters,
+          extractedData,
+          historyText: historyTextForGate,
+          lastMessage,
+        });
 
-        const ddmmMatches = (allUserText.match(ddmm) || []).length;
-        const ddDeMesMatches = (allUserText.match(ddDeMes) || []).length;
-        const isoMatches = (allUserText.match(isoDate) || []).length;
-        const concreteDateCount = ddmmMatches + ddDeMesMatches + isoMatches;
-        const hasConcreteDates =
-          concreteDateCount >= 2 ||
-          rangeDeA.test(allUserText) ||
-          checkInOut.test(allUserText) ||
-          isoMatches >= 1 && concreteDateCount >= 1;
+        const knownFields: string[] = [];
+        if (extractedData?.pessoas || filters?.pessoas) knownFields.push("pessoas");
+        if (filters?.preco_max || filters?.preco_min || extractedData?.orcamento_max || extractedData?.orcamento_min) knownFields.push("orcamento");
+        if (filters?.bairro || extractedData?.bairro_preferencia) knownFields.push("regiao");
+        if (filters?.tipo || extractedData?.tipo_imovel) knownFields.push("tipo");
 
-        const peopleRegex = /\b(\d{1,2})\s*(pessoas?|adultos?|hospedes?|h[óo]spedes?|gente|pax)\b|\bpara\s+(\d{1,2})\b|\bcasal\b/i;
-        const hasPeople = peopleRegex.test(allUserText);
+        console.log(JSON.stringify({
+          tag: "MarIA Gate",
+          session_id: sessionId,
+          intent: "temporada",
+          known_fields: knownFields,
+          missing_fields: gate.missing_fields,
+          can_show_cards: gate.can_show_cards,
+          block_reason: gate.block_reason,
+        }));
 
-        if (!hasConcreteDates || !hasPeople) {
-          const missing: string[] = [];
-          if (!hasConcreteDates) missing.push("datas");
-          if (!hasPeople) missing.push("pessoas");
-
-          console.log(JSON.stringify({
-            tag: "MarIA Season Gate",
-            session_id: sessionId,
-            blocked: true,
-            reason: "missing_temporada_criteria",
-            missing,
-            concrete_date_count: concreteDateCount,
-          }));
-
-          const asks: string[] = [];
-          if (!hasConcreteDates) asks.push("as datas de entrada e saída");
-          if (!hasPeople) asks.push("a quantidade de pessoas");
-          const budgetHint = !/\b(r\$|reais|diaria|di[áa]ria|orcamento|or[çc]amento|valor)\b/i.test(allUserText)
-            ? " Se puder, me conte também a faixa de diária que faz sentido."
-            : "";
-
-          cleaned = `Para eu encontrar as melhores opções em ${/[a-z]/i.test(allUserText) ? "Bombinhas" : "Bombinhas"}, preciso de ${asks.join(" e ")}.${budgetHint}`;
+        if (!gate.can_show_cards) {
+          cleaned = gate.ask || cleaned;
           allProperties = [];
           showResults = false;
           visibleProperties = [];
@@ -1100,6 +1210,7 @@ serve(async (req) => {
             if (shouldSearch) {
               const seasonResult = await searchAndRankSeasonProperties(seasonState, supabase);
               allProperties = seasonResult.properties;
+
               const seasonReply = buildSeasonReply(seasonState, seasonValidation, seasonResult);
 
               console.log(JSON.stringify({
