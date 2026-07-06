@@ -1,4 +1,5 @@
 import { Bot } from "lucide-react";
+import { buildMariaWhatsappLink } from "@/lib/maria-whatsapp";
 
 const Footer = () => {
   return (
