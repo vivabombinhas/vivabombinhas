@@ -1034,46 +1034,106 @@ serve(async (req) => {
       let seasonHandled = false;
 
       if (conversationMode === "temporada") {
-        const seasonState = buildSeasonSearchState(messages, finalidadeHint);
-        if (seasonState) {
-          const seasonValidation = validateSeasonSearchState(seasonState);
-          const shouldSearch = seasonValidation.ok || seasonState.explicit_show_request;
+        // ----------------------------------------------------------
+        // TRAVA DE QUALIFICAÇÃO: exige datas concretas + nº pessoas
+        // antes de qualquer busca/cards de temporada.
+        // "final do ano", "réveillon", "janeiro" NÃO contam como datas.
+        // ----------------------------------------------------------
+        const allUserText = messages
+          .filter((m: any) => m?.role === "user")
+          .map((m: any) => String(m?.content ?? ""))
+          .join("\n")
+          .toLowerCase();
 
-          if (shouldSearch) {
-            const seasonResult = await searchAndRankSeasonProperties(seasonState, supabase);
-            allProperties = seasonResult.properties;
-            const seasonReply = buildSeasonReply(seasonState, seasonValidation, seasonResult);
+        const monthName = "(janeiro|fevereiro|marco|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)";
+        const ddmm = /\b(\d{1,2})[\/\-\.](\d{1,2})(?:[\/\-\.]\d{2,4})?\b/g;
+        const ddDeMes = new RegExp(`\\b(\\d{1,2})\\s*(?:de\\s+)?${monthName}\\b`, "gi");
+        const isoDate = /\b\d{4}-\d{2}-\d{2}\b/g;
+        const rangeDeA = new RegExp(`\\bde\\s+\\d{1,2}(?:[\\/\\-\\.]\\d{1,2})?(?:\\s*(?:de\\s+)?${monthName})?\\s+(?:a|ate|até|à|a\\s+)\\s*\\d{1,2}`, "i");
+        const checkInOut = /\bcheck[\s\-]?in\b[\s\S]{0,80}\bcheck[\s\-]?out\b/i;
 
-            console.log(JSON.stringify({
-              tag: "MarIA Season Deterministic",
-              session_id: sessionId,
-              season_state: seasonState,
-              validation: seasonValidation,
-              exact_count: seasonResult.exact_count,
-              fallback_count: seasonResult.fallback_count,
-              fallback_layer: seasonResult.layer,
-              total_active_temporada: seasonResult.total_active_temporada,
-              show_results: allProperties.length > 0,
-              results_count: allProperties.length,
-            }));
+        const ddmmMatches = (allUserText.match(ddmm) || []).length;
+        const ddDeMesMatches = (allUserText.match(ddDeMes) || []).length;
+        const isoMatches = (allUserText.match(isoDate) || []).length;
+        const concreteDateCount = ddmmMatches + ddDeMesMatches + isoMatches;
+        const hasConcreteDates =
+          concreteDateCount >= 2 ||
+          rangeDeA.test(allUserText) ||
+          checkInOut.test(allUserText) ||
+          isoMatches >= 1 && concreteDateCount >= 1;
 
-            if (allProperties.length > 0) {
-              showResults = true;
-              if (!lead_captured && allProperties.length > 2) {
-                gateActive = true;
-                visibleProperties = allProperties.slice(0, 2);
-              } else {
-                visibleProperties = allProperties.slice(0, 3);
+        const peopleRegex = /\b(\d{1,2})\s*(pessoas?|adultos?|hospedes?|h[óo]spedes?|gente|pax)\b|\bpara\s+(\d{1,2})\b|\bcasal\b/i;
+        const hasPeople = peopleRegex.test(allUserText);
+
+        if (!hasConcreteDates || !hasPeople) {
+          const missing: string[] = [];
+          if (!hasConcreteDates) missing.push("datas");
+          if (!hasPeople) missing.push("pessoas");
+
+          console.log(JSON.stringify({
+            tag: "MarIA Season Gate",
+            session_id: sessionId,
+            blocked: true,
+            reason: "missing_temporada_criteria",
+            missing,
+            concrete_date_count: concreteDateCount,
+          }));
+
+          const asks: string[] = [];
+          if (!hasConcreteDates) asks.push("as datas de entrada e saída");
+          if (!hasPeople) asks.push("a quantidade de pessoas");
+          const budgetHint = !/\b(r\$|reais|diaria|di[áa]ria|orcamento|or[çc]amento|valor)\b/i.test(allUserText)
+            ? " Se puder, me conte também a faixa de diária que faz sentido."
+            : "";
+
+          cleaned = `Para eu encontrar as melhores opções em ${/[a-z]/i.test(allUserText) ? "Bombinhas" : "Bombinhas"}, preciso de ${asks.join(" e ")}.${budgetHint}`;
+          allProperties = [];
+          showResults = false;
+          visibleProperties = [];
+          seasonHandled = true;
+        } else {
+          const seasonState = buildSeasonSearchState(messages, finalidadeHint);
+          if (seasonState) {
+            const seasonValidation = validateSeasonSearchState(seasonState);
+            const shouldSearch = seasonValidation.ok || seasonState.explicit_show_request;
+
+            if (shouldSearch) {
+              const seasonResult = await searchAndRankSeasonProperties(seasonState, supabase);
+              allProperties = seasonResult.properties;
+              const seasonReply = buildSeasonReply(seasonState, seasonValidation, seasonResult);
+
+              console.log(JSON.stringify({
+                tag: "MarIA Season Deterministic",
+                session_id: sessionId,
+                season_state: seasonState,
+                validation: seasonValidation,
+                exact_count: seasonResult.exact_count,
+                fallback_count: seasonResult.fallback_count,
+                fallback_layer: seasonResult.layer,
+                total_active_temporada: seasonResult.total_active_temporada,
+                show_results: allProperties.length > 0,
+                results_count: allProperties.length,
+              }));
+
+              if (allProperties.length > 0) {
+                showResults = true;
+                if (!lead_captured && allProperties.length > 2) {
+                  gateActive = true;
+                  visibleProperties = allProperties.slice(0, 2);
+                } else {
+                  visibleProperties = allProperties.slice(0, 3);
+                }
               }
+              cleaned = seasonReply;
+              seasonHandled = true;
+            } else if (seasonValidation.ask) {
+              cleaned = seasonValidation.ask;
+              seasonHandled = true;
             }
-            cleaned = seasonReply;
-            seasonHandled = true;
-          } else if (seasonValidation.ask) {
-            cleaned = seasonValidation.ask;
-            seasonHandled = true;
           }
         }
       }
+
 
       // Concatena histórico para permitir inferência em fluxos legados
       const historyText = messages.map((m: any) => String(m?.content ?? "")).join(" \n ");
