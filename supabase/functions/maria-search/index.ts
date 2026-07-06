@@ -740,6 +740,106 @@ function resolveConversationMode(messages: any[], finalidadeHint?: string): { mo
 }
 
 // ============================================================
+// Camada de decisão conversacional (Prompt Mestre MarIA v2)
+// ============================================================
+const GREETING_RE = /^\s*(oi+|ol[áa]|opa|e[ai]|hey|hi|hello|bom\s*dia|boa\s*tarde|boa\s*noite|tudo\s*bem|tudo\s*bom|salve)[\s!.,?]*$/i;
+
+function isGreetingOnly(text: string): boolean {
+  const t = String(text || "").trim();
+  if (!t) return false;
+  if (t.length > 40) return false;
+  return GREETING_RE.test(t);
+}
+
+interface GateDecision {
+  can_show_cards: boolean;
+  block_reason: string | null;
+  missing_fields: string[];
+  ask: string | null;
+}
+
+function evaluateIntentGate(params: {
+  mode: ConversationMode;
+  filters: any;
+  extractedData: any;
+  historyText: string;
+  lastMessage: string;
+}): GateDecision {
+  const { mode, filters, extractedData, historyText, lastMessage } = params;
+  const text = ((historyText || "") + " " + (lastMessage || "")).toLowerCase();
+  const f = filters || {};
+  const ed = extractedData || {};
+
+  const hasBairro = !!(f.bairro || ed.bairro_preferencia);
+  const hasTipo = !!(f.tipo || ed.tipo_imovel);
+  const hasOrcamento = !!(f.preco_max || f.preco_min || ed.orcamento_max || ed.orcamento_min);
+  const hasCapital = !!(ed.capital_disponivel || f.preco_max || f.preco_min || ed.orcamento_max || ed.orcamento_min);
+
+  const capacityRe = /\b(\d{1,2})\s*(pessoas?|adultos?|h[óo]spedes?|gente|pax)\b|\bpara\s+(\d{1,2})\b|\bcasal\b|\bfam[íi]lia\b/i;
+  const hasPessoas = !!(ed.pessoas || f.pessoas || f.capacidade_pessoas) || capacityRe.test(text);
+
+  const objetivoRe = /\b(renda|valoriza[cç][aã]o|liquidez|patrim[oô]nio|uso\s+misto|morar|moradia|investir|aposentad|passar\s+f[ée]rias)\b/i;
+  const hasObjetivo = !!(ed.objetivo) || objetivoRe.test(text);
+
+  if (mode === "anunciante") {
+    return { can_show_cards: false, block_reason: "anunciante_no_cards", missing_fields: [], ask: null };
+  }
+
+  if (mode === "temporada") {
+    const missing: string[] = [];
+    if (!hasPessoas) missing.push("pessoas");
+    if (!hasOrcamento) missing.push("orcamento");
+    if (missing.length === 0) return { can_show_cards: true, block_reason: null, missing_fields: [], ask: null };
+    const parts: string[] = [];
+    if (!hasPessoas) parts.push("para quantas pessoas");
+    if (!hasOrcamento) parts.push("qual faixa de diária faz sentido");
+    return {
+      can_show_cards: false,
+      block_reason: "missing_temporada_criteria",
+      missing_fields: missing,
+      ask: `Para eu indicar as melhores opções em Bombinhas, me conta ${parts.join(" e ")}? Se tiver um bairro ou período em mente, também ajuda.`,
+    };
+  }
+
+  if (mode === "compra") {
+    const missing: string[] = [];
+    if (!hasOrcamento) missing.push("orcamento");
+    if (!hasTipo && !hasBairro && !hasObjetivo) missing.push("tipo_ou_regiao_ou_objetivo");
+    if (missing.length === 0) return { can_show_cards: true, block_reason: null, missing_fields: [], ask: null };
+    const parts: string[] = [];
+    if (!hasOrcamento) parts.push("a faixa de valor que faz sentido");
+    if (!hasTipo && !hasBairro && !hasObjetivo) parts.push("o tipo de imóvel, bairro ou objetivo (morar, segunda casa, etc.)");
+    return {
+      can_show_cards: false,
+      block_reason: "missing_compra_criteria",
+      missing_fields: missing,
+      ask: `Para eu buscar opções coerentes em Bombinhas, me conta ${parts.join(" e ")}?`,
+    };
+  }
+
+  if (mode === "investimento") {
+    const missing: string[] = [];
+    if (!hasCapital) missing.push("capital");
+    if (!hasObjetivo) missing.push("objetivo_investimento");
+    if (missing.length === 0) return { can_show_cards: true, block_reason: null, missing_fields: [], ask: null };
+    const parts: string[] = [];
+    if (!hasCapital) parts.push("qual a faixa de investimento");
+    if (!hasObjetivo) parts.push("qual seu objetivo (renda de temporada, valorização, liquidez, uso misto)");
+    return {
+      can_show_cards: false,
+      block_reason: "missing_investimento_criteria",
+      missing_fields: missing,
+      ask: `Antes de sugerir imóveis, me conta ${parts.join(" e ")}? Assim consigo montar um recorte estratégico sem prometer retorno que não posso garantir.`,
+    };
+  }
+
+  // modo comum / turismo / desconhecido — nunca mostra cards por conta própria
+  return { can_show_cards: false, block_reason: "mode_comum_no_cards", missing_fields: [], ask: null };
+}
+
+// ============================================================
+
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
