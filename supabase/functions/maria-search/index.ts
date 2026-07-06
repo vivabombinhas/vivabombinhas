@@ -623,48 +623,46 @@ function checkSearchRequirements(filters: any, intent: string, lastMessage: stri
 
   console.log(`[MarIA Search Logic] Checking requirements: Finalidade=${finalidade}, Intent=${intent}, hasBairro=${hasBairro}, hasTipo=${hasTipo}, hasOrcamento=${hasOrcamento}`);
   
-  // Regra específica para Investimento
+  // Regra específica para Investimento — Prompt Mestre v2:
+  // exige capital/orçamento + objetivo (renda, valorização, liquidez, uso misto...).
   if (finalidade === "investimento" || (finalidade === "compra" && extractedData?.objetivo === "investir")) {
-    const hasObjective = extractedData?.objetivo === "renda" || 
-                         extractedData?.objetivo === "patrimonio" || 
-                         extractedData?.objetivo === "investir" || 
-                         extractedData?.resumo_ia?.toLowerCase().includes("renda") || 
-                         extractedData?.resumo_ia?.toLowerCase().includes("investir") ||
-                         lastMessage.toLowerCase().includes("renda") ||
-                         lastMessage.toLowerCase().includes("investir");
-    
+    const objetivoRe = /\b(renda|valoriza[cç][aã]o|liquidez|patrim[oô]nio|uso\s+misto|investir|aposentad)\b/i;
+    const hasObjective = !!extractedData?.objetivo ||
+      objetivoRe.test((extractedData?.resumo_ia || "") + " " + (lastMessage || "") + " " + (historyText || ""));
+    const hasCapital = !!(extractedData?.capital_disponivel || filters.preco_max || filters.preco_min ||
+      extractedData?.orcamento_max || extractedData?.orcamento_min);
+
+    if (!hasCapital) missing.push("capital");
     if (!hasObjective) missing.push("objetivo");
-    if (!hasBairro && !filters.preco_max && !hasTipo) missing.push("filtros_concretos");
-    
+
     return { allowed: missing.length === 0, missing };
   }
-  
-  // Regra específica para Temporada — usar histórico completo para inferir capacidade/período
+
+  // Temporada — o gate deterministic acima já bloqueia; aqui só backup para fluxos legados.
   if (finalidade === "temporada") {
     const hasConstraint = hasBairro || filters.preco_max || hasTipo;
     const text = (historyText + " " + lastMessage).toLowerCase();
-    // Padrões: "8 pessoas", "para 6", "casal", período/mês/dias
     const capacityRegex = /\b(\d+)\s*(pessoas|pessoa|adultos|h[óo]spedes|gente)\b|\bpara\s+(\d+)\b|\bcasal\b|\bfam[íi]lia\b/;
-    const periodRegex = /\b(janeiro|fevereiro|mar[çc]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|carnaval|r[ée]veillon|natal|feriado|temporada)\b|\b\d+\s*(dias|noites|di[áa]rias|semanas?)\b|\bdia\s+\d+\b/;
     const hasCapacity = capacityRegex.test(text) || !!extractedData?.pessoas || !!filters?.pessoas || !!filters?.capacidade_pessoas;
-    const hasPeriod = periodRegex.test(text) || !!extractedData?.periodo || !!filters?.periodo;
-    const hasCapacityOrPeriod = hasCapacity || hasPeriod;
-    
-    if (!hasConstraint) missing.push("filtros_concretos");
-    if (!hasCapacityOrPeriod) missing.push("capacidade_ou_periodo");
-    
-    console.log(`[MarIA Search Logic] Temporada: hasConstraint=${hasConstraint}, hasCapacity=${hasCapacity}, hasPeriod=${hasPeriod}`);
+
+    if (!hasCapacity) missing.push("pessoas");
+    if (!hasOrcamento && !hasConstraint) missing.push("orcamento");
+
     return { allowed: missing.length === 0, missing };
   }
-  
-  // Compra Comum: exige bairro + tipo + faixa de orçamento
+
+  // Compra/moradia — Prompt Mestre v2:
+  // exige faixa de valor E (tipo OU região OU objetivo claro).
   if (finalidade === "compra") {
-    if (!hasBairro) missing.push("bairro");
-    if (!hasTipo) missing.push("tipo");
+    const objetivoRe = /\b(morar|moradia|segunda\s+casa|f[ée]rias|renda|investir|passar\s+tempo)\b/i;
+    const hasObjetivo = !!extractedData?.objetivo || objetivoRe.test((lastMessage || "") + " " + (historyText || ""));
+
     if (!hasOrcamento) missing.push("orcamento");
-    
+    if (!hasTipo && !hasBairro && !hasObjetivo) missing.push("tipo_ou_regiao_ou_objetivo");
+
     return { allowed: missing.length === 0, missing };
   }
+
   
   return { allowed: false, missing: ["desconhecido"] };
 }
