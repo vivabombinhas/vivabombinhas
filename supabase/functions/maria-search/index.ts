@@ -881,6 +881,34 @@ serve(async (req) => {
     console.log(`[MarIA Debug] Última mensagem: "${lastMessage}"`);
 
     // ============================================================
+    // Camada de decisão — saudação pura não deve disparar busca nenhuma
+    // ============================================================
+    const userMessagesCount = messages.filter((m: any) => m?.role === "user").length;
+    if (isGreetingOnly(lastMessage) && userMessagesCount <= 1) {
+      console.log(JSON.stringify({
+        tag: "MarIA Gate",
+        session_id: sessionId,
+        intent: "greeting",
+        known_fields: [],
+        missing_fields: ["intencao"],
+        can_show_cards: false,
+        block_reason: "greeting_only",
+      }));
+      const greetingReply = "Oi! Eu sou a MarIA, assistente do VIV Bombinhas. Posso te ajudar a passar uma temporada, comprar um imóvel, investir, anunciar o seu ou tirar dúvidas sobre Bombinhas. O que você está procurando?";
+      return new Response(JSON.stringify({
+        reply: greetingReply,
+        show_results: false,
+        properties: [],
+        all_properties: [],
+        gate_active: false,
+        no_results_gate: false,
+        show_strategic_form: false,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+
+
+    // ============================================================
     // MarIA Core proxy — tenta o cérebro externo antes do fallback local.
     // Só executa se MARIA_CORE_API_URL + MARIA_CORE_API_KEY existirem.
     // Qualquer status != "ok" cai no fallback local (comportamento atual).
