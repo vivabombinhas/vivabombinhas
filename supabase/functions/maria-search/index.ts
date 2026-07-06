@@ -1000,14 +1000,22 @@ serve(async (req) => {
               investment: "investimento",
               morar: "compra",
             };
+            const finalidade = purpose ? (finalidadeMap[purpose] ?? purpose) : undefined;
+            const isTemporada = finalidade === "temporada";
+            // Preço: em temporada usa daily_min/max (diária). Em compra/investimento
+            // usa price_min/max e IGNORA daily_* (não faz sentido misturar diária com venda).
+            const precoMin = isTemporada
+              ? (typeof coreFilters.daily_min === "number" ? coreFilters.daily_min : undefined)
+              : (typeof coreFilters.price_min === "number" ? coreFilters.price_min : undefined);
+            const precoMax = isTemporada
+              ? (typeof coreFilters.daily_max === "number" ? coreFilters.daily_max : undefined)
+              : (typeof coreFilters.price_max === "number" ? coreFilters.price_max : undefined);
             const localFilters: any = {
-              finalidade: purpose ? (finalidadeMap[purpose] ?? purpose) : undefined,
+              finalidade,
               bairro: typeof coreFilters.neighborhood === "string" ? coreFilters.neighborhood : undefined,
               tipo: typeof coreFilters.property_type === "string" ? coreFilters.property_type : undefined,
-              preco_min: typeof coreFilters.daily_min === "number" ? coreFilters.daily_min
-                : (typeof coreFilters.price_min === "number" ? coreFilters.price_min : undefined),
-              preco_max: typeof coreFilters.daily_max === "number" ? coreFilters.daily_max
-                : (typeof coreFilters.price_max === "number" ? coreFilters.price_max : undefined),
+              preco_min: precoMin,
+              preco_max: precoMax,
             };
             const localResults = await searchProperties(supabase, localFilters);
             bridgeExecuted = true;
