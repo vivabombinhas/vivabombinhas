@@ -1,18 +1,16 @@
 import { Search, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { openMariaWhatsapp } from "@/lib/maria-whatsapp";
 
 const CTASection = () => {
   const [query, setQuery] = useState("");
-  const navigate = useNavigate();
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
     const trimmed = query.trim();
-    if (!trimmed) return;
-    navigate("/maria", { state: { initialMessage: trimmed } });
+    openMariaWhatsapp(trimmed ? `Oi MarIA, ${trimmed}` : "geral");
   };
 
   return (
