@@ -966,7 +966,7 @@ serve(async (req) => {
       if (coreResult.status === "ok" && coreResult.data && typeof coreResult.data === "object") {
         const d: any = coreResult.data;
         // Normaliza para o mesmo contrato consumido por useMariaChat.
-        const payload = {
+        const payload: any = {
           reply: typeof d.reply === "string" ? d.reply : "",
           show_results: !!d.show_results,
           properties: Array.isArray(d.properties) ? d.properties : [],
@@ -975,6 +975,63 @@ serve(async (req) => {
           no_results_gate: !!d.no_results_gate,
           show_strategic_form: !!d.show_strategic_form,
         };
+
+        // ============================================================
+        // MarIA Core Search Bridge
+        // Core é o cérebro conversacional, mas os cards reais vêm da
+        // busca determinística local. Se o Core sinalizar que já pode
+        // mostrar cards e não trouxe imóveis, rodamos a busca local
+        // com os filtros que ele extraiu.
+        // ============================================================
+        const coreSearch: any = d.search && typeof d.search === "object" ? d.search : null;
+        const shouldSearch = payload.show_results === true || coreSearch?.should_search === true;
+        const coreFilters: any = coreSearch?.filters && typeof coreSearch.filters === "object" ? coreSearch.filters : {};
+        let bridgeExecuted = false;
+        if (shouldSearch && payload.all_properties.length === 0) {
+          try {
+            const purpose = typeof coreFilters.purpose === "string" ? coreFilters.purpose.toLowerCase() : null;
+            const finalidadeMap: Record<string, string> = {
+              temporada: "temporada",
+              rental: "temporada",
+              aluguel: "temporada",
+              compra: "compra",
+              buy: "compra",
+              investimento: "investimento",
+              investment: "investimento",
+              morar: "compra",
+            };
+            const localFilters: any = {
+              finalidade: purpose ? (finalidadeMap[purpose] ?? purpose) : undefined,
+              bairro: typeof coreFilters.neighborhood === "string" ? coreFilters.neighborhood : undefined,
+              tipo: typeof coreFilters.property_type === "string" ? coreFilters.property_type : undefined,
+              preco_min: typeof coreFilters.daily_min === "number" ? coreFilters.daily_min
+                : (typeof coreFilters.price_min === "number" ? coreFilters.price_min : undefined),
+              preco_max: typeof coreFilters.daily_max === "number" ? coreFilters.daily_max
+                : (typeof coreFilters.price_max === "number" ? coreFilters.price_max : undefined),
+            };
+            const localResults = await searchProperties(supabase, localFilters);
+            bridgeExecuted = true;
+            payload.all_properties = localResults;
+            payload.properties = localResults.slice(0, 6);
+            payload.show_results = localResults.length > 0;
+            console.log("[MarIA Core Search Bridge]", {
+              filters_from_core: coreFilters,
+              local_filters: localFilters,
+              found: localResults.length,
+              bridge_executed: true,
+              guest_count: coreFilters.guest_count ?? null,
+            });
+          } catch (bridgeErr) {
+            console.error("[MarIA Core Search Bridge] failed:", bridgeErr);
+          }
+        } else {
+          console.log("[MarIA Core Search Bridge]", {
+            filters_from_core: coreFilters,
+            found: payload.all_properties.length,
+            bridge_executed: false,
+            reason: shouldSearch ? "core_provided_properties" : "core_show_results_false",
+          });
+        }
         if (payload.reply && payload.reply.trim().length > 0) {
           // ============================================================
           // Persistência observacional (Passo 3B) — fire-and-forget.
