@@ -127,7 +127,7 @@ export const HeroV2 = () => {
           {CHIPS.map((chip) => (
             <button
               key={chip.label}
-              onClick={() => handleSearch(chip.query)}
+              onClick={() => openMariaWhatsapp(chip.intent)}
               className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-white/90 text-sm hover:bg-white/20 hover:border-white/40 hover:text-white hover:scale-105 transition-all duration-300 cursor-pointer"
             >
               <span>{chip.emoji}</span>
