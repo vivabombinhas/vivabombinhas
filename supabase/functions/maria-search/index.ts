@@ -1163,58 +1163,42 @@ serve(async (req) => {
 
       if (conversationMode === "temporada") {
         // ----------------------------------------------------------
-        // TRAVA DE QUALIFICAÇÃO: exige datas concretas + nº pessoas
-        // antes de qualquer busca/cards de temporada.
-        // "final do ano", "réveillon", "janeiro" NÃO contam como datas.
+        // GATE conversacional temporada (Prompt Mestre v2):
+        // MarIA é curadora/facilitadora — datas exatas NÃO são exigidas.
+        // Mínimo para mostrar cards: quantidade de pessoas + faixa de diária.
+        // Período (janeiro, fim de ano, carnaval, férias) é contexto, não filtro.
         // ----------------------------------------------------------
-        const allUserText = messages
+        const historyTextForGate = messages
           .filter((m: any) => m?.role === "user")
           .map((m: any) => String(m?.content ?? ""))
-          .join("\n")
-          .toLowerCase();
+          .join("\n");
 
-        const monthName = "(janeiro|fevereiro|marco|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)";
-        const ddmm = /\b(\d{1,2})[\/\-\.](\d{1,2})(?:[\/\-\.]\d{2,4})?\b/g;
-        const ddDeMes = new RegExp(`\\b(\\d{1,2})\\s*(?:de\\s+)?${monthName}\\b`, "gi");
-        const isoDate = /\b\d{4}-\d{2}-\d{2}\b/g;
-        const rangeDeA = new RegExp(`\\bde\\s+\\d{1,2}(?:[\\/\\-\\.]\\d{1,2})?(?:\\s*(?:de\\s+)?${monthName})?\\s+(?:a|ate|até|à|a\\s+)\\s*\\d{1,2}`, "i");
-        const checkInOut = /\bcheck[\s\-]?in\b[\s\S]{0,80}\bcheck[\s\-]?out\b/i;
+        const gate = evaluateIntentGate({
+          mode: "temporada",
+          filters,
+          extractedData,
+          historyText: historyTextForGate,
+          lastMessage,
+        });
 
-        const ddmmMatches = (allUserText.match(ddmm) || []).length;
-        const ddDeMesMatches = (allUserText.match(ddDeMes) || []).length;
-        const isoMatches = (allUserText.match(isoDate) || []).length;
-        const concreteDateCount = ddmmMatches + ddDeMesMatches + isoMatches;
-        const hasConcreteDates =
-          concreteDateCount >= 2 ||
-          rangeDeA.test(allUserText) ||
-          checkInOut.test(allUserText) ||
-          isoMatches >= 1 && concreteDateCount >= 1;
+        const knownFields: string[] = [];
+        if (extractedData?.pessoas || filters?.pessoas) knownFields.push("pessoas");
+        if (filters?.preco_max || filters?.preco_min || extractedData?.orcamento_max || extractedData?.orcamento_min) knownFields.push("orcamento");
+        if (filters?.bairro || extractedData?.bairro_preferencia) knownFields.push("regiao");
+        if (filters?.tipo || extractedData?.tipo_imovel) knownFields.push("tipo");
 
-        const peopleRegex = /\b(\d{1,2})\s*(pessoas?|adultos?|hospedes?|h[óo]spedes?|gente|pax)\b|\bpara\s+(\d{1,2})\b|\bcasal\b/i;
-        const hasPeople = peopleRegex.test(allUserText);
+        console.log(JSON.stringify({
+          tag: "MarIA Gate",
+          session_id: sessionId,
+          intent: "temporada",
+          known_fields: knownFields,
+          missing_fields: gate.missing_fields,
+          can_show_cards: gate.can_show_cards,
+          block_reason: gate.block_reason,
+        }));
 
-        if (!hasConcreteDates || !hasPeople) {
-          const missing: string[] = [];
-          if (!hasConcreteDates) missing.push("datas");
-          if (!hasPeople) missing.push("pessoas");
-
-          console.log(JSON.stringify({
-            tag: "MarIA Season Gate",
-            session_id: sessionId,
-            blocked: true,
-            reason: "missing_temporada_criteria",
-            missing,
-            concrete_date_count: concreteDateCount,
-          }));
-
-          const asks: string[] = [];
-          if (!hasConcreteDates) asks.push("as datas de entrada e saída");
-          if (!hasPeople) asks.push("a quantidade de pessoas");
-          const budgetHint = !/\b(r\$|reais|diaria|di[áa]ria|orcamento|or[çc]amento|valor)\b/i.test(allUserText)
-            ? " Se puder, me conte também a faixa de diária que faz sentido."
-            : "";
-
-          cleaned = `Para eu encontrar as melhores opções em ${/[a-z]/i.test(allUserText) ? "Bombinhas" : "Bombinhas"}, preciso de ${asks.join(" e ")}.${budgetHint}`;
+        if (!gate.can_show_cards) {
+          cleaned = gate.ask || cleaned;
           allProperties = [];
           showResults = false;
           visibleProperties = [];
@@ -1228,6 +1212,7 @@ serve(async (req) => {
             if (shouldSearch) {
               const seasonResult = await searchAndRankSeasonProperties(seasonState, supabase);
               allProperties = seasonResult.properties;
+
               const seasonReply = buildSeasonReply(seasonState, seasonValidation, seasonResult);
 
               console.log(JSON.stringify({
