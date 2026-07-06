@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Search, ArrowRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { openMariaWhatsapp, type MariaIntent } from "@/lib/maria-whatsapp";
 
-const CHIPS = [
-  { emoji: "🏖", label: "Temporada", query: "Quero alugar para temporada em Bombinhas" },
-  { emoji: "🏠", label: "Aluguel anual", query: "Procuro aluguel anual em Bombinhas" },
-  { emoji: "🔑", label: "Compra", query: "Quero comprar imóvel em Bombinhas" },
-  { emoji: "📈", label: "Investimento", query: "Quero investir em imóvel em Bombinhas" },
+const CHIPS: { emoji: string; label: string; intent: MariaIntent }[] = [
+  { emoji: "🏖", label: "Temporada", intent: "temporada" },
+  { emoji: "🏠", label: "Aluguel anual", intent: "temporada" },
+  { emoji: "🔑", label: "Compra", intent: "compra" },
+  { emoji: "📈", label: "Investimento", intent: "investimento" },
 ];
 
 const STATS = [
@@ -19,12 +19,10 @@ const STATS = [
 
 export const HeroV2 = () => {
   const [query, setQuery] = useState("");
-  const navigate = useNavigate();
 
   const handleSearch = (text?: string) => {
-    const msg = text || query.trim();
-    if (!msg) return;
-    navigate("/maria", { state: { initialMessage: msg } });
+    const msg = (text ?? query).trim();
+    openMariaWhatsapp(msg ? `Oi MarIA, ${msg}` : "geral");
   };
 
   return (
