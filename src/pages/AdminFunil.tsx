@@ -67,6 +67,8 @@ export default function AdminFunil() {
   const [finalidade, setFinalidade] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [days, setDays] = useState("30");
+  const [openLead, setOpenLead] = useState<Lead | null>(null);
+
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["admin_funil", days],
