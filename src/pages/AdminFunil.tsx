@@ -12,10 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { KanbanSquare, RefreshCw, Search } from "lucide-react";
+import { KanbanSquare, Phone, RefreshCw, Search } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { LeadTranscriptSheet } from "@/components/admin/LeadTranscriptSheet";
+
 
 // The DB enum status_lead currently supports only these values.
 // User-requested columns are mapped to the closest existing status;
