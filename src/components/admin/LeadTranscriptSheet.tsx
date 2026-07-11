@@ -34,7 +34,9 @@ type Lead = {
   next_action_suggested: string | null;
   proximo_passo_sugerido: string | null;
   maria_core_session_id?: string | null;
+  [key: string]: unknown;
 };
+
 
 type ColumnDef = { key: string; label: string };
 
