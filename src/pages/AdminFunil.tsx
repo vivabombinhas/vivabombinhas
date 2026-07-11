@@ -207,95 +207,144 @@ export default function AdminFunil() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
-          {COLUMNS.map((col) => {
-            const items = grouped[col.key] ?? [];
-            return (
-              <div key={col.key} className="flex flex-col min-w-0">
-                <div className="flex items-center justify-between mb-2 px-1">
-                  <div className="font-semibold text-sm">{col.label}</div>
-                  <Badge variant="outline">{items.length}</Badge>
-                </div>
-                <div className="flex-1 space-y-2 bg-muted/30 rounded-lg p-2 min-h-[200px]">
-                  {items.length === 0 ? (
-                    <div className="text-xs text-muted-foreground p-3 text-center">Vazio</div>
-                  ) : (
-                    items.map((l) => {
-                      const orc = orcamentoLabel(l);
-                      const next = l.next_action_suggested || l.proximo_passo_sugerido;
-                      const updated = l.last_contact_at || l.created_at;
-                      return (
-                        <div
-                          key={l.id}
-                          className="bg-background border rounded-md p-3 space-y-1.5 shadow-sm"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0">
-                              <div className="font-medium text-sm truncate">
-                                {l.nome || "Sem nome"}
-                              </div>
-                              {l.telefone && (
-                                <div className="text-xs text-muted-foreground truncate">
-                                  {l.telefone}
+        <div className="overflow-x-auto -mx-4 md:mx-0 pb-2">
+          <div className="flex gap-4 px-4 md:px-0 min-w-max md:min-w-full">
+            {COLUMNS.map((col) => {
+              const items = grouped[col.key] ?? [];
+              return (
+                <div
+                  key={col.key}
+                  className="flex flex-col w-[300px] md:w-[320px] shrink-0"
+                >
+                  <div className="flex items-center justify-between mb-2 px-1">
+                    <div className="font-semibold text-sm">{col.label}</div>
+                    <Badge variant="outline">{items.length}</Badge>
+                  </div>
+                  <div className="flex-1 space-y-3 bg-muted/30 rounded-lg p-3 min-h-[240px]">
+                    {items.length === 0 ? (
+                      <div className="text-xs text-muted-foreground p-3 text-center">
+                        Vazio
+                      </div>
+                    ) : (
+                      items.map((l) => {
+                        const orc = orcamentoLabel(l);
+                        const next = l.next_action_suggested || l.proximo_passo_sugerido;
+                        const updated = l.last_contact_at || l.created_at;
+                        const waDigits = (l.telefone || "").replace(/\D/g, "");
+                        const waHref = waDigits
+                          ? `https://wa.me/${waDigits.startsWith("55") ? waDigits : "55" + waDigits}`
+                          : null;
+                        return (
+                          <div
+                            key={l.id}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => setOpenLead(l)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") setOpenLead(l);
+                            }}
+                            className="bg-background border rounded-lg p-4 space-y-2.5 shadow-sm hover:shadow-md hover:border-primary/40 transition cursor-pointer"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <div className="font-semibold text-sm truncate">
+                                  {l.nome || "Sem nome"}
                                 </div>
+                                {l.telefone && (
+                                  waHref ? (
+                                    <a
+                                      href={waHref}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="mt-0.5 inline-flex items-center gap-1 text-xs text-primary hover:underline truncate"
+                                    >
+                                      <Phone className="w-3 h-3" />
+                                      {l.telefone}
+                                    </a>
+                                  ) : (
+                                    <div className="text-xs text-muted-foreground truncate">
+                                      {l.telefone}
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                              {l.finalidade && (
+                                <Badge variant="secondary" className="text-[10px] shrink-0">
+                                  {l.finalidade}
+                                </Badge>
                               )}
                             </div>
-                            {l.finalidade && (
-                              <Badge variant="secondary" className="text-[10px] shrink-0">
-                                {l.finalidade}
-                              </Badge>
+                            {(l.bairro_interesse || orc) && (
+                              <div className="text-xs text-muted-foreground">
+                                {l.bairro_interesse}
+                                {l.bairro_interesse && orc ? " · " : ""}
+                                {orc}
+                              </div>
                             )}
-                          </div>
-                          {(l.bairro_interesse || orc) && (
-                            <div className="text-xs text-muted-foreground">
-                              {l.bairro_interesse}
-                              {l.bairro_interesse && orc ? " · " : ""}
-                              {orc}
-                            </div>
-                          )}
-                          {next && (
-                            <div className="text-xs bg-primary/5 border border-primary/20 rounded px-2 py-1 line-clamp-2">
-                              <span className="font-medium">Próximo:</span> {next}
-                            </div>
-                          )}
-                          {l.resumo_ia && (
-                            <div className="text-xs text-muted-foreground line-clamp-2">
-                              {l.resumo_ia}
-                            </div>
-                          )}
-                          <div className="flex items-center justify-between gap-2 pt-1">
-                            <span className="text-[10px] text-muted-foreground">
-                              {formatDistanceToNow(new Date(updated), {
-                                addSuffix: true,
-                                locale: ptBR,
-                              })}
-                            </span>
-                            <Select
-                              value={l.status || "novo"}
-                              onValueChange={(v) => updateStatus(l, v)}
+                            {next && (
+                              <div className="text-xs bg-primary/5 border border-primary/20 rounded px-2 py-1.5 line-clamp-2">
+                                <span className="font-medium">Próximo:</span> {next}
+                              </div>
+                            )}
+                            {l.resumo_ia && (
+                              <div className="text-xs text-muted-foreground line-clamp-2">
+                                {l.resumo_ia}
+                              </div>
+                            )}
+                            <div
+                              className="flex items-center justify-between gap-2 pt-1"
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              <SelectTrigger className="h-7 text-xs w-auto min-w-[120px]">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {COLUMNS.map((c) => (
-                                  <SelectItem key={c.key} value={c.key}>
-                                    {c.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                              <span className="text-[10px] text-muted-foreground">
+                                {formatDistanceToNow(new Date(updated), {
+                                  addSuffix: true,
+                                  locale: ptBR,
+                                })}
+                              </span>
+                              <Select
+                                value={l.status || "novo"}
+                                onValueChange={(v) => updateStatus(l, v)}
+                              >
+                                <SelectTrigger className="h-7 text-xs w-auto min-w-[130px]">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {COLUMNS.map((c) => (
+                                    <SelectItem key={c.key} value={c.key}>
+                                      {c.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })
-                  )}
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
+
+      <LeadTranscriptSheet
+        lead={openLead}
+        open={!!openLead}
+        onOpenChange={(o) => !o && setOpenLead(null)}
+        columns={COLUMNS}
+        onStatusChange={(l, v) => {
+          updateStatus(l, v);
+          setOpenLead({ ...l, status: v });
+        }}
+        onAssume={(l) => {
+          updateStatus(l, "contatado");
+          setOpenLead({ ...l, status: "contatado" });
+        }}
+      />
     </div>
   );
 }
+
