@@ -1051,6 +1051,17 @@ serve(async (req) => {
           const finalidadeRaw = typeof leadFromCore.finalidade === "string" ? leadFromCore.finalidade.toLowerCase() : null;
           const finalidadeSafe = finalidadeRaw && ["temporada","compra","investimento","anunciante","morar"].includes(finalidadeRaw) ? finalidadeRaw : null;
 
+          // Contato capturado pela MarIA Core (extracted_fields no root ou dentro de lead)
+          const extractedRoot: any = (d as any).extracted_fields && typeof (d as any).extracted_fields === "object" ? (d as any).extracted_fields : {};
+          const extractedLead: any = leadFromCore.extracted_fields && typeof leadFromCore.extracted_fields === "object" ? leadFromCore.extracted_fields : {};
+          const extractedName = (typeof extractedRoot.name === "string" && extractedRoot.name.trim())
+            || (typeof extractedLead.name === "string" && extractedLead.name.trim())
+            || null;
+          const extractedPhoneRaw = (typeof extractedRoot.phone === "string" && extractedRoot.phone)
+            || (typeof extractedLead.phone === "string" && extractedLead.phone)
+            || null;
+          const extractedPhone = extractedPhoneRaw ? String(extractedPhoneRaw).replace(/\D/g, "") : null;
+
           (async () => {
             try {
               const leadPatch: Record<string, unknown> = {};
@@ -1058,6 +1069,17 @@ serve(async (req) => {
               if (typeof leadFromCore.next_action === "string") leadPatch.next_action_suggested = leadFromCore.next_action;
               if (typeof leadFromCore.resumo_ia === "string") leadPatch.resumo_ia = leadFromCore.resumo_ia;
               if (finalidadeSafe) leadPatch.finalidade = finalidadeSafe;
+
+              // Só preenche nome/telefone se estiverem vazios no lead atual (não sobrescreve)
+              if (sessionId && (extractedName || extractedPhone)) {
+                const { data: existingLead } = await supabase
+                  .from("leads_maria")
+                  .select("nome, telefone")
+                  .eq("session_id", sessionId)
+                  .maybeSingle();
+                if (extractedName && !existingLead?.nome) leadPatch.nome = extractedName;
+                if (extractedPhone && !existingLead?.telefone) leadPatch.telefone = extractedPhone;
+              }
 
               let leadId: string | null = null;
               if (sessionId && Object.keys(leadPatch).length > 0) {
