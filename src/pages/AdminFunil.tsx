@@ -336,13 +336,16 @@ export default function AdminFunil() {
         onOpenChange={(o) => !o && setOpenLead(null)}
         columns={COLUMNS}
         onStatusChange={(l, v) => {
-          updateStatus(l, v);
-          setOpenLead({ ...l, status: v });
+          const full = (data ?? []).find((x) => x.id === l.id) ?? (l as unknown as Lead);
+          updateStatus(full, v);
+          setOpenLead({ ...full, status: v });
         }}
         onAssume={(l) => {
-          updateStatus(l, "contatado");
-          setOpenLead({ ...l, status: "contatado" });
+          const full = (data ?? []).find((x) => x.id === l.id) ?? (l as unknown as Lead);
+          updateStatus(full, "contatado");
+          setOpenLead({ ...full, status: "contatado" });
         }}
+
       />
     </div>
   );
