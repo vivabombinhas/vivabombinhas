@@ -86,6 +86,11 @@ Deno.serve(async (req) => {
     q = q.gte("capacidade_pessoas", body.guest_count);
   }
 
+  const tipos = mapPropertyType(body.property_type);
+  if (tipos && tipos.length > 0) {
+    q = q.in("tipo", tipos);
+  }
+
   const priceCol = finalidade === "temporada"
     ? "preco_temporada_diaria"
     : "preco";
