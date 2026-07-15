@@ -213,6 +213,10 @@ export default function AdminLeads() {
 
   return (
     <div className="min-h-screen bg-background">
+      <AdminPageBanner
+        title="Base de leads"
+        description="Todos os contatos que a MarIA capturou ou que você cadastrou: nome, telefone, interesse, status e histórico. É o CRM do negócio."
+      />
       {/* Header */}
       <header className="border-b border-border bg-card/60">
         <div className="max-w-7xl mx-auto px-4 py-4">
