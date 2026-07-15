@@ -185,6 +185,10 @@ export default function AdminInsights() {
 
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+      <AdminPageBanner
+        title="Insights e tendências"
+        description="Gráficos e leituras do que os clientes estão pedindo: bairros mais procurados, faixas de preço, tipos de imóvel e onde estamos perdendo negócio. Use para decidir estratégia e captação."
+      />
       <header className="flex items-center gap-3 mb-2">
         <div className="p-2 bg-primary/10 rounded-lg">
           <Brain className="w-6 h-6 text-primary" />
