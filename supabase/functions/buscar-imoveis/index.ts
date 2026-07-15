@@ -14,6 +14,19 @@ interface Body {
   budget_max?: number | null;
   budget_min?: number | null;
   limit?: number | null;
+  property_type?: "apartamento" | "casa" | "cobertura" | "terreno" | "casa_ou_apartamento" | null;
+}
+
+function mapPropertyType(pt?: string | null): string[] | null {
+  if (!pt) return null;
+  switch (pt) {
+    case "apartamento": return ["apartamento"];
+    case "casa": return ["casa", "sobrado"];
+    case "cobertura": return ["cobertura"];
+    case "terreno": return ["terreno"];
+    case "casa_ou_apartamento": return ["casa", "sobrado", "apartamento"];
+    default: return null;
+  }
 }
 
 const SITE_URL = "https://vivabombinhas.lovable.app";
@@ -71,6 +84,11 @@ Deno.serve(async (req) => {
   }
   if (body.guest_count && body.guest_count > 0) {
     q = q.gte("capacidade_pessoas", body.guest_count);
+  }
+
+  const tipos = mapPropertyType(body.property_type);
+  if (tipos && tipos.length > 0) {
+    q = q.in("tipo", tipos);
   }
 
   const priceCol = finalidade === "temporada"
