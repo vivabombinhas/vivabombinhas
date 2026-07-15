@@ -69,6 +69,21 @@ export function AdminSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { pathname } = useLocation();
+  const [pwOpen, setPwOpen] = useState(false);
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [pwLoading, setPwLoading] = useState(false);
+
+  const handleChangePassword = async () => {
+    if (newPw.length < 6) return toast.error("Mínimo 6 caracteres");
+    if (newPw !== confirmPw) return toast.error("As senhas não coincidem");
+    setPwLoading(true);
+    const { error } = await supabase.auth.updateUser({ password: newPw });
+    setPwLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Senha alterada com sucesso");
+    setNewPw(""); setConfirmPw(""); setPwOpen(false);
+  };
 
   const isActive = (url: string, exact?: boolean) =>
     exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
