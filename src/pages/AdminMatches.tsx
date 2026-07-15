@@ -202,6 +202,10 @@ export default function AdminMatches() {
 
   return (
     <div className="min-h-screen bg-background">
+      <AdminPageBanner
+        title="Matches lead × imóvel"
+        description="Cruzamento automático: cada lead com os imóveis do estoque que batem com o pedido dele. Use para abordar o cliente com sugestões certeiras via WhatsApp."
+      />
       <header className="border-b border-border bg-card/60">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-3 flex-wrap">
