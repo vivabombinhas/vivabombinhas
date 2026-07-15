@@ -122,6 +122,18 @@ export default function AdminMariaCore() {
 
   return (
     <div className="p-6 space-y-6">
+      <AdminPageBanner
+        variant="success"
+        title="Cérebro da MarIA (Claude) — saúde e monitoramento"
+        description={
+          <>
+            Esta é a tela de <strong>saúde do cérebro real da MarIA</strong> — o backend Claude
+            que atende os clientes no WhatsApp e no site.
+            {" "}Se o status estiver <strong>OK / verde</strong>, está tudo funcionando normalmente.
+            Se ficar vermelho ou amarelo, a MarIA cai automaticamente no plano B (Configuração IA).
+          </>
+        }
+      />
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
