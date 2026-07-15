@@ -1,3 +1,4 @@
+import { AdminPageBanner } from "@/components/admin/AdminPageBanner";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -143,6 +144,10 @@ export default function AdminFunil() {
 
   return (
     <div className="p-4 md:p-6 space-y-4">
+      <AdminPageBanner
+        title="Funil de vendas (Kanban)"
+        description="Visão em colunas dos leads por etapa: novo, em atendimento, proposta, fechado, perdido. Arraste os cards para atualizar o status do negócio."
+      />
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">

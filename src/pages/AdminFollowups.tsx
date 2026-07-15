@@ -1,3 +1,4 @@
+import { AdminPageBanner } from "@/components/admin/AdminPageBanner";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -161,6 +162,10 @@ export default function AdminFollowups() {
 
   return (
     <div className="min-h-screen bg-background">
+      <AdminPageBanner
+        title="Follow-ups agendados"
+        description="Lista dos leads que precisam de retorno hoje ou atrasados. Objetivo: nenhum cliente esquecido. Marque como concluído assim que falar com ele."
+      />
       <header className="border-b border-border bg-card/60">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-3 flex-wrap">

@@ -1,3 +1,4 @@
+import { AdminPageBanner } from "@/components/admin/AdminPageBanner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -182,6 +183,18 @@ export default function AdminAIConfig() {
 
   return (
     <div className="container mx-auto py-8 max-w-4xl">
+      <AdminPageBanner
+        variant="warning"
+        title="Plano B da MarIA (fallback local)"
+        description={
+          <>
+            Esta tela configura o <strong>fallback local</strong> da plataforma (Lovable AI Gateway).
+            Ele só entra em ação se o cérebro principal — o <strong>MarIA Core (Claude)</strong> —
+            estiver fora do ar. <strong>Não é a MarIA principal.</strong> A MarIA de verdade,
+            que atende no WhatsApp e no site, roda no MarIA Core (aba ao lado).
+          </>
+        }
+      />
       <div className="flex items-center gap-3 mb-8">
         <div className="p-2 rounded-lg bg-primary/10">
           <Cpu className="w-6 h-6 text-primary" />

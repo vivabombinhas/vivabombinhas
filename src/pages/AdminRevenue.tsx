@@ -1,3 +1,4 @@
+import { AdminPageBanner } from "@/components/admin/AdminPageBanner";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -115,6 +116,10 @@ export default function AdminRevenue() {
 
   return (
     <div className="min-h-screen bg-background">
+      <AdminPageBanner
+        title="Receita e comissões"
+        description="Registro dos negócios fechados, valores previstos, pagos e comissões. É onde você acompanha quanto a plataforma está gerando de dinheiro."
+      />
       <header className="border-b border-border bg-card/60">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
