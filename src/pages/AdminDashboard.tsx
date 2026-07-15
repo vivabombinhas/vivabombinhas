@@ -164,6 +164,10 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
+      <AdminPageBanner
+        title="Visão geral do negócio"
+        description="Painel principal com os números do dia: leads novos, imóveis ativos, matches e receita. Ponto de partida para saber como o negócio está indo agora."
+      />
       <header className="border-b border-border bg-card/60">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-primary" />
