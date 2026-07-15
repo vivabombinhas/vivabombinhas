@@ -89,6 +89,10 @@ export default function AdminAlerts() {
 
   return (
     <div className="container py-6 space-y-6">
+      <AdminPageBanner
+        title="Central de avisos"
+        description="Notificações em tempo real: lead novo, follow-up urgente, mensagem no WhatsApp. Comece o dia por aqui — resolveu, marca como lido."
+      />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold font-display flex items-center gap-2">
