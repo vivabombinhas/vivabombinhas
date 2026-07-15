@@ -169,6 +169,9 @@ export default function Dashboard() {
             <span className="text-sm text-muted-foreground hidden md:inline-block">
               {session.user.email}
             </span>
+            <Button variant="ghost" size="icon" onClick={() => setPwOpen(true)} title="Alterar senha">
+              <KeyRound className="h-5 w-5" />
+            </Button>
             <Button variant="ghost" size="icon" onClick={handleLogout} title="Sair">
               <LogOut className="h-5 w-5" />
             </Button>
