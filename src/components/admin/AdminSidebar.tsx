@@ -195,6 +195,12 @@ export function AdminSidebar() {
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => setPwOpen(true)} tooltip="Alterar senha">
+              <KeyRound className="w-4 h-4" />
+              <span>Alterar senha</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
             <SidebarMenuButton onClick={handleLogout} tooltip="Sair" className="text-muted-foreground hover:text-destructive">
               <LogOut className="w-4 h-4" />
               <span>Sair</span>
@@ -202,6 +208,30 @@ export function AdminSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
+      <Dialog open={pwOpen} onOpenChange={setPwOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Alterar senha</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="new-pw">Nova senha</Label>
+              <Input id="new-pw" type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} minLength={6} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-pw">Confirmar nova senha</Label>
+              <Input id="confirm-pw" type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} minLength={6} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPwOpen(false)}>Cancelar</Button>
+            <Button onClick={handleChangePassword} disabled={pwLoading}>
+              {pwLoading ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Sidebar>
   );
 }
