@@ -501,7 +501,7 @@ export default function AdminAtendimento() {
           </div>
         </header>
         <AdminPageBanner
-          variant="info"
+          variant="default"
           title="Cockpit operacional (Etapa 1 de 6)"
           description="Layout de 3 zonas: fila à esquerda, conversa no meio, contexto e ações à direita. Próximas etapas: realtime, mensagem pronta + WhatsApp, follow-up, handoff, copiloto MarIA."
         />
