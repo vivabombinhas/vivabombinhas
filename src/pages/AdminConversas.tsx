@@ -148,6 +148,10 @@ export default function AdminConversas() {
 
   return (
     <div className="p-4 md:p-6 space-y-4">
+      <AdminPageBanner
+        title="Histórico de conversas da MarIA"
+        description="Transcrições completas de tudo que a MarIA conversou com cada cliente. Serve para conferir qualidade do atendimento e entender o contexto antes de ligar."
+      />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
