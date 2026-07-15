@@ -1,3 +1,4 @@
+import { AdminPageBanner } from "@/components/admin/AdminPageBanner";
 import { useState, useMemo } from "react";
 import { buildWhatsappLink as buildWALink, openWhatsapp } from "@/lib/whatsapp-templates";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
