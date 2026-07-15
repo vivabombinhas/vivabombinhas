@@ -19,7 +19,8 @@ import {
   ArrowRight,
   TrendingUp,
   MapPin,
-  Pencil
+  Pencil,
+  KeyRound
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +28,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import AdvertiserLoginPanel from "@/components/AdvertiserLoginPanel";
 
 export default function Dashboard() {
@@ -35,7 +39,22 @@ export default function Dashboard() {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [properties, setProperties] = useState<any[]>([]);
   const [matches, setMatches] = useState<any[]>([]);
+  const [pwOpen, setPwOpen] = useState(false);
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [pwLoading, setPwLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleChangePassword = async () => {
+    if (newPw.length < 6) return toast.error("Mínimo 6 caracteres");
+    if (newPw !== confirmPw) return toast.error("As senhas não coincidem");
+    setPwLoading(true);
+    const { error } = await supabase.auth.updateUser({ password: newPw });
+    setPwLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Senha alterada com sucesso");
+    setNewPw(""); setConfirmPw(""); setPwOpen(false);
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -150,6 +169,9 @@ export default function Dashboard() {
             <span className="text-sm text-muted-foreground hidden md:inline-block">
               {session.user.email}
             </span>
+            <Button variant="ghost" size="icon" onClick={() => setPwOpen(true)} title="Alterar senha">
+              <KeyRound className="h-5 w-5" />
+            </Button>
             <Button variant="ghost" size="icon" onClick={handleLogout} title="Sair">
               <LogOut className="h-5 w-5" />
             </Button>
@@ -443,6 +465,30 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <Dialog open={pwOpen} onOpenChange={setPwOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Alterar senha</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="new-pw">Nova senha</Label>
+              <Input id="new-pw" type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} minLength={6} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-pw">Confirmar nova senha</Label>
+              <Input id="confirm-pw" type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} minLength={6} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPwOpen(false)}>Cancelar</Button>
+            <Button onClick={handleChangePassword} disabled={pwLoading}>
+              {pwLoading ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
