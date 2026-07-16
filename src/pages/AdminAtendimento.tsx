@@ -483,7 +483,7 @@ export default function AdminAtendimento() {
           </p>
         )}
         {selected && messages.length > 0 && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {messages.map((m: any) => {
               const isCliente = m.role === "user";
               const isAtendente = !isCliente && m.mode === "atendente_whatsapp";
