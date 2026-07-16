@@ -71,6 +71,7 @@ export default function AdminAtendimento() {
   const [onlyHot, setOnlyHot] = useState(false);
   const [followupToday, setFollowupToday] = useState(false);
   const [mobileTab, setMobileTab] = useState<"fila" | "conversa" | "contexto">("fila");
+  const [reply, setReply] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: leads = [], isLoading } = useQuery({
