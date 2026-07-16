@@ -521,7 +521,8 @@ export default function AdminAtendimento() {
       {selected && (
         <div className="p-3 border-t bg-background space-y-2">
           <Textarea
-            rows={2}
+            ref={replyRef}
+            rows={3}
             value={reply}
             onChange={(e) => setReply(e.target.value)}
             onKeyDown={(e) => {
@@ -535,7 +536,7 @@ export default function AdminAtendimento() {
                 ? "Responder via WhatsApp (envia pelo MarIA Core e pausa a MarIA)…"
                 : "Lead sem telefone — não é possível enviar via WhatsApp."
             }
-            className="text-xs resize-none"
+            className="text-xs resize-none overflow-y-auto"
             disabled={sendReply.isPending || !phone}
           />
           <div className="flex justify-between items-center gap-2">
