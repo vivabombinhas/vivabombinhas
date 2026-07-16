@@ -407,7 +407,7 @@ export default function AdminAtendimento() {
 
   const ConversaZone = (
     <div className="flex flex-col h-full min-h-0">
-      <div className="p-3 border-b bg-background sticky top-0 z-10">
+      <div className="p-3 border-b bg-background sticky top-0 z-10 space-y-2">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4 text-primary" />
           <h3 className="font-semibold text-sm">
@@ -415,9 +415,35 @@ export default function AdminAtendimento() {
           </h3>
         </div>
         {selected && (
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            {messages.length} mensagens · sessão {selected?.maria_core_session_id || selected?.session_id || "—"}
-          </p>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <p className="text-[11px] text-muted-foreground">
+              {messages.length} mensagens · sessão {selected?.maria_core_session_id || selected?.session_id || "—"}
+            </p>
+            {phone && (
+              <div className="flex items-center gap-1.5">
+                {modeQuery.isLoading ? (
+                  <Badge variant="outline" className="text-[10px]">Verificando MarIA…</Badge>
+                ) : modeQuery.data?.paused ? (
+                  <>
+                    <Badge className="bg-amber-500 text-white text-[10px]">
+                      MarIA pausada — você está atendendo
+                    </Badge>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-6 text-[10px] px-2"
+                      onClick={() => resumeMaria.mutate()}
+                      disabled={resumeMaria.isPending}
+                    >
+                      {resumeMaria.isPending ? "…" : "Devolver pra MarIA"}
+                    </Button>
+                  </>
+                ) : (
+                  <Badge className="bg-emerald-600 text-white text-[10px]">MarIA atendendo</Badge>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
