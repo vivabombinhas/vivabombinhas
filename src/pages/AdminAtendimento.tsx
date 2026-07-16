@@ -23,7 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { AdminPageBanner } from "@/components/admin/AdminPageBanner";
+
 
 type Lead = any;
 
