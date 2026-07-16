@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Send } from "lucide-react";
+import { HelpCircle, Send } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Bot,
   Filter,
@@ -21,7 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { AdminPageBanner } from "@/components/admin/AdminPageBanner";
+
 
 type Lead = any;
 
@@ -64,6 +66,7 @@ const isToday = (d?: string | null) => {
 
 export default function AdminAtendimento() {
   const qc = useQueryClient();
+  const { setOpen: setSidebarOpen } = useSidebar();
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("todos");
@@ -73,6 +76,24 @@ export default function AdminAtendimento() {
   const [mobileTab, setMobileTab] = useState<"fila" | "conversa" | "contexto">("fila");
   const [reply, setReply] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const replyRef = useRef<HTMLTextAreaElement>(null);
+
+  // Colapsa a sidebar do admin ao entrar no cockpit
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [setSidebarOpen]);
+
+  // Autogrow do textarea (3–8 linhas)
+  useEffect(() => {
+    const el = replyRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const lineH = 20; // ~text-xs line-height
+    const min = lineH * 3 + 16;
+    const max = lineH * 8 + 16;
+    el.style.height = Math.min(max, Math.max(min, el.scrollHeight)) + "px";
+  }, [reply]);
+
 
   const { data: leads = [], isLoading } = useQuery({
     queryKey: ["atendimento_leads"],
@@ -462,7 +483,7 @@ export default function AdminAtendimento() {
           </p>
         )}
         {selected && messages.length > 0 && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {messages.map((m: any) => {
               const isCliente = m.role === "user";
               const isAtendente = !isCliente && m.mode === "atendente_whatsapp";
@@ -472,7 +493,7 @@ export default function AdminAtendimento() {
                   className={`flex ${isCliente ? "justify-start" : "justify-end"}`}
                 >
                   <div
-                    className={`max-w-[75%] rounded-2xl px-3 py-2 text-xs shadow-sm ${
+                    className={`max-w-[70%] rounded-2xl px-3.5 py-2.5 text-xs shadow-sm ${
                       isCliente
                         ? "bg-background border rounded-bl-sm"
                         : isAtendente
@@ -500,7 +521,8 @@ export default function AdminAtendimento() {
       {selected && (
         <div className="p-3 border-t bg-background space-y-2">
           <Textarea
-            rows={2}
+            ref={replyRef}
+            rows={3}
             value={reply}
             onChange={(e) => setReply(e.target.value)}
             onKeyDown={(e) => {
@@ -514,7 +536,7 @@ export default function AdminAtendimento() {
                 ? "Responder via WhatsApp (envia pelo MarIA Core e pausa a MarIA)…"
                 : "Lead sem telefone — não é possível enviar via WhatsApp."
             }
-            className="text-xs resize-none"
+            className="text-xs resize-none overflow-y-auto"
             disabled={sendReply.isPending || !phone}
           />
           <div className="flex justify-between items-center gap-2">
@@ -634,42 +656,50 @@ export default function AdminAtendimento() {
   );
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
-      <div className="px-6 pt-4 pb-2 shrink-0">
-        <header className="flex items-center gap-3 mb-2">
-          <Inbox className="w-6 h-6 text-primary" />
-          <div>
-            <h1 className="text-xl font-bold">Atendimento — Cockpit</h1>
-            <p className="text-xs text-muted-foreground">
-              Fila, conversa e ações do lead numa tela só.
-            </p>
-          </div>
-        </header>
-        <AdminPageBanner
-          variant="default"
-          title="Cockpit operacional (Etapa 1 de 6)"
-          description="Layout de 3 zonas: fila à esquerda, conversa no meio, contexto e ações à direita. Próximas etapas: realtime, mensagem pronta + WhatsApp, follow-up, handoff, copiloto MarIA."
-        />
-      </div>
+    <div className="flex flex-col h-[calc(100dvh-3rem)] overflow-hidden">
+      <header className="flex items-center gap-3 px-4 py-2 border-b shrink-0">
+        <Inbox className="w-5 h-5 text-primary" />
+        <div className="min-w-0">
+          <h1 className="text-sm font-bold leading-tight">Atendimento — Cockpit</h1>
+          <p className="text-[11px] text-muted-foreground leading-tight">
+            Fila, conversa e ações do lead numa tela só.
+          </p>
+        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className="ml-auto p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+              aria-label="Sobre o cockpit"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-xs text-xs">
+            Layout de 3 zonas: fila à esquerda, conversa no meio, contexto e ações à direita.
+            Próximas etapas: mensagem pronta, follow-up, handoff, copiloto MarIA.
+          </TooltipContent>
+        </Tooltip>
+      </header>
 
       {/* Desktop: 3 colunas */}
-      <div className="hidden lg:grid flex-1 min-h-0 grid-cols-[340px_1fr_360px] border-t">
-        <div className="border-r min-h-0">{FilaZone}</div>
-        <div className="border-r min-h-0">{ConversaZone}</div>
-        <div className="min-h-0">{ContextoZone}</div>
+      <div className="hidden lg:grid flex-1 min-h-0 grid-cols-[260px_1fr_320px] overflow-hidden">
+        <div className="border-r min-h-0 min-w-0 overflow-hidden">{FilaZone}</div>
+        <div className="border-r min-h-0 min-w-0 overflow-hidden">{ConversaZone}</div>
+        <div className="min-h-0 min-w-0 overflow-hidden">{ContextoZone}</div>
       </div>
 
       {/* Mobile: tabs */}
-      <div className="lg:hidden flex-1 min-h-0 flex flex-col border-t">
+      <div className="lg:hidden flex-1 min-h-0 flex flex-col overflow-hidden">
         <Tabs value={mobileTab} onValueChange={(v) => setMobileTab(v as any)} className="flex-1 flex flex-col min-h-0">
           <TabsList className="w-full rounded-none">
             <TabsTrigger value="fila" className="flex-1">Fila ({sorted.length})</TabsTrigger>
             <TabsTrigger value="conversa" className="flex-1" disabled={!selected}>Conversa</TabsTrigger>
             <TabsTrigger value="contexto" className="flex-1" disabled={!selected}>Contexto</TabsTrigger>
           </TabsList>
-          <TabsContent value="fila" className="flex-1 min-h-0 m-0">{FilaZone}</TabsContent>
-          <TabsContent value="conversa" className="flex-1 min-h-0 m-0">{ConversaZone}</TabsContent>
-          <TabsContent value="contexto" className="flex-1 min-h-0 m-0">{ContextoZone}</TabsContent>
+          <TabsContent value="fila" className="flex-1 min-h-0 m-0 overflow-hidden">{FilaZone}</TabsContent>
+          <TabsContent value="conversa" className="flex-1 min-h-0 m-0 overflow-hidden">{ConversaZone}</TabsContent>
+          <TabsContent value="contexto" className="flex-1 min-h-0 m-0 overflow-hidden">{ContextoZone}</TabsContent>
         </Tabs>
       </div>
     </div>
