@@ -390,6 +390,7 @@ export default function AdminAtendimento() {
           <div className="space-y-3">
             {messages.map((m: any) => {
               const isCliente = m.role === "user";
+              const isAtendente = !isCliente && m.mode === "atendente_whatsapp";
               return (
                 <div
                   key={m.id}
@@ -399,13 +400,15 @@ export default function AdminAtendimento() {
                     className={`max-w-[75%] rounded-2xl px-3 py-2 text-xs shadow-sm ${
                       isCliente
                         ? "bg-background border rounded-bl-sm"
+                        : isAtendente
+                        ? "bg-emerald-600 text-white rounded-br-sm"
                         : "bg-primary text-primary-foreground rounded-br-sm"
                     }`}
                   >
-                    <div className="flex items-center gap-1 mb-1 opacity-70">
+                    <div className="flex items-center gap-1 mb-1 opacity-80">
                       {isCliente ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
                       <span className="text-[10px] font-semibold">
-                        {isCliente ? "Cliente" : "MarIA"}
+                        {isCliente ? "Cliente" : isAtendente ? "Atendente (WhatsApp)" : "MarIA"}
                       </span>
                       <span className="text-[10px]">· {fmtDate(m.created_at)}</span>
                     </div>
@@ -418,6 +421,41 @@ export default function AdminAtendimento() {
           </div>
         )}
       </div>
+
+      {selected && (
+        <div className="p-3 border-t bg-background space-y-2">
+          <Textarea
+            rows={2}
+            value={reply}
+            onChange={(e) => setReply(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                if (reply.trim() && !sendReply.isPending) sendReply.mutate();
+              }
+            }}
+            placeholder="Responder como atendente (será registrado e enviado via WhatsApp pelo MarIA Core)..."
+            className="text-xs resize-none"
+            disabled={sendReply.isPending}
+          />
+          <div className="flex justify-between items-center gap-2">
+            <p className="text-[10px] text-muted-foreground">
+              📝 Registro salvo no histórico. Envio real via WhatsApp: MarIA Core (rota será conectada).
+            </p>
+            <Button
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={() => sendReply.mutate()}
+              disabled={sendReply.isPending || !reply.trim()}
+            >
+              <Send className="w-3 h-3" />
+              {sendReply.isPending ? "Salvando..." : "Registrar"}
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
       {selected && (
         <div className="p-3 border-t bg-background space-y-2">
