@@ -170,6 +170,53 @@ export default function AdminAtendimento() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, selected?.id]);
 
+  // Realtime: subscribe to new messages for the current session
+  const sessionId = selected?.maria_core_session_id || selected?.session_id;
+  useEffect(() => {
+    if (!sessionId) return;
+    const channel = supabase
+      .channel(`maria_messages:${sessionId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "maria_messages", filter: `session_id=eq.${sessionId}` },
+        () => {
+          qc.invalidateQueries({ queryKey: ["atendimento_msgs", selected?.id] });
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [sessionId, selected?.id, qc]);
+
+  useEffect(() => {
+    setReply("");
+  }, [selected?.id]);
+
+  const sendReply = useMutation({
+    mutationFn: async () => {
+      if (!selected) throw new Error("Nenhum lead selecionado");
+      const sid = selected?.maria_core_session_id || selected?.session_id;
+      if (!sid) throw new Error("Lead sem sessão vinculada");
+      const content = reply.trim();
+      if (!content) throw new Error("Mensagem vazia");
+      const { error } = await supabase.from("maria_messages").insert({
+        session_id: sid,
+        lead_id: selected.id,
+        role: "assistant",
+        content,
+        mode: "atendente_whatsapp",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setReply("");
+      toast.success("Registro salvo. Envio via WhatsApp será feito pelo MarIA Core.");
+      qc.invalidateQueries({ queryKey: ["atendimento_msgs", selected?.id] });
+    },
+    onError: (e: any) => toast.error(e.message || "Falha ao registrar"),
+  });
+
   const openLead = (l: Lead) => {
     setSelectedId(l.id);
     setMobileTab("conversa");
