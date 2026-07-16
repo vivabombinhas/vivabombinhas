@@ -656,42 +656,50 @@ export default function AdminAtendimento() {
   );
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
-      <div className="px-6 pt-4 pb-2 shrink-0">
-        <header className="flex items-center gap-3 mb-2">
-          <Inbox className="w-6 h-6 text-primary" />
-          <div>
-            <h1 className="text-xl font-bold">Atendimento — Cockpit</h1>
-            <p className="text-xs text-muted-foreground">
-              Fila, conversa e ações do lead numa tela só.
-            </p>
-          </div>
-        </header>
-        <AdminPageBanner
-          variant="default"
-          title="Cockpit operacional (Etapa 1 de 6)"
-          description="Layout de 3 zonas: fila à esquerda, conversa no meio, contexto e ações à direita. Próximas etapas: realtime, mensagem pronta + WhatsApp, follow-up, handoff, copiloto MarIA."
-        />
-      </div>
+    <div className="flex flex-col h-[calc(100dvh-3rem)] overflow-hidden">
+      <header className="flex items-center gap-3 px-4 py-2 border-b shrink-0">
+        <Inbox className="w-5 h-5 text-primary" />
+        <div className="min-w-0">
+          <h1 className="text-sm font-bold leading-tight">Atendimento — Cockpit</h1>
+          <p className="text-[11px] text-muted-foreground leading-tight">
+            Fila, conversa e ações do lead numa tela só.
+          </p>
+        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className="ml-auto p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+              aria-label="Sobre o cockpit"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="max-w-xs text-xs">
+            Layout de 3 zonas: fila à esquerda, conversa no meio, contexto e ações à direita.
+            Próximas etapas: mensagem pronta, follow-up, handoff, copiloto MarIA.
+          </TooltipContent>
+        </Tooltip>
+      </header>
 
       {/* Desktop: 3 colunas */}
-      <div className="hidden lg:grid flex-1 min-h-0 grid-cols-[340px_1fr_360px] border-t">
-        <div className="border-r min-h-0">{FilaZone}</div>
-        <div className="border-r min-h-0">{ConversaZone}</div>
-        <div className="min-h-0">{ContextoZone}</div>
+      <div className="hidden lg:grid flex-1 min-h-0 grid-cols-[260px_1fr_320px] overflow-hidden">
+        <div className="border-r min-h-0 min-w-0 overflow-hidden">{FilaZone}</div>
+        <div className="border-r min-h-0 min-w-0 overflow-hidden">{ConversaZone}</div>
+        <div className="min-h-0 min-w-0 overflow-hidden">{ContextoZone}</div>
       </div>
 
       {/* Mobile: tabs */}
-      <div className="lg:hidden flex-1 min-h-0 flex flex-col border-t">
+      <div className="lg:hidden flex-1 min-h-0 flex flex-col overflow-hidden">
         <Tabs value={mobileTab} onValueChange={(v) => setMobileTab(v as any)} className="flex-1 flex flex-col min-h-0">
           <TabsList className="w-full rounded-none">
             <TabsTrigger value="fila" className="flex-1">Fila ({sorted.length})</TabsTrigger>
             <TabsTrigger value="conversa" className="flex-1" disabled={!selected}>Conversa</TabsTrigger>
             <TabsTrigger value="contexto" className="flex-1" disabled={!selected}>Contexto</TabsTrigger>
           </TabsList>
-          <TabsContent value="fila" className="flex-1 min-h-0 m-0">{FilaZone}</TabsContent>
-          <TabsContent value="conversa" className="flex-1 min-h-0 m-0">{ConversaZone}</TabsContent>
-          <TabsContent value="contexto" className="flex-1 min-h-0 m-0">{ContextoZone}</TabsContent>
+          <TabsContent value="fila" className="flex-1 min-h-0 m-0 overflow-hidden">{FilaZone}</TabsContent>
+          <TabsContent value="conversa" className="flex-1 min-h-0 m-0 overflow-hidden">{ConversaZone}</TabsContent>
+          <TabsContent value="contexto" className="flex-1 min-h-0 m-0 overflow-hidden">{ContextoZone}</TabsContent>
         </Tabs>
       </div>
     </div>
