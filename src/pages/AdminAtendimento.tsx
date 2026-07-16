@@ -457,27 +457,6 @@ export default function AdminAtendimento() {
     </div>
   );
 
-      {selected && (
-        <div className="p-3 border-t bg-background space-y-2">
-          <Textarea
-            rows={2}
-            disabled
-            placeholder="Responder como atendente... (envio via WhatsApp será ligado na Etapa 4)"
-            className="text-xs resize-none"
-          />
-          <div className="flex justify-between items-center">
-            <p className="text-[10px] text-muted-foreground">
-              🚧 Envio real será habilitado nas próximas etapas
-            </p>
-            <Button size="sm" disabled className="h-7 text-xs">
-              Enviar
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
   const ContextoZone = (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
