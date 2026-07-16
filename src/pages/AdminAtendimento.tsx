@@ -509,22 +509,26 @@ export default function AdminAtendimento() {
                 if (reply.trim() && !sendReply.isPending) sendReply.mutate();
               }
             }}
-            placeholder="Responder como atendente (será registrado e enviado via WhatsApp pelo MarIA Core)..."
+            placeholder={
+              phone
+                ? "Responder via WhatsApp (envia pelo MarIA Core e pausa a MarIA)…"
+                : "Lead sem telefone — não é possível enviar via WhatsApp."
+            }
             className="text-xs resize-none"
-            disabled={sendReply.isPending}
+            disabled={sendReply.isPending || !phone}
           />
           <div className="flex justify-between items-center gap-2">
             <p className="text-[10px] text-muted-foreground">
-              📝 Registro salvo no histórico. Envio real via WhatsApp: MarIA Core (rota será conectada).
+              💬 Envio real via WhatsApp pelo MarIA Core. A MarIA pausa automaticamente neste contato.
             </p>
             <Button
               size="sm"
               className="h-7 text-xs gap-1"
               onClick={() => sendReply.mutate()}
-              disabled={sendReply.isPending || !reply.trim()}
+              disabled={sendReply.isPending || !reply.trim() || !phone}
             >
               <Send className="w-3 h-3" />
-              {sendReply.isPending ? "Salvando..." : "Registrar"}
+              {sendReply.isPending ? "Enviando…" : "Enviar"}
             </Button>
           </div>
         </div>
