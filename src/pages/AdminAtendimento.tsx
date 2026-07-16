@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Send } from "lucide-react";
 import {
   Bot,
   Filter,
@@ -70,6 +71,7 @@ export default function AdminAtendimento() {
   const [onlyHot, setOnlyHot] = useState(false);
   const [followupToday, setFollowupToday] = useState(false);
   const [mobileTab, setMobileTab] = useState<"fila" | "conversa" | "contexto">("fila");
+  const [reply, setReply] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: leads = [], isLoading } = useQuery({
@@ -167,6 +169,53 @@ export default function AdminAtendimento() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, selected?.id]);
+
+  // Realtime: subscribe to new messages for the current session
+  const sessionId = selected?.maria_core_session_id || selected?.session_id;
+  useEffect(() => {
+    if (!sessionId) return;
+    const channel = supabase
+      .channel(`maria_messages:${sessionId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "maria_messages", filter: `session_id=eq.${sessionId}` },
+        () => {
+          qc.invalidateQueries({ queryKey: ["atendimento_msgs", selected?.id] });
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [sessionId, selected?.id, qc]);
+
+  useEffect(() => {
+    setReply("");
+  }, [selected?.id]);
+
+  const sendReply = useMutation({
+    mutationFn: async () => {
+      if (!selected) throw new Error("Nenhum lead selecionado");
+      const sid = selected?.maria_core_session_id || selected?.session_id;
+      if (!sid) throw new Error("Lead sem sessão vinculada");
+      const content = reply.trim();
+      if (!content) throw new Error("Mensagem vazia");
+      const { error } = await supabase.from("maria_messages").insert({
+        session_id: sid,
+        lead_id: selected.id,
+        role: "assistant",
+        content,
+        mode: "atendente_whatsapp",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setReply("");
+      toast.success("Registro salvo. Envio via WhatsApp será feito pelo MarIA Core.");
+      qc.invalidateQueries({ queryKey: ["atendimento_msgs", selected?.id] });
+    },
+    onError: (e: any) => toast.error(e.message || "Falha ao registrar"),
+  });
 
   const openLead = (l: Lead) => {
     setSelectedId(l.id);
@@ -341,6 +390,7 @@ export default function AdminAtendimento() {
           <div className="space-y-3">
             {messages.map((m: any) => {
               const isCliente = m.role === "user";
+              const isAtendente = !isCliente && m.mode === "atendente_whatsapp";
               return (
                 <div
                   key={m.id}
@@ -350,13 +400,15 @@ export default function AdminAtendimento() {
                     className={`max-w-[75%] rounded-2xl px-3 py-2 text-xs shadow-sm ${
                       isCliente
                         ? "bg-background border rounded-bl-sm"
+                        : isAtendente
+                        ? "bg-emerald-600 text-white rounded-br-sm"
                         : "bg-primary text-primary-foreground rounded-br-sm"
                     }`}
                   >
-                    <div className="flex items-center gap-1 mb-1 opacity-70">
+                    <div className="flex items-center gap-1 mb-1 opacity-80">
                       {isCliente ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
                       <span className="text-[10px] font-semibold">
-                        {isCliente ? "Cliente" : "MarIA"}
+                        {isCliente ? "Cliente" : isAtendente ? "Atendente (WhatsApp)" : "MarIA"}
                       </span>
                       <span className="text-[10px]">· {fmtDate(m.created_at)}</span>
                     </div>
@@ -374,16 +426,30 @@ export default function AdminAtendimento() {
         <div className="p-3 border-t bg-background space-y-2">
           <Textarea
             rows={2}
-            disabled
-            placeholder="Responder como atendente... (envio via WhatsApp será ligado na Etapa 4)"
+            value={reply}
+            onChange={(e) => setReply(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                if (reply.trim() && !sendReply.isPending) sendReply.mutate();
+              }
+            }}
+            placeholder="Responder como atendente (será registrado e enviado via WhatsApp pelo MarIA Core)..."
             className="text-xs resize-none"
+            disabled={sendReply.isPending}
           />
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center gap-2">
             <p className="text-[10px] text-muted-foreground">
-              🚧 Envio real será habilitado nas próximas etapas
+              📝 Registro salvo no histórico. Envio real via WhatsApp: MarIA Core (rota será conectada).
             </p>
-            <Button size="sm" disabled className="h-7 text-xs">
-              Enviar
+            <Button
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={() => sendReply.mutate()}
+              disabled={sendReply.isPending || !reply.trim()}
+            >
+              <Send className="w-3 h-3" />
+              {sendReply.isPending ? "Salvando..." : "Registrar"}
             </Button>
           </div>
         </div>
