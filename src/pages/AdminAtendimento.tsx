@@ -66,6 +66,7 @@ const isToday = (d?: string | null) => {
 
 export default function AdminAtendimento() {
   const qc = useQueryClient();
+  const { setOpen: setSidebarOpen } = useSidebar();
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("todos");
@@ -75,6 +76,24 @@ export default function AdminAtendimento() {
   const [mobileTab, setMobileTab] = useState<"fila" | "conversa" | "contexto">("fila");
   const [reply, setReply] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const replyRef = useRef<HTMLTextAreaElement>(null);
+
+  // Colapsa a sidebar do admin ao entrar no cockpit
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [setSidebarOpen]);
+
+  // Autogrow do textarea (3–8 linhas)
+  useEffect(() => {
+    const el = replyRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const lineH = 20; // ~text-xs line-height
+    const min = lineH * 3 + 16;
+    const max = lineH * 8 + 16;
+    el.style.height = Math.min(max, Math.max(min, el.scrollHeight)) + "px";
+  }, [reply]);
+
 
   const { data: leads = [], isLoading } = useQuery({
     queryKey: ["atendimento_leads"],
