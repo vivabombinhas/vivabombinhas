@@ -193,13 +193,43 @@ export default function AdminAtendimento() {
     setReply("");
   }, [selected?.id]);
 
+  // Estado WhatsApp (MarIA pausada/atendendo) via MarIA Core
+  const phone = selected?.telefone as string | undefined;
+  const modeQuery = useQuery({
+    queryKey: ["wa_mode", phone],
+    enabled: !!phone,
+    refetchInterval: 15_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("maria-core-whatsapp", {
+        body: { action: "get_mode", phone },
+      });
+      if (error) throw error;
+      const inner: any = (data as any)?.data ?? data;
+      return { paused: !!inner?.maria_paused };
+    },
+  });
+
   const sendReply = useMutation({
     mutationFn: async () => {
       if (!selected) throw new Error("Nenhum lead selecionado");
       const sid = selected?.maria_core_session_id || selected?.session_id;
       if (!sid) throw new Error("Lead sem sessão vinculada");
+      if (!phone) throw new Error("Lead sem telefone");
       const content = reply.trim();
       if (!content) throw new Error("Mensagem vazia");
+
+      // 1) Envio via MarIA Core (Z-API + pausa da MarIA)
+      const { data: resp, error: fnErr } = await supabase.functions.invoke(
+        "maria-core-whatsapp",
+        { body: { action: "send", phone, message: content } },
+      );
+      if (fnErr) throw new Error(fnErr.message || "Falha ao chamar MarIA Core");
+      const status = (resp as any)?.status;
+      if (status && status !== "ok") {
+        throw new Error((resp as any)?.error || "MarIA Core recusou o envio");
+      }
+
+      // 2) Só grava como enviado se o Core aceitou
       const { error } = await supabase.from("maria_messages").insert({
         session_id: sid,
         lead_id: selected.id,
@@ -211,10 +241,29 @@ export default function AdminAtendimento() {
     },
     onSuccess: () => {
       setReply("");
-      toast.success("Registro salvo. Envio via WhatsApp será feito pelo MarIA Core.");
+      toast.success("Enviado via WhatsApp. MarIA pausada neste contato.");
       qc.invalidateQueries({ queryKey: ["atendimento_msgs", selected?.id] });
+      qc.invalidateQueries({ queryKey: ["wa_mode", phone] });
     },
-    onError: (e: any) => toast.error(e.message || "Falha ao registrar"),
+    onError: (e: any) => toast.error(e.message || "Falha ao enviar"),
+  });
+
+  const resumeMaria = useMutation({
+    mutationFn: async () => {
+      if (!phone) throw new Error("Lead sem telefone");
+      const { data: resp, error } = await supabase.functions.invoke(
+        "maria-core-whatsapp",
+        { body: { action: "set_mode", phone, paused: false } },
+      );
+      if (error) throw error;
+      const status = (resp as any)?.status;
+      if (status && status !== "ok") throw new Error((resp as any)?.error || "Falha");
+    },
+    onSuccess: () => {
+      toast.success("MarIA voltou a atender este contato.");
+      qc.invalidateQueries({ queryKey: ["wa_mode", phone] });
+    },
+    onError: (e: any) => toast.error(e.message || "Falha ao retomar MarIA"),
   });
 
   const openLead = (l: Lead) => {
