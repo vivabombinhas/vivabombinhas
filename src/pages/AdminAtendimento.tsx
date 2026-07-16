@@ -193,13 +193,43 @@ export default function AdminAtendimento() {
     setReply("");
   }, [selected?.id]);
 
+  // Estado WhatsApp (MarIA pausada/atendendo) via MarIA Core
+  const phone = selected?.telefone as string | undefined;
+  const modeQuery = useQuery({
+    queryKey: ["wa_mode", phone],
+    enabled: !!phone,
+    refetchInterval: 15_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("maria-core-whatsapp", {
+        body: { action: "get_mode", phone },
+      });
+      if (error) throw error;
+      const inner: any = (data as any)?.data ?? data;
+      return { paused: !!inner?.maria_paused };
+    },
+  });
+
   const sendReply = useMutation({
     mutationFn: async () => {
       if (!selected) throw new Error("Nenhum lead selecionado");
       const sid = selected?.maria_core_session_id || selected?.session_id;
       if (!sid) throw new Error("Lead sem sessão vinculada");
+      if (!phone) throw new Error("Lead sem telefone");
       const content = reply.trim();
       if (!content) throw new Error("Mensagem vazia");
+
+      // 1) Envio via MarIA Core (Z-API + pausa da MarIA)
+      const { data: resp, error: fnErr } = await supabase.functions.invoke(
+        "maria-core-whatsapp",
+        { body: { action: "send", phone, message: content } },
+      );
+      if (fnErr) throw new Error(fnErr.message || "Falha ao chamar MarIA Core");
+      const status = (resp as any)?.status;
+      if (status && status !== "ok") {
+        throw new Error((resp as any)?.error || "MarIA Core recusou o envio");
+      }
+
+      // 2) Só grava como enviado se o Core aceitou
       const { error } = await supabase.from("maria_messages").insert({
         session_id: sid,
         lead_id: selected.id,
@@ -211,10 +241,29 @@ export default function AdminAtendimento() {
     },
     onSuccess: () => {
       setReply("");
-      toast.success("Registro salvo. Envio via WhatsApp será feito pelo MarIA Core.");
+      toast.success("Enviado via WhatsApp. MarIA pausada neste contato.");
       qc.invalidateQueries({ queryKey: ["atendimento_msgs", selected?.id] });
+      qc.invalidateQueries({ queryKey: ["wa_mode", phone] });
     },
-    onError: (e: any) => toast.error(e.message || "Falha ao registrar"),
+    onError: (e: any) => toast.error(e.message || "Falha ao enviar"),
+  });
+
+  const resumeMaria = useMutation({
+    mutationFn: async () => {
+      if (!phone) throw new Error("Lead sem telefone");
+      const { data: resp, error } = await supabase.functions.invoke(
+        "maria-core-whatsapp",
+        { body: { action: "set_mode", phone, paused: false } },
+      );
+      if (error) throw error;
+      const status = (resp as any)?.status;
+      if (status && status !== "ok") throw new Error((resp as any)?.error || "Falha");
+    },
+    onSuccess: () => {
+      toast.success("MarIA voltou a atender este contato.");
+      qc.invalidateQueries({ queryKey: ["wa_mode", phone] });
+    },
+    onError: (e: any) => toast.error(e.message || "Falha ao retomar MarIA"),
   });
 
   const openLead = (l: Lead) => {
@@ -358,7 +407,7 @@ export default function AdminAtendimento() {
 
   const ConversaZone = (
     <div className="flex flex-col h-full min-h-0">
-      <div className="p-3 border-b bg-background sticky top-0 z-10">
+      <div className="p-3 border-b bg-background sticky top-0 z-10 space-y-2">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4 text-primary" />
           <h3 className="font-semibold text-sm">
@@ -366,9 +415,35 @@ export default function AdminAtendimento() {
           </h3>
         </div>
         {selected && (
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            {messages.length} mensagens · sessão {selected?.maria_core_session_id || selected?.session_id || "—"}
-          </p>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <p className="text-[11px] text-muted-foreground">
+              {messages.length} mensagens · sessão {selected?.maria_core_session_id || selected?.session_id || "—"}
+            </p>
+            {phone && (
+              <div className="flex items-center gap-1.5">
+                {modeQuery.isLoading ? (
+                  <Badge variant="outline" className="text-[10px]">Verificando MarIA…</Badge>
+                ) : modeQuery.data?.paused ? (
+                  <>
+                    <Badge className="bg-amber-500 text-white text-[10px]">
+                      MarIA pausada — você está atendendo
+                    </Badge>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-6 text-[10px] px-2"
+                      onClick={() => resumeMaria.mutate()}
+                      disabled={resumeMaria.isPending}
+                    >
+                      {resumeMaria.isPending ? "…" : "Devolver pra MarIA"}
+                    </Button>
+                  </>
+                ) : (
+                  <Badge className="bg-emerald-600 text-white text-[10px]">MarIA atendendo</Badge>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -434,22 +509,26 @@ export default function AdminAtendimento() {
                 if (reply.trim() && !sendReply.isPending) sendReply.mutate();
               }
             }}
-            placeholder="Responder como atendente (será registrado e enviado via WhatsApp pelo MarIA Core)..."
+            placeholder={
+              phone
+                ? "Responder via WhatsApp (envia pelo MarIA Core e pausa a MarIA)…"
+                : "Lead sem telefone — não é possível enviar via WhatsApp."
+            }
             className="text-xs resize-none"
-            disabled={sendReply.isPending}
+            disabled={sendReply.isPending || !phone}
           />
           <div className="flex justify-between items-center gap-2">
             <p className="text-[10px] text-muted-foreground">
-              📝 Registro salvo no histórico. Envio real via WhatsApp: MarIA Core (rota será conectada).
+              💬 Envio real via WhatsApp pelo MarIA Core. A MarIA pausa automaticamente neste contato.
             </p>
             <Button
               size="sm"
               className="h-7 text-xs gap-1"
               onClick={() => sendReply.mutate()}
-              disabled={sendReply.isPending || !reply.trim()}
+              disabled={sendReply.isPending || !reply.trim() || !phone}
             >
               <Send className="w-3 h-3" />
-              {sendReply.isPending ? "Salvando..." : "Registrar"}
+              {sendReply.isPending ? "Enviando…" : "Enviar"}
             </Button>
           </div>
         </div>
