@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { HelpCircle, Send, Calendar as CalendarIcon, MessageCircle, RefreshCw, CheckCircle2, UserPlus, ThumbsUp, ThumbsDown } from "lucide-react";
+import { HelpCircle, Send, Calendar as CalendarIcon, MessageCircle, RefreshCw, CheckCircle2, UserPlus, ThumbsUp, ThumbsDown, Loader2 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -22,8 +22,47 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { buildPersonalizedMessage, type ViewedProperty } from "@/lib/whatsapp-templates";
+
+// Invoca uma edge function e extrai a mensagem de erro real que o MarIA Core devolveu.
+// A edge maria-core-whatsapp responde com { status, error, ... } em corpo JSON,
+// e supabase-js lança FunctionsHttpError quando status != 2xx — o corpo fica em error.context.
+async function invokeCore(
+  fnName: string,
+  body: Record<string, unknown>,
+): Promise<{ data: any }> {
+  const { data, error } = await supabase.functions.invoke(fnName, { body });
+  if (error) {
+    let humano = "";
+    try {
+      const ctx: any = (error as any).context;
+      if (ctx && typeof ctx.json === "function") {
+        const parsed = await ctx.json();
+        humano = parsed?.error || parsed?.message || "";
+      } else if (ctx && typeof ctx.text === "function") {
+        const raw = await ctx.text();
+        try { humano = JSON.parse(raw)?.error || raw; } catch { humano = raw; }
+      }
+    } catch { /* ignore */ }
+    throw new Error(humano || error.message || "Falha ao chamar MarIA Core");
+  }
+  const inner: any = data;
+  if (inner && inner.status && inner.status !== "ok") {
+    throw new Error(inner.error || "MarIA Core recusou a operação");
+  }
+  return { data };
+}
 
 
 
@@ -79,6 +118,9 @@ export default function AdminAtendimento() {
   const [reply, setReply] = useState("");
   const [readyMessage, setReadyMessage] = useState("");
   const [followupCustom, setFollowupCustom] = useState("");
+  const [confirmReply, setConfirmReply] = useState(false);
+  const [confirmReady, setConfirmReady] = useState(false);
+  const [confirmHandoff, setConfirmHandoff] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const replyRef = useRef<HTMLTextAreaElement>(null);
 
@@ -281,15 +323,7 @@ export default function AdminAtendimento() {
       if (!content) throw new Error("Mensagem vazia");
 
       // 1) Envio via MarIA Core (Z-API + pausa da MarIA)
-      const { data: resp, error: fnErr } = await supabase.functions.invoke(
-        "maria-core-whatsapp",
-        { body: { action: "send", phone, message: content } },
-      );
-      if (fnErr) throw new Error(fnErr.message || "Falha ao chamar MarIA Core");
-      const status = (resp as any)?.status;
-      if (status && status !== "ok") {
-        throw new Error((resp as any)?.error || "MarIA Core recusou o envio");
-      }
+      await invokeCore("maria-core-whatsapp", { action: "send", phone, message: content });
 
       // 2) Só grava como enviado se o Core aceitou
       const { error } = await supabase.from("maria_messages").insert({
@@ -313,13 +347,7 @@ export default function AdminAtendimento() {
   const resumeMaria = useMutation({
     mutationFn: async () => {
       if (!phone) throw new Error("Lead sem telefone");
-      const { data: resp, error } = await supabase.functions.invoke(
-        "maria-core-whatsapp",
-        { body: { action: "set_mode", phone, paused: false } },
-      );
-      if (error) throw error;
-      const status = (resp as any)?.status;
-      if (status && status !== "ok") throw new Error((resp as any)?.error || "Falha");
+      await invokeCore("maria-core-whatsapp", { action: "set_mode", phone, paused: false });
     },
     onSuccess: () => {
       toast.success("MarIA voltou a atender este contato.");
@@ -410,15 +438,7 @@ export default function AdminAtendimento() {
       if (!phone) throw new Error("Lead sem telefone");
       const content = readyMessage.trim();
       if (!content) throw new Error("Mensagem vazia");
-      const { data: resp, error: fnErr } = await supabase.functions.invoke(
-        "maria-core-whatsapp",
-        { body: { action: "send", phone, message: content } },
-      );
-      if (fnErr) throw new Error(fnErr.message || "Falha ao chamar MarIA Core");
-      const status = (resp as any)?.status;
-      if (status && status !== "ok") {
-        throw new Error((resp as any)?.error || "MarIA Core recusou o envio");
-      }
+      await invokeCore("maria-core-whatsapp", { action: "send", phone, message: content });
       const { error } = await supabase.from("maria_messages").insert({
         session_id: sid,
         lead_id: selected.id,
@@ -679,7 +699,7 @@ export default function AdminAtendimento() {
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
-                if (reply.trim() && !sendReply.isPending) sendReply.mutate();
+                if (reply.trim() && !sendReply.isPending) setConfirmReply(true);
               }
             }}
             placeholder={
@@ -697,10 +717,10 @@ export default function AdminAtendimento() {
             <Button
               size="sm"
               className="h-7 text-xs gap-1"
-              onClick={() => sendReply.mutate()}
+              onClick={() => setConfirmReply(true)}
               disabled={sendReply.isPending || !reply.trim() || !phone}
             >
-              <Send className="w-3 h-3" />
+              {sendReply.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
               {sendReply.isPending ? "Enviando…" : "Enviar"}
             </Button>
           </div>
@@ -779,10 +799,10 @@ export default function AdminAtendimento() {
               <Button
                 size="sm"
                 className="w-full h-8 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700"
-                onClick={() => sendReady.mutate()}
+                onClick={() => setConfirmReady(true)}
                 disabled={sendReady.isPending || !readyMessage.trim() || !phone}
               >
-                <Send className="w-3 h-3" />
+                {sendReady.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                 {sendReady.isPending ? "Enviando…" : "Enviar via WhatsApp"}
               </Button>
               {!phone && (
@@ -880,10 +900,10 @@ export default function AdminAtendimento() {
                   size="sm"
                   variant="outline"
                   className="w-full h-8 text-xs gap-1 border-red-300 text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
-                  onClick={() => handoffDaniel.mutate()}
+                  onClick={() => setConfirmHandoff(true)}
                   disabled={handoffDaniel.isPending}
                 >
-                  <UserPlus className="w-3 h-3" />
+                  {handoffDaniel.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <UserPlus className="w-3 h-3" />}
                   {handoffDaniel.isPending ? "Enviando…" : "Enviar para Daniel"}
                 </Button>
               )}
@@ -1021,6 +1041,91 @@ export default function AdminAtendimento() {
           <TabsContent value="contexto" className="flex-1 min-h-0 m-0 overflow-hidden">{ContextoZone}</TabsContent>
         </Tabs>
       </div>
+
+      {/* Confirmação: enviar resposta livre */}
+      <AlertDialog open={confirmReply} onOpenChange={setConfirmReply}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enviar mensagem via WhatsApp?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-xs">
+                <div>
+                  Vai para <strong>{selected?.nome || "Lead"}</strong> ({phone || "—"}). A MarIA pausa neste contato.
+                </div>
+                <div className="bg-muted p-2 rounded whitespace-pre-wrap max-h-40 overflow-y-auto">{reply}</div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={sendReply.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={sendReply.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                sendReply.mutate(undefined, { onSuccess: () => setConfirmReply(false) });
+              }}
+            >
+              {sendReply.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+              {sendReply.isPending ? "Enviando…" : "Confirmar envio"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmação: enviar mensagem pronta */}
+      <AlertDialog open={confirmReady} onOpenChange={setConfirmReady}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enviar mensagem pronta?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-xs">
+                <div>
+                  Vai para <strong>{selected?.nome || "Lead"}</strong> ({phone || "—"}). A MarIA pausa neste contato.
+                </div>
+                <div className="bg-muted p-2 rounded whitespace-pre-wrap max-h-48 overflow-y-auto">{readyMessage}</div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={sendReady.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={sendReady.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                sendReady.mutate(undefined, { onSuccess: () => setConfirmReady(false) });
+              }}
+            >
+              {sendReady.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+              {sendReady.isPending ? "Enviando…" : "Confirmar envio"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmação: handoff para Daniel */}
+      <AlertDialog open={confirmHandoff} onOpenChange={setConfirmHandoff}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Encaminhar para o Daniel?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O Daniel receberá aviso deste lead ({selected?.nome || "sem nome"} — {phone || "sem telefone"}) e o lead será marcado como pedido de especialista.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={handoffDaniel.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={handoffDaniel.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                handoffDaniel.mutate(undefined, { onSuccess: () => setConfirmHandoff(false) });
+              }}
+            >
+              {handoffDaniel.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+              {handoffDaniel.isPending ? "Enviando…" : "Confirmar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
