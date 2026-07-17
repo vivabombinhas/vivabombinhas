@@ -216,7 +216,11 @@ export default function AdminAtendimento() {
           .some((v: string) => v.toLowerCase().includes(q));
       })
       .sort((a: any, b: any) => {
-        const diff = priorityScore(b) - priorityScore(a);
+        // Ordena por FAIXA de temperatura (Quente > Morno > Novo), não pelo
+        // score cru — assim, dentro da mesma faixa, quem mandou mensagem mais
+        // recente sobe, mesmo que outro lead tenha score levemente maior.
+        const bandRank = (score: number) => (score >= 100 ? 2 : score >= 40 ? 1 : 0);
+        const diff = bandRank(priorityScore(b)) - bandRank(priorityScore(a));
         if (diff !== 0) return diff;
         // Desempate por atividade real: última mensagem recebida naquela sessão.
         return lastActivityAt(b) - lastActivityAt(a);
