@@ -699,7 +699,7 @@ export default function AdminAtendimento() {
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
-                if (reply.trim() && !sendReply.isPending) sendReply.mutate();
+                if (reply.trim() && !sendReply.isPending) setConfirmReply(true);
               }
             }}
             placeholder={
@@ -717,10 +717,10 @@ export default function AdminAtendimento() {
             <Button
               size="sm"
               className="h-7 text-xs gap-1"
-              onClick={() => sendReply.mutate()}
+              onClick={() => setConfirmReply(true)}
               disabled={sendReply.isPending || !reply.trim() || !phone}
             >
-              <Send className="w-3 h-3" />
+              {sendReply.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
               {sendReply.isPending ? "Enviando…" : "Enviar"}
             </Button>
           </div>
