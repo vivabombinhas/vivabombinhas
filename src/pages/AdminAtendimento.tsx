@@ -755,22 +755,190 @@ export default function AdminAtendimento() {
 
             <Separator />
 
+            {/* Mensagem pronta (personalizada) — envia pelo mesmo canal do MarIA Core */}
             <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <h4 className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1">
+                  <MessageCircle className="w-3 h-3" /> Mensagem pronta
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setReadyMessage(defaultPersonalizedMessage)}
+                  className="text-[10px] text-primary hover:underline flex items-center gap-1"
+                >
+                  <RefreshCw className="w-2.5 h-2.5" /> Regenerar
+                </button>
+              </div>
+              <Textarea
+                value={readyMessage}
+                onChange={(e) => setReadyMessage(e.target.value)}
+                className="text-xs min-h-[120px]"
+                placeholder="Mensagem personalizada..."
+                disabled={sendReady.isPending || !phone}
+              />
               <Button
                 size="sm"
-                className="w-full h-8 text-xs"
-                variant="secondary"
-                onClick={() => markContacted.mutate()}
-                disabled={markContacted.isPending || selected.status === "contatado"}
+                className="w-full h-8 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => sendReady.mutate()}
+                disabled={sendReady.isPending || !readyMessage.trim() || !phone}
               >
-                Marcar como em atendimento
+                <Send className="w-3 h-3" />
+                {sendReady.isPending ? "Enviando…" : "Enviar via WhatsApp"}
               </Button>
-              <p className="text-[10px] text-muted-foreground italic text-center">
-                Mensagem pronta, WhatsApp, follow-up, handoff e sugerir imóveis → Etapa 4
-              </p>
+              {!phone && (
+                <p className="text-[10px] text-muted-foreground italic text-center">
+                  Lead sem telefone — envio indisponível.
+                </p>
+              )}
             </div>
 
             <Separator />
+
+            {/* Follow-up */}
+            <div className="space-y-1.5">
+              <h4 className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1">
+                <CalendarIcon className="w-3 h-3" /> Follow-up
+              </h4>
+              {selected.next_followup_at && (
+                <p className="text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded px-2 py-1">
+                  Agendado: {fmtDate(selected.next_followup_at)}
+                </p>
+              )}
+              <div className="flex flex-wrap gap-1">
+                {[
+                  { label: "Amanhã", days: 1 },
+                  { label: "+3 dias", days: 3 },
+                  { label: "+1 semana", days: 7 },
+                  { label: "+2 semanas", days: 14 },
+                ].map((opt) => (
+                  <Button
+                    key={opt.days}
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-[10px] px-2"
+                    onClick={() => {
+                      const d = new Date();
+                      d.setDate(d.getDate() + opt.days);
+                      d.setHours(10, 0, 0, 0);
+                      updateLeadPatch.mutate({ next_followup_at: d.toISOString() });
+                    }}
+                    disabled={updateLeadPatch.isPending}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
+              <div className="flex gap-1">
+                <Input
+                  type="datetime-local"
+                  value={followupCustom}
+                  onChange={(e) => setFollowupCustom(e.target.value)}
+                  className="h-7 text-xs flex-1"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-[10px] px-2"
+                  onClick={() =>
+                    updateLeadPatch.mutate({
+                      next_followup_at: followupCustom ? new Date(followupCustom).toISOString() : null,
+                    })
+                  }
+                >
+                  Salvar
+                </Button>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full h-7 text-[10px] gap-1"
+                onClick={() => updateLeadPatch.mutate({ last_contact_at: new Date().toISOString() })}
+                disabled={updateLeadPatch.isPending}
+              >
+                <CheckCircle2 className="w-3 h-3" /> Marcar contato feito agora
+              </Button>
+              {selected.last_contact_at && (
+                <p className="text-[10px] text-muted-foreground text-center">
+                  Último contato: {fmtDate(selected.last_contact_at)}
+                </p>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Handoff Daniel */}
+            <div className="space-y-1.5">
+              <h4 className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1">
+                <UserPlus className="w-3 h-3" /> Handoff para Daniel
+              </h4>
+              {selected.quer_falar_daniel ? (
+                <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded px-2 py-1.5">
+                  <CheckCircle2 className="w-3 h-3" /> Já enviado ao Daniel
+                </div>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full h-8 text-xs gap-1 border-red-300 text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+                  onClick={() => handoffDaniel.mutate()}
+                  disabled={handoffDaniel.isPending}
+                >
+                  <UserPlus className="w-3 h-3" />
+                  {handoffDaniel.isPending ? "Enviando…" : "Enviar para Daniel"}
+                </Button>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Status + validade */}
+            <div className="space-y-1.5">
+              <h4 className="text-[10px] font-bold uppercase text-muted-foreground">Status do lead</h4>
+              <div className="flex gap-1">
+                <select
+                  value={selected.status || "novo"}
+                  onChange={(e) => changeStatus.mutate(e.target.value)}
+                  disabled={changeStatus.isPending}
+                  className="flex-1 text-xs h-7 rounded border bg-background px-2"
+                >
+                  {["novo", "contatado", "convertido", "descartado"].map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="h-7 text-[10px] px-2"
+                  onClick={() => markContacted.mutate()}
+                  disabled={markContacted.isPending || selected.status === "contatado"}
+                >
+                  Em atendimento
+                </Button>
+              </div>
+              <div className="flex gap-1">
+                <Button
+                  size="sm"
+                  variant={selected.feedback_corretor === "valido" ? "default" : "outline"}
+                  className={`flex-1 h-7 text-[10px] gap-1 ${selected.feedback_corretor === "valido" ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
+                  onClick={() => updateLeadPatch.mutate({ feedback_corretor: "valido" })}
+                  disabled={updateLeadPatch.isPending}
+                >
+                  <ThumbsUp className="w-3 h-3" /> Válido
+                </Button>
+                <Button
+                  size="sm"
+                  variant={selected.feedback_corretor === "invalido" ? "destructive" : "outline"}
+                  className="flex-1 h-7 text-[10px] gap-1"
+                  onClick={() => updateLeadPatch.mutate({ feedback_corretor: "invalido" })}
+                  disabled={updateLeadPatch.isPending}
+                >
+                  <ThumbsDown className="w-3 h-3" /> Inválido
+                </Button>
+              </div>
+            </div>
+
+            <Separator />
+
 
             <Tabs defaultValue="notas">
               <TabsList className="w-full h-8">
