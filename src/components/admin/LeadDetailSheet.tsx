@@ -39,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { WHATSAPP_TEMPLATES, buildWhatsappLink, openWhatsapp, buildPersonalizedMessage, type ViewedProperty } from "@/lib/whatsapp-templates";
+import { sendWhatsappMessage } from "@/lib/send-whatsapp-message";
 
 interface Lead {
   id: string;
