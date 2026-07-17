@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { buildPersonalizedMessage, type ViewedProperty } from "@/lib/whatsapp-templates";
+import { sendWhatsappMessage } from "@/lib/send-whatsapp-message";
 
 // Invoca uma edge function e extrai a mensagem de erro real que o MarIA Core devolveu.
 // A edge maria-core-whatsapp responde com { status, error, ... } em corpo JSON,
