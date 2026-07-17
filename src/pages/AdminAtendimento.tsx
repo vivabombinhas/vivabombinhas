@@ -192,6 +192,42 @@ export default function AdminAtendimento() {
     },
   });
 
+  const { data: matches = [] } = useQuery({
+    queryKey: ["atendimento_matches", selected?.id],
+    enabled: !!selected,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("lead_matches")
+        .select("id, score, imoveis(titulo, bairro, preco, quartos, tipo)")
+        .eq("lead_id", selected!.id)
+        .order("score", { ascending: false })
+        .limit(10);
+      return data ?? [];
+    },
+  });
+
+  const viewedProperties = useMemo<ViewedProperty[]>(() => {
+    return (matches as any[])
+      .filter((m) => m.imoveis)
+      .map((m) => ({
+        titulo: m.imoveis?.titulo ?? null,
+        bairro: m.imoveis?.bairro ?? null,
+        preco: m.imoveis?.preco ?? null,
+        quartos: m.imoveis?.quartos ?? null,
+        tipo: m.imoveis?.tipo ?? null,
+      }));
+  }, [matches]);
+
+  const defaultPersonalizedMessage = useMemo(
+    () => (selected ? buildPersonalizedMessage(selected as any, viewedProperties) : ""),
+    [selected, viewedProperties],
+  );
+
+  useEffect(() => {
+    setReadyMessage(defaultPersonalizedMessage);
+    setFollowupCustom("");
+  }, [selected?.id, defaultPersonalizedMessage]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, selected?.id]);
