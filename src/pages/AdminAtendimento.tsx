@@ -322,18 +322,14 @@ export default function AdminAtendimento() {
       const content = reply.trim();
       if (!content) throw new Error("Mensagem vazia");
 
-      // 1) Envio via MarIA Core (Z-API + pausa da MarIA)
-      await invokeCore("maria-core-whatsapp", { action: "send", phone, message: content });
-
-      // 2) Só grava como enviado se o Core aceitou
-      const { error } = await supabase.from("maria_messages").insert({
+      // Envio + registro no CRM acontecem na edge function, usando service role.
+      await invokeCore("maria-core-whatsapp", {
+        action: "send",
+        phone,
+        message: content,
         session_id: sid,
         lead_id: selected.id,
-        role: "assistant",
-        content,
-        mode: "atendente_whatsapp",
       });
-      if (error) throw error;
     },
     onSuccess: () => {
       setReply("");
@@ -438,19 +434,14 @@ export default function AdminAtendimento() {
       if (!phone) throw new Error("Lead sem telefone");
       const content = readyMessage.trim();
       if (!content) throw new Error("Mensagem vazia");
-      await invokeCore("maria-core-whatsapp", { action: "send", phone, message: content });
-      const { error } = await supabase.from("maria_messages").insert({
+      // Envio + registro no CRM acontecem na edge function, usando service role.
+      await invokeCore("maria-core-whatsapp", {
+        action: "send",
+        phone,
+        message: content,
         session_id: sid,
         lead_id: selected.id,
-        role: "assistant",
-        content,
-        mode: "atendente_whatsapp",
       });
-      if (error) throw error;
-      await supabase
-        .from("leads_maria")
-        .update({ last_contact_at: new Date().toISOString() })
-        .eq("id", selected.id);
     },
     onSuccess: () => {
       toast.success("Mensagem pronta enviada. MarIA pausada.");
