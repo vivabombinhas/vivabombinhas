@@ -438,15 +438,7 @@ export default function AdminAtendimento() {
       if (!phone) throw new Error("Lead sem telefone");
       const content = readyMessage.trim();
       if (!content) throw new Error("Mensagem vazia");
-      const { data: resp, error: fnErr } = await supabase.functions.invoke(
-        "maria-core-whatsapp",
-        { body: { action: "send", phone, message: content } },
-      );
-      if (fnErr) throw new Error(fnErr.message || "Falha ao chamar MarIA Core");
-      const status = (resp as any)?.status;
-      if (status && status !== "ok") {
-        throw new Error((resp as any)?.error || "MarIA Core recusou o envio");
-      }
+      await invokeCore("maria-core-whatsapp", { action: "send", phone, message: content });
       const { error } = await supabase.from("maria_messages").insert({
         session_id: sid,
         lead_id: selected.id,
