@@ -319,21 +319,19 @@ export default function AdminAtendimento() {
       const sid = selected?.maria_core_session_id || selected?.session_id;
       if (!sid) throw new Error("Lead sem sessão vinculada");
       if (!phone) throw new Error("Lead sem telefone");
-      const content = reply.trim();
-      if (!content) throw new Error("Mensagem vazia");
-
-      // Envio + registro no CRM acontecem na edge function, usando service role.
-      await invokeCore("maria-core-whatsapp", {
-        action: "send",
+      // Envio + registro no CRM acontecem na edge function (service role),
+      // via helper compartilhado com o painel de Leads.
+      return await sendWhatsappMessage({
         phone,
-        message: content,
-        session_id: sid,
-        lead_id: selected.id,
+        message: reply,
+        leadId: selected.id,
+        sessionId: sid,
       });
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       setReply("");
-      toast.success("Enviado via WhatsApp. MarIA pausada neste contato.");
+      if (res?.warning) toast.warning(res.warning);
+      else toast.success("Enviado via WhatsApp. MarIA pausada neste contato.");
       qc.invalidateQueries({ queryKey: ["atendimento_msgs", selected?.id] });
       qc.invalidateQueries({ queryKey: ["wa_mode", phone] });
     },
