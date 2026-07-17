@@ -118,6 +118,9 @@ export default function AdminAtendimento() {
   const [reply, setReply] = useState("");
   const [readyMessage, setReadyMessage] = useState("");
   const [followupCustom, setFollowupCustom] = useState("");
+  const [confirmReply, setConfirmReply] = useState(false);
+  const [confirmReady, setConfirmReady] = useState(false);
+  const [confirmHandoff, setConfirmHandoff] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const replyRef = useRef<HTMLTextAreaElement>(null);
 
