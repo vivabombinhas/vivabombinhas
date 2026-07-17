@@ -68,6 +68,7 @@ interface Lead {
   feedback_corretor?: string | null;
   observacao_interna?: string | null;
   session_id?: string | null;
+  maria_core_session_id?: string | null;
 }
 
 interface Props {
