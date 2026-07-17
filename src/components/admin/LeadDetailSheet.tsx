@@ -513,8 +513,9 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
                     <DropdownMenuItem
                       key={t.id}
                       onClick={() => {
-                        openWhatsapp(lead.telefone!, t.build(lead, viewedProperties));
-                        updateLead.mutate({ last_contact_at: new Date().toISOString() });
+                        const msg = t.build(lead, viewedProperties);
+                        // Envio via CRM (edge + service_role). Registra em maria_messages.
+                        sendViaCrm.mutate(msg);
                       }}
                       className="flex flex-col items-start gap-0.5 py-2"
                     >
