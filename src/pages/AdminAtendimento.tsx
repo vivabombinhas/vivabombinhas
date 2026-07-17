@@ -78,10 +78,11 @@ export default function AdminAtendimento() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const replyRef = useRef<HTMLTextAreaElement>(null);
 
-  // Colapsa a sidebar do admin ao entrar no cockpit
+  // Colapsa a sidebar do admin ao entrar no cockpit (uma vez só)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     setSidebarOpen(false);
-  }, [setSidebarOpen]);
+  }, []);
 
   // Autogrow do textarea (3–8 linhas)
   useEffect(() => {
