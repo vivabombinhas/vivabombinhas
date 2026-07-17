@@ -16,6 +16,15 @@ interface Body {
   phone?: string;
   message?: string;
   paused?: boolean;
+  session_id?: string | null;
+  lead_id?: string | null;
+}
+
+function json(data: Record<string, unknown>, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 }
 
 async function requireAdmin(req: Request): Promise<boolean> {
@@ -44,17 +53,11 @@ Deno.serve(async (req) => {
 
   try {
     if (!(await requireAdmin(req))) {
-      return new Response(JSON.stringify({ error: "unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ error: "unauthorized" }, 401);
     }
 
     if (!isMariaCoreConfigured()) {
-      return new Response(
-        JSON.stringify({ error: "not_configured", message: "MarIA Core não configurado" }),
-        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      return json({ error: "not_configured", message: "MarIA Core não configurado" }, 503);
     }
 
     const body = (await req.json()) as Body;
@@ -62,64 +65,126 @@ Deno.serve(async (req) => {
 
     if (body.action === "send") {
       if (!phone || !body.message?.trim()) {
-        return new Response(JSON.stringify({ error: "phone e message obrigatórios" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return json({ error: "phone e message obrigatórios" }, 400);
       }
+      const message = body.message.trim();
       const result = await callMariaCore("/whatsapp/send", {
         method: "POST",
-        body: { phone, message: body.message },
+        body: { phone, message },
       });
-      return new Response(JSON.stringify(result), {
-        status: result.status === "ok" ? 200 : 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+
+      if (result.status !== "ok") {
+        return json(result as unknown as Record<string, unknown>, 502);
+      }
+
+      const service = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      );
+
+      let leadId = body.lead_id?.toString().trim() || null;
+      let sessionId = body.session_id?.toString().trim() || null;
+
+      if (!sessionId || !leadId) {
+        const { data: lead, error: leadError } = await service
+          .from("leads_maria")
+          .select("id, session_id, maria_core_session_id")
+          .eq("telefone", phone)
+          .order("last_contact_at", { ascending: false, nullsFirst: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (leadError) {
+          console.error("[maria-core-whatsapp] lead lookup error", leadError);
+        }
+
+        leadId = leadId ?? lead?.id ?? null;
+        sessionId = sessionId ?? lead?.maria_core_session_id ?? lead?.session_id ?? null;
+      }
+
+      if (!sessionId) {
+        return json(
+          {
+            error:
+              "Mensagem enviada ao cliente, mas não foi registrada no CRM: lead sem sessão vinculada.",
+            sent: true,
+            message_recorded: false,
+          },
+          500,
+        );
+      }
+
+      const { data: inserted, error: insertError } = await service
+        .from("maria_messages")
+        .insert({
+          session_id: sessionId,
+          lead_id: leadId,
+          role: "assistant",
+          content: message,
+          mode: "atendente_whatsapp",
+        })
+        .select("id")
+        .single();
+
+      if (insertError) {
+        console.error("[maria-core-whatsapp] maria_messages insert error", insertError);
+        return json(
+          {
+            error:
+              "Mensagem enviada ao cliente, mas não foi registrada no CRM. Não reenvie automaticamente; verifique o histórico antes de tentar novamente.",
+            detail: insertError.message,
+            sent: true,
+            message_recorded: false,
+          },
+          500,
+        );
+      }
+
+      if (leadId) {
+        const { error: touchError } = await service
+          .from("leads_maria")
+          .update({ last_contact_at: new Date().toISOString() })
+          .eq("id", leadId);
+
+        if (touchError) {
+          console.warn("[maria-core-whatsapp] last_contact_at update warning", touchError);
+        }
+      }
+
+      return json({
+        status: "ok",
+        data: result.data,
+        sent: true,
+        message_recorded: true,
+        message_id: inserted?.id,
       });
     }
 
     if (body.action === "get_mode") {
       if (!phone) {
-        return new Response(JSON.stringify({ error: "phone obrigatório" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return json({ error: "phone obrigatório" }, 400);
       }
       const result = await callMariaCore(
         `/whatsapp/mode?phone=${encodeURIComponent(phone)}`,
         { method: "GET" },
       );
-      return new Response(JSON.stringify(result), {
-        status: result.status === "ok" ? 200 : 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json(result as unknown as Record<string, unknown>, result.status === "ok" ? 200 : 502);
     }
 
     if (body.action === "set_mode") {
       if (!phone || typeof body.paused !== "boolean") {
-        return new Response(JSON.stringify({ error: "phone e paused obrigatórios" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return json({ error: "phone e paused obrigatórios" }, 400);
       }
       const result = await callMariaCore("/whatsapp/mode", {
         method: "POST",
         body: { phone, paused: body.paused },
       });
-      return new Response(JSON.stringify(result), {
-        status: result.status === "ok" ? 200 : 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json(result as unknown as Record<string, unknown>, result.status === "ok" ? 200 : 502);
     }
 
-    return new Response(JSON.stringify({ error: "action inválida" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ error: "action inválida" }, 400);
   } catch (err) {
     console.error("[maria-core-whatsapp] error", err);
-    return new Response(
-      JSON.stringify({ error: "internal_error", detail: String((err as Error).message ?? err) }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
+    return json({ error: "internal_error", detail: String((err as Error).message ?? err) }, 500);
   }
 });
