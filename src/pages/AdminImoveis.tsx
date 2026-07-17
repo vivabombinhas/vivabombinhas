@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { PauseCircle } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -61,6 +63,8 @@ export default function AdminImoveis() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editProperty, setEditProperty] = useState<any | null>(null);
   const [galleryProperty, setGalleryProperty] = useState<any | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<null | "deactivate" | "delete">(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -94,7 +98,41 @@ export default function AdminImoveis() {
       });
     },
   });
+
+  const bulkDeactivateMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("imoveis").update({ status: "pausado" }).in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: (_d, ids) => {
+      queryClient.invalidateQueries({ queryKey: ["admin_imoveis"] });
+      toast({ title: `${ids.length} imóvel(is) desativado(s)` });
+      setSelectedIds(new Set());
+      setBulkAction(null);
+    },
+    onError: (error: any) => {
+      toast({ title: "Erro ao desativar", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("imoveis").delete().in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: (_d, ids) => {
+      queryClient.invalidateQueries({ queryKey: ["admin_imoveis"] });
+      toast({ title: `${ids.length} imóvel(is) excluído(s)` });
+      setSelectedIds(new Set());
+      setBulkAction(null);
+    },
+    onError: (error: any) => {
+      toast({ title: "Erro ao excluir", description: error.message, variant: "destructive" });
+    },
+  });
+
   const [refreshingId, setRefreshingId] = useState<string | null>(null);
+
 
   const handleRefreshPhotos = async (imovel: any) => {
     if (!imovel.link_anuncio) {
@@ -157,6 +195,26 @@ export default function AdminImoveis() {
 
     return matchesSearch && matchesStatus && matchesQuality;
   });
+
+  const filteredIds = useMemo(() => filteredImoveis?.map((i) => i.id) ?? [], [filteredImoveis]);
+  const allFilteredSelected = filteredIds.length > 0 && filteredIds.every((id) => selectedIds.has(id));
+  const someFilteredSelected = filteredIds.some((id) => selectedIds.has(id));
+  const selectedCount = selectedIds.size;
+
+  const toggleSelectAll = (checked: boolean) => {
+    const next = new Set(selectedIds);
+    if (checked) filteredIds.forEach((id) => next.add(id));
+    else filteredIds.forEach((id) => next.delete(id));
+    setSelectedIds(next);
+  };
+  const toggleOne = (id: string, checked: boolean) => {
+    const next = new Set(selectedIds);
+    if (checked) next.add(id);
+    else next.delete(id);
+    setSelectedIds(next);
+  };
+
+
 
   return (
     <div className="container py-6 space-y-6">
@@ -223,10 +281,36 @@ export default function AdminImoveis() {
         </div>
       </div>
 
+      {selectedCount > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-muted/40 px-4 py-2.5">
+          <div className="text-sm">
+            <span className="font-semibold">{selectedCount}</span> selecionado{selectedCount > 1 ? "s" : ""}
+            <Button variant="link" size="sm" className="ml-2 h-auto p-0" onClick={() => setSelectedIds(new Set())}>
+              Limpar
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => setBulkAction("deactivate")}>
+              <PauseCircle className="w-4 h-4" /> Desativar
+            </Button>
+            <Button variant="destructive" size="sm" className="gap-2" onClick={() => setBulkAction("delete")}>
+              <Trash2 className="w-4 h-4" /> Excluir
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="border rounded-lg bg-card overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[40px]">
+                <Checkbox
+                  checked={allFilteredSelected ? true : someFilteredSelected ? "indeterminate" : false}
+                  onCheckedChange={(c) => toggleSelectAll(!!c)}
+                  aria-label="Selecionar todos os filtrados"
+                />
+              </TableHead>
               <TableHead>Imóvel</TableHead>
               <TableHead>Preço</TableHead>
               <TableHead>Status</TableHead>
@@ -237,24 +321,32 @@ export default function AdminImoveis() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-10">Carregando...</TableCell>
+                <TableCell colSpan={6} className="text-center py-10">Carregando...</TableCell>
               </TableRow>
             ) : imoveisError ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-10 text-destructive">
+                <TableCell colSpan={6} className="text-center py-10 text-destructive">
                   Erro ao carregar imóveis: {(imoveisError as Error).message}
                 </TableCell>
               </TableRow>
             ) : filteredImoveis?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">Nenhum imóvel encontrado</TableCell>
+                <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">Nenhum imóvel encontrado</TableCell>
               </TableRow>
             ) : (
               filteredImoveis?.map((imovel) => (
-                <TableRow key={imovel.id}>
+                <TableRow key={imovel.id} data-state={selectedIds.has(imovel.id) ? "selected" : undefined}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedIds.has(imovel.id)}
+                      onCheckedChange={(c) => toggleOne(imovel.id, !!c)}
+                      aria-label="Selecionar imóvel"
+                    />
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <div className="font-medium">{imovel.titulo}</div>
+
                       {imovel.destaque_premium && (
                         <Badge variant="outline" className="text-[10px] bg-amber-100 text-amber-800 border-amber-300 font-bold">
                           PREMIUM
@@ -359,6 +451,37 @@ export default function AdminImoveis() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={!!bulkAction} onOpenChange={(o) => !o && setBulkAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {bulkAction === "delete"
+                ? `Excluir ${selectedCount} imóvel(is)?`
+                : `Desativar ${selectedCount} imóvel(is)?`}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {bulkAction === "delete"
+                ? `Esta ação não pode ser desfeita. ${selectedCount} imóvel(is) e seus dados associados serão removidos permanentemente. Se quiser apenas tirá-los do ar, prefira "Desativar".`
+                : `${selectedCount} imóvel(is) terão status alterado para "pausado" e sairão da MarIA e da vitrine. Você pode reativá-los depois.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const ids = Array.from(selectedIds);
+                if (bulkAction === "delete") bulkDeleteMutation.mutate(ids);
+                else bulkDeactivateMutation.mutate(ids);
+              }}
+              className={bulkAction === "delete" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+            >
+              {bulkAction === "delete" ? "Excluir definitivamente" : "Desativar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
 
       {editProperty && (
         <PropertyEditSheet
