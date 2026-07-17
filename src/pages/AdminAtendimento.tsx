@@ -360,6 +360,116 @@ export default function AdminAtendimento() {
     onError: (e: any) => toast.error(e.message || "Falha ao atualizar"),
   });
 
+  // Atualizações genéricas no lead (follow-up, contato, status, feedback, handoff)
+  const updateLeadPatch = useMutation({
+    mutationFn: async (patch: Record<string, any>) => {
+      if (!selected) throw new Error("Nenhum lead selecionado");
+      const { error } = await supabase.from("leads_maria").update(patch).eq("id", selected.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["atendimento_leads"] });
+    },
+    onError: (e: any) => toast.error(e.message || "Falha ao salvar"),
+  });
+
+  const changeStatus = useMutation({
+    mutationFn: async (newStatus: string) => {
+      if (!selected) return;
+      const old = selected.status;
+      const { error } = await supabase
+        .from("leads_maria")
+        .update({ status: newStatus as any })
+        .eq("id", selected.id);
+      if (error) throw error;
+      try {
+        await supabase.from("lead_status_audit").insert({
+          lead_id: selected.id,
+          old_status: old,
+          new_status: newStatus,
+          source: "admin_atendimento",
+        });
+      } catch (e) {
+        console.warn("audit insert falhou", e);
+      }
+    },
+    onSuccess: () => {
+      toast.success("Status atualizado");
+      qc.invalidateQueries({ queryKey: ["atendimento_leads"] });
+      qc.invalidateQueries({ queryKey: ["atendimento_audit", selected?.id] });
+    },
+    onError: (e: any) => toast.error(e.message || "Falha ao trocar status"),
+  });
+
+  // Envia a "mensagem pronta" pelo mesmo canal do MarIA Core
+  const sendReady = useMutation({
+    mutationFn: async () => {
+      if (!selected) throw new Error("Nenhum lead selecionado");
+      const sid = selected?.maria_core_session_id || selected?.session_id;
+      if (!sid) throw new Error("Lead sem sessão vinculada");
+      if (!phone) throw new Error("Lead sem telefone");
+      const content = readyMessage.trim();
+      if (!content) throw new Error("Mensagem vazia");
+      const { data: resp, error: fnErr } = await supabase.functions.invoke(
+        "maria-core-whatsapp",
+        { body: { action: "send", phone, message: content } },
+      );
+      if (fnErr) throw new Error(fnErr.message || "Falha ao chamar MarIA Core");
+      const status = (resp as any)?.status;
+      if (status && status !== "ok") {
+        throw new Error((resp as any)?.error || "MarIA Core recusou o envio");
+      }
+      const { error } = await supabase.from("maria_messages").insert({
+        session_id: sid,
+        lead_id: selected.id,
+        role: "assistant",
+        content,
+        mode: "atendente_whatsapp",
+      });
+      if (error) throw error;
+      await supabase
+        .from("leads_maria")
+        .update({ last_contact_at: new Date().toISOString() })
+        .eq("id", selected.id);
+    },
+    onSuccess: () => {
+      toast.success("Mensagem pronta enviada. MarIA pausada.");
+      qc.invalidateQueries({ queryKey: ["atendimento_msgs", selected?.id] });
+      qc.invalidateQueries({ queryKey: ["atendimento_leads"] });
+      qc.invalidateQueries({ queryKey: ["wa_mode", phone] });
+    },
+    onError: (e: any) => toast.error(e.message || "Falha ao enviar"),
+  });
+
+  const handoffDaniel = useMutation({
+    mutationFn: async () => {
+      if (!selected) throw new Error("Nenhum lead selecionado");
+      if (selected.quer_falar_daniel) throw new Error("Handoff já enviado");
+      const { error } = await supabase
+        .from("leads_maria")
+        .update({ quer_falar_daniel: true, proximo_passo_sugerido: "analise_daniel" })
+        .eq("id", selected.id);
+      if (error) throw error;
+      const sid = selected?.maria_core_session_id || selected?.session_id;
+      try {
+        await supabase.functions.invoke("notify-broker", {
+          body: {
+            lead_name: selected.nome || "Lead sem nome",
+            lead_phone: selected.telefone || "",
+            session_id: sid,
+          },
+        });
+      } catch (e) {
+        console.warn("notify-broker falhou", e);
+      }
+    },
+    onSuccess: () => {
+      toast.success("Daniel foi avisado deste lead");
+      qc.invalidateQueries({ queryKey: ["atendimento_leads"] });
+    },
+    onError: (e: any) => toast.error(e.message || "Falha no handoff"),
+  });
+
   // ---------- Blocos reutilizados nas 3 zonas ----------
 
   const FilaZone = (
