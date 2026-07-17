@@ -212,6 +212,29 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
     onError: () => toast.error("Erro ao salvar"),
   });
 
+  // Envio unificado: mesmo helper usado pelo cockpit Atendimento.
+  // Roteia por edge function (service_role) → registra em maria_messages
+  // sem tocar direto no navegador (evita "permission denied").
+  const sendViaCrm = useMutation({
+    mutationFn: async (message: string) => {
+      if (!lead?.telefone) throw new Error("Lead sem telefone");
+      const sid = lead.maria_core_session_id || lead.session_id || null;
+      return await sendWhatsappMessage({
+        phone: lead.telefone,
+        message,
+        leadId: lead.id,
+        sessionId: sid,
+      });
+    },
+    onSuccess: (res) => {
+      if (res?.warning) toast.warning(res.warning);
+      else toast.success("Mensagem enviada e registrada no histórico.");
+      updateLead.mutate({ last_contact_at: new Date().toISOString() });
+      qc.invalidateQueries({ queryKey: ["maria_messages", lead?.id] });
+    },
+    onError: (e: any) => toast.error(e.message || "Falha ao enviar via CRM"),
+  });
+
   // Timeline unificada — merge cronológico de todos os eventos do lead
   const timeline = useMemo<TimelineEvent[]>(() => {
     if (!lead) return [];
