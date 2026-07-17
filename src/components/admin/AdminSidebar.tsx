@@ -59,7 +59,8 @@ const mainItems = [
 const importItems = [
   { title: "Meus Imóveis", url: "/admin/imoveis", icon: ClipboardList },
   { title: "Inventário", url: "/admin/inventario", icon: PackageSearch },
-  { title: "Curadoria", url: "/admin/curadoria", icon: Sparkles },
+  // "Curadoria" aposentada: duplicava os toggles de "Meus Imóveis → Editar"
+  // (Destaque Premium / Ocultar da MarIA) com rótulo invertido. Rota preservada.
   { title: "Submissões", url: "/admin/submissions", icon: Bell },
   { title: "Importar link", url: "/admin/importar-link", icon: Link2 },
   { title: "Importar planilha", url: "/admin/importar", icon: FileSpreadsheet },
