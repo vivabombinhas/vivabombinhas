@@ -452,6 +452,37 @@ export default function AdminImoveis() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog open={!!bulkAction} onOpenChange={(o) => !o && setBulkAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {bulkAction === "delete"
+                ? `Excluir ${selectedCount} imóvel(is)?`
+                : `Desativar ${selectedCount} imóvel(is)?`}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {bulkAction === "delete"
+                ? `Esta ação não pode ser desfeita. ${selectedCount} imóvel(is) e seus dados associados serão removidos permanentemente. Se quiser apenas tirá-los do ar, prefira "Desativar".`
+                : `${selectedCount} imóvel(is) terão status alterado para "pausado" e sairão da MarIA e da vitrine. Você pode reativá-los depois.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const ids = Array.from(selectedIds);
+                if (bulkAction === "delete") bulkDeleteMutation.mutate(ids);
+                else bulkDeactivateMutation.mutate(ids);
+              }}
+              className={bulkAction === "delete" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+            >
+              {bulkAction === "delete" ? "Excluir definitivamente" : "Desativar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+
       {editProperty && (
         <PropertyEditSheet
           property={editProperty}
