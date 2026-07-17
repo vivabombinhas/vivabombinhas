@@ -1041,6 +1041,91 @@ export default function AdminAtendimento() {
           <TabsContent value="contexto" className="flex-1 min-h-0 m-0 overflow-hidden">{ContextoZone}</TabsContent>
         </Tabs>
       </div>
+
+      {/* Confirmação: enviar resposta livre */}
+      <AlertDialog open={confirmReply} onOpenChange={setConfirmReply}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enviar mensagem via WhatsApp?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-xs">
+                <div>
+                  Vai para <strong>{selected?.nome || "Lead"}</strong> ({phone || "—"}). A MarIA pausa neste contato.
+                </div>
+                <div className="bg-muted p-2 rounded whitespace-pre-wrap max-h-40 overflow-y-auto">{reply}</div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={sendReply.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={sendReply.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                sendReply.mutate(undefined, { onSuccess: () => setConfirmReply(false) });
+              }}
+            >
+              {sendReply.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+              {sendReply.isPending ? "Enviando…" : "Confirmar envio"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmação: enviar mensagem pronta */}
+      <AlertDialog open={confirmReady} onOpenChange={setConfirmReady}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enviar mensagem pronta?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-xs">
+                <div>
+                  Vai para <strong>{selected?.nome || "Lead"}</strong> ({phone || "—"}). A MarIA pausa neste contato.
+                </div>
+                <div className="bg-muted p-2 rounded whitespace-pre-wrap max-h-48 overflow-y-auto">{readyMessage}</div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={sendReady.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={sendReady.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                sendReady.mutate(undefined, { onSuccess: () => setConfirmReady(false) });
+              }}
+            >
+              {sendReady.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+              {sendReady.isPending ? "Enviando…" : "Confirmar envio"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmação: handoff para Daniel */}
+      <AlertDialog open={confirmHandoff} onOpenChange={setConfirmHandoff}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Encaminhar para o Daniel?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O Daniel receberá aviso deste lead ({selected?.nome || "sem nome"} — {phone || "sem telefone"}) e o lead será marcado como pedido de especialista.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={handoffDaniel.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={handoffDaniel.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                handoffDaniel.mutate(undefined, { onSuccess: () => setConfirmHandoff(false) });
+              }}
+            >
+              {handoffDaniel.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+              {handoffDaniel.isPending ? "Enviando…" : "Confirmar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
