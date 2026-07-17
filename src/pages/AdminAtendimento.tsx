@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { HelpCircle, Send, Calendar as CalendarIcon, MessageCircle, RefreshCw, CheckCircle2, UserPlus, ThumbsUp, ThumbsDown, Loader2 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
