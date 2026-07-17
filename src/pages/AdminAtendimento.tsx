@@ -158,6 +158,38 @@ export default function AdminAtendimento() {
     },
   });
 
+  // Última mensagem por lead (usado para ordenar a fila por atividade real
+  // e destacar conversas ao vivo). Refetch curto para "conversando agora".
+  const { data: lastMsgMap = {} } = useQuery<Record<string, string>>({
+    queryKey: ["atendimento_last_msgs", leads.map((l: any) => l.id).join(",")],
+    enabled: leads.length > 0,
+    refetchInterval: 15_000,
+    queryFn: async () => {
+      const ids = leads.map((l: any) => l.id).filter(Boolean);
+      if (!ids.length) return {};
+      const { data, error } = await supabase
+        .from("maria_messages")
+        .select("lead_id, created_at")
+        .in("lead_id", ids)
+        .order("created_at", { ascending: false })
+        .limit(2000);
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      for (const row of data ?? []) {
+        const lid = (row as any).lead_id as string | null;
+        if (!lid) continue;
+        if (!map[lid]) map[lid] = (row as any).created_at;
+      }
+      return map;
+    },
+  });
+
+  const lastActivityAt = (l: any): number => {
+    const fromMsgs = lastMsgMap[l.id];
+    const ts = fromMsgs || l.last_contact_at || l.created_at;
+    return ts ? new Date(ts).getTime() : 0;
+  };
+
   const statusOptions = useMemo(() => {
     const s = new Set<string>();
     leads.forEach((l: any) => l.status && s.add(l.status));
@@ -186,9 +218,11 @@ export default function AdminAtendimento() {
       .sort((a: any, b: any) => {
         const diff = priorityScore(b) - priorityScore(a);
         if (diff !== 0) return diff;
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        // Desempate por atividade real: última mensagem recebida naquela sessão.
+        return lastActivityAt(b) - lastActivityAt(a);
       });
-  }, [leads, search, filterStatus, filterFinalidade, onlyHot, followupToday]);
+  }, [leads, search, filterStatus, filterFinalidade, onlyHot, followupToday, lastMsgMap]);
+
 
   const selected: any = sorted.find((l: any) => l.id === selectedId) || leads.find((l: any) => l.id === selectedId) || null;
 
@@ -576,6 +610,8 @@ export default function AdminAtendimento() {
           const score = priorityScore(l);
           const t = temperatura(score);
           const active = l.id === selectedId;
+          const lastMs = lastMsgMap[l.id] ? Date.now() - new Date(lastMsgMap[l.id]).getTime() : Infinity;
+          const isLive = lastMs < 5 * 60 * 1000;
           return (
             <button
               key={l.id}
@@ -586,6 +622,15 @@ export default function AdminAtendimento() {
             >
               <div className="flex items-start justify-between gap-2 mb-1">
                 <div className="font-semibold text-sm truncate flex items-center gap-1">
+                  {isLive && (
+                    <span
+                      title="Conversando agora (última mensagem < 5 min)"
+                      className="relative inline-flex shrink-0"
+                    >
+                      <span className="absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-75 animate-ping" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                    </span>
+                  )}
                   <User className="w-3 h-3 shrink-0" />
                   {l.nome || "Sem nome"}
                 </div>
@@ -595,6 +640,11 @@ export default function AdminAtendimento() {
                 <Phone className="w-2.5 h-2.5" /> {l.telefone || "—"}
               </div>
               <div className="flex flex-wrap gap-1">
+                {isLive && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500 text-white font-medium">
+                    conversando agora
+                  </span>
+                )}
                 {l.finalidade && (
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted">{l.finalidade}</span>
                 )}
