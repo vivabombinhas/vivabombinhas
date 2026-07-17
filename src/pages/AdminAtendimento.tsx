@@ -798,7 +798,7 @@ export default function AdminAtendimento() {
                 </h4>
                 <button
                   type="button"
-                  onClick={() => setReadyMessage(defaultPersonalizedMessage)}
+                  onClick={() => regenerateReadyMessage()}
                   className="text-[10px] text-primary hover:underline flex items-center gap-1"
                 >
                   <RefreshCw className="w-2.5 h-2.5" /> Regenerar
