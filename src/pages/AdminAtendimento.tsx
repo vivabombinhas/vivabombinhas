@@ -158,6 +158,38 @@ export default function AdminAtendimento() {
     },
   });
 
+  // Última mensagem por lead (usado para ordenar a fila por atividade real
+  // e destacar conversas ao vivo). Refetch curto para "conversando agora".
+  const { data: lastMsgMap = {} } = useQuery<Record<string, string>>({
+    queryKey: ["atendimento_last_msgs", leads.map((l: any) => l.id).join(",")],
+    enabled: leads.length > 0,
+    refetchInterval: 15_000,
+    queryFn: async () => {
+      const ids = leads.map((l: any) => l.id).filter(Boolean);
+      if (!ids.length) return {};
+      const { data, error } = await supabase
+        .from("maria_messages")
+        .select("lead_id, created_at")
+        .in("lead_id", ids)
+        .order("created_at", { ascending: false })
+        .limit(2000);
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      for (const row of data ?? []) {
+        const lid = (row as any).lead_id as string | null;
+        if (!lid) continue;
+        if (!map[lid]) map[lid] = (row as any).created_at;
+      }
+      return map;
+    },
+  });
+
+  const lastActivityAt = (l: any): number => {
+    const fromMsgs = lastMsgMap[l.id];
+    const ts = fromMsgs || l.last_contact_at || l.created_at;
+    return ts ? new Date(ts).getTime() : 0;
+  };
+
   const statusOptions = useMemo(() => {
     const s = new Set<string>();
     leads.forEach((l: any) => l.status && s.add(l.status));
@@ -186,9 +218,11 @@ export default function AdminAtendimento() {
       .sort((a: any, b: any) => {
         const diff = priorityScore(b) - priorityScore(a);
         if (diff !== 0) return diff;
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        // Desempate por atividade real: última mensagem recebida naquela sessão.
+        return lastActivityAt(b) - lastActivityAt(a);
       });
-  }, [leads, search, filterStatus, filterFinalidade, onlyHot, followupToday]);
+  }, [leads, search, filterStatus, filterFinalidade, onlyHot, followupToday, lastMsgMap]);
+
 
   const selected: any = sorted.find((l: any) => l.id === selectedId) || leads.find((l: any) => l.id === selectedId) || null;
 
