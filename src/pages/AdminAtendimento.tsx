@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { HelpCircle, Send, Calendar as CalendarIcon, MessageCircle, RefreshCw, CheckCircle2, UserPlus, ThumbsUp, ThumbsDown, Loader2 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -261,15 +261,43 @@ export default function AdminAtendimento() {
       }));
   }, [matches]);
 
-  const defaultPersonalizedMessage = useMemo(
-    () => (selected ? buildPersonalizedMessage(selected as any, viewedProperties) : ""),
-    [selected, viewedProperties],
-  );
+  const regenerateReadyMessage = useCallback(() => {
+    if (!selected) {
+      setReadyMessage("");
+      return "";
+    }
+    const msg = buildPersonalizedMessage(selected as any, viewedProperties);
+    setReadyMessage(msg);
+    return msg;
+  }, [selected, viewedProperties]);
+
+  // Sempre re-sincroniza a mensagem pronta quando o lead selecionado muda
+  // ou quando o conteúdo-chave desse lead muda (resumo_ia, imóveis vistos).
+  // Usamos uma "assinatura" em string para não depender da identidade do objeto
+  // `selected` (que muda a cada refetch), evitando ficar preso em um lead antigo.
+  const readySignature = useMemo(() => {
+    if (!selected) return "";
+    return [
+      selected.id,
+      selected.resumo_ia ?? "",
+      selected.nome ?? "",
+      selected.bairro_interesse ?? "",
+      selected.tipo_imovel ?? "",
+      selected.faixa_preco ?? "",
+      viewedProperties.length,
+    ].join("|");
+  }, [selected, viewedProperties]);
 
   useEffect(() => {
-    setReadyMessage(defaultPersonalizedMessage);
+    if (!selected) {
+      setReadyMessage("");
+      setFollowupCustom("");
+      return;
+    }
+    setReadyMessage(buildPersonalizedMessage(selected as any, viewedProperties));
     setFollowupCustom("");
-  }, [selected?.id, defaultPersonalizedMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [readySignature]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -770,7 +798,7 @@ export default function AdminAtendimento() {
                 </h4>
                 <button
                   type="button"
-                  onClick={() => setReadyMessage(defaultPersonalizedMessage)}
+                  onClick={() => regenerateReadyMessage()}
                   className="text-[10px] text-primary hover:underline flex items-center gap-1"
                 >
                   <RefreshCw className="w-2.5 h-2.5" /> Regenerar
