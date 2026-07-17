@@ -797,12 +797,13 @@ export default function AdminAtendimento() {
                 disabled={sendReady.isPending || !phone}
               />
               <Button
+              <Button
                 size="sm"
                 className="w-full h-8 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700"
-                onClick={() => sendReady.mutate()}
+                onClick={() => setConfirmReady(true)}
                 disabled={sendReady.isPending || !readyMessage.trim() || !phone}
               >
-                <Send className="w-3 h-3" />
+                {sendReady.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                 {sendReady.isPending ? "Enviando…" : "Enviar via WhatsApp"}
               </Button>
               {!phone && (
