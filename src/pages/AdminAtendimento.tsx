@@ -347,13 +347,7 @@ export default function AdminAtendimento() {
   const resumeMaria = useMutation({
     mutationFn: async () => {
       if (!phone) throw new Error("Lead sem telefone");
-      const { data: resp, error } = await supabase.functions.invoke(
-        "maria-core-whatsapp",
-        { body: { action: "set_mode", phone, paused: false } },
-      );
-      if (error) throw error;
-      const status = (resp as any)?.status;
-      if (status && status !== "ok") throw new Error((resp as any)?.error || "Falha");
+      await invokeCore("maria-core-whatsapp", { action: "set_mode", phone, paused: false });
     },
     onSuccess: () => {
       toast.success("MarIA voltou a atender este contato.");
