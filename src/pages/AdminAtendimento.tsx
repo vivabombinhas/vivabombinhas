@@ -323,15 +323,7 @@ export default function AdminAtendimento() {
       if (!content) throw new Error("Mensagem vazia");
 
       // 1) Envio via MarIA Core (Z-API + pausa da MarIA)
-      const { data: resp, error: fnErr } = await supabase.functions.invoke(
-        "maria-core-whatsapp",
-        { body: { action: "send", phone, message: content } },
-      );
-      if (fnErr) throw new Error(fnErr.message || "Falha ao chamar MarIA Core");
-      const status = (resp as any)?.status;
-      if (status && status !== "ok") {
-        throw new Error((resp as any)?.error || "MarIA Core recusou o envio");
-      }
+      await invokeCore("maria-core-whatsapp", { action: "send", phone, message: content });
 
       // 2) Só grava como enviado se o Core aceitou
       const { error } = await supabase.from("maria_messages").insert({
