@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { HelpCircle, Send } from "lucide-react";
+import { HelpCircle, Send, Calendar as CalendarIcon, MessageCircle, RefreshCw, CheckCircle2, UserPlus, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -23,6 +23,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { buildPersonalizedMessage, type ViewedProperty } from "@/lib/whatsapp-templates";
+
 
 
 type Lead = any;
