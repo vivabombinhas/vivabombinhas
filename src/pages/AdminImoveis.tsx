@@ -281,10 +281,36 @@ export default function AdminImoveis() {
         </div>
       </div>
 
+      {selectedCount > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-muted/40 px-4 py-2.5">
+          <div className="text-sm">
+            <span className="font-semibold">{selectedCount}</span> selecionado{selectedCount > 1 ? "s" : ""}
+            <Button variant="link" size="sm" className="ml-2 h-auto p-0" onClick={() => setSelectedIds(new Set())}>
+              Limpar
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => setBulkAction("deactivate")}>
+              <PauseCircle className="w-4 h-4" /> Desativar
+            </Button>
+            <Button variant="destructive" size="sm" className="gap-2" onClick={() => setBulkAction("delete")}>
+              <Trash2 className="w-4 h-4" /> Excluir
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="border rounded-lg bg-card overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[40px]">
+                <Checkbox
+                  checked={allFilteredSelected ? true : someFilteredSelected ? "indeterminate" : false}
+                  onCheckedChange={(c) => toggleSelectAll(!!c)}
+                  aria-label="Selecionar todos os filtrados"
+                />
+              </TableHead>
               <TableHead>Imóvel</TableHead>
               <TableHead>Preço</TableHead>
               <TableHead>Status</TableHead>
@@ -295,24 +321,32 @@ export default function AdminImoveis() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-10">Carregando...</TableCell>
+                <TableCell colSpan={6} className="text-center py-10">Carregando...</TableCell>
               </TableRow>
             ) : imoveisError ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-10 text-destructive">
+                <TableCell colSpan={6} className="text-center py-10 text-destructive">
                   Erro ao carregar imóveis: {(imoveisError as Error).message}
                 </TableCell>
               </TableRow>
             ) : filteredImoveis?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">Nenhum imóvel encontrado</TableCell>
+                <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">Nenhum imóvel encontrado</TableCell>
               </TableRow>
             ) : (
               filteredImoveis?.map((imovel) => (
-                <TableRow key={imovel.id}>
+                <TableRow key={imovel.id} data-state={selectedIds.has(imovel.id) ? "selected" : undefined}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedIds.has(imovel.id)}
+                      onCheckedChange={(c) => toggleOne(imovel.id, !!c)}
+                      aria-label="Selecionar imóvel"
+                    />
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <div className="font-medium">{imovel.titulo}</div>
+
                       {imovel.destaque_premium && (
                         <Badge variant="outline" className="text-[10px] bg-amber-100 text-amber-800 border-amber-300 font-bold">
                           PREMIUM
