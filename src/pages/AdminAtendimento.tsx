@@ -797,7 +797,6 @@ export default function AdminAtendimento() {
                 disabled={sendReady.isPending || !phone}
               />
               <Button
-              <Button
                 size="sm"
                 className="w-full h-8 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700"
                 onClick={() => setConfirmReady(true)}
