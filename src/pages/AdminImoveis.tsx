@@ -196,6 +196,26 @@ export default function AdminImoveis() {
     return matchesSearch && matchesStatus && matchesQuality;
   });
 
+  const filteredIds = useMemo(() => filteredImoveis?.map((i) => i.id) ?? [], [filteredImoveis]);
+  const allFilteredSelected = filteredIds.length > 0 && filteredIds.every((id) => selectedIds.has(id));
+  const someFilteredSelected = filteredIds.some((id) => selectedIds.has(id));
+  const selectedCount = selectedIds.size;
+
+  const toggleSelectAll = (checked: boolean) => {
+    const next = new Set(selectedIds);
+    if (checked) filteredIds.forEach((id) => next.add(id));
+    else filteredIds.forEach((id) => next.delete(id));
+    setSelectedIds(next);
+  };
+  const toggleOne = (id: string, checked: boolean) => {
+    const next = new Set(selectedIds);
+    if (checked) next.add(id);
+    else next.delete(id);
+    setSelectedIds(next);
+  };
+
+
+
   return (
     <div className="container py-6 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
