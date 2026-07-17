@@ -98,7 +98,41 @@ export default function AdminImoveis() {
       });
     },
   });
+
+  const bulkDeactivateMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("imoveis").update({ status: "pausado" }).in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: (_d, ids) => {
+      queryClient.invalidateQueries({ queryKey: ["admin_imoveis"] });
+      toast({ title: `${ids.length} imóvel(is) desativado(s)` });
+      setSelectedIds(new Set());
+      setBulkAction(null);
+    },
+    onError: (error: any) => {
+      toast({ title: "Erro ao desativar", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("imoveis").delete().in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: (_d, ids) => {
+      queryClient.invalidateQueries({ queryKey: ["admin_imoveis"] });
+      toast({ title: `${ids.length} imóvel(is) excluído(s)` });
+      setSelectedIds(new Set());
+      setBulkAction(null);
+    },
+    onError: (error: any) => {
+      toast({ title: "Erro ao excluir", description: error.message, variant: "destructive" });
+    },
+  });
+
   const [refreshingId, setRefreshingId] = useState<string | null>(null);
+
 
   const handleRefreshPhotos = async (imovel: any) => {
     if (!imovel.link_anuncio) {
