@@ -545,18 +545,34 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
                   value={customMessage}
                   onChange={(e) => setCustomMessage(e.target.value)}
                 />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full text-xs h-8 border-emerald-600 text-emerald-700 hover:bg-emerald-50"
-                  onClick={() => {
-                    const msg = (customMessage || defaultPersonalizedMessage).trim();
-                    openWhatsapp(lead.telefone!, msg);
-                    updateLead.mutate({ last_contact_at: new Date().toISOString() });
-                  }}
-                >
-                  <Phone className="w-3 h-3 mr-1" /> Abrir no WhatsApp
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="flex-1 text-xs h-8 bg-emerald-600 hover:bg-emerald-700"
+                    disabled={sendViaCrm.isPending}
+                    onClick={() => {
+                      const msg = (customMessage || defaultPersonalizedMessage).trim();
+                      if (!msg) return;
+                      sendViaCrm.mutate(msg);
+                    }}
+                  >
+                    <Send className="w-3 h-3 mr-1" />
+                    {sendViaCrm.isPending ? "Enviando..." : "Enviar via MarIA (registra CRM)"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs h-8"
+                    title="Abrir wa.me manualmente (não registra no CRM)"
+                    onClick={() => {
+                      const msg = (customMessage || defaultPersonalizedMessage).trim();
+                      openWhatsapp(lead.telefone!, msg);
+                      updateLead.mutate({ last_contact_at: new Date().toISOString() });
+                    }}
+                  >
+                    <Phone className="w-3 h-3" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}
