@@ -610,6 +610,8 @@ export default function AdminAtendimento() {
           const score = priorityScore(l);
           const t = temperatura(score);
           const active = l.id === selectedId;
+          const lastMs = lastMsgMap[l.id] ? Date.now() - new Date(lastMsgMap[l.id]).getTime() : Infinity;
+          const isLive = lastMs < 5 * 60 * 1000;
           return (
             <button
               key={l.id}
@@ -620,6 +622,15 @@ export default function AdminAtendimento() {
             >
               <div className="flex items-start justify-between gap-2 mb-1">
                 <div className="font-semibold text-sm truncate flex items-center gap-1">
+                  {isLive && (
+                    <span
+                      title="Conversando agora (última mensagem < 5 min)"
+                      className="relative inline-flex shrink-0"
+                    >
+                      <span className="absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-75 animate-ping" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                    </span>
+                  )}
                   <User className="w-3 h-3 shrink-0" />
                   {l.nome || "Sem nome"}
                 </div>
@@ -629,6 +640,11 @@ export default function AdminAtendimento() {
                 <Phone className="w-2.5 h-2.5" /> {l.telefone || "—"}
               </div>
               <div className="flex flex-wrap gap-1">
+                {isLive && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500 text-white font-medium">
+                    conversando agora
+                  </span>
+                )}
                 {l.finalidade && (
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted">{l.finalidade}</span>
                 )}
