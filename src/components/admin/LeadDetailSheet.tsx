@@ -28,6 +28,7 @@ import {
   Sparkles,
   Home,
   Activity,
+  Send,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -39,6 +40,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { WHATSAPP_TEMPLATES, buildWhatsappLink, openWhatsapp, buildPersonalizedMessage, type ViewedProperty } from "@/lib/whatsapp-templates";
+import { sendWhatsappMessage } from "@/lib/send-whatsapp-message";
 
 interface Lead {
   id: string;
@@ -67,6 +69,7 @@ interface Lead {
   feedback_corretor?: string | null;
   observacao_interna?: string | null;
   session_id?: string | null;
+  maria_core_session_id?: string | null;
 }
 
 interface Props {
@@ -208,6 +211,29 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
       toast.success("Salvo");
     },
     onError: () => toast.error("Erro ao salvar"),
+  });
+
+  // Envio unificado: mesmo helper usado pelo cockpit Atendimento.
+  // Roteia por edge function (service_role) → registra em maria_messages
+  // sem tocar direto no navegador (evita "permission denied").
+  const sendViaCrm = useMutation({
+    mutationFn: async (message: string) => {
+      if (!lead?.telefone) throw new Error("Lead sem telefone");
+      const sid = lead.maria_core_session_id || lead.session_id || null;
+      return await sendWhatsappMessage({
+        phone: lead.telefone,
+        message,
+        leadId: lead.id,
+        sessionId: sid,
+      });
+    },
+    onSuccess: (res) => {
+      if (res?.warning) toast.warning(res.warning);
+      else toast.success("Mensagem enviada e registrada no histórico.");
+      updateLead.mutate({ last_contact_at: new Date().toISOString() });
+      qc.invalidateQueries({ queryKey: ["maria_messages", lead?.id] });
+    },
+    onError: (e: any) => toast.error(e.message || "Falha ao enviar via CRM"),
   });
 
   // Timeline unificada — merge cronológico de todos os eventos do lead
@@ -488,8 +514,9 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
                     <DropdownMenuItem
                       key={t.id}
                       onClick={() => {
-                        openWhatsapp(lead.telefone!, t.build(lead, viewedProperties));
-                        updateLead.mutate({ last_contact_at: new Date().toISOString() });
+                        const msg = t.build(lead, viewedProperties);
+                        // Envio via CRM (edge + service_role). Registra em maria_messages.
+                        sendViaCrm.mutate(msg);
                       }}
                       className="flex flex-col items-start gap-0.5 py-2"
                     >
@@ -519,18 +546,34 @@ export default function LeadDetailSheet({ lead, open, onOpenChange, defaultTab =
                   value={customMessage}
                   onChange={(e) => setCustomMessage(e.target.value)}
                 />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full text-xs h-8 border-emerald-600 text-emerald-700 hover:bg-emerald-50"
-                  onClick={() => {
-                    const msg = (customMessage || defaultPersonalizedMessage).trim();
-                    openWhatsapp(lead.telefone!, msg);
-                    updateLead.mutate({ last_contact_at: new Date().toISOString() });
-                  }}
-                >
-                  <Phone className="w-3 h-3 mr-1" /> Abrir no WhatsApp
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="flex-1 text-xs h-8 bg-emerald-600 hover:bg-emerald-700"
+                    disabled={sendViaCrm.isPending}
+                    onClick={() => {
+                      const msg = (customMessage || defaultPersonalizedMessage).trim();
+                      if (!msg) return;
+                      sendViaCrm.mutate(msg);
+                    }}
+                  >
+                    <Send className="w-3 h-3 mr-1" />
+                    {sendViaCrm.isPending ? "Enviando..." : "Enviar via MarIA (registra CRM)"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs h-8"
+                    title="Abrir wa.me manualmente (não registra no CRM)"
+                    onClick={() => {
+                      const msg = (customMessage || defaultPersonalizedMessage).trim();
+                      openWhatsapp(lead.telefone!, msg);
+                      updateLead.mutate({ last_contact_at: new Date().toISOString() });
+                    }}
+                  >
+                    <Phone className="w-3 h-3" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}

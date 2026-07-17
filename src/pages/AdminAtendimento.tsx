@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { buildPersonalizedMessage, type ViewedProperty } from "@/lib/whatsapp-templates";
+import { sendWhatsappMessage } from "@/lib/send-whatsapp-message";
 
 // Invoca uma edge function e extrai a mensagem de erro real que o MarIA Core devolveu.
 // A edge maria-core-whatsapp responde com { status, error, ... } em corpo JSON,
@@ -319,21 +320,19 @@ export default function AdminAtendimento() {
       const sid = selected?.maria_core_session_id || selected?.session_id;
       if (!sid) throw new Error("Lead sem sessão vinculada");
       if (!phone) throw new Error("Lead sem telefone");
-      const content = reply.trim();
-      if (!content) throw new Error("Mensagem vazia");
-
-      // Envio + registro no CRM acontecem na edge function, usando service role.
-      await invokeCore("maria-core-whatsapp", {
-        action: "send",
+      // Envio + registro no CRM acontecem na edge function (service role),
+      // via helper compartilhado com o painel de Leads.
+      return await sendWhatsappMessage({
         phone,
-        message: content,
-        session_id: sid,
-        lead_id: selected.id,
+        message: reply,
+        leadId: selected.id,
+        sessionId: sid,
       });
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       setReply("");
-      toast.success("Enviado via WhatsApp. MarIA pausada neste contato.");
+      if (res?.warning) toast.warning(res.warning);
+      else toast.success("Enviado via WhatsApp. MarIA pausada neste contato.");
       qc.invalidateQueries({ queryKey: ["atendimento_msgs", selected?.id] });
       qc.invalidateQueries({ queryKey: ["wa_mode", phone] });
     },
@@ -425,26 +424,23 @@ export default function AdminAtendimento() {
     onError: (e: any) => toast.error(e.message || "Falha ao trocar status"),
   });
 
-  // Envia a "mensagem pronta" pelo mesmo canal do MarIA Core
+  // Envia a "mensagem pronta" pelo mesmo canal do MarIA Core (helper compartilhado)
   const sendReady = useMutation({
     mutationFn: async () => {
       if (!selected) throw new Error("Nenhum lead selecionado");
       const sid = selected?.maria_core_session_id || selected?.session_id;
       if (!sid) throw new Error("Lead sem sessão vinculada");
       if (!phone) throw new Error("Lead sem telefone");
-      const content = readyMessage.trim();
-      if (!content) throw new Error("Mensagem vazia");
-      // Envio + registro no CRM acontecem na edge function, usando service role.
-      await invokeCore("maria-core-whatsapp", {
-        action: "send",
+      return await sendWhatsappMessage({
         phone,
-        message: content,
-        session_id: sid,
-        lead_id: selected.id,
+        message: readyMessage,
+        leadId: selected.id,
+        sessionId: sid,
       });
     },
-    onSuccess: () => {
-      toast.success("Mensagem pronta enviada. MarIA pausada.");
+    onSuccess: (res) => {
+      if (res?.warning) toast.warning(res.warning);
+      else toast.success("Mensagem pronta enviada. MarIA pausada.");
       qc.invalidateQueries({ queryKey: ["atendimento_msgs", selected?.id] });
       qc.invalidateQueries({ queryKey: ["atendimento_leads"] });
       qc.invalidateQueries({ queryKey: ["wa_mode", phone] });
