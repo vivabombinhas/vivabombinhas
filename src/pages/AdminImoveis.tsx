@@ -63,6 +63,8 @@ export default function AdminImoveis() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editProperty, setEditProperty] = useState<any | null>(null);
   const [galleryProperty, setGalleryProperty] = useState<any | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<null | "deactivate" | "delete">(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
