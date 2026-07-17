@@ -908,6 +908,24 @@ export type Database = {
           },
         ]
       }
+      maria_pausas: {
+        Row: {
+          paused: boolean
+          phone: string
+          updated_at: string
+        }
+        Insert: {
+          paused?: boolean
+          phone: string
+          updated_at?: string
+        }
+        Update: {
+          paused?: boolean
+          phone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       maria_search_metrics: {
         Row: {
           created_at: string
