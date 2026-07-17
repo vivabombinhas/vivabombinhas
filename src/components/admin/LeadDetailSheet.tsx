@@ -28,6 +28,7 @@ import {
   Sparkles,
   Home,
   Activity,
+  Send,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
