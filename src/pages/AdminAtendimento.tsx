@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { HelpCircle, Send, Calendar as CalendarIcon, MessageCircle, RefreshCw, CheckCircle2, UserPlus, ThumbsUp, ThumbsDown } from "lucide-react";
+import { HelpCircle, Send, Calendar as CalendarIcon, MessageCircle, RefreshCw, CheckCircle2, UserPlus, ThumbsUp, ThumbsDown, Loader2 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -22,8 +22,47 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { buildPersonalizedMessage, type ViewedProperty } from "@/lib/whatsapp-templates";
+
+// Invoca uma edge function e extrai a mensagem de erro real que o MarIA Core devolveu.
+// A edge maria-core-whatsapp responde com { status, error, ... } em corpo JSON,
+// e supabase-js lança FunctionsHttpError quando status != 2xx — o corpo fica em error.context.
+async function invokeCore(
+  fnName: string,
+  body: Record<string, unknown>,
+): Promise<{ data: any }> {
+  const { data, error } = await supabase.functions.invoke(fnName, { body });
+  if (error) {
+    let humano = "";
+    try {
+      const ctx: any = (error as any).context;
+      if (ctx && typeof ctx.json === "function") {
+        const parsed = await ctx.json();
+        humano = parsed?.error || parsed?.message || "";
+      } else if (ctx && typeof ctx.text === "function") {
+        const raw = await ctx.text();
+        try { humano = JSON.parse(raw)?.error || raw; } catch { humano = raw; }
+      }
+    } catch { /* ignore */ }
+    throw new Error(humano || error.message || "Falha ao chamar MarIA Core");
+  }
+  const inner: any = data;
+  if (inner && inner.status && inner.status !== "ok") {
+    throw new Error(inner.error || "MarIA Core recusou a operação");
+  }
+  return { data };
+}
 
 
 
