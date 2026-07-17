@@ -961,8 +961,20 @@ export default function AdminAtendimento() {
                 <UserPlus className="w-3 h-3" /> Handoff para Daniel
               </h4>
               {selected.quer_falar_daniel ? (
-                <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded px-2 py-1.5">
-                  <CheckCircle2 className="w-3 h-3" /> Já enviado ao Daniel
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded px-2 py-1.5">
+                    <CheckCircle2 className="w-3 h-3" /> Já enviado ao Daniel
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="w-full h-7 text-[10px] gap-1 text-muted-foreground hover:text-foreground"
+                    onClick={() => updateLeadPatch.mutate({ quer_falar_daniel: false })}
+                    disabled={updateLeadPatch.isPending}
+                    title="Rebaixa a temperatura: remove o pedido de Daniel e o selo Quente forçado"
+                  >
+                    Remover marcação "Quer falar com Daniel"
+                  </Button>
                 </div>
               ) : (
                 <Button
