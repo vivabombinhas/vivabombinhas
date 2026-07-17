@@ -900,10 +900,10 @@ export default function AdminAtendimento() {
                   size="sm"
                   variant="outline"
                   className="w-full h-8 text-xs gap-1 border-red-300 text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
-                  onClick={() => handoffDaniel.mutate()}
+                  onClick={() => setConfirmHandoff(true)}
                   disabled={handoffDaniel.isPending}
                 >
-                  <UserPlus className="w-3 h-3" />
+                  {handoffDaniel.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <UserPlus className="w-3 h-3" />}
                   {handoffDaniel.isPending ? "Enviando…" : "Enviar para Daniel"}
                 </Button>
               )}
