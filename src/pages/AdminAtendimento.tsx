@@ -77,6 +77,8 @@ export default function AdminAtendimento() {
   const [followupToday, setFollowupToday] = useState(false);
   const [mobileTab, setMobileTab] = useState<"fila" | "conversa" | "contexto">("fila");
   const [reply, setReply] = useState("");
+  const [readyMessage, setReadyMessage] = useState("");
+  const [followupCustom, setFollowupCustom] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const replyRef = useRef<HTMLTextAreaElement>(null);
 
