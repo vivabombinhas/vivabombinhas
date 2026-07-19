@@ -237,15 +237,23 @@ serve(async (req) => {
       }));
 
       const coreData: any = coreResult.data;
-      const hasValidPayload =
-        coreResult.status === "ok" &&
-        coreData &&
-        typeof coreData === "object" &&
-        (coreData.data || coreData.titulo || coreData.finalidade);
+      const inner = coreData?.data && typeof coreData.data === "object" ? coreData.data : coreData;
+
+      // Considera o payload do Core útil apenas se tiver dados REAIS extraídos.
+      // Stubs genéricos (ex: "Imovel em Bombinhas" com tudo nulo, sem preço, sem bairro,
+      // sem fotos, sem tipo) NÃO devem curto-circuitar — precisam cair no extrator local.
+      const hasRealData = !!inner && typeof inner === "object" && (
+        (inner.preco && Number(inner.preco) > 0) ||
+        (inner.preco_temporada_diaria && Number(inner.preco_temporada_diaria) > 0) ||
+        (typeof inner.bairro === "string" && inner.bairro.trim().length > 0) ||
+        (typeof inner.tipo === "string" && inner.tipo && inner.tipo !== "outro") ||
+        (Array.isArray(inner.fotos) && inner.fotos.length > 0) ||
+        (typeof inner.descricao === "string" && inner.descricao.trim().length > 40)
+      );
+      const hasValidPayload = coreResult.status === "ok" && hasRealData;
 
       if (hasValidPayload) {
         // Normaliza para o mesmo contrato consumido pelo admin.
-        const inner = coreData.data && typeof coreData.data === "object" ? coreData.data : coreData;
         const payload = {
           success: true,
           data: {
@@ -263,7 +271,10 @@ serve(async (req) => {
         });
       }
 
-      const reason = coreResult.status !== "ok" ? coreResult.status : "invalid_payload";
+      const reason = coreResult.status !== "ok"
+        ? coreResult.status
+        : (inner ? "core_stub_no_real_data" : "invalid_payload");
+
       console.log(JSON.stringify({
         tag: "MarIA Core PropertyFromLink",
         event: "fallback_local",
