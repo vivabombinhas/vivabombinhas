@@ -306,7 +306,10 @@ export default function AdminImportarLink() {
       anunciante_email: data.anunciante_email?.trim() || null,
       imobiliaria: data.imobiliaria?.trim() || null,
       origem: inferOrigem(data.link_anuncio) as never,
-      status: "ativo" as never,
+      // Rascunho: fora da vitrine E oculto da MarIA até revisão manual (mesma regra do lote).
+      status: "pausado" as never,
+      oculta_para_maria: true,
+
     });
     setSubmitting(false);
 
