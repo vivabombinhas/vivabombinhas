@@ -5,7 +5,7 @@ const ENV_NUMBER = (import.meta as any).env?.VITE_MARIA_WHATSAPP as string | und
 
 // Número da MarIA no WhatsApp (DDI+DDD+número, apenas dígitos).
 // Ajuste aqui ou defina VITE_MARIA_WHATSAPP no .env.
-export const MARIA_WHATSAPP_NUMBER = (ENV_NUMBER || "5547999999999").replace(/\D/g, "");
+export const MARIA_WHATSAPP_NUMBER = (ENV_NUMBER || "554199992422").replace(/\D/g, "");
 
 export type MariaIntent =
   | "temporada"
