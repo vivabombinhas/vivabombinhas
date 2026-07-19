@@ -5,7 +5,7 @@ const ENV_NUMBER = (import.meta as any).env?.VITE_MARIA_WHATSAPP as string | und
 
 // Número da MarIA no WhatsApp (DDI+DDD+número, apenas dígitos).
 // Ajuste aqui ou defina VITE_MARIA_WHATSAPP no .env.
-export const MARIA_WHATSAPP_NUMBER = (ENV_NUMBER || "5547999999999").replace(/\D/g, "");
+export const MARIA_WHATSAPP_NUMBER = (ENV_NUMBER || "554199992422").replace(/\D/g, "");
 
 export type MariaIntent =
   | "temporada"
@@ -22,7 +22,7 @@ export const MARIA_INTENT_MESSAGES: Record<MariaIntent, string> = {
   investimento: "Oi MarIA, quero investir em imóveis em Bombinhas.",
   anunciar: "Oi MarIA, quero anunciar meu imóvel em Bombinhas.",
   turismo: "Oi MarIA, quero dicas de Bombinhas.",
-  geral: "Oi MarIA, quero falar sobre imóveis em Bombinhas.",
+  geral: "Oi! Quero saber mais sobre imóveis em Bombinhas.",
 };
 
 export const buildMariaWhatsappLink = (
