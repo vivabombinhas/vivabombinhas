@@ -306,7 +306,10 @@ export default function AdminImportarLink() {
       anunciante_email: data.anunciante_email?.trim() || null,
       imobiliaria: data.imobiliaria?.trim() || null,
       origem: inferOrigem(data.link_anuncio) as never,
-      status: "ativo" as never,
+      // Rascunho: fora da vitrine E oculto da MarIA até revisão manual (mesma regra do lote).
+      status: "pausado" as never,
+      oculta_para_maria: true,
+
     });
     setSubmitting(false);
 
@@ -414,7 +417,7 @@ export default function AdminImportarLink() {
               <Sparkles className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="text-sm">
                 <p className="font-semibold">Revise antes de salvar no inventário</p>
-                <p className="text-muted-foreground">Vai entrar como <strong>ativo</strong> direto na vitrine. Edite tudo o que precisar.</p>
+                <p className="text-muted-foreground">Vai entrar como <strong>rascunho pausado</strong> e <strong>oculto da MarIA</strong> até você revisar e ativar em "Meus Imóveis".</p>
               </div>
             </div>
 
