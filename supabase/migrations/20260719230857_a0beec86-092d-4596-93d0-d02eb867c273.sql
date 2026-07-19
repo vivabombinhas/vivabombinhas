@@ -1,0 +1,2 @@
+CREATE POLICY "Admins can delete imoveis" ON public.imoveis FOR DELETE TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "Admins can update all imoveis" ON public.imoveis FOR UPDATE TO authenticated USING (public.has_role(auth.uid(), 'admin')) WITH CHECK (public.has_role(auth.uid(), 'admin'));
