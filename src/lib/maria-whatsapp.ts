@@ -22,7 +22,7 @@ export const MARIA_INTENT_MESSAGES: Record<MariaIntent, string> = {
   investimento: "Oi MarIA, quero investir em imóveis em Bombinhas.",
   anunciar: "Oi MarIA, quero anunciar meu imóvel em Bombinhas.",
   turismo: "Oi MarIA, quero dicas de Bombinhas.",
-  geral: "Oi MarIA, quero falar sobre imóveis em Bombinhas.",
+  geral: "Oi! Quero saber mais sobre imóveis em Bombinhas.",
 };
 
 export const buildMariaWhatsappLink = (
