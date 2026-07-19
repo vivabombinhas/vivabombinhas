@@ -12,6 +12,7 @@ import AdminLeads from "./pages/AdminLeads.tsx";
 import AdminSubmissions from "./pages/AdminSubmissions.tsx";
 import AdminImportar from "./pages/AdminImportar.tsx";
 import AdminImportarLink from "./pages/AdminImportarLink.tsx";
+import AdminImportarLinksLote from "./pages/AdminImportarLinksLote.tsx";
 import AdminMatches from "./pages/AdminMatches.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
 import AdminFollowups from "./pages/AdminFollowups.tsx";
@@ -60,6 +61,7 @@ const App = () => (
             <Route path="curadoria" element={<AdminCuradoria />} />
             <Route path="importar" element={<AdminImportar />} />
             <Route path="importar-link" element={<AdminImportarLink />} />
+            <Route path="importar-links-lote" element={<AdminImportarLinksLote />} />
             <Route path="matches" element={<AdminMatches />} />
             <Route path="ai-config" element={<AdminAIConfig />} />
             <Route path="maria-core" element={<AdminMariaCore />} />

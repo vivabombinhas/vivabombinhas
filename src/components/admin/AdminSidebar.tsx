@@ -63,6 +63,7 @@ const importItems = [
   // (Destaque Premium / Ocultar da MarIA) com rótulo invertido. Rota preservada.
   { title: "Submissões", url: "/admin/submissions", icon: Bell },
   { title: "Importar link", url: "/admin/importar-link", icon: Link2 },
+  { title: "Importar links (lote)", url: "/admin/importar-links-lote", icon: Link2 },
   { title: "Importar planilha", url: "/admin/importar", icon: FileSpreadsheet },
 ];
 
