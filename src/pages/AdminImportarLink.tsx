@@ -60,6 +60,7 @@ interface ExtractedData {
   anunciante_email?: string;
   imobiliaria?: string;
   codigo?: string;
+  gestao_propria?: boolean;
   photos_confidence?: "high" | "low";
   photos_warning?: string | null;
   photos_groups?: {
