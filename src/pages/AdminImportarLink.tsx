@@ -307,6 +307,7 @@ export default function AdminImportarLink() {
       anunciante_telefone: data.anunciante_telefone?.trim() || null,
       anunciante_email: data.anunciante_email?.trim() || null,
       imobiliaria: data.imobiliaria?.trim() || null,
+      gestao_propria: data.gestao_propria ?? false,
       origem: inferOrigem(data.link_anuncio) as never,
       // Rascunho: fora da vitrine E oculto da MarIA até revisão manual (mesma regra do lote).
       status: "pausado" as never,
