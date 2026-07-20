@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 
 type Mode = "link" | "text";
@@ -59,6 +60,7 @@ interface ExtractedData {
   anunciante_email?: string;
   imobiliaria?: string;
   codigo?: string;
+  gestao_propria?: boolean;
   photos_confidence?: "high" | "low";
   photos_warning?: string | null;
   photos_groups?: {
@@ -305,6 +307,7 @@ export default function AdminImportarLink() {
       anunciante_telefone: data.anunciante_telefone?.trim() || null,
       anunciante_email: data.anunciante_email?.trim() || null,
       imobiliaria: data.imobiliaria?.trim() || null,
+      gestao_propria: data.gestao_propria ?? false,
       origem: inferOrigem(data.link_anuncio) as never,
       // Rascunho: fora da vitrine E oculto da MarIA até revisão manual (mesma regra do lote).
       status: "pausado" as never,
@@ -805,6 +808,17 @@ export default function AdminImportarLink() {
             {/* ===== CONTATO ===== */}
             <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
               <h3 className="font-semibold text-sm">Contato do anunciante</h3>
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border/50">
+                <div className="space-y-0.5">
+                  <Label htmlFor="gestao_propria" className="text-sm font-medium">Imóvel Próprio / Gestão Direta</Label>
+                  <p className="text-xs text-muted-foreground">Marque se este imóvel é de propriedade ou gestão da sua imobiliária</p>
+                </div>
+                <Switch
+                  id="gestao_propria"
+                  checked={data.gestao_propria ?? false}
+                  onCheckedChange={(v) => updateField("gestao_propria", v)}
+                />
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="nome">Nome</Label>
