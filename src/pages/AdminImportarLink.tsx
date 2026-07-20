@@ -808,6 +808,17 @@ export default function AdminImportarLink() {
             {/* ===== CONTATO ===== */}
             <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
               <h3 className="font-semibold text-sm">Contato do anunciante</h3>
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border/50">
+                <div className="space-y-0.5">
+                  <Label htmlFor="gestao_propria" className="text-sm font-medium">Imóvel Próprio / Gestão Direta</Label>
+                  <p className="text-xs text-muted-foreground">Marque se este imóvel é de propriedade ou gestão da sua imobiliária</p>
+                </div>
+                <Switch
+                  id="gestao_propria"
+                  checked={data.gestao_propria ?? false}
+                  onCheckedChange={(v) => updateField("gestao_propria", v)}
+                />
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="nome">Nome</Label>
