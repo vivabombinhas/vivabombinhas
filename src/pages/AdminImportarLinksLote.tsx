@@ -81,6 +81,16 @@ export default function AdminImportarLinksLote() {
       const tipo = TIPOS.includes(d.tipo) ? d.tipo : "outro";
       const titulo = (d.titulo?.trim() as string) || `Imóvel importado ${new Date().toLocaleDateString("pt-BR")}`;
 
+      // Em lote não há revisão visual: se a galeria principal veio vazia (baixa confiança),
+      // caímos para likely + doubtful do photos_groups para não salvar imóvel sem fotos.
+      // O admin ainda revisa manualmente antes de ativar.
+      const fotosPrincipais = Array.isArray(d.fotos) && d.fotos.length > 0 ? d.fotos : [];
+      const fotosFallback = [
+        ...(d.photos_groups?.likely ?? []),
+        ...(d.photos_groups?.doubtful ?? []),
+      ];
+      const fotosFinal = fotosPrincipais.length > 0 ? fotosPrincipais : fotosFallback;
+
       const { data: inserted, error: insErr } = await supabase.from("imoveis").insert({
         codigo: d.codigo?.trim() || null,
         titulo,
