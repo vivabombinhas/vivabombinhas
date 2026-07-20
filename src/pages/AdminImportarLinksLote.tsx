@@ -120,7 +120,7 @@ export default function AdminImportarLinksLote() {
         condominio: d.condominio || null,
         iptu_anual: d.iptu_anual || null,
         link_anuncio: d.link_anuncio || url,
-        fotos: Array.isArray(d.fotos) && d.fotos.length > 0 ? d.fotos : null,
+        fotos: fotosFinal.length > 0 ? fotosFinal : null,
         anunciante_nome: d.anunciante_nome?.trim() || null,
         anunciante_telefone: d.anunciante_telefone?.trim() || null,
         anunciante_email: d.anunciante_email?.trim() || null,
