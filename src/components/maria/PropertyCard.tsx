@@ -1,7 +1,8 @@
 import {
   Home, MapPin, BedDouble, Bath, Car, Waves, Sun, Dog,
-  Wind, Wifi, UtensilsCrossed, ExternalLink, Phone, Users, Maximize, Flame
+  Wind, Wifi, UtensilsCrossed, ExternalLink, Phone, Users, Maximize, Flame, Star
 } from "lucide-react";
+import { useAgencyConfig, AGENCY_FALLBACK } from "@/hooks/useAgencyConfig";
 
 export interface Property {
   id: string;
