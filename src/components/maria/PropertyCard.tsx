@@ -114,6 +114,12 @@ export function PropertyCard({ property }: PropertyCardProps) {
           />
           {/* Badges over image */}
           <div className="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
+            {isExclusivo && (
+              <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground text-[10px] font-bold shadow-md flex items-center gap-1">
+                <Star className="w-2.5 h-2.5 fill-current" />
+                Exclusivo VIV
+              </span>
+            )}
             {isDestaqueAtivo && (
               <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-[10px] font-bold backdrop-blur-sm shadow-md flex items-center gap-1 animate-pulse">
                 <Flame className="w-2.5 h-2.5" />
