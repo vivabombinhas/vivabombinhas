@@ -66,6 +66,9 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
+  const { data: agencyData } = useAgencyConfig();
+  const agency = agencyData ?? AGENCY_FALLBACK;
+
   const amenities: { icon: React.ElementType; label: string }[] = [];
 
   if (property.piscina) amenities.push({ icon: Waves, label: "Piscina" });
@@ -81,11 +84,15 @@ export function PropertyCard({ property }: PropertyCardProps) {
     Boolean(property.destaque_pago) &&
     (!property.destaque_ate || new Date(property.destaque_ate).getTime() > Date.now());
 
+  const isExclusivo = !!property.gestao_propria;
+
   return (
     <div
       className={`relative bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group ${
         isDestaqueAtivo
           ? "border-2 border-transparent bg-gradient-to-br from-amber-400 via-yellow-300 to-amber-500 p-[2px]"
+          : isExclusivo
+          ? "border-2 border-primary/40"
           : "border border-border/60"
       }`}
     >
