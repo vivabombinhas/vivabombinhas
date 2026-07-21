@@ -52,9 +52,7 @@ Deno.serve(async (req) => {
 
   const { data: imovel, error } = await supabase
     .from("imoveis")
-    .select(
-      "id, titulo, bairro, fotos, photos_groups, gestao_propria, status, oculta_para_maria",
-    )
+    .select("id, titulo, bairro, fotos, gestao_propria, status, oculta_para_maria")
     .eq("id", imovelId)
     .maybeSingle();
 
@@ -67,15 +65,11 @@ Deno.serve(async (req) => {
     return json({ error: "imóvel não disponível" }, 403);
   }
 
-  // Prioridade: fotos principais → likely → doubtful
   const fotosPrincipais: string[] = Array.isArray(imovel.fotos) ? imovel.fotos : [];
-  const groups = (imovel.photos_groups ?? {}) as Record<string, unknown>;
-  const likely: string[] = Array.isArray(groups.likely) ? (groups.likely as string[]) : [];
-  const doubtful: string[] = Array.isArray(groups.doubtful) ? (groups.doubtful as string[]) : [];
 
   const seen = new Set<string>();
   const photos: string[] = [];
-  for (const url of [...fotosPrincipais, ...likely, ...doubtful]) {
+  for (const url of fotosPrincipais) {
     if (typeof url !== "string" || !url.trim()) continue;
     if (seen.has(url)) continue;
     seen.add(url);
