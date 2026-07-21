@@ -224,50 +224,60 @@ export function PropertyCard({ property }: PropertyCardProps) {
         )}
 
         {/* Gestão própria badge */}
-        {property.gestao_propria && (
+        {isExclusivo && (
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary/10 border border-primary/20">
             <Home className="w-3 h-3 text-primary" />
             <span className="text-[10px] font-semibold text-primary">
-              Administrado por {property.imobiliaria_nome ?? "nossa imobiliária"}
+              Administrado por {property.imobiliaria_nome ?? agency.nome}
             </span>
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex gap-2 pt-1">
-          {property.link_anuncio && !property.gestao_propria && (
-            <a
-              href={property.link_anuncio}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              Ver anúncio
-            </a>
-          )}
-          {property.anunciante_telefone && (
-            <a
-              href={`https://wa.me/${(() => {
-                const digits = property.anunciante_telefone.replace(/\D/g, "");
-                // Se já começa com 55 e tem 12-13 dígitos, já tem DDI
-                if (digits.startsWith("55") && digits.length >= 12) return digits;
-                // Senão, adiciona 55
-                return "55" + digits;
-              })()}?text=${encodeURIComponent(
-                property.gestao_propria
-                  ? `Olá! Tenho interesse no imóvel "${property.titulo}" anunciado na MarIA. Pode me passar mais informações?`
-                  : `Olá! Vi o imóvel "${property.titulo}" na MarIA Bombinhas e gostaria de mais informações.`
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${property.gestao_propria ? "flex-1" : ""} flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-accent text-accent-foreground text-xs font-semibold hover:opacity-90 transition-opacity`}
-            >
-              <Phone className="w-3.5 h-3.5" />
-              WhatsApp
-            </a>
-          )}
-        </div>
+        {(() => {
+          // Para gestão própria, o WhatsApp aponta para o especialista da imobiliária,
+          // não para o telefone do anunciante original.
+          const rawTarget = isExclusivo
+            ? agency.whatsapp
+            : (property.anunciante_telefone ?? "");
+          const digits = rawTarget.replace(/\D/g, "");
+          const waNumber = digits
+            ? (digits.startsWith("55") && digits.length >= 12 ? digits : "55" + digits)
+            : "";
+          const waMessage = isExclusivo
+            ? `Olá! Quero falar com um especialista sobre o imóvel "${property.titulo}" (Exclusivo VIV Bombinhas).`
+            : `Olá! Vi o imóvel "${property.titulo}" na MarIA Bombinhas e gostaria de mais informações.`;
+
+          const waLabel = isExclusivo ? "Falar com especialista" : "WhatsApp";
+          const showAnuncio = property.link_anuncio && !isExclusivo;
+
+          return (
+            <div className="flex gap-2 pt-1">
+              {showAnuncio && (
+                <a
+                  href={property.link_anuncio!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Ver anúncio
+                </a>
+              )}
+              {waNumber && (
+                <a
+                  href={`https://wa.me/${waNumber}?text=${encodeURIComponent(waMessage)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${!showAnuncio ? "flex-1" : ""} flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-accent text-accent-foreground text-xs font-semibold hover:opacity-90 transition-opacity`}
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                  {waLabel}
+                </a>
+              )}
+            </div>
+          );
+        })()}
       </div>
       </div>
     </div>
