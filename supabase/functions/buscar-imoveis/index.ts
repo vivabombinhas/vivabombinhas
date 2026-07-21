@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
   let q = supabase
     .from("imoveis")
     .select(
-      "id, titulo, bairro, micro_regiao, preco, preco_temporada_diaria, fotos, link_anuncio, codigo, capacidade_pessoas, qualidade_score, destaque_premium, destaque",
+      "id, titulo, bairro, micro_regiao, preco, preco_temporada_diaria, fotos, link_anuncio, codigo, capacidade_pessoas, qualidade_score, destaque_premium, destaque, gestao_propria",
     )
     .eq("status", "ativo")
     .or("oculta_para_maria.is.null,oculta_para_maria.eq.false")
@@ -112,19 +112,36 @@ Deno.serve(async (req) => {
     });
   }
 
-  const properties = (data ?? []).map((r: any) => ({
-    id: r.id,
-    title: r.titulo,
-    neighborhood: r.bairro ?? r.micro_regiao ?? null,
-    daily_price: finalidade === "temporada"
-      ? Number(r.preco_temporada_diaria) || null
-      : Number(r.preco) || null,
-    photo_url: Array.isArray(r.fotos) && r.fotos.length > 0 ? r.fotos[0] : null,
-    link: r.link_anuncio || `${SITE_URL}/imovel/${r.id}`,
-    capacity: r.capacidade_pessoas ?? null,
-  }));
+  // Menu textual sugerido para o Core anexar ao card no WhatsApp.
+  // O Core interpreta as respostas "1" / "2" / "3" e aciona:
+  //  1 → chamar edge maria-send-photos
+  //  2 → chamar edge maria-request-especialista
+  //  3 → devolver o link do anúncio (ou link do site para gestão própria)
+  const MENU_HINT =
+    "\n\nQuer saber mais? É só responder:\n1️⃣ Ver mais fotos\n2️⃣ Falar com especialista\n3️⃣ Ver o anúncio completo";
 
-  return new Response(JSON.stringify({ properties }), {
+  const properties = (data ?? []).map((r: any) => {
+    const isOwn = !!r.gestao_propria;
+    return {
+      id: r.id,
+      title: r.titulo,
+      neighborhood: r.bairro ?? r.micro_regiao ?? null,
+      daily_price: finalidade === "temporada"
+        ? Number(r.preco_temporada_diaria) || null
+        : Number(r.preco) || null,
+      photo_url: Array.isArray(r.fotos) && r.fotos.length > 0 ? r.fotos[0] : null,
+      // Para imóveis de gestão própria, o "link do anúncio" aponta pro site (não pro portal externo)
+      link: isOwn
+        ? `${SITE_URL}/imovel/${r.id}`
+        : (r.link_anuncio || `${SITE_URL}/imovel/${r.id}`),
+      capacity: r.capacidade_pessoas ?? null,
+      gestao_propria: isOwn,
+      exclusive_badge: isOwn ? "Exclusivo VIV Bombinhas" : null,
+      menu_hint: MENU_HINT,
+    };
+  });
+
+  return new Response(JSON.stringify({ properties, menu_hint: MENU_HINT }), {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
