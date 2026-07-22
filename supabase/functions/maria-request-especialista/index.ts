@@ -85,7 +85,32 @@ Deno.serve(async (req) => {
     lead = data ?? null;
   }
 
-  if (!lead) return json({ error: "lead não encontrado" }, 404);
+  // Auto-create lead if not found (must have phone or session_id)
+  let autoCreated = false;
+  if (!lead) {
+    if (!phone && !sessionId) {
+      return json({ error: "lead não encontrado e sem phone/session_id para criar" }, 404);
+    }
+    const { data: created, error: createErr } = await supabase
+      .from("leads_maria")
+      .insert({
+        session_id: sessionId,
+        maria_core_session_id: sessionId,
+        telefone: phone ?? null,
+        origem: "whatsapp",
+        status: "anonimo",
+        quer_falar_daniel: true,
+        last_contact_at: new Date().toISOString(),
+      })
+      .select("id, session_id, maria_core_session_id, nome")
+      .single();
+    if (createErr || !created) {
+      console.error("[maria-request-especialista] auto-create error", createErr);
+      return json({ error: createErr?.message ?? "falha ao criar lead" }, 500);
+    }
+    lead = created;
+    autoCreated = true;
+  }
 
   const { error: updErr } = await supabase
     .from("leads_maria")
