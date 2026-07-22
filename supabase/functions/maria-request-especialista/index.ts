@@ -162,6 +162,7 @@ Deno.serve(async (req) => {
   return json({
     ok: true,
     lead_id: lead.id,
+    auto_created: autoCreated,
     confirm_message: confirmMessage,
   });
 });
